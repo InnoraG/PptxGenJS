@@ -1,4 +1,3 @@
-/* PptxGenJS 4.0.1 @ 2025-06-25T23:35:35.096Z */
 'use strict';
 
 var JSZip = require('jszip');
@@ -781,6 +780,154 @@ function createGlowElement(options, defaults) {
     return strXml;
 }
 /**
+ * Generate gradient fill XML (a:gradFill)
+ * @param {ShapeFillProps} props - fill properties with gradient settings
+ * @returns {string} XML string for <a:gradFill>
+ * @see http://www.datypic.com/sc/ooxml/e-a_gradFill-1.html
+ */
+function genXmlGradientFill(props) {
+    // Handle preset gradients
+    if (props.gradientPreset) {
+        return genXmlGradientPreset(props.gradientPreset, props.rotateGradientWithShape);
+    }
+    // Validate: must have gradient stops
+    if (!props.gradientStops || props.gradientStops.length < 2) {
+        console.warn('Gradient fill requires at least 2 gradient stops. Using default solid fill.');
+        return '';
+    }
+    const rotWithShape = props.rotateGradientWithShape !== false ? '1' : '0';
+    const flip = props.gradientFlip || 'none';
+    let strXml = `<a:gradFill rotWithShape="${rotWithShape}" flip="${flip}">`;
+    // Gradient stops (<a:gsLst>)
+    strXml += '<a:gsLst>';
+    for (const stop of props.gradientStops) {
+        // Position: 0-100 → 0-100000
+        const pos = Math.round(Math.max(0, Math.min(100, stop.position)) * 1000);
+        let innerElements = '';
+        // Add transparency if specified
+        if (stop.transparency && stop.transparency > 0) {
+            innerElements = `<a:alpha val="${Math.round((100 - stop.transparency) * 1000)}"/>`;
+        }
+        strXml += `<a:gs pos="${pos}">`;
+        strXml += createColorElement(stop.color, innerElements);
+        strXml += '</a:gs>';
+    }
+    strXml += '</a:gsLst>';
+    // Direction: linear or path
+    const direction = props.gradientDirection || 'linear';
+    if (direction === 'linear') {
+        // Linear gradient: angle in 60000ths of a degree
+        const angle = props.gradientAngle || 0;
+        const ang = Math.round(angle * 60000);
+        strXml += `<a:lin ang="${ang}" scaled="0"/>`;
+    }
+    else {
+        // Path gradient: circle, rect, or shape
+        strXml += `<a:path path="${direction}">`;
+        // Fill-to-rect (focus rectangle for path gradients)
+        if (props.fillToRect) {
+            const r = props.fillToRect;
+            const l = Math.round((r.l || 0) * 1000);
+            const t = Math.round((r.t || 0) * 1000);
+            const rt = Math.round((r.r || 0) * 1000);
+            const b = Math.round((r.b || 0) * 1000);
+            strXml += `<a:fillToRect l="${l}" t="${t}" r="${rt}" b="${b}"/>`;
+        }
+        strXml += '</a:path>';
+    }
+    // Tile rect (optional)
+    if (props.tileRect) {
+        const tr = props.tileRect;
+        const l = Math.round((tr.l || 0) * 1000);
+        const t = Math.round((tr.t || 0) * 1000);
+        const r = Math.round((tr.r || 0) * 1000);
+        const b = Math.round((tr.b || 0) * 1000);
+        strXml += `<a:tileRect l="${l}" t="${t}" r="${r}" b="${b}"/>`;
+    }
+    strXml += '</a:gradFill>';
+    return strXml;
+}
+/**
+ * Generate preset gradient XML
+ * @param {string} preset - preset gradient name
+ * @param {boolean} rotWithShape - rotate with shape
+ * @returns {string} XML string
+ */
+function genXmlGradientPreset(preset, rotWithShape) {
+    const rotAttr = rotWithShape !== false ? '1' : '0';
+    // Parse preset name: e.g., 'lightGradient-accent1' → type='lightGradient', accent='accent1'
+    const parts = preset.split('-');
+    const presetType = parts[0];
+    const accentColor = parts[1] || 'accent1';
+    // Generate appropriate stops based on preset type
+    let stops = [];
+    let angle = 0;
+    switch (presetType) {
+        case 'lightGradient':
+            // Light gradient: white → accent color (45°)
+            stops = [
+                { position: 0, color: 'FFFFFF' },
+                { position: 100, color: accentColor }
+            ];
+            angle = 45;
+            break;
+        case 'topSpotlight':
+            // Top spotlight: transparent accent → solid accent (radial from top)
+            stops = [
+                { position: 0, color: accentColor, transparency: 0 },
+                { position: 100, color: accentColor, transparency: 80 }
+            ];
+            // Return path gradient
+            let strXml = `<a:gradFill rotWithShape="${rotAttr}" flip="none">`;
+            strXml += '<a:gsLst>';
+            for (const stop of stops) {
+                const pos = Math.round(stop.position * 1000);
+                const innerElements = stop.transparency ? `<a:alpha val="${Math.round((100 - stop.transparency) * 1000)}"/>` : '';
+                strXml += `<a:gs pos="${pos}">${createColorElement(stop.color, innerElements)}</a:gs>`;
+            }
+            strXml += '</a:gsLst>';
+            strXml += '<a:path path="circle"><a:fillToRect l="50000" t="0" r="50000" b="100000"/></a:path>';
+            strXml += '</a:gradFill>';
+            return strXml;
+        case 'bottomSpotlight':
+            // Bottom spotlight
+            stops = [
+                { position: 0, color: accentColor, transparency: 0 },
+                { position: 100, color: accentColor, transparency: 80 }
+            ];
+            let strXmlBottom = `<a:gradFill rotWithShape="${rotAttr}" flip="none">`;
+            strXmlBottom += '<a:gsLst>';
+            for (const stop of stops) {
+                const pos = Math.round(stop.position * 1000);
+                const innerElements = stop.transparency ? `<a:alpha val="${Math.round((100 - stop.transparency) * 1000)}"/>` : '';
+                strXmlBottom += `<a:gs pos="${pos}">${createColorElement(stop.color, innerElements)}</a:gs>`;
+            }
+            strXmlBottom += '</a:gsLst>';
+            strXmlBottom += '<a:path path="circle"><a:fillToRect l="50000" t="100000" r="50000" b="0"/></a:path>';
+            strXmlBottom += '</a:gradFill>';
+            return strXmlBottom;
+        default:
+            // Default linear gradient
+            stops = [
+                { position: 0, color: 'FFFFFF' },
+                { position: 100, color: accentColor }
+            ];
+            angle = 90;
+    }
+    // Generate linear gradient XML
+    let strXmlLinear = `<a:gradFill rotWithShape="${rotAttr}" flip="none">`;
+    strXmlLinear += '<a:gsLst>';
+    for (const stop of stops) {
+        const pos = Math.round(stop.position * 1000);
+        const innerElements = stop.transparency ? `<a:alpha val="${Math.round((100 - stop.transparency) * 1000)}"/>` : '';
+        strXmlLinear += `<a:gs pos="${pos}">${createColorElement(stop.color, innerElements)}</a:gs>`;
+    }
+    strXmlLinear += '</a:gsLst>';
+    strXmlLinear += `<a:lin ang="${angle * 60000}" scaled="0"/>`;
+    strXmlLinear += '</a:gradFill>';
+    return strXmlLinear;
+}
+/**
  * Create color selection
  * @param {Color | ShapeFillProps | ShapeLineProps} props fill props
  * @returns XML string
@@ -806,6 +953,9 @@ function genXmlColorSelection(props) {
         switch (fillType) {
             case 'solid':
                 outText += `<a:solidFill>${createColorElement(colorVal, internalElements)}</a:solidFill>`;
+                break;
+            case 'gradient':
+                outText += genXmlGradientFill(props);
                 break;
             default: // @note need a statement as having only "break" is removed by rollup, then tiggers "no-default" js-linter
                 outText += '';
@@ -5092,14 +5242,14 @@ const ImageSizingXml = {
  * @return {string} XML string with <p:cSld> as the root
  */
 function slideObjectToXml(slide) {
-    var _a;
+    var _a, _b;
     let strSlideXml = slide._name ? '<p:cSld name="' + slide._name + '">' : '<p:cSld>';
     let intTableNum = 1;
     // STEP 1: Add background color/image (ensure only a single `<p:bg>` tag is created, ex: when master-baskground has both `color` and `path`)
     if (slide._bkgdImgRid) {
         strSlideXml += `<p:bg><p:bgPr><a:blipFill dpi="0" rotWithShape="1"><a:blip r:embed="rId${slide._bkgdImgRid}"><a:lum/></a:blip><a:srcRect/><a:stretch><a:fillRect/></a:stretch></a:blipFill><a:effectLst/></p:bgPr></p:bg>`;
     }
-    else if ((_a = slide.background) === null || _a === void 0 ? void 0 : _a.color) {
+    else if (((_a = slide.background) === null || _a === void 0 ? void 0 : _a.color) || ((_b = slide.background) === null || _b === void 0 ? void 0 : _b.type) === 'gradient') {
         strSlideXml += `<p:bg><p:bgPr>${genXmlColorSelection(slide.background)}</p:bgPr></p:bg>`;
     }
     else if (!slide.bkgd && slide._name && slide._name === DEF_PRES_LAYOUT_NAME) {
