@@ -3,7 +3,7 @@
  */
 
 import { EMU, REGEX_HEX_COLOR, DEF_FONT_COLOR, ONEPT, SchemeColor, SCHEME_COLORS } from './core-enums'
-import { PresLayout, TextGlowProps, PresSlide, ShapeFillProps, Color, ShapeLineProps, Coord, ShadowProps } from './core-interfaces'
+import { PresLayout, TextGlowProps, PresSlide, ShapeFillProps, Color, ShapeLineProps, Coord, ShadowProps, GradientStopProps } from './core-interfaces'
 
 /**
  * Translates any type of `x`/`y`/`w`/`h` prop to EMU
@@ -16,7 +16,7 @@ import { PresLayout, TextGlowProps, PresSlide, ShapeFillProps, Color, ShapeLineP
  * @param {PresLayout} layout - presentation layout
  * @returns {number} calculated size
  */
-export function getSmartParseNumber (size: Coord, xyDir: 'X' | 'Y', layout: PresLayout): number {
+export function getSmartParseNumber(size: Coord, xyDir: 'X' | 'Y', layout: PresLayout): number {
 	// FIRST: Convert string numeric value if reqd
 	if (typeof size === 'string' && !isNaN(Number(size))) size = Number(size)
 
@@ -47,7 +47,7 @@ export function getSmartParseNumber (size: Coord, xyDir: 'X' | 'Y', layout: Pres
  * @param {string} uuidFormat - UUID format
  * @returns {string} UUID
  */
-export function getUuid (uuidFormat: string): string {
+export function getUuid(uuidFormat: string): string {
 	return uuidFormat.replace(/[xy]/g, function (c) {
 		const r = (Math.random() * 16) | 0
 		const v = c === 'x' ? r : (r & 0x3) | 0x8
@@ -60,7 +60,7 @@ export function getUuid (uuidFormat: string): string {
  * @param {string} xml - XML string to encode
  * @returns {string} escaped XML
  */
-export function encodeXmlEntities (xml: string): string {
+export function encodeXmlEntities(xml: string): string {
 	// NOTE: Dont use short-circuit eval here as value c/b "0" (zero) etc.!
 	if (typeof xml === 'undefined' || xml == null) return ''
 	return xml.toString().replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&apos;')
@@ -71,7 +71,7 @@ export function encodeXmlEntities (xml: string): string {
  * @param {number|string} inches - as string or number
  * @returns {number} EMU value
  */
-export function inch2Emu (inches: number | string): number {
+export function inch2Emu(inches: number | string): number {
 	// NOTE: Provide Caller Safety: Numbers may get conv<->conv during flight, so be kind and do some simple checks to ensure inches were passed
 	// Any value over 100 damn sure isnt inches, so lets assume its in EMU already, therefore, just return the same value
 	if (typeof inches === 'number' && inches > 100) return inches
@@ -84,7 +84,7 @@ export function inch2Emu (inches: number | string): number {
  * @param {number|string} pt
  * @returns {number} value in points (`ONEPT`)
  */
-export function valToPts (pt: number | string): number {
+export function valToPts(pt: number | string): number {
 	const points = Number(pt) || 0
 	return isNaN(points) ? 0 : Math.round(points * ONEPT)
 }
@@ -94,7 +94,7 @@ export function valToPts (pt: number | string): number {
  * @param {number} d degrees
  * @returns {number} calculated `rot` value
  */
-export function convertRotationDegrees (d: number): number {
+export function convertRotationDegrees(d: number): number {
 	d = d || 0
 	return Math.round((d > 360 ? d - 360 : d) * 60000)
 }
@@ -104,7 +104,7 @@ export function convertRotationDegrees (d: number): number {
  * @param {number} c - component color
  * @returns {string} hex string
  */
-export function componentToHex (c: number): string {
+export function componentToHex(c: number): string {
 	const hex = c.toString(16)
 	return hex.length === 1 ? '0' + hex : hex
 }
@@ -116,7 +116,7 @@ export function componentToHex (c: number): string {
  * @param {number} b - blue value
  * @returns {string} XML string
  */
-export function rgbToHex (r: number, g: number, b: number): string {
+export function rgbToHex(r: number, g: number, b: number): string {
 	return (componentToHex(r) + componentToHex(g) + componentToHex(b)).toUpperCase()
 }
 
@@ -133,7 +133,7 @@ export function rgbToHex (r: number, g: number, b: number): string {
  * @param {string} innerElements - additional elements that adjust the color and are enclosed by the color element
  * @returns {string} XML string
  */
-export function createColorElement (colorStr: string | SCHEME_COLORS, innerElements?: string): string {
+export function createColorElement(colorStr: string | SCHEME_COLORS, innerElements?: string): string {
 	let colorVal = (colorStr || '').replace('#', '')
 
 	if (
@@ -166,7 +166,7 @@ export function createColorElement (colorStr: string | SCHEME_COLORS, innerEleme
  * @see http://officeopenxml.com/drwSp-effects.php
  * { size: 8, color: 'FFFFFF', opacity: 0.75 };
  */
-export function createGlowElement (options: TextGlowProps, defaults: TextGlowProps): string {
+export function createGlowElement(options: TextGlowProps, defaults: TextGlowProps): string {
 	let strXml = ''
 	const opts = { ...defaults, ...options }
 	const size = Math.round(opts.size * ONEPT)
@@ -181,11 +181,177 @@ export function createGlowElement (options: TextGlowProps, defaults: TextGlowPro
 }
 
 /**
+ * Generate gradient fill XML (a:gradFill)
+ * @param {ShapeFillProps} props - fill properties with gradient settings
+ * @returns {string} XML string for <a:gradFill>
+ * @see http://www.datypic.com/sc/ooxml/e-a_gradFill-1.html
+ */
+export function genXmlGradientFill(props: ShapeFillProps): string {
+	// Handle preset gradients
+	if (props.gradientPreset) {
+		return genXmlGradientPreset(props.gradientPreset, props.rotateGradientWithShape)
+	}
+
+	// Validate: must have gradient stops
+	if (!props.gradientStops || props.gradientStops.length < 2) {
+		console.warn('Gradient fill requires at least 2 gradient stops. Using default solid fill.')
+		return ''
+	}
+
+	const rotWithShape = props.rotateGradientWithShape !== false ? '1' : '0'
+	const flip = props.gradientFlip || 'none'
+
+	let strXml = `<a:gradFill rotWithShape="${rotWithShape}" flip="${flip}">`
+
+	// Gradient stops (<a:gsLst>)
+	strXml += '<a:gsLst>'
+	for (const stop of props.gradientStops) {
+		// Position: 0-100 → 0-100000
+		const pos = Math.round(Math.max(0, Math.min(100, stop.position)) * 1000)
+		let innerElements = ''
+
+		// Add transparency if specified
+		if (stop.transparency && stop.transparency > 0) {
+			innerElements = `<a:alpha val="${Math.round((100 - stop.transparency) * 1000)}"/>`
+		}
+
+		strXml += `<a:gs pos="${pos}">`
+		strXml += createColorElement(stop.color, innerElements)
+		strXml += '</a:gs>'
+	}
+	strXml += '</a:gsLst>'
+
+	// Direction: linear or path
+	const direction = props.gradientDirection || 'linear'
+
+	if (direction === 'linear') {
+		// Linear gradient: angle in 60000ths of a degree
+		const angle = props.gradientAngle || 0
+		const ang = Math.round(angle * 60000)
+		strXml += `<a:lin ang="${ang}" scaled="0"/>`
+	} else {
+		// Path gradient: circle, rect, or shape
+		strXml += `<a:path path="${direction}">`
+
+		// Fill-to-rect (focus rectangle for path gradients)
+		if (props.fillToRect) {
+			const r = props.fillToRect
+			const l = Math.round((r.l || 0) * 1000)
+			const t = Math.round((r.t || 0) * 1000)
+			const rt = Math.round((r.r || 0) * 1000)
+			const b = Math.round((r.b || 0) * 1000)
+			strXml += `<a:fillToRect l="${l}" t="${t}" r="${rt}" b="${b}"/>`
+		}
+
+		strXml += '</a:path>'
+	}
+
+	// Tile rect (optional)
+	if (props.tileRect) {
+		const tr = props.tileRect
+		const l = Math.round((tr.l || 0) * 1000)
+		const t = Math.round((tr.t || 0) * 1000)
+		const r = Math.round((tr.r || 0) * 1000)
+		const b = Math.round((tr.b || 0) * 1000)
+		strXml += `<a:tileRect l="${l}" t="${t}" r="${r}" b="${b}"/>`
+	}
+
+	strXml += '</a:gradFill>'
+	return strXml
+}
+
+/**
+ * Generate preset gradient XML
+ * @param {string} preset - preset gradient name
+ * @param {boolean} rotWithShape - rotate with shape
+ * @returns {string} XML string
+ */
+function genXmlGradientPreset(preset: string, rotWithShape?: boolean): string {
+	const rotAttr = rotWithShape !== false ? '1' : '0'
+
+	// Parse preset name: e.g., 'lightGradient-accent1' → type='lightGradient', accent='accent1'
+	const parts = preset.split('-')
+	const presetType = parts[0]
+	const accentColor = parts[1] || 'accent1'
+
+	// Generate appropriate stops based on preset type
+	let stops: GradientStopProps[] = []
+	let angle = 0
+
+	switch (presetType) {
+		case 'lightGradient':
+			// Light gradient: white → accent color (45°)
+			stops = [
+				{ position: 0, color: 'FFFFFF' },
+				{ position: 100, color: accentColor as any }
+			]
+			angle = 45
+			break
+		case 'topSpotlight':
+			// Top spotlight: transparent accent → solid accent (radial from top)
+			stops = [
+				{ position: 0, color: accentColor as any, transparency: 0 },
+				{ position: 100, color: accentColor as any, transparency: 80 }
+			]
+			// Return path gradient
+			let strXml = `<a:gradFill rotWithShape="${rotAttr}" flip="none">`
+			strXml += '<a:gsLst>'
+			for (const stop of stops) {
+				const pos = Math.round(stop.position * 1000)
+				const innerElements = stop.transparency ? `<a:alpha val="${Math.round((100 - stop.transparency) * 1000)}"/>` : ''
+				strXml += `<a:gs pos="${pos}">${createColorElement(stop.color, innerElements)}</a:gs>`
+			}
+			strXml += '</a:gsLst>'
+			strXml += '<a:path path="circle"><a:fillToRect l="50000" t="0" r="50000" b="100000"/></a:path>'
+			strXml += '</a:gradFill>'
+			return strXml
+		case 'bottomSpotlight':
+			// Bottom spotlight
+			stops = [
+				{ position: 0, color: accentColor as any, transparency: 0 },
+				{ position: 100, color: accentColor as any, transparency: 80 }
+			]
+			let strXmlBottom = `<a:gradFill rotWithShape="${rotAttr}" flip="none">`
+			strXmlBottom += '<a:gsLst>'
+			for (const stop of stops) {
+				const pos = Math.round(stop.position * 1000)
+				const innerElements = stop.transparency ? `<a:alpha val="${Math.round((100 - stop.transparency) * 1000)}"/>` : ''
+				strXmlBottom += `<a:gs pos="${pos}">${createColorElement(stop.color, innerElements)}</a:gs>`
+			}
+			strXmlBottom += '</a:gsLst>'
+			strXmlBottom += '<a:path path="circle"><a:fillToRect l="50000" t="100000" r="50000" b="0"/></a:path>'
+			strXmlBottom += '</a:gradFill>'
+			return strXmlBottom
+		default:
+			// Default linear gradient
+			stops = [
+				{ position: 0, color: 'FFFFFF' },
+				{ position: 100, color: accentColor as any }
+			]
+			angle = 90
+	}
+
+	// Generate linear gradient XML
+	let strXmlLinear = `<a:gradFill rotWithShape="${rotAttr}" flip="none">`
+	strXmlLinear += '<a:gsLst>'
+	for (const stop of stops) {
+		const pos = Math.round(stop.position * 1000)
+		const innerElements = stop.transparency ? `<a:alpha val="${Math.round((100 - stop.transparency) * 1000)}"/>` : ''
+		strXmlLinear += `<a:gs pos="${pos}">${createColorElement(stop.color, innerElements)}</a:gs>`
+	}
+	strXmlLinear += '</a:gsLst>'
+	strXmlLinear += `<a:lin ang="${angle * 60000}" scaled="0"/>`
+	strXmlLinear += '</a:gradFill>'
+	return strXmlLinear
+}
+
+/**
  * Create color selection
  * @param {Color | ShapeFillProps | ShapeLineProps} props fill props
  * @returns XML string
  */
-export function genXmlColorSelection (props: Color | ShapeFillProps | ShapeLineProps): string {
+export function genXmlColorSelection(props: Color | ShapeFillProps | ShapeLineProps): string {
+
 	let fillType = 'solid'
 	let colorVal = ''
 	let internalElements = ''
@@ -204,6 +370,9 @@ export function genXmlColorSelection (props: Color | ShapeFillProps | ShapeLineP
 			case 'solid':
 				outText += `<a:solidFill>${createColorElement(colorVal, internalElements)}</a:solidFill>`
 				break
+			case 'gradient':
+				outText += genXmlGradientFill(props as ShapeFillProps)
+				break
 			default: // @note need a statement as having only "break" is removed by rollup, then tiggers "no-default" js-linter
 				outText += ''
 				break
@@ -218,7 +387,7 @@ export function genXmlColorSelection (props: Color | ShapeFillProps | ShapeLineP
  * @param {PresSlide} target - the slide to use
  * @returns {number} count of all current rels plus 1 for the caller to use as its "rId"
  */
-export function getNewRelId (target: PresSlide): number {
+export function getNewRelId(target: PresSlide): number {
 	return target._rels.length + target._relsChart.length + target._relsMedia.length + 1
 }
 
@@ -226,7 +395,7 @@ export function getNewRelId (target: PresSlide): number {
  * Checks shadow options passed by user and performs corrections if needed.
  * @param {ShadowProps} ShadowProps - shadow options
  */
-export function correctShadowOptions (ShadowProps: ShadowProps): ShadowProps | undefined {
+export function correctShadowOptions(ShadowProps: ShadowProps): ShadowProps | undefined {
 	if (!ShadowProps || typeof ShadowProps !== 'object') {
 		// console.warn("`shadow` options must be an object. Ex: `{shadow: {type:'none'}}`")
 		return

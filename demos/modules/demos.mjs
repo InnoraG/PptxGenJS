@@ -10,6 +10,7 @@
 import { COMPRESS, CUST_NAME } from "../modules/enums.mjs";
 import { createMasterSlides, testSlideBackgrounds } from "./masters.mjs";
 import { genSlides_Chart } from "./demo_chart.mjs";
+import { genSlides_Gradient } from "./demo_gradient.mjs";
 import { genSlides_Image } from "./demo_image.mjs";
 import { genSlides_Master } from "./demo_master.mjs";
 import { genSlides_Media } from "./demo_media.mjs";
@@ -22,7 +23,7 @@ const DEPRECATED_TEST_MODE = false;
 // ==================================================================================================================
 
 export function runEveryTest(pptxgen) {
-	return execGenSlidesFuncs(["Master", "Chart", "Image", "Media", "Shape", "Text", "Table"], pptxgen);
+	return execGenSlidesFuncs(["Master", "Chart", "Gradient", "Image", "Media", "Shape", "Text", "Table"], pptxgen);
 
 	// NOTE: Html2Pptx needs table to be visible (otherwise col widths are even and look horrible)
 	// ....: Therefore, run it manually. // if ( typeof table2slides1 !== 'undefined' ) table2slides1();
@@ -55,6 +56,7 @@ export function execGenSlidesFuncs(type, pptxgen) {
 			genSlides_Master(pptx);
 			if (DEPRECATED_TEST_MODE) testSlideBackgrounds(pptx);
 		} else if (type === "Chart") genSlides_Chart(pptx);
+		else if (type === "Gradient") genSlides_Gradient(pptx);
 		else if (type === "Image") genSlides_Image(pptx);
 		else if (type === "Media") genSlides_Media(pptx);
 		else if (type === "Shape") genSlides_Shape(pptx);

@@ -171,6 +171,81 @@ export interface ShadowProps {
 	 */
 	rotateWithShape?: boolean
 }
+
+// ============================================================================
+// GRADIENT FILL TYPES
+// ============================================================================
+
+/**
+ * Gradient stop definition - defines a color at a position in the gradient
+ * @example { position: 0, color: 'FF0000' }  // Red at start
+ * @example { position: 100, color: '0000FF', transparency: 50 }  // 50% transparent blue at end
+ */
+export interface GradientStopProps {
+	/**
+	 * Position of the gradient stop (0-100)
+	 * - 0 = start of gradient
+	 * - 100 = end of gradient
+	 */
+	position: number
+	/**
+	 * Stop color
+	 * - `HexColor` or `ThemeColor`
+	 * @example 'FF0000' // hex color (red)
+	 * @example pptx.SchemeColor.accent1 // Theme color
+	 */
+	color: Color
+	/**
+	 * Stop transparency (0-100)
+	 * @default 0
+	 */
+	transparency?: number
+}
+
+/**
+ * Gradient direction/path types (matches PowerPoint)
+ * - 'linear': Linear gradient at specified angle
+ * - 'circle': Circular radial gradient (path)
+ * - 'rect': Rectangular path gradient
+ * - 'shape': Follows shape contour
+ */
+export type GradientDirection = 'linear' | 'circle' | 'rect' | 'shape'
+
+/**
+ * Gradient flip modes for tiling
+ * - 'none': No flip
+ * - 'x': Flip horizontally
+ * - 'y': Flip vertically
+ * - 'xy': Flip both
+ */
+export type GradientFlip = 'none' | 'x' | 'y' | 'xy'
+
+/**
+ * PowerPoint preset gradient names
+ * These use the theme's accent colors
+ */
+export type GradientPreset =
+	| 'lightGradient-accent1' | 'lightGradient-accent2' | 'lightGradient-accent3'
+	| 'lightGradient-accent4' | 'lightGradient-accent5' | 'lightGradient-accent6'
+	| 'topSpotlight-accent1' | 'topSpotlight-accent2' | 'topSpotlight-accent3'
+	| 'topSpotlight-accent4' | 'topSpotlight-accent5' | 'topSpotlight-accent6'
+	| 'bottomSpotlight-accent1' | 'bottomSpotlight-accent2' | 'bottomSpotlight-accent3'
+	| 'bottomSpotlight-accent4' | 'bottomSpotlight-accent5' | 'bottomSpotlight-accent6'
+
+/**
+ * Rectangle definition for gradient positioning (l,t,r,b as percentages 0-100)
+ */
+export interface GradientRectProps {
+	/** Left offset (0-100) */
+	l?: number
+	/** Top offset (0-100) */
+	t?: number
+	/** Right offset (0-100) */
+	r?: number
+	/** Bottom offset (0-100) */
+	b?: number
+}
+
 // used by: shape, table, text
 export interface ShapeFillProps {
 	/**
@@ -191,7 +266,58 @@ export interface ShapeFillProps {
 	 * Fill type
 	 * @default 'solid'
 	 */
-	type?: 'none' | 'solid'
+	type?: 'none' | 'solid' | 'gradient'
+
+	// ========== GRADIENT PROPERTIES ==========
+
+	/**
+	 * Gradient direction/path type
+	 * - 'linear': Linear gradient at angle
+	 * - 'circle': Circular radial gradient
+	 * - 'rect': Rectangular path gradient
+	 * - 'shape': Follows shape contour
+	 * @default 'linear'
+	 */
+	gradientDirection?: GradientDirection
+	/**
+	 * Gradient stops - defines colors and positions
+	 * Required when type is 'gradient'
+	 * @example [{ position: 0, color: 'FF0000' }, { position: 100, color: '0000FF' }]
+	 */
+	gradientStops?: GradientStopProps[]
+	/**
+	 * Angle in degrees for linear gradients
+	 * - PowerPoint convention: 0° = left-to-right
+	 * - 90° = top-to-bottom
+	 * - 180° = right-to-left
+	 * - 270° = bottom-to-top
+	 * @default 0
+	 */
+	gradientAngle?: number
+	/**
+	 * Use a preset gradient instead of custom stops
+	 */
+	gradientPreset?: GradientPreset
+	/**
+	 * Whether to rotate gradient with shape
+	 * @default true
+	 */
+	rotateGradientWithShape?: boolean
+	/**
+	 * Flip mode for gradient tiling
+	 * @default 'none'
+	 */
+	gradientFlip?: GradientFlip
+	/**
+	 * Fill-to-rect for path gradients (center point)
+	 * - Defines the focus rectangle for path gradients
+	 */
+	fillToRect?: GradientRectProps
+	/**
+	 * Tile rect for gradient tiling
+	 * - Defines the rectangular region to tile
+	 */
+	tileRect?: GradientRectProps
 
 	/**
 	 * Transparency (percent)
@@ -199,6 +325,7 @@ export interface ShapeFillProps {
 	 */
 	alpha?: number
 }
+
 export interface ShapeLineProps extends ShapeFillProps {
 	/**
 	 * Line width (pt)
@@ -667,11 +794,11 @@ export interface ShapeProps extends PositionProps, ObjectNameProps {
 	 * @example [{ x: 0, y: 0 }, { x: 10, y: 10 }] // draw a line between those two points
 	 */
 	points?: Array<
-	| { x: Coord, y: Coord, moveTo?: boolean }
-	| { x: Coord, y: Coord, curve: { type: 'arc', hR: Coord, wR: Coord, stAng: number, swAng: number } }
-	| { x: Coord, y: Coord, curve: { type: 'cubic', x1: Coord, y1: Coord, x2: Coord, y2: Coord } }
-	| { x: Coord, y: Coord, curve: { type: 'quadratic', x1: Coord, y1: Coord } }
-	| { close: true }
+		| { x: Coord, y: Coord, moveTo?: boolean }
+		| { x: Coord, y: Coord, curve: { type: 'arc', hR: Coord, wR: Coord, stAng: number, swAng: number } }
+		| { x: Coord, y: Coord, curve: { type: 'cubic', x1: Coord, y1: Coord, x2: Coord, y2: Coord } }
+		| { x: Coord, y: Coord, curve: { type: 'quadratic', x1: Coord, y1: Coord } }
+		| { close: true }
 	>
 	/**
 	 * Rounded rectangle radius (only for pptx.shapes.ROUNDED_RECTANGLE)
@@ -1746,21 +1873,21 @@ export interface SlideMasterProps {
 	background?: BackgroundProps
 	margin?: Margin
 	slideNumber?: SlideNumberProps
-	objects?: Array< | { chart: IChartOpts }
-	| { image: ImageProps }
-	| { line: ShapeProps }
-	| { rect: ShapeProps }
-	| { text: TextProps }
-	| {
-		placeholder: {
-			options: PlaceholderProps
-			/**
-			 * Text to be shown in placeholder (shown until user focuses textbox or adds text)
-			 * - Leave blank to have powerpoint show default phrase (ex: "Click to add title")
-			 */
-			text?: string
-		}
-	}>
+	objects?: Array<| { chart: IChartOpts }
+		| { image: ImageProps }
+		| { line: ShapeProps }
+		| { rect: ShapeProps }
+		| { text: TextProps }
+		| {
+			placeholder: {
+				options: PlaceholderProps
+				/**
+				 * Text to be shown in placeholder (shown until user focuses textbox or adds text)
+				 * - Leave blank to have powerpoint show default phrase (ex: "Click to add title")
+				 */
+				text?: string
+			}
+		}>
 
 	/**
 	 * @deprecated v3.3.0 - use `background`

@@ -82,14 +82,14 @@ const ImageSizingXml = {
  * @param {PresSlide|SlideLayout} slideObject - slide object created within createSlideObject
  * @return {string} XML string with <p:cSld> as the root
  */
-function slideObjectToXml (slide: PresSlide | SlideLayout): string {
+function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 	let strSlideXml: string = slide._name ? '<p:cSld name="' + slide._name + '">' : '<p:cSld>'
 	let intTableNum = 1
 
 	// STEP 1: Add background color/image (ensure only a single `<p:bg>` tag is created, ex: when master-baskground has both `color` and `path`)
 	if (slide._bkgdImgRid) {
 		strSlideXml += `<p:bg><p:bgPr><a:blipFill dpi="0" rotWithShape="1"><a:blip r:embed="rId${slide._bkgdImgRid}"><a:lum/></a:blip><a:srcRect/><a:stretch><a:fillRect/></a:stretch></a:blipFill><a:effectLst/></p:bgPr></p:bg>`
-	} else if (slide.background?.color) {
+	} else if (slide.background?.color || slide.background?.type === 'gradient') {
 		strSlideXml += `<p:bg><p:bgPr>${genXmlColorSelection(slide.background)}</p:bgPr></p:bg>`
 	} else if (!slide.bkgd && slide._name && slide._name === DEF_PRES_LAYOUT_NAME) {
 		// NOTE: Default [white] background is needed on slideMaster1.xml to avoid gray background in Keynote (and Finder previews)
@@ -178,7 +178,7 @@ function slideObjectToXml (slide: PresSlide | SlideLayout): string {
 					'  <p:nvPr><p:extLst><p:ext uri="{D42A27DB-BD31-4B8C-83A1-F6EECF244321}"><p14:modId xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" val="1579011935"/></p:ext></p:extLst></p:nvPr>' +
 					'</p:nvGraphicFramePr>'
 				strXml += `<p:xfrm><a:off x="${x || (x === 0 ? 0 : EMU)}" y="${y || (y === 0 ? 0 : EMU)}"/><a:ext cx="${cx || (cx === 0 ? 0 : EMU)}" cy="${cy || EMU
-				}"/></p:xfrm>`
+					}"/></p:xfrm>`
 				strXml += '<a:graphic><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/table"><a:tbl><a:tblPr/>'
 				// + '        <a:tblPr bandRow="1"/>';
 				// TODO: Support banded rows, first/last row, etc.
@@ -297,11 +297,11 @@ function slideObjectToXml (slide: PresSlide | SlideLayout): string {
 						const cellOpts = cell.options || {}
 						cell.options = cellOpts
 
-						// B: Inherit some options from table when cell options dont exist
-						// @see: http://officeopenxml.com/drwTableCellProperties-alignment.php
-						;['align', 'bold', 'border', 'color', 'fill', 'fontFace', 'fontSize', 'margin', 'textDirection', 'underline', 'valign'].forEach(name => {
-							if (objTabOpts[name] && !cellOpts[name] && cellOpts[name] !== 0) cellOpts[name] = objTabOpts[name]
-						})
+							// B: Inherit some options from table when cell options dont exist
+							// @see: http://officeopenxml.com/drwTableCellProperties-alignment.php
+							;['align', 'bold', 'border', 'color', 'fill', 'fontFace', 'fontSize', 'margin', 'textDirection', 'underline', 'valign'].forEach(name => {
+								if (objTabOpts[name] && !cellOpts[name] && cellOpts[name] !== 0) cellOpts[name] = objTabOpts[name]
+							})
 
 						const cellValign = cellOpts.valign
 							? ` anchor="${cellOpts.valign.replace(/^c$/i, 'ctr').replace(/^m$/i, 'ctr').replace('center', 'ctr').replace('middle', 'ctr').replace('top', 't').replace('btm', 'b').replace('bottom', 'b')}"`
@@ -355,7 +355,7 @@ function slideObjectToXml (slide: PresSlide | SlideLayout): string {
 									strXml += `<a:${obj.name} w="${valToPts(cellOpts.border[obj.idx].pt)}" cap="flat" cmpd="sng" algn="ctr">`
 									strXml += `<a:solidFill>${createColorElement(cellOpts.border[obj.idx].color)}</a:solidFill>`
 									strXml += `<a:prstDash val="${cellOpts.border[obj.idx].type === 'dash' ? 'sysDash' : 'solid'
-									}"/><a:round/><a:headEnd type="none" w="med" len="med"/><a:tailEnd type="none" w="med" len="med"/>`
+										}"/><a:round/><a:headEnd type="none" w="med" len="med"/><a:tailEnd type="none" w="med" len="med"/>`
 									strXml += `</a:${obj.name}>`
 								} else {
 									strXml += `<a:${obj.name} w="0" cap="flat" cmpd="sng" algn="ctr"><a:noFill/></a:${obj.name}>`
@@ -561,11 +561,11 @@ function slideObjectToXml (slide: PresSlide | SlideLayout): string {
 				)}">`
 				if (slideItemObj.hyperlink?.url) {
 					strSlideXml += `<a:hlinkClick r:id="rId${slideItemObj.hyperlink._rId}" tooltip="${slideItemObj.hyperlink.tooltip ? encodeXmlEntities(slideItemObj.hyperlink.tooltip) : ''
-					}"/>`
+						}"/>`
 				}
 				if (slideItemObj.hyperlink?.slide) {
 					strSlideXml += `<a:hlinkClick r:id="rId${slideItemObj.hyperlink._rId}" tooltip="${slideItemObj.hyperlink.tooltip ? encodeXmlEntities(slideItemObj.hyperlink.tooltip) : ''
-					}" action="ppaction://hlinksldjump"/>`
+						}" action="ppaction://hlinksldjump"/>`
 				}
 				strSlideXml += '    </p:cNvPr>'
 				strSlideXml += '    <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr>'
@@ -653,7 +653,7 @@ function slideObjectToXml (slide: PresSlide | SlideLayout): string {
 					strSlideXml += ' <p:nvPicPr>'
 					// IMPORTANT: <p:cNvPr id="" value is critical - if not the same number as preiew image rId, PowerPoint throws error!
 					strSlideXml += `<p:cNvPr id="${slideItemObj.mediaRid + 2}" name="${slideItemObj.options.objectName
-					}"><a:hlinkClick r:id="" action="ppaction://media"/></p:cNvPr>`
+						}"><a:hlinkClick r:id="" action="ppaction://media"/></p:cNvPr>`
 					strSlideXml += ' <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr>'
 					strSlideXml += ' <p:nvPr>'
 					strSlideXml += `  <a:videoFile r:link="rId${slideItemObj.mediaRid}"/>`
@@ -764,7 +764,7 @@ function slideObjectToXml (slide: PresSlide | SlideLayout): string {
  * @param {{ target: string; type: string }[]} defaultRels - array of default relations
  * @return {string} XML
  */
-function slideObjectRelationsToXml (slide: PresSlide | SlideLayout, defaultRels: Array<{ target: string, type: string }>): string {
+function slideObjectRelationsToXml(slide: PresSlide | SlideLayout, defaultRels: Array<{ target: string, type: string }>): string {
 	let lastRid = 0 // stores maximum rId used for dynamic relations
 	let strXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + CRLF + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
 
@@ -781,38 +781,38 @@ function slideObjectRelationsToXml (slide: PresSlide | SlideLayout, defaultRels:
 			strXml += `<Relationship Id="rId${rel.rId}" Target="${rel.Target}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesSlide"/>`
 		}
 	})
-	; (slide._relsChart || []).forEach((rel: ISlideRelChart) => {
-		lastRid = Math.max(lastRid, rel.rId)
-		strXml += `<Relationship Id="rId${rel.rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="${rel.Target}"/>`
-	})
-	; (slide._relsMedia || []).forEach((rel: ISlideRelMedia) => {
-		const relRid = rel.rId.toString()
-		lastRid = Math.max(lastRid, rel.rId)
-		if (rel.type.toLowerCase().includes('image')) {
-			strXml += '<Relationship Id="rId' + relRid + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="' + rel.Target + '"/>'
-		} else if (rel.type.toLowerCase().includes('audio')) {
-			// As media has *TWO* rel entries per item, check for first one, if found add second rel with alt style
-			if (strXml.includes(' Target="' + rel.Target + '"')) {
-				strXml += '<Relationship Id="rId' + relRid + '" Type="http://schemas.microsoft.com/office/2007/relationships/media" Target="' + rel.Target + '"/>'
-			} else {
-				strXml += '<Relationship Id="rId' + relRid + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/audio" Target="' + rel.Target + '"/>'
+		; (slide._relsChart || []).forEach((rel: ISlideRelChart) => {
+			lastRid = Math.max(lastRid, rel.rId)
+			strXml += `<Relationship Id="rId${rel.rId}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/chart" Target="${rel.Target}"/>`
+		})
+		; (slide._relsMedia || []).forEach((rel: ISlideRelMedia) => {
+			const relRid = rel.rId.toString()
+			lastRid = Math.max(lastRid, rel.rId)
+			if (rel.type.toLowerCase().includes('image')) {
+				strXml += '<Relationship Id="rId' + relRid + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="' + rel.Target + '"/>'
+			} else if (rel.type.toLowerCase().includes('audio')) {
+				// As media has *TWO* rel entries per item, check for first one, if found add second rel with alt style
+				if (strXml.includes(' Target="' + rel.Target + '"')) {
+					strXml += '<Relationship Id="rId' + relRid + '" Type="http://schemas.microsoft.com/office/2007/relationships/media" Target="' + rel.Target + '"/>'
+				} else {
+					strXml += '<Relationship Id="rId' + relRid + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/audio" Target="' + rel.Target + '"/>'
+				}
+			} else if (rel.type.toLowerCase().includes('video')) {
+				// As media has *TWO* rel entries per item, check for first one, if found add second rel with alt style
+				if (strXml.includes(' Target="' + rel.Target + '"')) {
+					strXml += '<Relationship Id="rId' + relRid + '" Type="http://schemas.microsoft.com/office/2007/relationships/media" Target="' + rel.Target + '"/>'
+				} else {
+					strXml += '<Relationship Id="rId' + relRid + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/video" Target="' + rel.Target + '"/>'
+				}
+			} else if (rel.type.toLowerCase().includes('online')) {
+				// As media has *TWO* rel entries per item, check for first one, if found add second rel with alt style
+				if (strXml.includes(' Target="' + rel.Target + '"')) {
+					strXml += '<Relationship Id="rId' + relRid + '" Type="http://schemas.microsoft.com/office/2007/relationships/image" Target="' + rel.Target + '"/>'
+				} else {
+					strXml += '<Relationship Id="rId' + relRid + '" Target="' + rel.Target + '" TargetMode="External" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/video"/>'
+				}
 			}
-		} else if (rel.type.toLowerCase().includes('video')) {
-			// As media has *TWO* rel entries per item, check for first one, if found add second rel with alt style
-			if (strXml.includes(' Target="' + rel.Target + '"')) {
-				strXml += '<Relationship Id="rId' + relRid + '" Type="http://schemas.microsoft.com/office/2007/relationships/media" Target="' + rel.Target + '"/>'
-			} else {
-				strXml += '<Relationship Id="rId' + relRid + '" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/video" Target="' + rel.Target + '"/>'
-			}
-		} else if (rel.type.toLowerCase().includes('online')) {
-			// As media has *TWO* rel entries per item, check for first one, if found add second rel with alt style
-			if (strXml.includes(' Target="' + rel.Target + '"')) {
-				strXml += '<Relationship Id="rId' + relRid + '" Type="http://schemas.microsoft.com/office/2007/relationships/image" Target="' + rel.Target + '"/>'
-			} else {
-				strXml += '<Relationship Id="rId' + relRid + '" Target="' + rel.Target + '" TargetMode="External" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/video"/>'
-			}
-		}
-	})
+		})
 
 	// STEP 2: Add default rels
 	defaultRels.forEach((rel, idx) => {
@@ -829,7 +829,7 @@ function slideObjectRelationsToXml (slide: PresSlide | SlideLayout, defaultRels:
  * @param {boolean} isDefault - array of default relations
  * @return {string} XML
  */
-function genXmlParagraphProperties (textObj: ISlideObject | TextProps, isDefault: boolean): string {
+function genXmlParagraphProperties(textObj: ISlideObject | TextProps, isDefault: boolean): string {
 	let strXmlBullet = ''
 	let strXmlLnSpc = ''
 	let strXmlParaSpc = ''
@@ -890,9 +890,9 @@ function genXmlParagraphProperties (textObj: ISlideObject | TextProps, isDefault
 			if (textObj.options.bullet.type) {
 				if (textObj.options.bullet.type.toString().toLowerCase() === 'number') {
 					paragraphPropXml += ` marL="${textObj.options.indentLevel && textObj.options.indentLevel > 0 ? bulletMarL + bulletMarL * textObj.options.indentLevel : bulletMarL
-					}" indent="-${bulletMarL}"`
+						}" indent="-${bulletMarL}"`
 					strXmlBullet = `<a:buSzPct val="100000"/><a:buFont typeface="+mj-lt"/><a:buAutoNum type="${textObj.options.bullet.style || 'arabicPeriod'}" startAt="${textObj.options.bullet.numberStartAt || textObj.options.bullet.startAt || '1'
-					}"/>`
+						}"/>`
 				}
 			} else if (textObj.options.bullet.characterCode) {
 				let bulletCode = `&#x${textObj.options.bullet.characterCode};`
@@ -904,7 +904,7 @@ function genXmlParagraphProperties (textObj: ISlideObject | TextProps, isDefault
 				}
 
 				paragraphPropXml += ` marL="${textObj.options.indentLevel && textObj.options.indentLevel > 0 ? bulletMarL + bulletMarL * textObj.options.indentLevel : bulletMarL
-				}" indent="-${bulletMarL}"`
+					}" indent="-${bulletMarL}"`
 				strXmlBullet = '<a:buSzPct val="100000"/><a:buChar char="' + bulletCode + '"/>'
 			} else if (textObj.options.bullet.code) {
 				// @deprecated `bullet.code` v3.3.0
@@ -917,16 +917,16 @@ function genXmlParagraphProperties (textObj: ISlideObject | TextProps, isDefault
 				}
 
 				paragraphPropXml += ` marL="${textObj.options.indentLevel && textObj.options.indentLevel > 0 ? bulletMarL + bulletMarL * textObj.options.indentLevel : bulletMarL
-				}" indent="-${bulletMarL}"`
+					}" indent="-${bulletMarL}"`
 				strXmlBullet = '<a:buSzPct val="100000"/><a:buChar char="' + bulletCode + '"/>'
 			} else {
 				paragraphPropXml += ` marL="${textObj.options.indentLevel && textObj.options.indentLevel > 0 ? bulletMarL + bulletMarL * textObj.options.indentLevel : bulletMarL
-				}" indent="-${bulletMarL}"`
+					}" indent="-${bulletMarL}"`
 				strXmlBullet = `<a:buSzPct val="100000"/><a:buChar char="${BULLET_TYPES.DEFAULT}"/>`
 			}
 		} else if (textObj.options.bullet) {
 			paragraphPropXml += ` marL="${textObj.options.indentLevel && textObj.options.indentLevel > 0 ? bulletMarL + bulletMarL * textObj.options.indentLevel : bulletMarL
-			}" indent="-${bulletMarL}"`
+				}" indent="-${bulletMarL}"`
 			strXmlBullet = `<a:buSzPct val="100000"/><a:buChar char="${BULLET_TYPES.DEFAULT}"/>`
 		} else if (!textObj.options.bullet) {
 			// We only add this when the user explicitely asks for no bullet, otherwise, it can override the master defaults!
@@ -956,7 +956,7 @@ function genXmlParagraphProperties (textObj: ISlideObject | TextProps, isDefault
  * @param {boolean} isDefault - whether these are the default text run properties
  * @return {string} XML
  */
-function genXmlTextRunProperties (opts: ObjectOptions | TextPropsOptions, isDefault: boolean): string {
+function genXmlTextRunProperties(opts: ObjectOptions | TextPropsOptions, isDefault: boolean): string {
 	let runProps = ''
 	const runPropsTag = isDefault ? 'a:defRPr' : 'a:rPr'
 
@@ -1006,10 +1006,10 @@ function genXmlTextRunProperties (opts: ObjectOptions | TextPropsOptions, isDefa
 		else if (opts.hyperlink.url) {
 			// runProps += '<a:uFill>'+ genXmlColorSelection('0000FF') +'</a:uFill>'; // Breaks PPT2010! (Issue#74)
 			runProps += `<a:hlinkClick r:id="rId${opts.hyperlink._rId}" invalidUrl="" action="" tgtFrame="" tooltip="${opts.hyperlink.tooltip ? encodeXmlEntities(opts.hyperlink.tooltip) : ''
-			}" history="1" highlightClick="0" endSnd="0"${opts.color ? '>' : '/>'}`
+				}" history="1" highlightClick="0" endSnd="0"${opts.color ? '>' : '/>'}`
 		} else if (opts.hyperlink.slide) {
 			runProps += `<a:hlinkClick r:id="rId${opts.hyperlink._rId}" action="ppaction://hlinksldjump" tooltip="${opts.hyperlink.tooltip ? encodeXmlEntities(opts.hyperlink.tooltip) : ''
-			}"${opts.color ? '>' : '/>'}`
+				}"${opts.color ? '>' : '/>'}`
 		}
 		if (opts.color) {
 			runProps += ' <a:extLst>'
@@ -1032,7 +1032,7 @@ function genXmlTextRunProperties (opts: ObjectOptions | TextPropsOptions, isDefa
  * @param {TextProps} textObj - Text object
  * @return {string} XML string
  */
-function genXmlTextRun (textObj: TextProps): string {
+function genXmlTextRun(textObj: TextProps): string {
 	// NOTE: Dont create full rPr runProps for empty [lineBreak] runs
 	// Why? The size of the lineBreak wont match (eg: below it will be 18px instead of the correct 36px)
 	// Do this:
@@ -1070,7 +1070,7 @@ function genXmlTextRun (textObj: TextProps): string {
  * @param {ISlideObject | TableCell} slideObject - various options
  * @return {string} XML string
  */
-function genXmlBodyProperties (slideObject: ISlideObject | TableCell): string {
+function genXmlBodyProperties(slideObject: ISlideObject | TableCell): string {
 	let bodyProperties = '<a:bodyPr'
 
 	if (slideObject && slideObject._type === SLIDE_OBJECT_TYPES.text && slideObject.options._bodyProp) {
@@ -1151,7 +1151,7 @@ function genXmlBodyProperties (slideObject: ISlideObject | TableCell): string {
  *    </p:txBody>
  * @returns XML containing the param object's text and formatting
  */
-export function genXmlTextBody (slideObj: ISlideObject | TableCell): string {
+export function genXmlTextBody(slideObj: ISlideObject | TableCell): string {
 	const opts: ObjectOptions = slideObj.options || {}
 	let tmpTextObjects: TextProps[] = []
 	const arrTextObjects: TextProps[] = []
@@ -1353,7 +1353,7 @@ export function genXmlTextBody (slideObj: ISlideObject | TableCell): string {
  * @param {ISlideObject} placeholderObj
  * @returns XML
  */
-export function genXmlPlaceholder (placeholderObj: ISlideObject): string {
+export function genXmlPlaceholder(placeholderObj: ISlideObject): string {
 	if (!placeholderObj) return ''
 
 	const placeholderIdx = placeholderObj.options?._placeholderIdx ? placeholderObj.options._placeholderIdx : ''
@@ -1376,7 +1376,7 @@ export function genXmlPlaceholder (placeholderObj: ISlideObject): string {
  * @param {PresSlide} masterSlide - master slide
  * @returns XML
  */
-export function makeXmlContTypes (slides: PresSlide[], slideLayouts: SlideLayout[], masterSlide?: PresSlide): string {
+export function makeXmlContTypes(slides: PresSlide[], slideLayouts: SlideLayout[], masterSlide?: PresSlide): string {
 	let strXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + CRLF
 	strXml += '<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">'
 	strXml += '<Default Extension="xml" ContentType="application/xml"/>'
@@ -1421,9 +1421,9 @@ export function makeXmlContTypes (slides: PresSlide[], slideLayouts: SlideLayout
 	// STEP 4: Add Slide Layouts
 	slideLayouts.forEach((layout, idx) => {
 		strXml += `<Override PartName="/ppt/slideLayouts/slideLayout${idx + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>`
-		; (layout._relsChart || []).forEach(rel => {
-			strXml += ' <Override PartName="' + rel.Target + '" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>'
-		})
+			; (layout._relsChart || []).forEach(rel => {
+				strXml += ' <Override PartName="' + rel.Target + '" ContentType="application/vnd.openxmlformats-officedocument.drawingml.chart+xml"/>'
+			})
 	})
 
 	// STEP 5: Add notes slide(s)
@@ -1451,7 +1451,7 @@ export function makeXmlContTypes (slides: PresSlide[], slideLayouts: SlideLayout
  * Creates `_rels/.rels`
  * @returns XML
  */
-export function makeXmlRootRels (): string {
+export function makeXmlRootRels(): string {
 	return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>${CRLF}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 		<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/>
 		<Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/>
@@ -1465,7 +1465,7 @@ export function makeXmlRootRels (): string {
  * @param {string} company - "Company" metadata
  * @returns XML
  */
-export function makeXmlApp (slides: PresSlide[], company: string): string {
+export function makeXmlApp(slides: PresSlide[], company: string): string {
 	return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>${CRLF}<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes">
 	<TotalTime>0</TotalTime>
 	<Words>0</Words>
@@ -1511,7 +1511,7 @@ export function makeXmlApp (slides: PresSlide[], company: string): string {
  * @param {string} revision - metadata value
  * @returns XML
  */
-export function makeXmlCore (title: string, subject: string, author: string, revision: string): string {
+export function makeXmlCore(title: string, subject: string, author: string, revision: string): string {
 	return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 	<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 		<dc:title>${encodeXmlEntities(title)}</dc:title>
@@ -1529,7 +1529,7 @@ export function makeXmlCore (title: string, subject: string, author: string, rev
  * @param {PresSlide[]} slides - Presenation Slides
  * @returns XML
  */
-export function makeXmlPresentationRels (slides: PresSlide[]): string {
+export function makeXmlPresentationRels(slides: PresSlide[]): string {
 	let intRelNum = 1
 	let strXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' + CRLF
 	strXml += '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
@@ -1556,7 +1556,7 @@ export function makeXmlPresentationRels (slides: PresSlide[]): string {
  * @param {PresSlide} slide - the slide object to transform into XML
  * @return {string} XML
  */
-export function makeXmlSlide (slide: PresSlide): string {
+export function makeXmlSlide(slide: PresSlide): string {
 	return (
 		`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>${CRLF}` +
 		'<p:sld xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ' +
@@ -1572,7 +1572,7 @@ export function makeXmlSlide (slide: PresSlide): string {
  * @param {PresSlide} slide - the slide object to transform into XML
  * @return {string} notes text
  */
-export function getNotesFromSlide (slide: PresSlide): string {
+export function getNotesFromSlide(slide: PresSlide): string {
 	let notesText = ''
 
 	slide._slideObjects.forEach(data => {
@@ -1586,7 +1586,7 @@ export function getNotesFromSlide (slide: PresSlide): string {
  * Generate XML for Notes Master (notesMaster1.xml)
  * @returns {string} XML
  */
-export function makeXmlNotesMaster (): string {
+export function makeXmlNotesMaster(): string {
 	return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>${CRLF}<p:notesMaster xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:cSld><p:bg><p:bgRef idx="1001"><a:schemeClr val="bg1"/></p:bgRef></p:bg><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id="2" name="Header Placeholder 1"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="hdr" sz="quarter"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="2971800" cy="458788"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert="horz" lIns="91440" tIns="45720" rIns="91440" bIns="45720" rtlCol="0"/><a:lstStyle><a:lvl1pPr algn="l"><a:defRPr sz="1200"/></a:lvl1pPr></a:lstStyle><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="3" name="Date Placeholder 2"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="dt" idx="1"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="3884613" y="0"/><a:ext cx="2971800" cy="458788"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert="horz" lIns="91440" tIns="45720" rIns="91440" bIns="45720" rtlCol="0"/><a:lstStyle><a:lvl1pPr algn="r"><a:defRPr sz="1200"/></a:lvl1pPr></a:lstStyle><a:p><a:fld id="{5282F153-3F37-0F45-9E97-73ACFA13230C}" type="datetimeFigureOut"><a:rPr lang="en-US"/><a:t>7/23/19</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="4" name="Slide Image Placeholder 3"/><p:cNvSpPr><a:spLocks noGrp="1" noRot="1" noChangeAspect="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldImg" idx="2"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="685800" y="1143000"/><a:ext cx="5486400" cy="3086100"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom><a:noFill/><a:ln w="12700"><a:solidFill><a:prstClr val="black"/></a:solidFill></a:ln></p:spPr><p:txBody><a:bodyPr vert="horz" lIns="91440" tIns="45720" rIns="91440" bIns="45720" rtlCol="0" anchor="ctr"/><a:lstStyle/><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="5" name="Notes Placeholder 4"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="body" sz="quarter" idx="3"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="685800" y="4400550"/><a:ext cx="5486400" cy="3600450"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert="horz" lIns="91440" tIns="45720" rIns="91440" bIns="45720" rtlCol="0"/><a:lstStyle/><a:p><a:pPr lvl="0"/><a:r><a:rPr lang="en-US"/><a:t>Click to edit Master text styles</a:t></a:r></a:p><a:p><a:pPr lvl="1"/><a:r><a:rPr lang="en-US"/><a:t>Second level</a:t></a:r></a:p><a:p><a:pPr lvl="2"/><a:r><a:rPr lang="en-US"/><a:t>Third level</a:t></a:r></a:p><a:p><a:pPr lvl="3"/><a:r><a:rPr lang="en-US"/><a:t>Fourth level</a:t></a:r></a:p><a:p><a:pPr lvl="4"/><a:r><a:rPr lang="en-US"/><a:t>Fifth level</a:t></a:r></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="6" name="Footer Placeholder 5"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="ftr" sz="quarter" idx="4"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="0" y="8685213"/><a:ext cx="2971800" cy="458787"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert="horz" lIns="91440" tIns="45720" rIns="91440" bIns="45720" rtlCol="0" anchor="b"/><a:lstStyle><a:lvl1pPr algn="l"><a:defRPr sz="1200"/></a:lvl1pPr></a:lstStyle><a:p><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="7" name="Slide Number Placeholder 6"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="5"/></p:nvPr></p:nvSpPr><p:spPr><a:xfrm><a:off x="3884613" y="8685213"/><a:ext cx="2971800" cy="458787"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></p:spPr><p:txBody><a:bodyPr vert="horz" lIns="91440" tIns="45720" rIns="91440" bIns="45720" rtlCol="0" anchor="b"/><a:lstStyle><a:lvl1pPr algn="r"><a:defRPr sz="1200"/></a:lvl1pPr></a:lstStyle><a:p><a:fld id="{CE5E9CC1-C706-0F49-92D6-E571CC5EEA8F}" type="slidenum"><a:rPr lang="en-US"/><a:t>‹#›</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp></p:spTree><p:extLst><p:ext uri="{BB962C8B-B14F-4D97-AF65-F5344CB8AC3E}"><p14:creationId xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" val="1024086991"/></p:ext></p:extLst></p:cSld><p:clrMap bg1="lt1" tx1="dk1" bg2="lt2" tx2="dk2" accent1="accent1" accent2="accent2" accent3="accent3" accent4="accent4" accent5="accent5" accent6="accent6" hlink="hlink" folHlink="folHlink"/><p:notesStyle><a:lvl1pPr marL="0" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl1pPr><a:lvl2pPr marL="457200" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl2pPr><a:lvl3pPr marL="914400" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl3pPr><a:lvl4pPr marL="1371600" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl4pPr><a:lvl5pPr marL="1828800" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl5pPr><a:lvl6pPr marL="2286000" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl6pPr><a:lvl7pPr marL="2743200" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl7pPr><a:lvl8pPr marL="3200400" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl8pPr><a:lvl9pPr marL="3657600" algn="l" defTabSz="914400" rtl="0" eaLnBrk="1" latinLnBrk="0" hangingPunct="1"><a:defRPr sz="1200" kern="1200"><a:solidFill><a:schemeClr val="tx1"/></a:solidFill><a:latin typeface="+mn-lt"/><a:ea typeface="+mn-ea"/><a:cs typeface="+mn-cs"/></a:defRPr></a:lvl9pPr></p:notesStyle></p:notesMaster>`
 }
 
@@ -1595,7 +1595,7 @@ export function makeXmlNotesMaster (): string {
  * @param {PresSlide} slide - the slide object to transform into XML
  * @return {string} XML
  */
-export function makeXmlNotesSlide (slide: PresSlide): string {
+export function makeXmlNotesSlide(slide: PresSlide): string {
 	return (
 		`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>${CRLF}<p:notes xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:cSld><p:spTree><p:nvGrpSpPr><p:cNvPr id="1" name=""/><p:cNvGrpSpPr/><p:nvPr/></p:nvGrpSpPr><p:grpSpPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="0" cy="0"/><a:chOff x="0" y="0"/><a:chExt cx="0" cy="0"/></a:xfrm></p:grpSpPr><p:sp><p:nvSpPr><p:cNvPr id="2" name="Slide Image Placeholder 1"/><p:cNvSpPr><a:spLocks noGrp="1" noRot="1" noChangeAspect="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldImg"/></p:nvPr></p:nvSpPr><p:spPr/></p:sp><p:sp><p:nvSpPr><p:cNvPr id="3" name="Notes Placeholder 2"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="body" idx="1"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr lang="en-US" dirty="0"/><a:t>${encodeXmlEntities(getNotesFromSlide(slide))}</a:t></a:r><a:endParaRPr lang="en-US" dirty="0"/></a:p></p:txBody></p:sp><p:sp><p:nvSpPr><p:cNvPr id="4" name="Slide Number Placeholder 3"/><p:cNvSpPr><a:spLocks noGrp="1"/></p:cNvSpPr><p:nvPr><p:ph type="sldNum" sz="quarter" idx="10"/></p:nvPr></p:nvSpPr><p:spPr/><p:txBody><a:bodyPr/><a:lstStyle/><a:p><a:fld id="${SLDNUMFLDID}" type="slidenum"><a:rPr lang="en-US"/><a:t>${slide._slideNum}</a:t></a:fld><a:endParaRPr lang="en-US"/></a:p></p:txBody></p:sp></p:spTree><p:extLst><p:ext uri="{BB962C8B-B14F-4D97-AF65-F5344CB8AC3E}"><p14:creationId xmlns:p14="http://schemas.microsoft.com/office/powerpoint/2010/main" val="1024086991"/></p:ext></p:extLst></p:cSld><p:clrMapOvr><a:masterClrMapping/></p:clrMapOvr></p:notes>`
 	)
@@ -1606,7 +1606,7 @@ export function makeXmlNotesSlide (slide: PresSlide): string {
  * @param {SlideLayout} layout - slide layout (master)
  * @return {string} XML
  */
-export function makeXmlLayout (layout: SlideLayout): string {
+export function makeXmlLayout(layout: SlideLayout): string {
 	return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 		<p:sldLayout xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main" preserve="1">
 		${slideObjectToXml(layout)}
@@ -1619,7 +1619,7 @@ export function makeXmlLayout (layout: SlideLayout): string {
  * @param {SlideLayout[]} layouts - slide layouts
  * @return {string} XML
  */
-export function makeXmlMaster (slide: PresSlide, layouts: SlideLayout[]): string {
+export function makeXmlMaster(slide: PresSlide, layouts: SlideLayout[]): string {
 	// NOTE: Pass layouts as static rels because they are not referenced any time
 	const layoutDefs = layouts.map((_layoutDef, idx) => `<p:sldLayoutId id="${LAYOUT_IDX_SERIES_BASE + idx}" r:id="rId${slide._rels.length + idx + 1}"/>`)
 
@@ -1671,7 +1671,7 @@ export function makeXmlMaster (slide: PresSlide, layouts: SlideLayout[]): string
  * @param {SlideLayout[]} slideLayouts - Slide Layouts
  * @return {string} XML
  */
-export function makeXmlSlideLayoutRel (layoutNumber: number, slideLayouts: SlideLayout[]): string {
+export function makeXmlSlideLayoutRel(layoutNumber: number, slideLayouts: SlideLayout[]): string {
 	return slideObjectRelationsToXml(slideLayouts[layoutNumber - 1], [
 		{
 			target: '../slideMasters/slideMaster1.xml',
@@ -1687,7 +1687,7 @@ export function makeXmlSlideLayoutRel (layoutNumber: number, slideLayouts: Slide
  * @param {number} `slideNumber` 1-indexed number of a layout that relations are generated for
  * @return {string} XML
  */
-export function makeXmlSlideRel (slides: PresSlide[], slideLayouts: SlideLayout[], slideNumber: number): string {
+export function makeXmlSlideRel(slides: PresSlide[], slideLayouts: SlideLayout[], slideNumber: number): string {
 	return slideObjectRelationsToXml(slides[slideNumber - 1], [
 		{
 			target: `../slideLayouts/slideLayout${getLayoutIdxForSlide(slides, slideLayouts, slideNumber)}.xml`,
@@ -1705,7 +1705,7 @@ export function makeXmlSlideRel (slides: PresSlide[], slideLayouts: SlideLayout[
  * @param {number} slideNumber - 1-indexed number of a layout that relations are generated for
  * @return {string} XML
  */
-export function makeXmlNotesSlideRel (slideNumber: number): string {
+export function makeXmlNotesSlideRel(slideNumber: number): string {
 	return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 		<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 			<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/notesMaster" Target="../notesMasters/notesMaster1.xml"/>
@@ -1719,7 +1719,7 @@ export function makeXmlNotesSlideRel (slideNumber: number): string {
  * @param {SlideLayout[]} slideLayouts - Slide Layouts
  * @return {string} XML
  */
-export function makeXmlMasterRel (masterSlide: PresSlide, slideLayouts: SlideLayout[]): string {
+export function makeXmlMasterRel(masterSlide: PresSlide, slideLayouts: SlideLayout[]): string {
 	const defaultRels = slideLayouts.map((_layoutDef, idx) => ({
 		target: `../slideLayouts/slideLayout${idx + 1}.xml`,
 		type: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/slideLayout',
@@ -1733,7 +1733,7 @@ export function makeXmlMasterRel (masterSlide: PresSlide, slideLayouts: SlideLay
  * Creates `ppt/notesMasters/_rels/notesMaster1.xml.rels`
  * @return {string} XML
  */
-export function makeXmlNotesMasterRel (): string {
+export function makeXmlNotesMasterRel(): string {
 	return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>${CRLF}<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
 		<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme" Target="../theme/theme1.xml"/>
 		</Relationships>`
@@ -1746,7 +1746,7 @@ export function makeXmlNotesMasterRel (): string {
  * @param {number} slideNumber
  * @return {number} slide number
  */
-function getLayoutIdxForSlide (slides: PresSlide[], slideLayouts: SlideLayout[], slideNumber: number): number {
+function getLayoutIdxForSlide(slides: PresSlide[], slideLayouts: SlideLayout[], slideNumber: number): number {
 	for (let i = 0; i < slideLayouts.length; i++) {
 		if (slideLayouts[i]._name === slides[slideNumber - 1]._slideLayout._name) {
 			return i + 1
@@ -1764,7 +1764,7 @@ function getLayoutIdxForSlide (slides: PresSlide[], slideLayouts: SlideLayout[],
  * Creates `ppt/theme/theme1.xml`
  * @return {string} XML
  */
-export function makeXmlTheme (pres: IPresentationProps): string {
+export function makeXmlTheme(pres: IPresentationProps): string {
 	const majorFont = pres.theme?.headFontFace ? `<a:latin typeface="${pres.theme?.headFontFace}"/>` : '<a:latin typeface="Calibri Light" panose="020F0302020204030204"/>'
 	const minorFont = pres.theme?.bodyFontFace ? `<a:latin typeface="${pres.theme?.bodyFontFace}"/>` : '<a:latin typeface="Calibri" panose="020F0502020204030204"/>'
 	return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><a:theme xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" name="Office Theme"><a:themeElements><a:clrScheme name="Office"><a:dk1><a:sysClr val="windowText" lastClr="000000"/></a:dk1><a:lt1><a:sysClr val="window" lastClr="FFFFFF"/></a:lt1><a:dk2><a:srgbClr val="44546A"/></a:dk2><a:lt2><a:srgbClr val="E7E6E6"/></a:lt2><a:accent1><a:srgbClr val="4472C4"/></a:accent1><a:accent2><a:srgbClr val="ED7D31"/></a:accent2><a:accent3><a:srgbClr val="A5A5A5"/></a:accent3><a:accent4><a:srgbClr val="FFC000"/></a:accent4><a:accent5><a:srgbClr val="5B9BD5"/></a:accent5><a:accent6><a:srgbClr val="70AD47"/></a:accent6><a:hlink><a:srgbClr val="0563C1"/></a:hlink><a:folHlink><a:srgbClr val="954F72"/></a:folHlink></a:clrScheme><a:fontScheme name="Office"><a:majorFont>${majorFont}<a:ea typeface=""/><a:cs typeface=""/><a:font script="Jpan" typeface="游ゴシック Light"/><a:font script="Hang" typeface="맑은 고딕"/><a:font script="Hans" typeface="等线 Light"/><a:font script="Hant" typeface="新細明體"/><a:font script="Arab" typeface="Times New Roman"/><a:font script="Hebr" typeface="Times New Roman"/><a:font script="Thai" typeface="Angsana New"/><a:font script="Ethi" typeface="Nyala"/><a:font script="Beng" typeface="Vrinda"/><a:font script="Gujr" typeface="Shruti"/><a:font script="Khmr" typeface="MoolBoran"/><a:font script="Knda" typeface="Tunga"/><a:font script="Guru" typeface="Raavi"/><a:font script="Cans" typeface="Euphemia"/><a:font script="Cher" typeface="Plantagenet Cherokee"/><a:font script="Yiii" typeface="Microsoft Yi Baiti"/><a:font script="Tibt" typeface="Microsoft Himalaya"/><a:font script="Thaa" typeface="MV Boli"/><a:font script="Deva" typeface="Mangal"/><a:font script="Telu" typeface="Gautami"/><a:font script="Taml" typeface="Latha"/><a:font script="Syrc" typeface="Estrangelo Edessa"/><a:font script="Orya" typeface="Kalinga"/><a:font script="Mlym" typeface="Kartika"/><a:font script="Laoo" typeface="DokChampa"/><a:font script="Sinh" typeface="Iskoola Pota"/><a:font script="Mong" typeface="Mongolian Baiti"/><a:font script="Viet" typeface="Times New Roman"/><a:font script="Uigh" typeface="Microsoft Uighur"/><a:font script="Geor" typeface="Sylfaen"/><a:font script="Armn" typeface="Arial"/><a:font script="Bugi" typeface="Leelawadee UI"/><a:font script="Bopo" typeface="Microsoft JhengHei"/><a:font script="Java" typeface="Javanese Text"/><a:font script="Lisu" typeface="Segoe UI"/><a:font script="Mymr" typeface="Myanmar Text"/><a:font script="Nkoo" typeface="Ebrima"/><a:font script="Olck" typeface="Nirmala UI"/><a:font script="Osma" typeface="Ebrima"/><a:font script="Phag" typeface="Phagspa"/><a:font script="Syrn" typeface="Estrangelo Edessa"/><a:font script="Syrj" typeface="Estrangelo Edessa"/><a:font script="Syre" typeface="Estrangelo Edessa"/><a:font script="Sora" typeface="Nirmala UI"/><a:font script="Tale" typeface="Microsoft Tai Le"/><a:font script="Talu" typeface="Microsoft New Tai Lue"/><a:font script="Tfng" typeface="Ebrima"/></a:majorFont><a:minorFont>${minorFont}<a:ea typeface=""/><a:cs typeface=""/><a:font script="Jpan" typeface="游ゴシック"/><a:font script="Hang" typeface="맑은 고딕"/><a:font script="Hans" typeface="等线"/><a:font script="Hant" typeface="新細明體"/><a:font script="Arab" typeface="Arial"/><a:font script="Hebr" typeface="Arial"/><a:font script="Thai" typeface="Cordia New"/><a:font script="Ethi" typeface="Nyala"/><a:font script="Beng" typeface="Vrinda"/><a:font script="Gujr" typeface="Shruti"/><a:font script="Khmr" typeface="DaunPenh"/><a:font script="Knda" typeface="Tunga"/><a:font script="Guru" typeface="Raavi"/><a:font script="Cans" typeface="Euphemia"/><a:font script="Cher" typeface="Plantagenet Cherokee"/><a:font script="Yiii" typeface="Microsoft Yi Baiti"/><a:font script="Tibt" typeface="Microsoft Himalaya"/><a:font script="Thaa" typeface="MV Boli"/><a:font script="Deva" typeface="Mangal"/><a:font script="Telu" typeface="Gautami"/><a:font script="Taml" typeface="Latha"/><a:font script="Syrc" typeface="Estrangelo Edessa"/><a:font script="Orya" typeface="Kalinga"/><a:font script="Mlym" typeface="Kartika"/><a:font script="Laoo" typeface="DokChampa"/><a:font script="Sinh" typeface="Iskoola Pota"/><a:font script="Mong" typeface="Mongolian Baiti"/><a:font script="Viet" typeface="Arial"/><a:font script="Uigh" typeface="Microsoft Uighur"/><a:font script="Geor" typeface="Sylfaen"/><a:font script="Armn" typeface="Arial"/><a:font script="Bugi" typeface="Leelawadee UI"/><a:font script="Bopo" typeface="Microsoft JhengHei"/><a:font script="Java" typeface="Javanese Text"/><a:font script="Lisu" typeface="Segoe UI"/><a:font script="Mymr" typeface="Myanmar Text"/><a:font script="Nkoo" typeface="Ebrima"/><a:font script="Olck" typeface="Nirmala UI"/><a:font script="Osma" typeface="Ebrima"/><a:font script="Phag" typeface="Phagspa"/><a:font script="Syrn" typeface="Estrangelo Edessa"/><a:font script="Syrj" typeface="Estrangelo Edessa"/><a:font script="Syre" typeface="Estrangelo Edessa"/><a:font script="Sora" typeface="Nirmala UI"/><a:font script="Tale" typeface="Microsoft Tai Le"/><a:font script="Talu" typeface="Microsoft New Tai Lue"/><a:font script="Tfng" typeface="Ebrima"/></a:minorFont></a:fontScheme><a:fmtScheme name="Office"><a:fillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"><a:lumMod val="110000"/><a:satMod val="105000"/><a:tint val="67000"/></a:schemeClr></a:gs><a:gs pos="50000"><a:schemeClr val="phClr"><a:lumMod val="105000"/><a:satMod val="103000"/><a:tint val="73000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:lumMod val="105000"/><a:satMod val="109000"/><a:tint val="81000"/></a:schemeClr></a:gs></a:gsLst><a:lin ang="5400000" scaled="0"/></a:gradFill><a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"><a:satMod val="103000"/><a:lumMod val="102000"/><a:tint val="94000"/></a:schemeClr></a:gs><a:gs pos="50000"><a:schemeClr val="phClr"><a:satMod val="110000"/><a:lumMod val="100000"/><a:shade val="100000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:lumMod val="99000"/><a:satMod val="120000"/><a:shade val="78000"/></a:schemeClr></a:gs></a:gsLst><a:lin ang="5400000" scaled="0"/></a:gradFill></a:fillStyleLst><a:lnStyleLst><a:ln w="6350" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/><a:miter lim="800000"/></a:ln><a:ln w="12700" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/><a:miter lim="800000"/></a:ln><a:ln w="19050" cap="flat" cmpd="sng" algn="ctr"><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:prstDash val="solid"/><a:miter lim="800000"/></a:ln></a:lnStyleLst><a:effectStyleLst><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst/></a:effectStyle><a:effectStyle><a:effectLst><a:outerShdw blurRad="57150" dist="19050" dir="5400000" algn="ctr" rotWithShape="0"><a:srgbClr val="000000"><a:alpha val="63000"/></a:srgbClr></a:outerShdw></a:effectLst></a:effectStyle></a:effectStyleLst><a:bgFillStyleLst><a:solidFill><a:schemeClr val="phClr"/></a:solidFill><a:solidFill><a:schemeClr val="phClr"><a:tint val="95000"/><a:satMod val="170000"/></a:schemeClr></a:solidFill><a:gradFill rotWithShape="1"><a:gsLst><a:gs pos="0"><a:schemeClr val="phClr"><a:tint val="93000"/><a:satMod val="150000"/><a:shade val="98000"/><a:lumMod val="102000"/></a:schemeClr></a:gs><a:gs pos="50000"><a:schemeClr val="phClr"><a:tint val="98000"/><a:satMod val="130000"/><a:shade val="90000"/><a:lumMod val="103000"/></a:schemeClr></a:gs><a:gs pos="100000"><a:schemeClr val="phClr"><a:shade val="63000"/><a:satMod val="120000"/></a:schemeClr></a:gs></a:gsLst><a:lin ang="5400000" scaled="0"/></a:gradFill></a:bgFillStyleLst></a:fmtScheme></a:themeElements><a:objectDefaults/><a:extraClrSchemeLst/><a:extLst><a:ext uri="{05A4C25C-085E-4340-85A3-A5531E510DB2}"><thm15:themeFamily xmlns:thm15="http://schemas.microsoft.com/office/thememl/2012/main" name="Office Theme" id="{62F939B6-93AF-4DB8-9C6B-D6C7DFDC589F}" vid="{4A3C46E8-61CC-4603-A589-7422A47A8E4A}"/></a:ext></a:extLst></a:theme>`
@@ -1777,7 +1777,7 @@ export function makeXmlTheme (pres: IPresentationProps): string {
  * @param {IPresentationProps} pres - presentation
  * @return {string} XML
  */
-export function makeXmlPresentation (pres: IPresentationProps): string {
+export function makeXmlPresentation(pres: IPresentationProps): string {
 	let strXml =
 		`<?xml version="1.0" encoding="UTF-8" standalone="yes"?>${CRLF}` +
 		'<p:presentation xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" ' +
@@ -1835,7 +1835,7 @@ export function makeXmlPresentation (pres: IPresentationProps): string {
  * Create `ppt/presProps.xml`
  * @return {string} XML
  */
-export function makeXmlPresProps (): string {
+export function makeXmlPresProps(): string {
 	return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>${CRLF}<p:presentationPr xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"/>`
 }
 
@@ -1844,7 +1844,7 @@ export function makeXmlPresProps (): string {
  * @see: http://openxmldeveloper.org/discussions/formats/f/13/p/2398/8107.aspx
  * @return {string} XML
  */
-export function makeXmlTableStyles (): string {
+export function makeXmlTableStyles(): string {
 	return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>${CRLF}<a:tblStyleLst xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" def="{5C22544A-7EE6-4342-B048-85BDC9FD1C3A}"/>`
 }
 
@@ -1852,7 +1852,7 @@ export function makeXmlTableStyles (): string {
  * Creates `ppt/viewProps.xml`
  * @return {string} XML
  */
-export function makeXmlViewProps (): string {
+export function makeXmlViewProps(): string {
 	return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>${CRLF}<p:viewPr xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main"><p:normalViewPr horzBarState="maximized"><p:restoredLeft sz="15611"/><p:restoredTop sz="94610"/></p:normalViewPr><p:slideViewPr><p:cSldViewPr snapToGrid="0" snapToObjects="1"><p:cViewPr varScale="1"><p:scale><a:sx n="136" d="100"/><a:sy n="136" d="100"/></p:scale><p:origin x="216" y="312"/></p:cViewPr><p:guideLst/></p:cSldViewPr></p:slideViewPr><p:notesTextViewPr><p:cViewPr><p:scale><a:sx n="1" d="1"/><a:sy n="1" d="1"/></p:scale><p:origin x="0" y="0"/></p:cViewPr></p:notesTextViewPr><p:gridSpacing cx="76200" cy="76200"/></p:viewPr>`
 }
 
@@ -1860,7 +1860,7 @@ export function makeXmlViewProps (): string {
  * Checks shadow options passed by user and performs corrections if needed.
  * @param {ShadowProps} shadowProps - shadow options
  */
-export function correctShadowOptions (shadowProps: ShadowProps): void {
+export function correctShadowOptions(shadowProps: ShadowProps): void {
 	if (!shadowProps || typeof shadowProps !== 'object') {
 		// console.warn("`shadow` options must be an object. Ex: `{shadow: {type:'none'}}`")
 		return
