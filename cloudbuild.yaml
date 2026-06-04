@@ -1,0 +1,53 @@
+substitutions:
+  _REGION: us-central1
+  _SERVICE: betterpptx-mcp-staging
+  _REPOSITORY: betterpptx-mcp
+  _RUNTIME_SERVICE_ACCOUNT: betterpptx-mcp-runtime@betterpptx-mcp-staging.iam.gserviceaccount.com
+  _ARTIFACT_BUCKET: betterpptx-mcp-staging-artifacts-860007156914
+
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - build
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$SHORT_SHA
+      - -t
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:latest
+      - .
+
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$SHORT_SHA
+
+  - name: gcr.io/cloud-builders/docker
+    args:
+      - push
+      - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:latest
+
+  - name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: gcloud
+    args:
+      - run
+      - deploy
+      - ${_SERVICE}
+      - --image=${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$SHORT_SHA
+      - --region=${_REGION}
+      - --platform=managed
+      - --service-account=${_RUNTIME_SERVICE_ACCOUNT}
+      - --no-allow-unauthenticated
+      - --max-instances=1
+      - --min-instances=0
+      - --cpu=1
+      - --memory=1Gi
+      - --concurrency=20
+      - --timeout=300
+      - --set-secrets=DODO_PAYMENTS_API_KEY=betterpptx-dodo-test-api-key:latest
+      - --set-env-vars=BETTERPPTX_HOST=0.0.0.0,BETTERPPTX_AUTH=none,BETTERPPTX_PUBLIC_BLACK_BOX=1,BETTERPPTX_BILLING_PROVIDER=dodo,BETTERPPTX_DODO_VALIDATE_URL=https://test.dodopayments.com/licenses/validate,BETTERPPTX_LICENSE_VALIDATION_MODE=auto,BETTERPPTX_PRICING_URL=https://betterpptx.com/pricing,BETTERPPTX_CHECKOUT_URL=https://betterpptx.com/pricing,BETTERPPTX_PORTAL_URL=https://betterpptx.com/pricing,BETTERPPTX_ARTIFACT_STORE=gcs,BETTERPPTX_GCS_BUCKET=${_ARTIFACT_BUCKET},BETTERPPTX_GCS_PREFIX=artifacts,BETTERPPTX_ARTIFACT_TTL_MS=43200000,BETTERPPTX_ENTITLEMENT_STORE=firestore,BETTERPPTX_FIRESTORE_DATABASE=(default),BETTERPPTX_FIRESTORE_ENTITLEMENTS_COLLECTION=betterpptx_entitlements,BETTERPPTX_REQUIRE_SHARED_STORES=1,BETTERPPTX_RATE_LIMIT_BURST=120,BETTERPPTX_RATE_LIMIT_REFILL_PER_MIN=120,BETTERPPTX_SESSION_DECKS_PER_HOUR=20,BETTERPPTX_MAX_DECKS=60,BETTERPPTX_DECK_TTL_MS=1800000,BETTERPPTX_MAX_CONCURRENCY=4,BETTERPPTX_MAX_QUEUE=64,BETTERPPTX_JSON_LIMIT=40mb,BETTERPPTX_MAX_UPLOAD_BYTES=41943040,BETTERPPTX_TOOL_TIMEOUT_MS=120000,BETTERPPTX_ENABLE_GENERIC_HTTP_FETCH=0,BETTERPPTX_LOG_PAYLOADS=0,BETTERPPTX_LOG_PATHS=0,BETTERPPTX_TTS_PROVIDER=tone
+
+images:
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:$SHORT_SHA
+  - ${_REGION}-docker.pkg.dev/$PROJECT_ID/${_REPOSITORY}/${_SERVICE}:latest
+
+options:
+  logging: CLOUD_LOGGING_ONLY
