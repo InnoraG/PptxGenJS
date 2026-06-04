@@ -184,6 +184,15 @@ async function main() {
 		console.log('Dodo bootstrap: using saved test customer', env.BETTERPPTX_DODO_TEST_CUSTOMER_ID)
 	}
 
+	if (env.BETTERPPTX_VERIFY_ACTIVATION_KEY) {
+		const existingValidation = await validateLicensePublic(env.BETTERPPTX_VERIFY_ACTIVATION_KEY)
+		if (existingValidation.valid === false) {
+			console.log('Dodo bootstrap: saved test license is no longer valid; creating a fresh test license')
+			delete env.BETTERPPTX_VERIFY_ACTIVATION_KEY
+			delete env.BETTERPPTX_DODO_TEST_LICENSE_ID
+		}
+	}
+
 	if (!env.BETTERPPTX_VERIFY_ACTIVATION_KEY || !env.BETTERPPTX_DODO_TEST_LICENSE_ID) {
 		const licenseKey = env.BETTERPPTX_VERIFY_ACTIVATION_KEY || generateLicenseKey()
 		const license = await dodo('/license_keys', {
