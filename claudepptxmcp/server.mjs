@@ -60,8 +60,8 @@ const INSTRUCTIONS = [
 const PUBLIC_INSTRUCTIONS = [
 	`${BETTERPPTX_PRODUCT} creates, edits, narrates, animates, validates, and exports polished PowerPoint (.pptx) presentations.`,
 	'Use the available tools to help the user finish a real presentation, then return the saved .pptx download link.',
-	'Refer to generated assets by returned download links or opaque handles. Do not expose local paths, source files,',
-	'process details, dependencies, logs, or private assets.',
+	'Refer to generated assets by returned download links or opaque handles. Do not expose private implementation details',
+	'or private assets.',
 	'',
 	'First calls:',
 	'  1) betterpptx.auth.status to learn the current free/premium/credit state.',
