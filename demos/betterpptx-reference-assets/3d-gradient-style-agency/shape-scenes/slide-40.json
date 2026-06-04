@@ -1,0 +1,51 @@
+{
+  "brand": "aimcpx.ai",
+  "handle": "shapeScene://agency-slide-40",
+  "source": "imported-reference",
+  "title": "Agency reference slide 40",
+  "preview": "previews/slide-40.png",
+  "counts": {
+    "shapes": 0,
+    "pictures": 1,
+    "groups": 0,
+    "customGeometry": 0,
+    "presetGeometry": 1,
+    "gradients": 0,
+    "shadows": 0,
+    "reflections": 0,
+    "model3d": 0,
+    "timingNodes": 0,
+    "transitions": 2
+  },
+  "tags": [
+    "agency-reference",
+    "shape-scene",
+    "library-first"
+  ],
+  "relationships": [
+    {
+      "id": "rId3",
+      "type": "hyperlink",
+      "target": "http://bit.ly/2PfT4lq",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId2",
+      "type": "notesSlide",
+      "target": "../notesSlides/notesSlide32.xml"
+    },
+    {
+      "id": "rId1",
+      "type": "slideLayout",
+      "target": "../slideLayouts/slideLayout19.xml"
+    },
+    {
+      "id": "rId4",
+      "type": "image",
+      "target": "../media/image56.png"
+    }
+  ],
+  "expressiveSpecimens": [],
+  "recommendedUse": "Reference visual composition, typography, image crop, or transition behavior.",
+  "notes": "Imported as an aimcpx.ai reference-library scene. Do not use as final SaaS redistribution material unless source licensing is confirmed."
+}

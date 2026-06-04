@@ -1,0 +1,58 @@
+{
+  "brand": "aimcpx.ai",
+  "handle": "shapeScene://agency-slide-10",
+  "source": "imported-reference",
+  "title": "Agency reference slide 10",
+  "preview": "previews/slide-10.png",
+  "counts": {
+    "shapes": 11,
+    "pictures": 0,
+    "groups": 0,
+    "customGeometry": 0,
+    "presetGeometry": 10,
+    "gradients": 0,
+    "shadows": 0,
+    "reflections": 0,
+    "model3d": 0,
+    "timingNodes": 39,
+    "transitions": 2
+  },
+  "tags": [
+    "agency-reference",
+    "shape-scene",
+    "library-first",
+    "animation",
+    "timing"
+  ],
+  "relationships": [
+    {
+      "id": "rId3",
+      "type": "image",
+      "target": "../media/image5.jpg"
+    },
+    {
+      "id": "rId2",
+      "type": "notesSlide",
+      "target": "../notesSlides/notesSlide5.xml"
+    },
+    {
+      "id": "rId1",
+      "type": "slideLayout",
+      "target": "../slideLayouts/slideLayout5.xml"
+    },
+    {
+      "id": "rId5",
+      "type": "chart",
+      "target": "../charts/chart1.xml"
+    },
+    {
+      "id": "rId4",
+      "type": "hyperlink",
+      "target": "https://slidesgo.com/slidesgo-school/presentation-tips/how-to-modify-a-graph-in-our-templates?utm_source=slidesgo_template&amp;utm_medium=referral-link&amp;utm_campaign=how-to-modify-a-graph-in-our-templates&amp;utm_term=slidesgo-school&amp;utm_content=how-to-modify-a-graph-in-our-templates",
+      "targetMode": "External"
+    }
+  ],
+  "expressiveSpecimens": [],
+  "recommendedUse": "Reference visual composition, typography, image crop, or transition behavior.",
+  "notes": "Imported as an aimcpx.ai reference-library scene. Do not use as final SaaS redistribution material unless source licensing is confirmed."
+}

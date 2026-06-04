@@ -1,0 +1,82 @@
+{
+  "brand": "aimcpx.ai",
+  "handle": "shapeScene://agency-slide-15",
+  "source": "imported-reference",
+  "title": "Agency reference slide 15",
+  "preview": "previews/slide-15.png",
+  "counts": {
+    "shapes": 2,
+    "pictures": 3,
+    "groups": 0,
+    "customGeometry": 0,
+    "presetGeometry": 6,
+    "gradients": 0,
+    "shadows": 6,
+    "reflections": 6,
+    "model3d": 3,
+    "timingNodes": 17,
+    "transitions": 2
+  },
+  "tags": [
+    "agency-reference",
+    "shape-scene",
+    "library-first",
+    "3d",
+    "native3d",
+    "shadow",
+    "animation",
+    "timing"
+  ],
+  "relationships": [
+    {
+      "id": "rId8",
+      "type": "model3d",
+      "target": "../media/model3d4.glb"
+    },
+    {
+      "id": "rId3",
+      "type": "hyperlink",
+      "target": "https://www.freepik.com/free-photo/abstract-fantasy-landscape-background_19061046.htm/?utm_source=slidesgo_template&amp;utm_medium=referral-link&amp;utm_campaign=sg_resources&amp;utm_content=freepik",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId7",
+      "type": "image",
+      "target": "../media/image49.png"
+    },
+    {
+      "id": "rId2",
+      "type": "hyperlink",
+      "target": "https://www.freepik.com/free-psd/art-exhibition-abstract-banner-template_15186214.htm/?utm_source=slidesgo_template&amp;utm_medium=referral-link&amp;utm_campaign=sg_resources&amp;utm_content=freepik",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId1",
+      "type": "slideLayout",
+      "target": "../slideLayouts/slideLayout8.xml"
+    },
+    {
+      "id": "rId6",
+      "type": "model3d",
+      "target": "../media/model3d1.glb"
+    },
+    {
+      "id": "rId5",
+      "type": "image",
+      "target": "../media/image48.png"
+    },
+    {
+      "id": "rId4",
+      "type": "model3d",
+      "target": "../media/model3d7.glb"
+    },
+    {
+      "id": "rId9",
+      "type": "image",
+      "target": "../media/image50.png"
+    }
+  ],
+  "expressiveSpecimens": [],
+  "recommendedUse": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A.",
+  "notes": "Imported as an aimcpx.ai reference-library scene. Do not use as final SaaS redistribution material unless source licensing is confirmed."
+}

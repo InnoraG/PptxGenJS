@@ -1,0 +1,41 @@
+{
+  "brand": "aimcpx.ai",
+  "handle": "shapeScene://agency-slide-34",
+  "source": "imported-reference",
+  "title": "Agency reference slide 34",
+  "preview": "previews/slide-34.png",
+  "counts": {
+    "shapes": 28,
+    "pictures": 0,
+    "groups": 5,
+    "customGeometry": 0,
+    "presetGeometry": 34,
+    "gradients": 0,
+    "shadows": 0,
+    "reflections": 0,
+    "model3d": 0,
+    "timingNodes": 0,
+    "transitions": 2
+  },
+  "tags": [
+    "agency-reference",
+    "shape-scene",
+    "library-first",
+    "grouped-shapes"
+  ],
+  "relationships": [
+    {
+      "id": "rId2",
+      "type": "notesSlide",
+      "target": "../notesSlides/notesSlide26.xml"
+    },
+    {
+      "id": "rId1",
+      "type": "slideLayout",
+      "target": "../slideLayouts/slideLayout20.xml"
+    }
+  ],
+  "expressiveSpecimens": [],
+  "recommendedUse": "Reference visual composition, typography, image crop, or transition behavior.",
+  "notes": "Imported as an aimcpx.ai reference-library scene. Do not use as final SaaS redistribution material unless source licensing is confirmed."
+}

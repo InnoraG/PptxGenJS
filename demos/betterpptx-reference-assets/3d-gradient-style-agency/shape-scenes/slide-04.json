@@ -1,0 +1,100 @@
+{
+  "brand": "aimcpx.ai",
+  "handle": "shapeScene://agency-slide-04",
+  "source": "imported-reference",
+  "title": "Agency reference slide 4",
+  "preview": "previews/slide-04.png",
+  "counts": {
+    "shapes": 3,
+    "pictures": 6,
+    "groups": 0,
+    "customGeometry": 0,
+    "presetGeometry": 12,
+    "gradients": 0,
+    "shadows": 12,
+    "reflections": 12,
+    "model3d": 6,
+    "timingNodes": 29,
+    "transitions": 2
+  },
+  "tags": [
+    "agency-reference",
+    "shape-scene",
+    "library-first",
+    "3d",
+    "native3d",
+    "shadow",
+    "animation",
+    "timing"
+  ],
+  "relationships": [
+    {
+      "id": "rId8",
+      "type": "model3d",
+      "target": "../media/model3d4.glb"
+    },
+    {
+      "id": "rId13",
+      "type": "image",
+      "target": "../media/image21.png"
+    },
+    {
+      "id": "rId3",
+      "type": "image",
+      "target": "../media/image17.png"
+    },
+    {
+      "id": "rId7",
+      "type": "image",
+      "target": "../media/image19.png"
+    },
+    {
+      "id": "rId12",
+      "type": "model3d",
+      "target": "../media/model3d2.glb"
+    },
+    {
+      "id": "rId2",
+      "type": "model3d",
+      "target": "../media/model3d6.glb"
+    },
+    {
+      "id": "rId1",
+      "type": "slideLayout",
+      "target": "../slideLayouts/slideLayout2.xml"
+    },
+    {
+      "id": "rId6",
+      "type": "model3d",
+      "target": "../media/model3d3.glb"
+    },
+    {
+      "id": "rId11",
+      "type": "image",
+      "target": "../media/image20.png"
+    },
+    {
+      "id": "rId5",
+      "type": "image",
+      "target": "../media/image18.png"
+    },
+    {
+      "id": "rId10",
+      "type": "model3d",
+      "target": "../media/model3d7.glb"
+    },
+    {
+      "id": "rId4",
+      "type": "model3d",
+      "target": "../media/model3d1.glb"
+    },
+    {
+      "id": "rId9",
+      "type": "image",
+      "target": "../media/image16.png"
+    }
+  ],
+  "expressiveSpecimens": [],
+  "recommendedUse": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A.",
+  "notes": "Imported as an aimcpx.ai reference-library scene. Do not use as final SaaS redistribution material unless source licensing is confirmed."
+}

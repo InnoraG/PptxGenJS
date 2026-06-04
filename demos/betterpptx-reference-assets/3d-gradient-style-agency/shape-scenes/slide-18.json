@@ -1,0 +1,58 @@
+{
+  "brand": "aimcpx.ai",
+  "handle": "shapeScene://agency-slide-18",
+  "source": "imported-reference",
+  "title": "Agency reference slide 18",
+  "preview": "previews/slide-18.png",
+  "counts": {
+    "shapes": 17,
+    "pictures": 0,
+    "groups": 0,
+    "customGeometry": 0,
+    "presetGeometry": 17,
+    "gradients": 0,
+    "shadows": 0,
+    "reflections": 0,
+    "model3d": 0,
+    "timingNodes": 0,
+    "transitions": 2
+  },
+  "tags": [
+    "agency-reference",
+    "shape-scene",
+    "library-first"
+  ],
+  "relationships": [
+    {
+      "id": "rId3",
+      "type": "hyperlink",
+      "target": "https://fonts.google.com/specimen/Bigshot+One",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId2",
+      "type": "notesSlide",
+      "target": "../notesSlides/notesSlide10.xml"
+    },
+    {
+      "id": "rId1",
+      "type": "slideLayout",
+      "target": "../slideLayouts/slideLayout20.xml"
+    },
+    {
+      "id": "rId5",
+      "type": "hyperlink",
+      "target": "https://fonts.google.com/specimen/Raleway",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId4",
+      "type": "hyperlink",
+      "target": "https://fonts.google.com/specimen/Actor",
+      "targetMode": "External"
+    }
+  ],
+  "expressiveSpecimens": [],
+  "recommendedUse": "Reference visual composition, typography, image crop, or transition behavior.",
+  "notes": "Imported as an aimcpx.ai reference-library scene. Do not use as final SaaS redistribution material unless source licensing is confirmed."
+}

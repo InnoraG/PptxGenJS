@@ -1,0 +1,21 @@
+{
+	"name": "claudepptxmcp",
+	"version": "1.0.0",
+	"type": "module",
+	"description": "Self-contained claudepptxmcp MCP server for PPTX generation, editing, validation, charts, tables, media, animations, transitions, WordArt, Text3D, 3D models, and motion paths.",
+	"main": "./server.mjs",
+	"bin": {
+		"claudepptxmcp": "./cli.mjs",
+		"claudepptxmcp-http": "./http-cli.mjs"
+	},
+	"exports": {
+		".": "./server.mjs",
+		"./engine": "./engine.mjs",
+		"./tools": "./tools.mjs",
+		"./http": "./server-http.mjs"
+	},
+	"scripts": {
+		"start": "node ./server.mjs",
+		"start:http": "node ./server-http.mjs"
+	}
+}

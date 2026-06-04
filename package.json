@@ -1,0 +1,29 @@
+{
+  "name": "@betterpptx/betterpptx-mcp-private",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Private BetterPPTX MCP server deployment package.",
+  "main": "claudepptxmcp/server-http.mjs",
+  "scripts": {
+    "start": "node claudepptxmcp/server-http.mjs",
+    "verify:stores": "node claudepptxmcp/verify-production-store-config.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "dependencies": {
+    "@gltf-transform/core": "^4.3.0",
+    "@gltf-transform/extensions": "^4.3.0",
+    "@gltf-transform/functions": "^4.3.0",
+    "@google-cloud/firestore": "^7.11.0",
+    "@google-cloud/storage": "^7.16.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "@xmldom/xmldom": "^0.8.11",
+    "express": "^5.1.0",
+    "https": "^1.0.0",
+    "image-size": "^1.2.1",
+    "jszip": "^3.10.1",
+    "three": "^0.184.0",
+    "xml2js": "^0.6.2"
+  }
+}

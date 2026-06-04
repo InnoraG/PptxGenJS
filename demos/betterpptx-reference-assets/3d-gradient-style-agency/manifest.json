@@ -1,0 +1,2410 @@
+{
+  "brand": "aimcpx.ai",
+  "id": "3d-gradient-style-agency",
+  "title": "3D gradient style agency reference asset library",
+  "source": {
+    "type": "imported-reference-deck",
+    "originalFile": "3d-gradient-style-advertising-agency.pptx",
+    "license": "Imported from the local workspace reference deck. Verify redistribution rights before public SaaS packaging."
+  },
+  "version": "0.1.0",
+  "createdAt": "2026-05-25T15:26:53.511Z",
+  "summary": {
+    "models3d": 13,
+    "images": 56,
+    "shapeScenes": 40,
+    "customGeometrySlides": 21,
+    "native3DSlides": 13
+  },
+  "models": [
+    {
+      "handle": "model3d://agency-model3d1",
+      "file": "models/model3d1.glb",
+      "preview": "images/image6.png",
+      "altText": "Imported agency reference native 3D model model3d1",
+      "tags": [
+        "3d",
+        "glb",
+        "model",
+        "agency-reference",
+        "premium",
+        "custom-3d",
+        "library-first"
+      ],
+      "usage": "Use as a maintained native 3D object in Path A expressive decks with poster fallback, shadows, camera, motion-path/spin animation, and morph scenes.",
+      "bytes": 307984,
+      "sha256": "f77f9800423b956da99d7bbd00f01519212c8f65ed7557495cf27075a96a2fc7",
+      "posters": [
+        "image6.png",
+        "image14.png",
+        "image18.png",
+        "image23.png",
+        "image29.png",
+        "image36.png",
+        "image49.png"
+      ]
+    },
+    {
+      "handle": "model3d://agency-model3d2",
+      "file": "models/model3d2.glb",
+      "preview": "images/image7.png",
+      "altText": "Imported agency reference native 3D model model3d2",
+      "tags": [
+        "3d",
+        "glb",
+        "model",
+        "agency-reference",
+        "premium",
+        "custom-3d",
+        "library-first"
+      ],
+      "usage": "Use as a maintained native 3D object in Path A expressive decks with poster fallback, shadows, camera, motion-path/spin animation, and morph scenes.",
+      "bytes": 382356,
+      "sha256": "6e490a663a7b45b759e202fc995ab7c3a979ee4098c489526a664d11b54a2678",
+      "posters": [
+        "image7.png",
+        "image10.png",
+        "image21.png",
+        "image27.png",
+        "image41.png"
+      ]
+    },
+    {
+      "handle": "model3d://agency-model3d3",
+      "file": "models/model3d3.glb",
+      "preview": "images/image8.png",
+      "altText": "Imported agency reference native 3D model model3d3",
+      "tags": [
+        "3d",
+        "glb",
+        "model",
+        "agency-reference",
+        "premium",
+        "custom-3d",
+        "library-first"
+      ],
+      "usage": "Use as a maintained native 3D object in Path A expressive decks with poster fallback, shadows, camera, motion-path/spin animation, and morph scenes.",
+      "bytes": 208780,
+      "sha256": "6470bb73379172dafce98fb7cff67432beb736636d8ce44690c49e5fe852ea05",
+      "posters": [
+        "image8.png",
+        "image11.png",
+        "image19.png",
+        "image25.png",
+        "image33.png",
+        "image35.png",
+        "image37.png",
+        "image38.png"
+      ]
+    },
+    {
+      "handle": "model3d://agency-model3d4",
+      "file": "models/model3d4.glb",
+      "preview": "images/image9.png",
+      "altText": "Imported agency reference native 3D model model3d4",
+      "tags": [
+        "3d",
+        "glb",
+        "model",
+        "agency-reference",
+        "premium",
+        "custom-3d",
+        "library-first"
+      ],
+      "usage": "Use as a maintained native 3D object in Path A expressive decks with poster fallback, shadows, camera, motion-path/spin animation, and morph scenes.",
+      "bytes": 13984,
+      "sha256": "8a4fd90a68690263500837884b7fbb11f070c5bac17648a4dd4d2121335829d6",
+      "posters": [
+        "image9.png",
+        "image16.png",
+        "image26.png",
+        "image30.png",
+        "image34.png",
+        "image39.png",
+        "image50.png"
+      ]
+    },
+    {
+      "handle": "model3d://agency-model3d5",
+      "file": "models/model3d5.glb",
+      "preview": "images/image12.png",
+      "altText": "Imported agency reference native 3D model model3d5",
+      "tags": [
+        "3d",
+        "glb",
+        "model",
+        "agency-reference",
+        "premium",
+        "custom-3d",
+        "library-first"
+      ],
+      "usage": "Use as a maintained native 3D object in Path A expressive decks with poster fallback, shadows, camera, motion-path/spin animation, and morph scenes.",
+      "bytes": 19004,
+      "sha256": "df739ed8913246dc746b04a02ce1b97791a27d9df83d15d303bc1966594eb885",
+      "posters": [
+        "image12.png",
+        "image13.png"
+      ]
+    },
+    {
+      "handle": "model3d://agency-model3d6",
+      "file": "models/model3d6.glb",
+      "preview": "images/image15.png",
+      "altText": "Imported agency reference native 3D model model3d6",
+      "tags": [
+        "3d",
+        "glb",
+        "model",
+        "agency-reference",
+        "premium",
+        "custom-3d",
+        "library-first"
+      ],
+      "usage": "Use as a maintained native 3D object in Path A expressive decks with poster fallback, shadows, camera, motion-path/spin animation, and morph scenes.",
+      "bytes": 65500,
+      "sha256": "8baddbbfa17beb3f526dae6fb862684fcf94ba104aed01d8bb32b74945a372e7",
+      "posters": [
+        "image15.png",
+        "image17.png"
+      ]
+    },
+    {
+      "handle": "model3d://agency-model3d7",
+      "file": "models/model3d7.glb",
+      "preview": "images/image20.png",
+      "altText": "Imported agency reference native 3D model model3d7",
+      "tags": [
+        "3d",
+        "glb",
+        "model",
+        "agency-reference",
+        "premium",
+        "custom-3d",
+        "library-first"
+      ],
+      "usage": "Use as a maintained native 3D object in Path A expressive decks with poster fallback, shadows, camera, motion-path/spin animation, and morph scenes.",
+      "bytes": 205304,
+      "sha256": "4dc2ecf512c79587c2b90641099f6ca914299bf2a96dca853943bb24cef4ec9e",
+      "posters": [
+        "image20.png",
+        "image24.png",
+        "image28.png",
+        "image31.png",
+        "image40.png",
+        "image48.png"
+      ]
+    },
+    {
+      "handle": "model3d://agency-model3d8",
+      "file": "models/model3d8.glb",
+      "preview": "images/image42.png",
+      "altText": "Imported agency reference native 3D model model3d8",
+      "tags": [
+        "3d",
+        "glb",
+        "model",
+        "agency-reference",
+        "premium",
+        "custom-3d",
+        "library-first"
+      ],
+      "usage": "Use as a maintained native 3D object in Path A expressive decks with poster fallback, shadows, camera, motion-path/spin animation, and morph scenes.",
+      "bytes": 65500,
+      "sha256": "db015885c9706aed7594177ee3dc54c7dc7ca8ca673cec4b3e917c69a6cb151d",
+      "posters": [
+        "image42.png"
+      ]
+    },
+    {
+      "handle": "model3d://agency-model3d9",
+      "file": "models/model3d9.glb",
+      "preview": "images/image43.png",
+      "altText": "Imported agency reference native 3D model model3d9",
+      "tags": [
+        "3d",
+        "glb",
+        "model",
+        "agency-reference",
+        "premium",
+        "custom-3d",
+        "library-first"
+      ],
+      "usage": "Use as a maintained native 3D object in Path A expressive decks with poster fallback, shadows, camera, motion-path/spin animation, and morph scenes.",
+      "bytes": 209648,
+      "sha256": "1a6ba108f7f9935170626b69a19cd31656ea70ec2851cb6a6493ee070dc9ce78",
+      "posters": [
+        "image43.png"
+      ]
+    },
+    {
+      "handle": "model3d://agency-model3d10",
+      "file": "models/model3d10.glb",
+      "preview": "images/image44.png",
+      "altText": "Imported agency reference native 3D model model3d10",
+      "tags": [
+        "3d",
+        "glb",
+        "model",
+        "agency-reference",
+        "premium",
+        "custom-3d",
+        "library-first"
+      ],
+      "usage": "Use as a maintained native 3D object in Path A expressive decks with poster fallback, shadows, camera, motion-path/spin animation, and morph scenes.",
+      "bytes": 88092,
+      "sha256": "88c1a2f5e831d36fa361a4a61ffd5f2a9dc100d8a35396bea275315537397209",
+      "posters": [
+        "image44.png"
+      ]
+    },
+    {
+      "handle": "model3d://agency-model3d11",
+      "file": "models/model3d11.glb",
+      "preview": "images/image45.png",
+      "altText": "Imported agency reference native 3D model model3d11",
+      "tags": [
+        "3d",
+        "glb",
+        "model",
+        "agency-reference",
+        "premium",
+        "custom-3d",
+        "library-first"
+      ],
+      "usage": "Use as a maintained native 3D object in Path A expressive decks with poster fallback, shadows, camera, motion-path/spin animation, and morph scenes.",
+      "bytes": 287692,
+      "sha256": "c205da11ef367a66efdd2f09e62b03fe864d1a60aba000ad8ab2d95ee84ea475",
+      "posters": [
+        "image45.png"
+      ]
+    },
+    {
+      "handle": "model3d://agency-model3d12",
+      "file": "models/model3d12.glb",
+      "preview": "images/image46.png",
+      "altText": "Imported agency reference native 3D model model3d12",
+      "tags": [
+        "3d",
+        "glb",
+        "model",
+        "agency-reference",
+        "premium",
+        "custom-3d",
+        "library-first"
+      ],
+      "usage": "Use as a maintained native 3D object in Path A expressive decks with poster fallback, shadows, camera, motion-path/spin animation, and morph scenes.",
+      "bytes": 34788,
+      "sha256": "f8d3aaf3b3f0429ac7841e0041f4803aacea79e74a7f5237a93038a8d881c8cd",
+      "posters": [
+        "image46.png"
+      ]
+    },
+    {
+      "handle": "model3d://agency-model3d13",
+      "file": "models/model3d13.glb",
+      "preview": "images/image47.png",
+      "altText": "Imported agency reference native 3D model model3d13",
+      "tags": [
+        "3d",
+        "glb",
+        "model",
+        "agency-reference",
+        "premium",
+        "custom-3d",
+        "library-first"
+      ],
+      "usage": "Use as a maintained native 3D object in Path A expressive decks with poster fallback, shadows, camera, motion-path/spin animation, and morph scenes.",
+      "bytes": 24892,
+      "sha256": "dc431029d562989054e3fe2f673cb5c9a43c3566a334339d2bece43e91e07b39",
+      "posters": [
+        "image47.png"
+      ]
+    }
+  ],
+  "images": [
+    {
+      "handle": "stock://agency-image1",
+      "file": "images/image1.jpg",
+      "altText": "Imported agency reference image image1.jpg",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 698345,
+      "sha256": "63a6f9e8a514e5a0d03ac9070ef77918541ecfba5db73921293e7cf8af78911d"
+    },
+    {
+      "handle": "stock://agency-image2",
+      "file": "images/image2.jpg",
+      "altText": "Imported agency reference image image2.jpg",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 570907,
+      "sha256": "806c11a5097902c6635fe16625fa349d54fa3bd384dd7795ed7d67a148cc1f40"
+    },
+    {
+      "handle": "stock://agency-image3",
+      "file": "images/image3.jpg",
+      "altText": "Imported agency reference image image3.jpg",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 502015,
+      "sha256": "773d012a56538c905fe8bb0f6e6ed22651013a74eb3f8cbd52dd407bc2aaa33e"
+    },
+    {
+      "handle": "stock://agency-image4",
+      "file": "images/image4.jpg",
+      "altText": "Imported agency reference image image4.jpg",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 536210,
+      "sha256": "14f1ea9fb4b0927463cb04051d86448e94cf99b4778c2eb569a2c51b4b4efc8d"
+    },
+    {
+      "handle": "stock://agency-image5",
+      "file": "images/image5.jpg",
+      "altText": "Imported agency reference image image5.jpg",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 485927,
+      "sha256": "f46c384a549ac01bd4ab4e176988dfadcee7547ac032c7e95dcbc56835d9b698"
+    },
+    {
+      "handle": "stock://agency-image6",
+      "file": "images/image6.png",
+      "altText": "Imported agency reference image image6.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 50315,
+      "sha256": "399f35e5085edca9bb70dedaf653edf7dfbb6970f96147fda0271bfc7cf73873"
+    },
+    {
+      "handle": "stock://agency-image7",
+      "file": "images/image7.png",
+      "altText": "Imported agency reference image image7.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 68101,
+      "sha256": "dcda6260f3d8e90349977c82844709ef610b5df097a3fa2f4ee2566efbc1ded7"
+    },
+    {
+      "handle": "stock://agency-image8",
+      "file": "images/image8.png",
+      "altText": "Imported agency reference image image8.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 35575,
+      "sha256": "329fb786652520cf83a6081fa1d85543db84335ff26c0f61151e11601e2e9cc1"
+    },
+    {
+      "handle": "stock://agency-image9",
+      "file": "images/image9.png",
+      "altText": "Imported agency reference image image9.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 22983,
+      "sha256": "25bc8185261d6534dbb910e20fb2cdb101712acda69f314875b00aac2882022b"
+    },
+    {
+      "handle": "stock://agency-image10",
+      "file": "images/image10.png",
+      "altText": "Imported agency reference image image10.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 55016,
+      "sha256": "fefbfe896ec04a74148c86600f0a84470d588f443c11943a23471e066df3efc0"
+    },
+    {
+      "handle": "stock://agency-image11",
+      "file": "images/image11.png",
+      "altText": "Imported agency reference image image11.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 35512,
+      "sha256": "8161ce8970c8e1ab6ad3d89dedff44a2af93b6118b0c5c0b7bc045596d542dd6"
+    },
+    {
+      "handle": "stock://agency-image12",
+      "file": "images/image12.png",
+      "altText": "Imported agency reference image image12.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 9114,
+      "sha256": "629b29676e274d7d398b73a405947580887327b5060362eb5ab1bb0e1d78a935"
+    },
+    {
+      "handle": "stock://agency-image13",
+      "file": "images/image13.png",
+      "altText": "Imported agency reference image image13.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 9110,
+      "sha256": "e996b433c3e0c8a9007c65e2572312280fe674569785af77098cc6b267bb3ae9"
+    },
+    {
+      "handle": "stock://agency-image14",
+      "file": "images/image14.png",
+      "altText": "Imported agency reference image image14.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 59983,
+      "sha256": "47720a011cdf8bdb5c4b45c3be75c28c0d6cf6e05f9b2ee2f325094c2618186e"
+    },
+    {
+      "handle": "stock://agency-image15",
+      "file": "images/image15.png",
+      "altText": "Imported agency reference image image15.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 55729,
+      "sha256": "04218e7ee827f8e2d8ddcf413891b667da98a52e94011a61ac22cc1bdd7943d3"
+    },
+    {
+      "handle": "stock://agency-image16",
+      "file": "images/image16.png",
+      "altText": "Imported agency reference image image16.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 23013,
+      "sha256": "eccfcf4d662c5cb033bcfb328d72a9923528380ee6bc5769e1403139d6ff8c8c"
+    },
+    {
+      "handle": "stock://agency-image17",
+      "file": "images/image17.png",
+      "altText": "Imported agency reference image image17.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 56334,
+      "sha256": "28fce216b47012c6f28c6d7bd1cd362dd8806ee3dfbf507f768bab74432fdf23"
+    },
+    {
+      "handle": "stock://agency-image18",
+      "file": "images/image18.png",
+      "altText": "Imported agency reference image image18.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 47714,
+      "sha256": "aadff0b6915321def47b738a629e5f5a364f194044523c95ac4bc8e6ae0fc416"
+    },
+    {
+      "handle": "stock://agency-image19",
+      "file": "images/image19.png",
+      "altText": "Imported agency reference image image19.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 49977,
+      "sha256": "47810d9208eb3694c848e14a164e6314fb7035a66a14c1b6cfec67b690e57313"
+    },
+    {
+      "handle": "stock://agency-image20",
+      "file": "images/image20.png",
+      "altText": "Imported agency reference image image20.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 31244,
+      "sha256": "fd28190a889c1cfbc3d5b5be391753d36b548e71561be578ba8a97c9e3c689f8"
+    },
+    {
+      "handle": "stock://agency-image21",
+      "file": "images/image21.png",
+      "altText": "Imported agency reference image image21.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 56327,
+      "sha256": "b8c2b8a6b3054bac67af9c7ebcb7d1773231e66fb9476a76a767e9aa373ecece"
+    },
+    {
+      "handle": "stock://agency-image22",
+      "file": "images/image22.jpg",
+      "altText": "Imported agency reference image image22.jpg",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 1622263,
+      "sha256": "9b22397d22acdc42182177127f01ca18a1753a05d32c80c9888fa8b48b9dd81f"
+    },
+    {
+      "handle": "stock://agency-image23",
+      "file": "images/image23.png",
+      "altText": "Imported agency reference image image23.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 43496,
+      "sha256": "abdaa03c344d4c87dedc2cb3f1a465d704213caf43f56fa4f04ed36956d2ddab"
+    },
+    {
+      "handle": "stock://agency-image24",
+      "file": "images/image24.png",
+      "altText": "Imported agency reference image image24.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 23128,
+      "sha256": "79a5957962536e47745296f40fda84accb3bb55be7ae29cd20c1fdaa97c2623a"
+    },
+    {
+      "handle": "stock://agency-image25",
+      "file": "images/image25.png",
+      "altText": "Imported agency reference image image25.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 49983,
+      "sha256": "0b5a346072461abab6eee89d67e6327b6a6ef572eff0d936f4ad39576ec01c0b"
+    },
+    {
+      "handle": "stock://agency-image26",
+      "file": "images/image26.png",
+      "altText": "Imported agency reference image image26.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 20606,
+      "sha256": "86b21409df3d78cff3ed63752d621bae064f4c0b90708e3f5306b07c5c577d79"
+    },
+    {
+      "handle": "stock://agency-image27",
+      "file": "images/image27.png",
+      "altText": "Imported agency reference image image27.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 24599,
+      "sha256": "5ae2bb85b88b8070604cf8238fe7b82a5e2a92863b36b8199f1ee7b225deed2a"
+    },
+    {
+      "handle": "stock://agency-image28",
+      "file": "images/image28.png",
+      "altText": "Imported agency reference image image28.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 12480,
+      "sha256": "cb75e2e6fc74f366e980ec24129d4a85f68b76e8ab062e49be8c7dae6f82067f"
+    },
+    {
+      "handle": "stock://agency-image29",
+      "file": "images/image29.png",
+      "altText": "Imported agency reference image image29.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 14571,
+      "sha256": "b88b45d1bbbf26a7731d535571ed4faba8f1c832b17bac105de73d1ae69e2330"
+    },
+    {
+      "handle": "stock://agency-image30",
+      "file": "images/image30.png",
+      "altText": "Imported agency reference image image30.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 7430,
+      "sha256": "0fa954df40614d530be7e649f47e3c2a07f2ecdbf9d5f59affe04f433d05a3ec"
+    },
+    {
+      "handle": "stock://agency-image31",
+      "file": "images/image31.png",
+      "altText": "Imported agency reference image image31.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 16204,
+      "sha256": "aceffc2cb81c887ff5ddeaa15e0ef15daef3b298f0ab991e4b816738a00c0a99"
+    },
+    {
+      "handle": "stock://agency-image32",
+      "file": "images/image32.jpg",
+      "altText": "Imported agency reference image image32.jpg",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 2511238,
+      "sha256": "6a3151966a7d4d974021b9fab60724a754e27dea9f1e9f57f6abeeb2fb336b00"
+    },
+    {
+      "handle": "stock://agency-image33",
+      "file": "images/image33.png",
+      "altText": "Imported agency reference image image33.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 49990,
+      "sha256": "ce077cb40deb3d79bf8a2d15f2bb7d3754c2a9eee34f34b1ce0750a678b57177"
+    },
+    {
+      "handle": "stock://agency-image34",
+      "file": "images/image34.png",
+      "altText": "Imported agency reference image image34.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 13854,
+      "sha256": "21678ac98139f86d1f8c96ebcb85ce6555069a351baddde7c1ecc440827af358"
+    },
+    {
+      "handle": "stock://agency-image35",
+      "file": "images/image35.png",
+      "altText": "Imported agency reference image image35.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 33720,
+      "sha256": "d0d270dde2f4922c73618ebe33e4a2e5035d96e933e6b0ff03b98d7c0a66252e"
+    },
+    {
+      "handle": "stock://agency-image36",
+      "file": "images/image36.png",
+      "altText": "Imported agency reference image image36.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 39992,
+      "sha256": "2b39d65f1146a8397428338c33b8f0d3bcf390bbd10f00e767371cd7c95d7675"
+    },
+    {
+      "handle": "stock://agency-image37",
+      "file": "images/image37.png",
+      "altText": "Imported agency reference image image37.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 18558,
+      "sha256": "16410a71f9e4949817b5bd06a1035a1c924d9bc7c6319eeeace589fa9b22d7f0"
+    },
+    {
+      "handle": "stock://agency-image38",
+      "file": "images/image38.png",
+      "altText": "Imported agency reference image image38.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 40009,
+      "sha256": "87c37e1d3d53b935fe83a2e7c22ef8234fd56509ef89c02f3557e0814d575846"
+    },
+    {
+      "handle": "stock://agency-image39",
+      "file": "images/image39.png",
+      "altText": "Imported agency reference image image39.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 22704,
+      "sha256": "7a24deb0665e8d84d87ae4166a225f0186d5e68deb71293c87d1f1da7679fc3e"
+    },
+    {
+      "handle": "stock://agency-image40",
+      "file": "images/image40.png",
+      "altText": "Imported agency reference image image40.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 30948,
+      "sha256": "916c0a825db0df214cb309491c0d72905d6174ab95fcdafaa1962d36dce47e4e"
+    },
+    {
+      "handle": "stock://agency-image41",
+      "file": "images/image41.png",
+      "altText": "Imported agency reference image image41.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 44976,
+      "sha256": "53901ea3e5ead62765bcdfcaab99ec66a327cc3dc1e2ee15b790305c2d129666"
+    },
+    {
+      "handle": "stock://agency-image42",
+      "file": "images/image42.png",
+      "altText": "Imported agency reference image image42.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 59030,
+      "sha256": "6e5eb8e1680fd7acfe3e26f340802684948a2bcd31ff7176770830a1c4c24d29"
+    },
+    {
+      "handle": "stock://agency-image43",
+      "file": "images/image43.png",
+      "altText": "Imported agency reference image image43.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 110332,
+      "sha256": "16e958811d95f969338847cbab5d26b9cd3e55fc0212db2ab8e4c94928a49809"
+    },
+    {
+      "handle": "stock://agency-image44",
+      "file": "images/image44.png",
+      "altText": "Imported agency reference image image44.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 61719,
+      "sha256": "9860f41c44afff9b4896e181969fbd3ac549b1711d4eea7379fa8460baaa9720"
+    },
+    {
+      "handle": "stock://agency-image45",
+      "file": "images/image45.png",
+      "altText": "Imported agency reference image image45.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 105281,
+      "sha256": "113221504d0d32ac1f633129a3f326ccb0acf20444e51aed7eda9743a8b11216"
+    },
+    {
+      "handle": "stock://agency-image46",
+      "file": "images/image46.png",
+      "altText": "Imported agency reference image image46.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 26615,
+      "sha256": "ecbb8c0001344178a6347b0bbe518d4d75b93303cc2cc1a45e79269f3532a456"
+    },
+    {
+      "handle": "stock://agency-image47",
+      "file": "images/image47.png",
+      "altText": "Imported agency reference image image47.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 18172,
+      "sha256": "bac7e05f7330476afade0e03995813a038cd2d61622bbf242a6fea9a5d5b7395"
+    },
+    {
+      "handle": "stock://agency-image48",
+      "file": "images/image48.png",
+      "altText": "Imported agency reference image image48.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 19182,
+      "sha256": "2ea3e8868bc6b8fc56ea4aa34a4cff624b8f8e66a49423889d7ec9a1763a00a6"
+    },
+    {
+      "handle": "stock://agency-image49",
+      "file": "images/image49.png",
+      "altText": "Imported agency reference image image49.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 48617,
+      "sha256": "1c966c2c7c34fdd22d4f119e6d59f8a478620721539c50d623b1af6090499b0d"
+    },
+    {
+      "handle": "stock://agency-image50",
+      "file": "images/image50.png",
+      "altText": "Imported agency reference image image50.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 23676,
+      "sha256": "011251d4c6af44288d96972341971396d3e37ac874f615d25e99f3fee8013b5f"
+    },
+    {
+      "handle": "stock://agency-image51",
+      "file": "images/image51.gif",
+      "altText": "Imported agency reference image image51.gif",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first",
+        "animated-gif",
+        "media"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 216471,
+      "sha256": "81fd25988e5b027b82ca54a243ccbffe48ed33b0a39308aec7614a4876700852"
+    },
+    {
+      "handle": "stock://agency-image52",
+      "file": "images/image52.gif",
+      "altText": "Imported agency reference image image52.gif",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first",
+        "animated-gif",
+        "media"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 583710,
+      "sha256": "5b56924e7f378b2ae91d6c6c1cab9bcadd5ea726b3c6717d344b25283395b73f"
+    },
+    {
+      "handle": "stock://agency-image53",
+      "file": "images/image53.gif",
+      "altText": "Imported agency reference image image53.gif",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first",
+        "animated-gif",
+        "media"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 670428,
+      "sha256": "4a3f554d902e5a0395d23c88addaf06c553d586947e96177dbdc65040e63b190"
+    },
+    {
+      "handle": "stock://agency-image54",
+      "file": "images/image54.gif",
+      "altText": "Imported agency reference image image54.gif",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first",
+        "animated-gif",
+        "media"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 1356736,
+      "sha256": "a9a445e91c9ba5677556bca2df3aede372cd58702e9d0b817e500506aedbe6fc"
+    },
+    {
+      "handle": "stock://agency-image55",
+      "file": "images/image55.gif",
+      "altText": "Imported agency reference image image55.gif",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first",
+        "animated-gif",
+        "media"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 322837,
+      "sha256": "4b88ff8bcb515315bf3e4f440250f5d783ed003ae15e6c7d65a03f4efacbb104"
+    },
+    {
+      "handle": "stock://agency-image56",
+      "file": "images/image56.png",
+      "altText": "Imported agency reference image image56.png",
+      "tags": [
+        "image",
+        "poster",
+        "agency-reference",
+        "premium",
+        "texture",
+        "library-first"
+      ],
+      "usage": "Use as a maintained poster, texture, gradient background, scene crop, or 3D fallback image in Path A expressive decks.",
+      "bytes": 20365,
+      "sha256": "3ebce243a78e563954ed79c9a6151026c4ea4913c4c5b7eb3e36716b6480e9de"
+    }
+  ],
+  "shapeScenes": [
+    {
+      "handle": "shapeScene://agency-slide-01",
+      "file": "shape-scenes/slide-01.json",
+      "preview": "previews/slide-01.png",
+      "title": "Agency reference slide 1",
+      "counts": {
+        "shapes": 2,
+        "pictures": 4,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 8,
+        "gradients": 0,
+        "shadows": 9,
+        "reflections": 8,
+        "model3d": 4,
+        "timingNodes": 22,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "3d",
+        "native3d",
+        "shadow",
+        "animation",
+        "timing"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A."
+    },
+    {
+      "handle": "shapeScene://agency-slide-02",
+      "file": "shape-scenes/slide-02.json",
+      "preview": "previews/slide-02.png",
+      "title": "Agency reference slide 2",
+      "counts": {
+        "shapes": 2,
+        "pictures": 2,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 4,
+        "gradients": 0,
+        "shadows": 4,
+        "reflections": 4,
+        "model3d": 2,
+        "timingNodes": 14,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "3d",
+        "native3d",
+        "shadow",
+        "animation",
+        "timing"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A."
+    },
+    {
+      "handle": "shapeScene://agency-slide-03",
+      "file": "shape-scenes/slide-03.json",
+      "preview": "previews/slide-03.png",
+      "title": "Agency reference slide 3",
+      "counts": {
+        "shapes": 13,
+        "pictures": 7,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 14,
+        "gradients": 0,
+        "shadows": 6,
+        "reflections": 6,
+        "model3d": 7,
+        "timingNodes": 69,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "3d",
+        "native3d",
+        "shadow",
+        "animation",
+        "timing"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A."
+    },
+    {
+      "handle": "shapeScene://agency-slide-04",
+      "file": "shape-scenes/slide-04.json",
+      "preview": "previews/slide-04.png",
+      "title": "Agency reference slide 4",
+      "counts": {
+        "shapes": 3,
+        "pictures": 6,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 12,
+        "gradients": 0,
+        "shadows": 12,
+        "reflections": 12,
+        "model3d": 6,
+        "timingNodes": 29,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "3d",
+        "native3d",
+        "shadow",
+        "animation",
+        "timing"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A."
+    },
+    {
+      "handle": "shapeScene://agency-slide-05",
+      "file": "shape-scenes/slide-05.json",
+      "preview": "previews/slide-05.png",
+      "title": "Agency reference slide 5",
+      "counts": {
+        "shapes": 4,
+        "pictures": 4,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 8,
+        "gradients": 0,
+        "shadows": 8,
+        "reflections": 8,
+        "model3d": 4,
+        "timingNodes": 20,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "3d",
+        "native3d",
+        "shadow",
+        "animation",
+        "timing"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A."
+    },
+    {
+      "handle": "shapeScene://agency-slide-06",
+      "file": "shape-scenes/slide-06.json",
+      "preview": "previews/slide-06.png",
+      "title": "Agency reference slide 6",
+      "counts": {
+        "shapes": 5,
+        "pictures": 2,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 4,
+        "gradients": 0,
+        "shadows": 4,
+        "reflections": 4,
+        "model3d": 2,
+        "timingNodes": 34,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "3d",
+        "native3d",
+        "shadow",
+        "animation",
+        "timing"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A."
+    },
+    {
+      "handle": "shapeScene://agency-slide-07",
+      "file": "shape-scenes/slide-07.json",
+      "preview": "previews/slide-07.png",
+      "title": "Agency reference slide 7",
+      "counts": {
+        "shapes": 7,
+        "pictures": 3,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 6,
+        "gradients": 0,
+        "shadows": 6,
+        "reflections": 6,
+        "model3d": 3,
+        "timingNodes": 48,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "3d",
+        "native3d",
+        "shadow",
+        "animation",
+        "timing"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A."
+    },
+    {
+      "handle": "shapeScene://agency-slide-08",
+      "file": "shape-scenes/slide-08.json",
+      "preview": "previews/slide-08.png",
+      "title": "Agency reference slide 8",
+      "counts": {
+        "shapes": 2,
+        "pictures": 3,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 4,
+        "gradients": 0,
+        "shadows": 5,
+        "reflections": 4,
+        "model3d": 2,
+        "timingNodes": 14,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "3d",
+        "native3d",
+        "shadow",
+        "animation",
+        "timing"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A."
+    },
+    {
+      "handle": "shapeScene://agency-slide-09",
+      "file": "shape-scenes/slide-09.json",
+      "preview": "previews/slide-09.png",
+      "title": "Agency reference slide 9",
+      "counts": {
+        "shapes": 70,
+        "pictures": 0,
+        "groups": 1,
+        "customGeometry": 51,
+        "presetGeometry": 18,
+        "gradients": 1,
+        "shadows": 12,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 212,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "gradient",
+        "shadow",
+        "animation",
+        "timing",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-10",
+      "file": "shape-scenes/slide-10.json",
+      "preview": "previews/slide-10.png",
+      "title": "Agency reference slide 10",
+      "counts": {
+        "shapes": 11,
+        "pictures": 0,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 10,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 39,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "animation",
+        "timing"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference visual composition, typography, image crop, or transition behavior."
+    },
+    {
+      "handle": "shapeScene://agency-slide-11",
+      "file": "shape-scenes/slide-11.json",
+      "preview": "previews/slide-11.png",
+      "title": "Agency reference slide 11",
+      "counts": {
+        "shapes": 17,
+        "pictures": 4,
+        "groups": 4,
+        "customGeometry": 0,
+        "presetGeometry": 24,
+        "gradients": 4,
+        "shadows": 12,
+        "reflections": 0,
+        "model3d": 4,
+        "timingNodes": 94,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "3d",
+        "native3d",
+        "gradient",
+        "shadow",
+        "animation",
+        "timing",
+        "grouped-shapes"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A."
+    },
+    {
+      "handle": "shapeScene://agency-slide-12",
+      "file": "shape-scenes/slide-12.json",
+      "preview": "previews/slide-12.png",
+      "title": "Agency reference slide 12",
+      "counts": {
+        "shapes": 1,
+        "pictures": 2,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 4,
+        "gradients": 0,
+        "shadows": 4,
+        "reflections": 4,
+        "model3d": 2,
+        "timingNodes": 15,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "3d",
+        "native3d",
+        "shadow",
+        "animation",
+        "timing"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A."
+    },
+    {
+      "handle": "shapeScene://agency-slide-13",
+      "file": "shape-scenes/slide-13.json",
+      "preview": "previews/slide-13.png",
+      "title": "Agency reference slide 13",
+      "counts": {
+        "shapes": 12,
+        "pictures": 4,
+        "groups": 2,
+        "customGeometry": 9,
+        "presetGeometry": 9,
+        "gradients": 0,
+        "shadows": 8,
+        "reflections": 8,
+        "model3d": 4,
+        "timingNodes": 21,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "3d",
+        "native3d",
+        "customGeometry",
+        "shape-library",
+        "shadow",
+        "animation",
+        "timing",
+        "grouped-shapes"
+      ],
+      "specimenCount": 9,
+      "usage": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A."
+    },
+    {
+      "handle": "shapeScene://agency-slide-14",
+      "file": "shape-scenes/slide-14.json",
+      "preview": "previews/slide-14.png",
+      "title": "Agency reference slide 14",
+      "counts": {
+        "shapes": 1,
+        "pictures": 6,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 12,
+        "gradients": 0,
+        "shadows": 12,
+        "reflections": 0,
+        "model3d": 6,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "3d",
+        "native3d",
+        "shadow"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A."
+    },
+    {
+      "handle": "shapeScene://agency-slide-15",
+      "file": "shape-scenes/slide-15.json",
+      "preview": "previews/slide-15.png",
+      "title": "Agency reference slide 15",
+      "counts": {
+        "shapes": 2,
+        "pictures": 3,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 6,
+        "gradients": 0,
+        "shadows": 6,
+        "reflections": 6,
+        "model3d": 3,
+        "timingNodes": 17,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "3d",
+        "native3d",
+        "shadow",
+        "animation",
+        "timing"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A."
+    },
+    {
+      "handle": "shapeScene://agency-slide-16",
+      "file": "shape-scenes/slide-16.json",
+      "preview": "previews/slide-16.png",
+      "title": "Agency reference slide 16",
+      "counts": {
+        "shapes": 3,
+        "pictures": 0,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 3,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference visual composition, typography, image crop, or transition behavior."
+    },
+    {
+      "handle": "shapeScene://agency-slide-17",
+      "file": "shape-scenes/slide-17.json",
+      "preview": "previews/slide-17.png",
+      "title": "Agency reference slide 17",
+      "counts": {
+        "shapes": 3,
+        "pictures": 0,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 3,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference visual composition, typography, image crop, or transition behavior."
+    },
+    {
+      "handle": "shapeScene://agency-slide-18",
+      "file": "shape-scenes/slide-18.json",
+      "preview": "previews/slide-18.png",
+      "title": "Agency reference slide 18",
+      "counts": {
+        "shapes": 17,
+        "pictures": 0,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 17,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference visual composition, typography, image crop, or transition behavior."
+    },
+    {
+      "handle": "shapeScene://agency-slide-19",
+      "file": "shape-scenes/slide-19.json",
+      "preview": "previews/slide-19.png",
+      "title": "Agency reference slide 19",
+      "counts": {
+        "shapes": 7,
+        "pictures": 5,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 12,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference visual composition, typography, image crop, or transition behavior."
+    },
+    {
+      "handle": "shapeScene://agency-slide-20",
+      "file": "shape-scenes/slide-20.json",
+      "preview": "previews/slide-20.png",
+      "title": "Agency reference slide 20",
+      "counts": {
+        "shapes": 288,
+        "pictures": 0,
+        "groups": 47,
+        "customGeometry": 266,
+        "presetGeometry": 22,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-21",
+      "file": "shape-scenes/slide-21.json",
+      "preview": "previews/slide-21.png",
+      "title": "Agency reference slide 21",
+      "counts": {
+        "shapes": 2515,
+        "pictures": 0,
+        "groups": 268,
+        "customGeometry": 2513,
+        "presetGeometry": 2,
+        "gradients": 1,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "gradient",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-22",
+      "file": "shape-scenes/slide-22.json",
+      "preview": "previews/slide-22.png",
+      "title": "Agency reference slide 22",
+      "counts": {
+        "shapes": 271,
+        "pictures": 0,
+        "groups": 100,
+        "customGeometry": 229,
+        "presetGeometry": 86,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-23",
+      "file": "shape-scenes/slide-23.json",
+      "preview": "previews/slide-23.png",
+      "title": "Agency reference slide 23",
+      "counts": {
+        "shapes": 133,
+        "pictures": 0,
+        "groups": 26,
+        "customGeometry": 32,
+        "presetGeometry": 104,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-24",
+      "file": "shape-scenes/slide-24.json",
+      "preview": "previews/slide-24.png",
+      "title": "Agency reference slide 24",
+      "counts": {
+        "shapes": 287,
+        "pictures": 0,
+        "groups": 98,
+        "customGeometry": 258,
+        "presetGeometry": 45,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-25",
+      "file": "shape-scenes/slide-25.json",
+      "preview": "previews/slide-25.png",
+      "title": "Agency reference slide 25",
+      "counts": {
+        "shapes": 276,
+        "pictures": 0,
+        "groups": 76,
+        "customGeometry": 129,
+        "presetGeometry": 171,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-26",
+      "file": "shape-scenes/slide-26.json",
+      "preview": "previews/slide-26.png",
+      "title": "Agency reference slide 26",
+      "counts": {
+        "shapes": 331,
+        "pictures": 0,
+        "groups": 79,
+        "customGeometry": 329,
+        "presetGeometry": 2,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-27",
+      "file": "shape-scenes/slide-27.json",
+      "preview": "previews/slide-27.png",
+      "title": "Agency reference slide 27",
+      "counts": {
+        "shapes": 280,
+        "pictures": 0,
+        "groups": 77,
+        "customGeometry": 278,
+        "presetGeometry": 2,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-28",
+      "file": "shape-scenes/slide-28.json",
+      "preview": "previews/slide-28.png",
+      "title": "Agency reference slide 28",
+      "counts": {
+        "shapes": 421,
+        "pictures": 0,
+        "groups": 85,
+        "customGeometry": 419,
+        "presetGeometry": 2,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-29",
+      "file": "shape-scenes/slide-29.json",
+      "preview": "previews/slide-29.png",
+      "title": "Agency reference slide 29",
+      "counts": {
+        "shapes": 521,
+        "pictures": 0,
+        "groups": 95,
+        "customGeometry": 519,
+        "presetGeometry": 2,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-30",
+      "file": "shape-scenes/slide-30.json",
+      "preview": "previews/slide-30.png",
+      "title": "Agency reference slide 30",
+      "counts": {
+        "shapes": 502,
+        "pictures": 0,
+        "groups": 88,
+        "customGeometry": 500,
+        "presetGeometry": 2,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-31",
+      "file": "shape-scenes/slide-31.json",
+      "preview": "previews/slide-31.png",
+      "title": "Agency reference slide 31",
+      "counts": {
+        "shapes": 271,
+        "pictures": 0,
+        "groups": 46,
+        "customGeometry": 270,
+        "presetGeometry": 1,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-32",
+      "file": "shape-scenes/slide-32.json",
+      "preview": "previews/slide-32.png",
+      "title": "Agency reference slide 32",
+      "counts": {
+        "shapes": 240,
+        "pictures": 0,
+        "groups": 64,
+        "customGeometry": 239,
+        "presetGeometry": 1,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-33",
+      "file": "shape-scenes/slide-33.json",
+      "preview": "previews/slide-33.png",
+      "title": "Agency reference slide 33",
+      "counts": {
+        "shapes": 127,
+        "pictures": 0,
+        "groups": 11,
+        "customGeometry": 87,
+        "presetGeometry": 51,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-34",
+      "file": "shape-scenes/slide-34.json",
+      "preview": "previews/slide-34.png",
+      "title": "Agency reference slide 34",
+      "counts": {
+        "shapes": 28,
+        "pictures": 0,
+        "groups": 5,
+        "customGeometry": 0,
+        "presetGeometry": 34,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "grouped-shapes"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference visual composition, typography, image crop, or transition behavior."
+    },
+    {
+      "handle": "shapeScene://agency-slide-35",
+      "file": "shape-scenes/slide-35.json",
+      "preview": "previews/slide-35.png",
+      "title": "Agency reference slide 35",
+      "counts": {
+        "shapes": 166,
+        "pictures": 0,
+        "groups": 46,
+        "customGeometry": 164,
+        "presetGeometry": 2,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-36",
+      "file": "shape-scenes/slide-36.json",
+      "preview": "previews/slide-36.png",
+      "title": "Agency reference slide 36",
+      "counts": {
+        "shapes": 239,
+        "pictures": 0,
+        "groups": 48,
+        "customGeometry": 237,
+        "presetGeometry": 2,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-37",
+      "file": "shape-scenes/slide-37.json",
+      "preview": "previews/slide-37.png",
+      "title": "Agency reference slide 37",
+      "counts": {
+        "shapes": 230,
+        "pictures": 0,
+        "groups": 37,
+        "customGeometry": 228,
+        "presetGeometry": 2,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-38",
+      "file": "shape-scenes/slide-38.json",
+      "preview": "previews/slide-38.png",
+      "title": "Agency reference slide 38",
+      "counts": {
+        "shapes": 302,
+        "pictures": 0,
+        "groups": 48,
+        "customGeometry": 300,
+        "presetGeometry": 2,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-39",
+      "file": "shape-scenes/slide-39.json",
+      "preview": "previews/slide-39.png",
+      "title": "Agency reference slide 39",
+      "counts": {
+        "shapes": 257,
+        "pictures": 0,
+        "groups": 40,
+        "customGeometry": 255,
+        "presetGeometry": 2,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first",
+        "customGeometry",
+        "shape-library",
+        "grouped-shapes"
+      ],
+      "specimenCount": 12,
+      "usage": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects."
+    },
+    {
+      "handle": "shapeScene://agency-slide-40",
+      "file": "shape-scenes/slide-40.json",
+      "preview": "previews/slide-40.png",
+      "title": "Agency reference slide 40",
+      "counts": {
+        "shapes": 0,
+        "pictures": 1,
+        "groups": 0,
+        "customGeometry": 0,
+        "presetGeometry": 1,
+        "gradients": 0,
+        "shadows": 0,
+        "reflections": 0,
+        "model3d": 0,
+        "timingNodes": 0,
+        "transitions": 2
+      },
+      "tags": [
+        "agency-reference",
+        "shape-scene",
+        "library-first"
+      ],
+      "specimenCount": 0,
+      "usage": "Reference visual composition, typography, image crop, or transition behavior."
+    }
+  ]
+}

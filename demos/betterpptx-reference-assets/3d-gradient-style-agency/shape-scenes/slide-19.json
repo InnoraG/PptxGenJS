@@ -1,0 +1,101 @@
+{
+  "brand": "aimcpx.ai",
+  "handle": "shapeScene://agency-slide-19",
+  "source": "imported-reference",
+  "title": "Agency reference slide 19",
+  "preview": "previews/slide-19.png",
+  "counts": {
+    "shapes": 7,
+    "pictures": 5,
+    "groups": 0,
+    "customGeometry": 0,
+    "presetGeometry": 12,
+    "gradients": 0,
+    "shadows": 0,
+    "reflections": 0,
+    "model3d": 0,
+    "timingNodes": 0,
+    "transitions": 2
+  },
+  "tags": [
+    "agency-reference",
+    "shape-scene",
+    "library-first"
+  ],
+  "relationships": [
+    {
+      "id": "rId8",
+      "type": "hyperlink",
+      "target": "https://storyset.com/rafiki?utm_source=slidesgo_template&amp;utm_medium=referral-link&amp;utm_campaign=slidesgo_final_slides&amp;utm_term=rafiki&amp;utm_content=storyset",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId13",
+      "type": "hyperlink",
+      "target": "https://storyset.com/cuate?utm_source=slidesgo_template&amp;utm_medium=referral-link&amp;utm_campaign=slidesgo_final_slides&amp;utm_term=cuate&amp;utm_content=storyset",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId3",
+      "type": "hyperlink",
+      "target": "https://storyset.com/how-it-works?utm_source=slidesgo_template&amp;utm_medium=referral-link&amp;utm_campaign=slidesgo_final_slides&amp;utm_term=how%20it%20works&amp;utm_content=storyset",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId7",
+      "type": "hyperlink",
+      "target": "https://storyset.com/bro?utm_source=slidesgo_template&amp;utm_medium=referral-link&amp;utm_campaign=slidesgo_final_slides&amp;utm_term=bro&amp;utm_content=storyset",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId12",
+      "type": "image",
+      "target": "../media/image55.gif"
+    },
+    {
+      "id": "rId2",
+      "type": "notesSlide",
+      "target": "../notesSlides/notesSlide11.xml"
+    },
+    {
+      "id": "rId1",
+      "type": "slideLayout",
+      "target": "../slideLayouts/slideLayout20.xml"
+    },
+    {
+      "id": "rId6",
+      "type": "hyperlink",
+      "target": "https://storyset.com/amico?utm_source=slidesgo_template&amp;utm_medium=referral-link&amp;utm_campaign=slidesgo_final_slides&amp;utm_term=amico&amp;utm_content=storyset",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId11",
+      "type": "image",
+      "target": "../media/image54.gif"
+    },
+    {
+      "id": "rId5",
+      "type": "hyperlink",
+      "target": "https://storyset.com/pana?utm_source=slidesgo_template&amp;utm_medium=referral-link&amp;utm_campaign=slidesgo_final_slides&amp;utm_term=pana&amp;utm_content=storyset",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId10",
+      "type": "image",
+      "target": "../media/image53.gif"
+    },
+    {
+      "id": "rId4",
+      "type": "image",
+      "target": "../media/image51.gif"
+    },
+    {
+      "id": "rId9",
+      "type": "image",
+      "target": "../media/image52.gif"
+    }
+  ],
+  "expressiveSpecimens": [],
+  "recommendedUse": "Reference visual composition, typography, image crop, or transition behavior.",
+  "notes": "Imported as an aimcpx.ai reference-library scene. Do not use as final SaaS redistribution material unless source licensing is confirmed."
+}

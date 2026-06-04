@@ -1,0 +1,63 @@
+{
+  "brand": "aimcpx.ai",
+  "handle": "shapeScene://agency-slide-17",
+  "source": "imported-reference",
+  "title": "Agency reference slide 17",
+  "preview": "previews/slide-17.png",
+  "counts": {
+    "shapes": 3,
+    "pictures": 0,
+    "groups": 0,
+    "customGeometry": 0,
+    "presetGeometry": 3,
+    "gradients": 0,
+    "shadows": 0,
+    "reflections": 0,
+    "model3d": 0,
+    "timingNodes": 0,
+    "transitions": 2
+  },
+  "tags": [
+    "agency-reference",
+    "shape-scene",
+    "library-first"
+  ],
+  "relationships": [
+    {
+      "id": "rId3",
+      "type": "hyperlink",
+      "target": "http://bit.ly/2PfT4lq",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId2",
+      "type": "notesSlide",
+      "target": "../notesSlides/notesSlide9.xml"
+    },
+    {
+      "id": "rId1",
+      "type": "slideLayout",
+      "target": "../slideLayouts/slideLayout20.xml"
+    },
+    {
+      "id": "rId6",
+      "type": "hyperlink",
+      "target": "http://bit.ly/30B07Gq",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId5",
+      "type": "hyperlink",
+      "target": "http://bit.ly/33VAFh3",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId4",
+      "type": "slide",
+      "target": "slide13.xml"
+    }
+  ],
+  "expressiveSpecimens": [],
+  "recommendedUse": "Reference visual composition, typography, image crop, or transition behavior.",
+  "notes": "Imported as an aimcpx.ai reference-library scene. Do not use as final SaaS redistribution material unless source licensing is confirmed."
+}

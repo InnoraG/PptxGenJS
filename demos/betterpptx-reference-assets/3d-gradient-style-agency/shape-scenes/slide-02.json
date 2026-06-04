@@ -1,0 +1,130 @@
+{
+  "brand": "aimcpx.ai",
+  "handle": "shapeScene://agency-slide-02",
+  "source": "imported-reference",
+  "title": "Agency reference slide 2",
+  "preview": "previews/slide-02.png",
+  "counts": {
+    "shapes": 2,
+    "pictures": 2,
+    "groups": 0,
+    "customGeometry": 0,
+    "presetGeometry": 4,
+    "gradients": 0,
+    "shadows": 4,
+    "reflections": 4,
+    "model3d": 2,
+    "timingNodes": 14,
+    "transitions": 2
+  },
+  "tags": [
+    "agency-reference",
+    "shape-scene",
+    "library-first",
+    "3d",
+    "native3d",
+    "shadow",
+    "animation",
+    "timing"
+  ],
+  "relationships": [
+    {
+      "id": "rId8",
+      "type": "hyperlink",
+      "target": "https://slidesgo.com/slidesgo-school/powerpoint-tutorials/how-to-download-the-fonts-for-our-powerpoint-templates?utm_source=slidesgo_template&amp;utm_medium=referral-link&amp;utm_campaign=sg_credits&amp;utm_content=slidesgo-school",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId13",
+      "type": "slide",
+      "target": "slide19.xml"
+    },
+    {
+      "id": "rId18",
+      "type": "image",
+      "target": "../media/image11.png"
+    },
+    {
+      "id": "rId3",
+      "type": "image",
+      "target": "../media/image10.png"
+    },
+    {
+      "id": "rId7",
+      "type": "slide",
+      "target": "slide18.xml"
+    },
+    {
+      "id": "rId12",
+      "type": "slide",
+      "target": "slide16.xml"
+    },
+    {
+      "id": "rId17",
+      "type": "model3d",
+      "target": "../media/model3d3.glb"
+    },
+    {
+      "id": "rId2",
+      "type": "model3d",
+      "target": "../media/model3d2.glb"
+    },
+    {
+      "id": "rId16",
+      "type": "slide",
+      "target": "slide27.xml"
+    },
+    {
+      "id": "rId1",
+      "type": "slideLayout",
+      "target": "../slideLayouts/slideLayout3.xml"
+    },
+    {
+      "id": "rId6",
+      "type": "hyperlink",
+      "target": "http://bit.ly/33VAFh3",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId11",
+      "type": "slide",
+      "target": "slide15.xml"
+    },
+    {
+      "id": "rId5",
+      "type": "hyperlink",
+      "target": "http://bit.ly/30B07Gq",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId15",
+      "type": "hyperlink",
+      "target": "https://storyset.com/?utm_source=slidesgo_template&amp;utm_medium=referral-link&amp;utm_campaign=slidesgo_contents_of_this_template&amp;utm_term=storyset&amp;utm_content=storyset",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId10",
+      "type": "slide",
+      "target": "slide13.xml"
+    },
+    {
+      "id": "rId4",
+      "type": "hyperlink",
+      "target": "http://bit.ly/2Tynxth",
+      "targetMode": "External"
+    },
+    {
+      "id": "rId9",
+      "type": "slide",
+      "target": "slide14.xml"
+    },
+    {
+      "id": "rId14",
+      "type": "slide",
+      "target": "slide20.xml"
+    }
+  ],
+  "expressiveSpecimens": [],
+  "recommendedUse": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A.",
+  "notes": "Imported as an aimcpx.ai reference-library scene. Do not use as final SaaS redistribution material unless source licensing is confirmed."
+}

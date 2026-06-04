@@ -1,0 +1,1721 @@
+{
+  "brand": "aimcpx.ai",
+  "handle": "shapeScene://agency-slide-24",
+  "source": "imported-reference",
+  "title": "Agency reference slide 24",
+  "preview": "previews/slide-24.png",
+  "counts": {
+    "shapes": 287,
+    "pictures": 0,
+    "groups": 98,
+    "customGeometry": 258,
+    "presetGeometry": 45,
+    "gradients": 0,
+    "shadows": 0,
+    "reflections": 0,
+    "model3d": 0,
+    "timingNodes": 0,
+    "transitions": 2
+  },
+  "tags": [
+    "agency-reference",
+    "shape-scene",
+    "library-first",
+    "customGeometry",
+    "shape-library",
+    "grouped-shapes"
+  ],
+  "relationships": [
+    {
+      "id": "rId2",
+      "type": "notesSlide",
+      "target": "../notesSlides/notesSlide16.xml"
+    },
+    {
+      "id": "rId1",
+      "type": "slideLayout",
+      "target": "../slideLayouts/slideLayout19.xml"
+    }
+  ],
+  "expressiveSpecimens": [
+    {
+      "name": "agency-s24-shape-249",
+      "sourceName": "Google Shape;4180;p12",
+      "area": 14.442,
+      "pointCount": 10,
+      "object": {
+        "kind": "shape",
+        "name": "agency-s24-custom-249",
+        "shapeType": "custGeom",
+        "x": 2.384,
+        "y": 1.093,
+        "w": 3.561,
+        "h": 4.055,
+        "fill": {
+          "color": "667E92"
+        },
+        "line": {
+          "color": "FFFFFF",
+          "transparency": 72,
+          "width": 0.5
+        },
+        "points": [
+          {
+            "x": 3.5612,
+            "y": 0,
+            "moveTo": true
+          },
+          {
+            "x": 1.3908,
+            "y": 1.7904,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.4782,
+              "y1": 0,
+              "x2": 1.9003,
+              "y2": 0.9511
+            }
+          },
+          {
+            "x": 0,
+            "y": 3.1425,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.8947,
+              "y1": 2.6072,
+              "x2": 0.5305,
+              "y2": 3.1425
+            }
+          },
+          {
+            "x": 0.4564,
+            "y": 3.5989,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.2519,
+              "y1": 3.1425,
+              "x2": 0.4564,
+              "y2": 3.3471
+            }
+          },
+          {
+            "x": 0,
+            "y": 4.0554,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.4564,
+              "y1": 3.8508,
+              "x2": 0.2519,
+              "y2": 4.0554
+            }
+          },
+          {
+            "x": 2.1708,
+            "y": 2.265,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.0835,
+              "y1": 4.0554,
+              "x2": 1.6613,
+              "y2": 3.1043
+            }
+          },
+          {
+            "x": 3.5612,
+            "y": 0.9124,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.6665,
+              "y1": 1.4477,
+              "x2": 3.0312,
+              "y2": 0.9124
+            }
+          },
+          {
+            "x": 3.1191,
+            "y": 0.4421,
+            "curve": {
+              "type": "cubic",
+              "x1": 3.3093,
+              "y1": 0.9043,
+              "x2": 3.1114,
+              "y2": 0.694
+            }
+          },
+          {
+            "x": 3.5612,
+            "y": 0,
+            "curve": {
+              "type": "cubic",
+              "x1": 3.1263,
+              "y1": 0.2012,
+              "x2": 3.3198,
+              "y2": 0.0077
+            }
+          },
+          {
+            "close": true
+          }
+        ],
+        "shadow": {
+          "type": "outer",
+          "color": "000000",
+          "opacity": 0.2,
+          "blur": 3,
+          "offset": 0.6,
+          "angle": 45
+        },
+        "coverageTags": [
+          "customGeometry",
+          "agency-reference-shape-library"
+        ]
+      }
+    },
+    {
+      "name": "agency-s24-shape-163",
+      "sourceName": "Google Shape;4030;p12",
+      "area": 10.056,
+      "pointCount": 18,
+      "object": {
+        "kind": "shape",
+        "name": "agency-s24-custom-163",
+        "shapeType": "custGeom",
+        "x": 1.3,
+        "y": 0.26,
+        "w": 3.498,
+        "h": 2.875,
+        "fill": {
+          "color": "667E92"
+        },
+        "line": {
+          "color": "FFFFFF",
+          "transparency": 72,
+          "width": 0.5
+        },
+        "points": [
+          {
+            "x": 0.5112,
+            "y": 0,
+            "moveTo": true
+          },
+          {
+            "x": 0,
+            "y": 0.5112,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.2289,
+              "y1": 0,
+              "x2": 0,
+              "y2": 0.2289
+            }
+          },
+          {
+            "x": 0,
+            "y": 2.8747
+          },
+          {
+            "x": 1.0077,
+            "y": 2.8747
+          },
+          {
+            "x": 0.9814,
+            "y": 2.6282,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.9766,
+              "y1": 2.7965,
+              "x2": 0.9674,
+              "y2": 2.7112
+            }
+          },
+          {
+            "x": 1.3932,
+            "y": 2.2445,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.0153,
+              "y1": 2.4237,
+              "x2": 1.1865,
+              "y2": 2.2636
+            }
+          },
+          {
+            "x": 1.4374,
+            "y": 2.2425,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.4081,
+              "y1": 2.2431,
+              "x2": 1.4228,
+              "y2": 2.2425
+            }
+          },
+          {
+            "x": 1.8995,
+            "y": 2.7047,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.6925,
+              "y1": 2.2425,
+              "x2": 1.8995,
+              "y2": 2.4495
+            }
+          },
+          {
+            "x": 1.8669,
+            "y": 2.8747,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.8995,
+              "y1": 2.7629,
+              "x2": 1.8884,
+              "y2": 2.8206
+            }
+          },
+          {
+            "x": 2.8747,
+            "y": 2.8747
+          },
+          {
+            "x": 2.8747,
+            "y": 1.8706
+          },
+          {
+            "x": 3.0336,
+            "y": 1.8995,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.9243,
+              "y1": 1.8889,
+              "x2": 2.9776,
+              "y2": 1.8995
+            }
+          },
+          {
+            "x": 3.1204,
+            "y": 1.891,
+            "curve": {
+              "type": "cubic",
+              "x1": 3.0618,
+              "y1": 1.8995,
+              "x2": 3.0908,
+              "y2": 1.8968
+            }
+          },
+          {
+            "x": 3.4959,
+            "y": 1.4412,
+            "curve": {
+              "type": "cubic",
+              "x1": 3.3342,
+              "y1": 1.8491,
+              "x2": 3.4941,
+              "y2": 1.6592
+            }
+          },
+          {
+            "x": 3.0338,
+            "y": 0.9751,
+            "curve": {
+              "type": "cubic",
+              "x1": 3.4982,
+              "y1": 1.1842,
+              "x2": 3.2904,
+              "y2": 0.9751
+            }
+          },
+          {
+            "x": 2.8747,
+            "y": 1.0039,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.9795,
+              "y1": 0.9752,
+              "x2": 2.9256,
+              "y2": 0.985
+            }
+          },
+          {
+            "x": 2.8747,
+            "y": 0
+          },
+          {
+            "close": true
+          }
+        ],
+        "shadow": {
+          "type": "outer",
+          "color": "000000",
+          "opacity": 0.2,
+          "blur": 3,
+          "offset": 0.6,
+          "angle": 45
+        },
+        "coverageTags": [
+          "customGeometry",
+          "agency-reference-shape-library"
+        ]
+      }
+    },
+    {
+      "name": "agency-s24-shape-166",
+      "sourceName": "Google Shape;4033;p12",
+      "area": 10.055,
+      "pointCount": 18,
+      "object": {
+        "kind": "shape",
+        "name": "agency-s24-custom-166",
+        "shapeType": "custGeom",
+        "x": 3.535,
+        "y": 3.115,
+        "w": 3.498,
+        "h": 2.875,
+        "fill": {
+          "color": "445D73"
+        },
+        "line": {
+          "color": "FFFFFF",
+          "transparency": 72,
+          "width": 0.5
+        },
+        "points": [
+          {
+            "x": 0.6235,
+            "y": 0,
+            "moveTo": true
+          },
+          {
+            "x": 0.6235,
+            "y": 1.004
+          },
+          {
+            "x": 0.4646,
+            "y": 0.9751,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.5739,
+              "y1": 0.9857,
+              "x2": 0.5206,
+              "y2": 0.9751
+            }
+          },
+          {
+            "x": 0.3778,
+            "y": 0.9836,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.4363,
+              "y1": 0.9751,
+              "x2": 0.4074,
+              "y2": 0.9778
+            }
+          },
+          {
+            "x": 0.0021,
+            "y": 1.4333,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.164,
+              "y1": 1.0256,
+              "x2": 0.0041,
+              "y2": 1.2154
+            }
+          },
+          {
+            "x": 0.4644,
+            "y": 1.8997,
+            "curve": {
+              "type": "cubic",
+              "x1": 0,
+              "y1": 1.6904,
+              "x2": 0.2078,
+              "y2": 1.8997
+            }
+          },
+          {
+            "x": 0.6235,
+            "y": 1.8706,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.5187,
+              "y1": 1.8995,
+              "x2": 0.5726,
+              "y2": 1.8897
+            }
+          },
+          {
+            "x": 0.6235,
+            "y": 2.8746
+          },
+          {
+            "x": 2.9785,
+            "y": 2.8746
+          },
+          {
+            "x": 3.498,
+            "y": 2.3551,
+            "curve": {
+              "type": "cubic",
+              "x1": 3.2654,
+              "y1": 2.8746,
+              "x2": 3.498,
+              "y2": 2.642
+            }
+          },
+          {
+            "x": 3.498,
+            "y": 0
+          },
+          {
+            "x": 2.4903,
+            "y": 0
+          },
+          {
+            "x": 2.5206,
+            "y": 0.2166,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.5177,
+              "y1": 0.0686,
+              "x2": 2.5281,
+              "y2": 0.1431
+            }
+          },
+          {
+            "x": 2.0745,
+            "y": 0.632,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.4973,
+              "y1": 0.4449,
+              "x2": 2.3037,
+              "y2": 0.6253
+            }
+          },
+          {
+            "x": 2.0606,
+            "y": 0.6322,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.0699,
+              "y1": 0.6321,
+              "x2": 2.0652,
+              "y2": 0.6322
+            }
+          },
+          {
+            "x": 1.5985,
+            "y": 0.17,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.8053,
+              "y1": 0.6322,
+              "x2": 1.5985,
+              "y2": 0.4252
+            }
+          },
+          {
+            "x": 1.6312,
+            "y": 0,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.5985,
+              "y1": 0.1117,
+              "x2": 1.6095,
+              "y2": 0.0541
+            }
+          },
+          {
+            "close": true
+          }
+        ],
+        "shadow": {
+          "type": "outer",
+          "color": "000000",
+          "opacity": 0.2,
+          "blur": 3,
+          "offset": 0.6,
+          "angle": 45
+        },
+        "coverageTags": [
+          "customGeometry",
+          "agency-reference-shape-library"
+        ]
+      }
+    },
+    {
+      "name": "agency-s24-shape-164",
+      "sourceName": "Google Shape;4031;p12",
+      "area": 10.05,
+      "pointCount": 19,
+      "object": {
+        "kind": "shape",
+        "name": "agency-s24-custom-164",
+        "shapeType": "custGeom",
+        "x": 1.298,
+        "y": 2.493,
+        "w": 2.875,
+        "h": 3.496,
+        "fill": {
+          "color": "A5B7C5"
+        },
+        "line": {
+          "color": "FFFFFF",
+          "transparency": 72,
+          "width": 0.5
+        },
+        "points": [
+          {
+            "x": 1.4374,
+            "y": 0,
+            "moveTo": true
+          },
+          {
+            "x": 0.9751,
+            "y": 0.4623,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.1821,
+              "y1": 0,
+              "x2": 0.9751,
+              "y2": 0.2069
+            }
+          },
+          {
+            "x": 1.0039,
+            "y": 0.6212,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.9752,
+              "y1": 0.5166,
+              "x2": 0.985,
+              "y2": 0.5704
+            }
+          },
+          {
+            "x": 0,
+            "y": 0.6212
+          },
+          {
+            "x": 0,
+            "y": 3.0078
+          },
+          {
+            "x": 0.4884,
+            "y": 3.496,
+            "curve": {
+              "type": "cubic",
+              "x1": 0,
+              "y1": 3.2774,
+              "x2": 0.2186,
+              "y2": 3.496
+            }
+          },
+          {
+            "x": 2.8747,
+            "y": 3.496
+          },
+          {
+            "x": 2.8747,
+            "y": 2.4883
+          },
+          {
+            "x": 2.7044,
+            "y": 2.521,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.8204,
+              "y1": 2.5099,
+              "x2": 2.7626,
+              "y2": 2.521
+            }
+          },
+          {
+            "x": 2.6579,
+            "y": 2.5186,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.6889,
+              "y1": 2.521,
+              "x2": 2.6734,
+              "y2": 2.5202
+            }
+          },
+          {
+            "x": 2.2426,
+            "y": 2.0725,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.4297,
+              "y1": 2.4953,
+              "x2": 2.2493,
+              "y2": 2.3016
+            }
+          },
+          {
+            "x": 2.7045,
+            "y": 1.5965,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.2349,
+              "y1": 1.8109,
+              "x2": 2.4447,
+              "y2": 1.5965
+            }
+          },
+          {
+            "x": 2.8745,
+            "y": 1.6291,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.7629,
+              "y1": 1.5965,
+              "x2": 2.8204,
+              "y2": 1.6074
+            }
+          },
+          {
+            "x": 2.8745,
+            "y": 0.6214
+          },
+          {
+            "x": 1.8706,
+            "y": 0.6214
+          },
+          {
+            "x": 1.891,
+            "y": 0.3756,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.8982,
+              "y1": 0.5466,
+              "x2": 1.9082,
+              "y2": 0.4635
+            }
+          },
+          {
+            "x": 1.4412,
+            "y": 0.0001,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.8491,
+              "y1": 0.1619,
+              "x2": 1.6592,
+              "y2": 0.002
+            }
+          },
+          {
+            "x": 1.4374,
+            "y": 0,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.44,
+              "y1": 0,
+              "x2": 1.4386,
+              "y2": 0
+            }
+          },
+          {
+            "close": true
+          }
+        ],
+        "shadow": {
+          "type": "outer",
+          "color": "000000",
+          "opacity": 0.2,
+          "blur": 3,
+          "offset": 0.6,
+          "angle": 45
+        },
+        "coverageTags": [
+          "customGeometry",
+          "agency-reference-shape-library"
+        ]
+      }
+    },
+    {
+      "name": "agency-s24-shape-165",
+      "sourceName": "Google Shape;4032;p12",
+      "area": 10.05,
+      "pointCount": 18,
+      "object": {
+        "kind": "shape",
+        "name": "agency-s24-custom-165",
+        "shapeType": "custGeom",
+        "x": 4.159,
+        "y": 0.262,
+        "w": 2.875,
+        "h": 3.496,
+        "fill": {
+          "color": "CFD9E0"
+        },
+        "line": {
+          "color": "FFFFFF",
+          "transparency": 72,
+          "width": 0.5
+        },
+        "points": [
+          {
+            "x": 0,
+            "y": 0,
+            "moveTo": true
+          },
+          {
+            "x": 0,
+            "y": 1.0077
+          },
+          {
+            "x": 0.1703,
+            "y": 0.975,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.0544,
+              "y1": 0.9861,
+              "x2": 0.1121,
+              "y2": 0.975
+            }
+          },
+          {
+            "x": 0.2168,
+            "y": 0.9774,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.1858,
+              "y1": 0.975,
+              "x2": 0.2013,
+              "y2": 0.9758
+            }
+          },
+          {
+            "x": 0.6321,
+            "y": 1.4235,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.445,
+              "y1": 1.0005,
+              "x2": 0.6255,
+              "y2": 1.1943
+            }
+          },
+          {
+            "x": 0.17,
+            "y": 1.8996,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.6396,
+              "y1": 1.6851,
+              "x2": 0.4298,
+              "y2": 1.8996
+            }
+          },
+          {
+            "x": 0,
+            "y": 1.867,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.1118,
+              "y1": 1.8995,
+              "x2": 0.0541,
+              "y2": 1.8886
+            }
+          },
+          {
+            "x": 0,
+            "y": 2.8747
+          },
+          {
+            "x": 1.0039,
+            "y": 2.8747
+          },
+          {
+            "x": 0.9836,
+            "y": 3.1204,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.9766,
+              "y1": 2.9495,
+              "x2": 0.9663,
+              "y2": 3.0325
+            }
+          },
+          {
+            "x": 1.4333,
+            "y": 3.4961,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.0256,
+              "y1": 3.3342,
+              "x2": 1.2155,
+              "y2": 3.4941
+            }
+          },
+          {
+            "x": 1.4372,
+            "y": 3.4961,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.4346,
+              "y1": 3.4961,
+              "x2": 1.4359,
+              "y2": 3.4961
+            }
+          },
+          {
+            "x": 1.8996,
+            "y": 3.0338,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.6926,
+              "y1": 3.4961,
+              "x2": 1.8996,
+              "y2": 3.2891
+            }
+          },
+          {
+            "x": 1.8708,
+            "y": 2.8747,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.8995,
+              "y1": 2.9795,
+              "x2": 1.8897,
+              "y2": 2.9256
+            }
+          },
+          {
+            "x": 2.8747,
+            "y": 2.8747
+          },
+          {
+            "x": 2.8747,
+            "y": 0.4471
+          },
+          {
+            "x": 2.4274,
+            "y": 0,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.8745,
+              "y1": 0.2004,
+              "x2": 2.6744,
+              "y2": 0
+            }
+          },
+          {
+            "close": true
+          }
+        ],
+        "shadow": {
+          "type": "outer",
+          "color": "000000",
+          "opacity": 0.2,
+          "blur": 3,
+          "offset": 0.6,
+          "angle": 45
+        },
+        "coverageTags": [
+          "customGeometry",
+          "agency-reference-shape-library"
+        ]
+      }
+    },
+    {
+      "name": "agency-s24-shape-127",
+      "sourceName": "Google Shape;3972;p12",
+      "area": 7.429,
+      "pointCount": 8,
+      "object": {
+        "kind": "shape",
+        "name": "agency-s24-custom-127",
+        "shapeType": "custGeom",
+        "x": 2.105,
+        "y": 2.123,
+        "w": 4.126,
+        "h": 1.8,
+        "fill": {
+          "color": "667E92"
+        },
+        "line": {
+          "color": "FFFFFF",
+          "transparency": 72,
+          "width": 0.5
+        },
+        "points": [
+          {
+            "x": 2.0618,
+            "y": 0,
+            "moveTo": true
+          },
+          {
+            "x": 0,
+            "y": 0.8056,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.2675,
+              "y1": 0,
+              "x2": 0.5431,
+              "y2": 0.3054
+            }
+          },
+          {
+            "x": 0.995,
+            "y": 1.8004
+          },
+          {
+            "x": 2.0664,
+            "y": 1.355,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.2685,
+              "y1": 1.5252,
+              "x2": 1.6476,
+              "y2": 1.355
+            }
+          },
+          {
+            "x": 3.1361,
+            "y": 1.7979,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.4843,
+              "y1": 1.355,
+              "x2": 2.8622,
+              "y2": 1.5242
+            }
+          },
+          {
+            "x": 4.1263,
+            "y": 0.8077
+          },
+          {
+            "x": 2.0618,
+            "y": 0,
+            "curve": {
+              "type": "cubic",
+              "x1": 3.583,
+              "y1": 0.3065,
+              "x2": 2.8576,
+              "y2": 0
+            }
+          },
+          {
+            "close": true
+          }
+        ],
+        "shadow": {
+          "type": "outer",
+          "color": "000000",
+          "opacity": 0.2,
+          "blur": 3,
+          "offset": 0.6,
+          "angle": 45
+        },
+        "coverageTags": [
+          "customGeometry",
+          "agency-reference-shape-library"
+        ]
+      }
+    },
+    {
+      "name": "agency-s24-shape-172",
+      "sourceName": "Google Shape;4057;p12",
+      "area": 7.21,
+      "pointCount": 17,
+      "object": {
+        "kind": "shape",
+        "name": "agency-s24-custom-172",
+        "shapeType": "custGeom",
+        "x": 4.013,
+        "y": 1.46,
+        "w": 2.173,
+        "h": 3.318,
+        "fill": {
+          "color": "A5B7C5"
+        },
+        "line": {
+          "color": "FFFFFF",
+          "transparency": 72,
+          "width": 0.5
+        },
+        "points": [
+          {
+            "x": 0,
+            "y": 0,
+            "moveTo": true
+          },
+          {
+            "x": 0,
+            "y": 1.0662
+          },
+          {
+            "x": 0.1465,
+            "y": 1.4468,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.0161,
+              "y1": 1.2033,
+              "x2": 0.0663,
+              "y2": 1.3341
+            }
+          },
+          {
+            "x": 0.2551,
+            "y": 1.5986
+          },
+          {
+            "x": 0.2551,
+            "y": 1.7196,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.2882,
+              "y1": 1.632,
+              "x2": 0.2882,
+              "y2": 1.6861
+            }
+          },
+          {
+            "x": 0.1465,
+            "y": 1.8714
+          },
+          {
+            "x": 0,
+            "y": 2.252,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.0663,
+              "y1": 1.9837,
+              "x2": 0.0161,
+              "y2": 2.1149
+            }
+          },
+          {
+            "x": 0,
+            "y": 3.3182
+          },
+          {
+            "x": 1.8795,
+            "y": 3.3182
+          },
+          {
+            "x": 1.8795,
+            "y": 2.3462
+          },
+          {
+            "x": 2.0312,
+            "y": 1.8714,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.8795,
+              "y1": 2.176,
+              "x2": 1.9325,
+              "y2": 2.0099
+            }
+          },
+          {
+            "x": 2.1394,
+            "y": 1.7196
+          },
+          {
+            "x": 2.1394,
+            "y": 1.5986,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.1729,
+              "y1": 1.6861,
+              "x2": 2.1729,
+              "y2": 1.632
+            }
+          },
+          {
+            "x": 2.0312,
+            "y": 1.4468
+          },
+          {
+            "x": 1.8791,
+            "y": 0.972,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.9321,
+              "y1": 1.308,
+              "x2": 1.8791,
+              "y2": 1.1422
+            }
+          },
+          {
+            "x": 1.8791,
+            "y": 0
+          },
+          {
+            "close": true
+          }
+        ],
+        "shadow": {
+          "type": "outer",
+          "color": "000000",
+          "opacity": 0.2,
+          "blur": 3,
+          "offset": 0.6,
+          "angle": 45
+        },
+        "coverageTags": [
+          "customGeometry",
+          "agency-reference-shape-library"
+        ]
+      }
+    },
+    {
+      "name": "agency-s24-shape-174",
+      "sourceName": "Google Shape;4059;p12",
+      "area": 7.21,
+      "pointCount": 11,
+      "object": {
+        "kind": "shape",
+        "name": "agency-s24-custom-174",
+        "shapeType": "custGeom",
+        "x": 0.26,
+        "y": 1.46,
+        "w": 2.173,
+        "h": 3.318,
+        "fill": {
+          "color": "445D73"
+        },
+        "line": {
+          "color": "FFFFFF",
+          "transparency": 72,
+          "width": 0.5
+        },
+        "points": [
+          {
+            "x": 0,
+            "y": 0,
+            "moveTo": true
+          },
+          {
+            "x": 0,
+            "y": 3.3182
+          },
+          {
+            "x": 1.879,
+            "y": 3.3182
+          },
+          {
+            "x": 1.879,
+            "y": 2.3462
+          },
+          {
+            "x": 2.0312,
+            "y": 1.8714,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.879,
+              "y1": 2.176,
+              "x2": 1.9321,
+              "y2": 2.0099
+            }
+          },
+          {
+            "x": 2.1393,
+            "y": 1.7196
+          },
+          {
+            "x": 2.1393,
+            "y": 1.5986,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.1728,
+              "y1": 1.6861,
+              "x2": 2.1728,
+              "y2": 1.632
+            }
+          },
+          {
+            "x": 2.0312,
+            "y": 1.4468
+          },
+          {
+            "x": 1.879,
+            "y": 0.972,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.9321,
+              "y1": 1.308,
+              "x2": 1.879,
+              "y2": 1.1422
+            }
+          },
+          {
+            "x": 1.879,
+            "y": 0
+          },
+          {
+            "close": true
+          }
+        ],
+        "shadow": {
+          "type": "outer",
+          "color": "000000",
+          "opacity": 0.2,
+          "blur": 3,
+          "offset": 0.6,
+          "angle": 45
+        },
+        "coverageTags": [
+          "customGeometry",
+          "agency-reference-shape-library"
+        ]
+      }
+    },
+    {
+      "name": "agency-s24-shape-173",
+      "sourceName": "Google Shape;4058;p12",
+      "area": 7.203,
+      "pointCount": 17,
+      "object": {
+        "kind": "shape",
+        "name": "agency-s24-custom-173",
+        "shapeType": "custGeom",
+        "x": 2.139,
+        "y": 1.46,
+        "w": 2.171,
+        "h": 3.318,
+        "fill": {
+          "color": "869FB1"
+        },
+        "line": {
+          "color": "FFFFFF",
+          "transparency": 72,
+          "width": 0.5
+        },
+        "points": [
+          {
+            "x": 0,
+            "y": 0,
+            "moveTo": true
+          },
+          {
+            "x": 0,
+            "y": 0.972
+          },
+          {
+            "x": 0.1521,
+            "y": 1.4468,
+            "curve": {
+              "type": "cubic",
+              "x1": 0,
+              "y1": 1.1422,
+              "x2": 0.053,
+              "y2": 1.3083
+            }
+          },
+          {
+            "x": 0.2603,
+            "y": 1.5986
+          },
+          {
+            "x": 0.2603,
+            "y": 1.7196,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.2938,
+              "y1": 1.632,
+              "x2": 0.2938,
+              "y2": 1.6861
+            }
+          },
+          {
+            "x": 0.1521,
+            "y": 1.8714
+          },
+          {
+            "x": 0,
+            "y": 2.3462,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.0534,
+              "y1": 2.0099,
+              "x2": 0,
+              "y2": 2.176
+            }
+          },
+          {
+            "x": 0,
+            "y": 3.3182
+          },
+          {
+            "x": 1.8774,
+            "y": 3.3182
+          },
+          {
+            "x": 1.8774,
+            "y": 2.3462
+          },
+          {
+            "x": 2.0291,
+            "y": 1.8714,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.8774,
+              "y1": 2.176,
+              "x2": 1.9304,
+              "y2": 2.0099
+            }
+          },
+          {
+            "x": 2.1376,
+            "y": 1.7196
+          },
+          {
+            "x": 2.1376,
+            "y": 1.5986,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.1708,
+              "y1": 1.6861,
+              "x2": 2.1708,
+              "y2": 1.632
+            }
+          },
+          {
+            "x": 2.0291,
+            "y": 1.4468
+          },
+          {
+            "x": 1.8774,
+            "y": 0.972,
+            "curve": {
+              "type": "cubic",
+              "x1": 1.9304,
+              "y1": 1.308,
+              "x2": 1.8774,
+              "y2": 1.1422
+            }
+          },
+          {
+            "x": 1.8774,
+            "y": 0
+          },
+          {
+            "close": true
+          }
+        ],
+        "shadow": {
+          "type": "outer",
+          "color": "000000",
+          "opacity": 0.2,
+          "blur": 3,
+          "offset": 0.6,
+          "angle": 45
+        },
+        "coverageTags": [
+          "customGeometry",
+          "agency-reference-shape-library"
+        ]
+      }
+    },
+    {
+      "name": "agency-s24-shape-167",
+      "sourceName": "Google Shape;4051;p12",
+      "area": 6.644,
+      "pointCount": 9,
+      "object": {
+        "kind": "shape",
+        "name": "agency-s24-custom-167",
+        "shapeType": "custGeom",
+        "x": 0.26,
+        "y": 1.3,
+        "w": 3.835,
+        "h": 1.732,
+        "fill": {
+          "color": "A5B7C5"
+        },
+        "line": {
+          "color": "FFFFFF",
+          "transparency": 72,
+          "width": 0.5
+        },
+        "points": [
+          {
+            "x": 0.1099,
+            "y": 0,
+            "moveTo": true
+          },
+          {
+            "x": 0,
+            "y": 0.1099,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.0492,
+              "y1": 0.0002,
+              "x2": 0.0002,
+              "y2": 0.0492
+            }
+          },
+          {
+            "x": 0,
+            "y": 1.6223
+          },
+          {
+            "x": 0.1099,
+            "y": 1.7323,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.0002,
+              "y1": 1.6829,
+              "x2": 0.0492,
+              "y2": 1.7321
+            }
+          },
+          {
+            "x": 2.6868,
+            "y": 1.7323
+          },
+          {
+            "x": 3.8353,
+            "y": 0.6511,
+            "curve": {
+              "type": "cubic",
+              "x1": 2.733,
+              "y1": 1.135,
+              "x2": 3.2288,
+              "y2": 0.6618
+            }
+          },
+          {
+            "x": 3.8353,
+            "y": 0.1099
+          },
+          {
+            "x": 3.7253,
+            "y": 0,
+            "curve": {
+              "type": "cubic",
+              "x1": 3.8351,
+              "y1": 0.0492,
+              "x2": 3.7859,
+              "y2": 0.0002
+            }
+          },
+          {
+            "close": true
+          }
+        ],
+        "shadow": {
+          "type": "outer",
+          "color": "000000",
+          "opacity": 0.2,
+          "blur": 3,
+          "offset": 0.6,
+          "angle": 45
+        },
+        "coverageTags": [
+          "customGeometry",
+          "agency-reference-shape-library"
+        ]
+      }
+    },
+    {
+      "name": "agency-s24-shape-168",
+      "sourceName": "Google Shape;4052;p12",
+      "area": 6.644,
+      "pointCount": 9,
+      "object": {
+        "kind": "shape",
+        "name": "agency-s24-custom-168",
+        "shapeType": "custGeom",
+        "x": 0.26,
+        "y": 3.216,
+        "w": 3.835,
+        "h": 1.732,
+        "fill": {
+          "color": "869FB1"
+        },
+        "line": {
+          "color": "FFFFFF",
+          "transparency": 72,
+          "width": 0.5
+        },
+        "points": [
+          {
+            "x": 0.1099,
+            "y": 0,
+            "moveTo": true
+          },
+          {
+            "x": 0,
+            "y": 0.11,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.0492,
+              "y1": 0.0002,
+              "x2": 0.0002,
+              "y2": 0.0494
+            }
+          },
+          {
+            "x": 0,
+            "y": 1.6224
+          },
+          {
+            "x": 0.1099,
+            "y": 1.7323,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.0002,
+              "y1": 1.6831,
+              "x2": 0.0492,
+              "y2": 1.7321
+            }
+          },
+          {
+            "x": 3.7253,
+            "y": 1.7323
+          },
+          {
+            "x": 3.8353,
+            "y": 1.6224,
+            "curve": {
+              "type": "cubic",
+              "x1": 3.7859,
+              "y1": 1.7321,
+              "x2": 3.8351,
+              "y2": 1.6831
+            }
+          },
+          {
+            "x": 3.8353,
+            "y": 1.0812
+          },
+          {
+            "x": 2.6868,
+            "y": 0,
+            "curve": {
+              "type": "cubic",
+              "x1": 3.2288,
+              "y1": 1.0705,
+              "x2": 2.733,
+              "y2": 0.5973
+            }
+          },
+          {
+            "close": true
+          }
+        ],
+        "shadow": {
+          "type": "outer",
+          "color": "000000",
+          "opacity": 0.2,
+          "blur": 3,
+          "offset": 0.6,
+          "angle": 45
+        },
+        "coverageTags": [
+          "customGeometry",
+          "agency-reference-shape-library"
+        ]
+      }
+    },
+    {
+      "name": "agency-s24-shape-169",
+      "sourceName": "Google Shape;4053;p12",
+      "area": 6.644,
+      "pointCount": 9,
+      "object": {
+        "kind": "shape",
+        "name": "agency-s24-custom-169",
+        "shapeType": "custGeom",
+        "x": 4.234,
+        "y": 1.3,
+        "w": 3.835,
+        "h": 1.732,
+        "fill": {
+          "color": "869FB1"
+        },
+        "line": {
+          "color": "FFFFFF",
+          "transparency": 72,
+          "width": 0.5
+        },
+        "points": [
+          {
+            "x": 0.11,
+            "y": 0,
+            "moveTo": true
+          },
+          {
+            "x": 0,
+            "y": 0.1099,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.0494,
+              "y1": 0.0002,
+              "x2": 0.0002,
+              "y2": 0.0492
+            }
+          },
+          {
+            "x": 0,
+            "y": 0.6566
+          },
+          {
+            "x": 1.0524,
+            "y": 1.7323,
+            "curve": {
+              "type": "cubic",
+              "x1": 0.5619,
+              "y1": 0.7127,
+              "x2": 1.0085,
+              "y2": 1.1668
+            }
+          },
+          {
+            "x": 3.7254,
+            "y": 1.7323
+          },
+          {
+            "x": 3.8353,
+            "y": 1.6223,
+            "curve": {
+              "type": "cubic",
+              "x1": 3.7861,
+              "y1": 1.7321,
+              "x2": 3.8351,
+              "y2": 1.6829
+            }
+          },
+          {
+            "x": 3.8353,
+            "y": 0.1099
+          },
+          {
+            "x": 3.7254,
+            "y": 0,
+            "curve": {
+              "type": "cubic",
+              "x1": 3.8351,
+              "y1": 0.0492,
+              "x2": 3.7861,
+              "y2": 0.0002
+            }
+          },
+          {
+            "close": true
+          }
+        ],
+        "shadow": {
+          "type": "outer",
+          "color": "000000",
+          "opacity": 0.2,
+          "blur": 3,
+          "offset": 0.6,
+          "angle": 45
+        },
+        "coverageTags": [
+          "customGeometry",
+          "agency-reference-shape-library"
+        ]
+      }
+    }
+  ],
+  "recommendedUse": "Reference vector/custom-geometry scene; copy expressiveSpecimens or use as visual target for new Path A objects.",
+  "notes": "Imported as an aimcpx.ai reference-library scene. Do not use as final SaaS redistribution material unless source licensing is confirmed."
+}

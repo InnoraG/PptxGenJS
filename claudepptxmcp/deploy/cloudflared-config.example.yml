@@ -1,0 +1,13 @@
+# Reference cloudflared named-tunnel config.
+# setup-cloudflare-tunnel.ps1 generates the real file (cloudflared-config.yml)
+# with your tunnel UUID + credentials path filled in. Shown here for reference.
+
+tunnel: claudepptxmcp
+credentials-file: C:\Users\YOU\.cloudflared\<TUNNEL-UUID>.json
+
+# One stable hostname → the local MCP server. Both /s/<secret>/mcp and /files/...
+# are served under this single hostname.
+ingress:
+  - hostname: mcp.YOURDOMAIN.com
+    service: http://127.0.0.1:3344
+  - service: http_status:404

@@ -1,0 +1,75 @@
+{
+  "brand": "aimcpx.ai",
+  "handle": "shapeScene://agency-slide-07",
+  "source": "imported-reference",
+  "title": "Agency reference slide 7",
+  "preview": "previews/slide-07.png",
+  "counts": {
+    "shapes": 7,
+    "pictures": 3,
+    "groups": 0,
+    "customGeometry": 0,
+    "presetGeometry": 6,
+    "gradients": 0,
+    "shadows": 6,
+    "reflections": 6,
+    "model3d": 3,
+    "timingNodes": 48,
+    "transitions": 2
+  },
+  "tags": [
+    "agency-reference",
+    "shape-scene",
+    "library-first",
+    "3d",
+    "native3d",
+    "shadow",
+    "animation",
+    "timing"
+  ],
+  "relationships": [
+    {
+      "id": "rId8",
+      "type": "image",
+      "target": "../media/image31.png"
+    },
+    {
+      "id": "rId3",
+      "type": "model3d",
+      "target": "../media/model3d1.glb"
+    },
+    {
+      "id": "rId7",
+      "type": "model3d",
+      "target": "../media/model3d7.glb"
+    },
+    {
+      "id": "rId2",
+      "type": "image",
+      "target": "../media/image5.jpg"
+    },
+    {
+      "id": "rId1",
+      "type": "slideLayout",
+      "target": "../slideLayouts/slideLayout13.xml"
+    },
+    {
+      "id": "rId6",
+      "type": "image",
+      "target": "../media/image30.png"
+    },
+    {
+      "id": "rId5",
+      "type": "model3d",
+      "target": "../media/model3d4.glb"
+    },
+    {
+      "id": "rId4",
+      "type": "image",
+      "target": "../media/image29.png"
+    }
+  ],
+  "expressiveSpecimens": [],
+  "recommendedUse": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A.",
+  "notes": "Imported as an aimcpx.ai reference-library scene. Do not use as final SaaS redistribution material unless source licensing is confirmed."
+}

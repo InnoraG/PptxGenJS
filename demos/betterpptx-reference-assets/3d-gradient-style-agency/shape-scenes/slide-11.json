@@ -1,0 +1,92 @@
+{
+  "brand": "aimcpx.ai",
+  "handle": "shapeScene://agency-slide-11",
+  "source": "imported-reference",
+  "title": "Agency reference slide 11",
+  "preview": "previews/slide-11.png",
+  "counts": {
+    "shapes": 17,
+    "pictures": 4,
+    "groups": 4,
+    "customGeometry": 0,
+    "presetGeometry": 24,
+    "gradients": 4,
+    "shadows": 12,
+    "reflections": 0,
+    "model3d": 4,
+    "timingNodes": 94,
+    "transitions": 2
+  },
+  "tags": [
+    "agency-reference",
+    "shape-scene",
+    "library-first",
+    "3d",
+    "native3d",
+    "gradient",
+    "shadow",
+    "animation",
+    "timing",
+    "grouped-shapes"
+  ],
+  "relationships": [
+    {
+      "id": "rId8",
+      "type": "model3d",
+      "target": "../media/model3d3.glb"
+    },
+    {
+      "id": "rId3",
+      "type": "image",
+      "target": "../media/image2.jpg"
+    },
+    {
+      "id": "rId7",
+      "type": "image",
+      "target": "../media/image24.png"
+    },
+    {
+      "id": "rId2",
+      "type": "notesSlide",
+      "target": "../notesSlides/notesSlide6.xml"
+    },
+    {
+      "id": "rId1",
+      "type": "slideLayout",
+      "target": "../slideLayouts/slideLayout5.xml"
+    },
+    {
+      "id": "rId6",
+      "type": "model3d",
+      "target": "../media/model3d7.glb"
+    },
+    {
+      "id": "rId11",
+      "type": "image",
+      "target": "../media/image36.png"
+    },
+    {
+      "id": "rId5",
+      "type": "image",
+      "target": "../media/image34.png"
+    },
+    {
+      "id": "rId10",
+      "type": "model3d",
+      "target": "../media/model3d1.glb"
+    },
+    {
+      "id": "rId4",
+      "type": "model3d",
+      "target": "../media/model3d4.glb"
+    },
+    {
+      "id": "rId9",
+      "type": "image",
+      "target": "../media/image35.png"
+    }
+  ],
+  "expressiveSpecimens": [],
+  "recommendedUse": "Reference native 3D layout/camera/poster usage; combine with model3d://agency-* assets in Path A.",
+  "notes": "Imported as an aimcpx.ai reference-library scene. Do not use as final SaaS redistribution material unless source licensing is confirmed."
+}
