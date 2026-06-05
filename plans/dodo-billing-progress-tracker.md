@@ -5,9 +5,9 @@ Executor plan: `plans/dodo-billing-integration-plan.md`
 
 ## Current Milestone
 
-Next milestone: private Git-trigger sync plus A7.1 max-instance decision. MC1 plus private deployed staging stress harness is now validated in test mode.
+Next milestone: A7.1 max-instance decision plus sanitized Track B/private-public repo prep. MC2 owner-secret Mission Control plus private deployed staging stress harness are now validated in test mode.
 
-Local implementation through the billing stress harness is complete. Dodo test checkout authorization, real credit deduction, provider-origin Dodo webhook processing, deployed activation customer mapping, deployed checkpoint saves, and private staging stress are verified. Firestore-backed private Cloud Run staging is deployed. A separate public webhook-only Cloud Run receiver is deployed, requires Dodo HMAC plus an owner-configurable custom header, exposes no MCP routes, and writes signed synthetic and Dodo-origin webhook deliveries to Firestore.
+Local implementation through the billing stress harness is complete. Dodo test checkout authorization, real credit deduction, provider-origin Dodo webhook processing, deployed activation customer mapping, deployed checkpoint saves, MC2 owner-secret controls, and private staging stress are verified. Firestore-backed private Cloud Run staging is deployed. A separate public webhook-only Cloud Run receiver is deployed, requires Dodo HMAC plus an owner-configurable custom header, exposes no MCP routes, and writes signed synthetic and Dodo-origin webhook deliveries to Firestore.
 
 ## Phase Status
 
@@ -23,7 +23,7 @@ Local implementation through the billing stress harness is complete. Dodo test c
 | Phase 7 - Dodo usage ingestion | Done | Dodo usage client, `/events/ingest` batch flush, deterministic event formatting, retry metadata, reconciler, engine auto-flush, and queued-debt cap are implemented and mock-verified. Real Dodo test mode now deducts credits from the active usage-credit checkout customer. |
 | Phase 8 - billing UX tools | Done | Public-safe billing URLs, Starter/top-up plan explanation, activated balance/pending/queued summary, billing estimate, usage summary, and no-provider-ID verifier are implemented locally. |
 | Phase 9 - billing stress harness | Done locally | Concurrency, idempotency, outage/recovery, zero-balance block, credit-added webhook recovery, and public tool schema black-box checks are implemented and passing locally. |
-| Phase 10 - live readiness | Pending owner approval | MC1/deployed stress now passes in test mode. Do not create or switch live products/pricing until the owner explicitly approves public/live launch steps. |
+| Phase 10 - live readiness | Pending owner approval | MC2/deployed stress now passes in test mode. Do not create or switch live products/pricing until the owner explicitly approves public/live launch steps. |
 
 ## Verification Log
 
@@ -63,6 +63,10 @@ Local implementation through the billing stress harness is complete. Dodo test c
 | 2026-06-05 | MC1 and deployed billing stress | Done. Added private MC1 read-only Mission Control and deployed stress harness. Direct-deployed image `us-central1-docker.pkg.dev/betterpptx-mcp-staging/betterpptx-mcp/betterpptx-mcp-staging:mc1-billingmap-20260605141304` reached revision `betterpptx-mcp-staging-00016-2qf`; Git-triggered commit `3e40914` deployed image tag `3e40914` to revision `betterpptx-mcp-staging-00017-hcs`. Authenticated MC1 data returns `MC1_READ_ONLY`, unauthenticated routes stay blocked by Cloud Run `403`. |
 | 2026-06-05 | Sparse Dodo validation backfill | Done. Deployed activation initially failed because Dodo public validation accepted the key but did not return customer/license IDs. The fix performs authenticated `/license_keys` backfill by transient key and keeps raw activation keys out of persisted state. `node betterpptx-mcp/verify-billing-customer-map.mjs` and `node betterpptx-mcp/dodo-admin-bootstrap.mjs` passed after the patch. |
 | 2026-06-05 | Private deployed staging stress | Done. `node betterpptx-mcp/verify-deployed-staging-stress.mjs https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/mcp --use-gcloud-auth --sessions 3 --iterations 2 --require-mission-control` passed against both direct-deployed and Git-deployed staging; latest pass on revision `betterpptx-mcp-staging-00017-hcs`: black-box checks, Dodo activation/customer mapping, 6 checkpoint saves, 6 PPTX downloads, and MC1 readback. |
+| 2026-06-05 | MC2 owner-secret controls | Done. Private repo commit `3e1da5f` added `mission-control-secrets.mjs`, owner-admin routes, and local verifiers. Git-triggered build rerun `f3b27214-d6f6-4765-9061-a6c5db35430d` deployed image tag `3e1da5f` to revision `betterpptx-mcp-staging-00020-6d2`; follow-up commit `394a1ea` updated the stress harness for MC2 and build `9e416132-fb94-4248-aaa5-53c3c2091043` deployed revision `betterpptx-mcp-staging-00021-kbf`. |
+| 2026-06-05 | MC2 deployed secret verification | Done. `/ops/mission-control/secrets` is blocked unauthenticated by Cloud Run `403`, authenticated status returns four allowlisted Secret Manager records with redacted fingerprints and no raw values, owner-admin token is required for actions, Dodo test API-key action returns HTTP 200, and reveal returns only through owner-admin auth. Runtime service account has resource-level Secret Manager accessor, viewer, and version-adder grants on the four allowlisted secrets. |
+| 2026-06-05 | Billing usage reconciler index and cleanup | Done. Created Firestore composite index on `betterpptx_billing_usage_events` for `state ASC, createdAt ASC`. One-shot Cloud Run Job `betterpptx-billing-reconcile-once` execution `betterpptx-billing-reconcile-once-bwk67` flushed 13 queued usage events to Dodo test mode after staging reached the queued-usage cap. |
+| 2026-06-05 | Private deployed staging stress after MC2 | Done. `node betterpptx-mcp/verify-deployed-staging-stress.mjs https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/mcp --use-gcloud-auth --sessions 1 --iterations 1 --require-mission-control` passed against revision `betterpptx-mcp-staging-00021-kbf`: black-box checks, Dodo activation/customer mapping, checkpoint save/download, and MC2 readback. |
 
 ## Active Risks
 
@@ -70,5 +74,5 @@ Local implementation through the billing stress harness is complete. Dodo test c
 - Firestore per-customer balance document is acceptable at launch scale but is the known transaction hotspot.
 - Local Firestore verification requires Application Default Credentials if run from the workstation; deployed Cloud Run uses workload identity and has now written billing documents.
 - Dodo API-created usage subscriptions remain pending without a saved/authorized test payment method; use hosted checkout for any future end-to-end customer billing tests.
-- Live product creation remains intentionally blocked until owner approval, even though test-mode MC1/deployed stress now passes.
-- Mission Control must expose owner-only reveal/update/rotate/test controls for billing-critical user-defined secrets before live launch; scripts can manage these values until MC2 exists.
+- Live product creation remains intentionally blocked until owner approval, even though test-mode MC2/deployed stress now passes.
+- MC2 owner-secret controls are deployed. Live Dodo product/pricing remains intentionally blocked until owner approval, even though test-mode private staging is validated.
