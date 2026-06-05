@@ -29,14 +29,17 @@ Scope: Track A private implementation hardening for `betterpptx-mcp`, aligned to
 | GCS staging artifact bucket | Done | Created private bucket `betterpptx-mcp-staging-artifacts-860007156914` with public access prevention and 3-day lifecycle deletion. |
 | Firestore staging entitlement database | Done | Created Firestore Native `(default)` database in `us-central1`; runtime service account has datastore user access. |
 | Dodo test key in Secret Manager | Done | Stored Dodo test API key in Secret Manager as `betterpptx-dodo-test-api-key`; no API key committed to Git. |
-| Cloud Run direct staging deploy path | Done | `deploy/cloudbuild.mcp.yaml` plus `deploy/gcp/deploy-mcp-staging.ps1` build and deploy the MCP image through Cloud Build and Cloud Run. Latest deployed image is `us-central1-docker.pkg.dev/betterpptx-mcp-staging/betterpptx-mcp/betterpptx-mcp-staging:billing-20260605065302`. |
-| Cloud Run Git-based deployment pipeline | Trigger present; root config added | GitHub connection `betterpptx-github`, repository mapping `betterpptx-mcp`, and trigger `betterpptx-mcp-staging-main` exist. Added root `cloudbuild.yaml` so pushes to `main` can build/deploy both the private MCP service and the public webhook-only receiver. |
-| Cloud Run private staging deployment | Done | Service `betterpptx-mcp-staging` is Ready in `us-central1` on revision `betterpptx-mcp-staging-00008-bp4`, IAM-protected with unauthenticated `/health`, `/`, and `/webhooks/dodo` returning `403`; authenticated `/health` returns generic BetterPPTX OK. |
+| Cloud Run direct staging deploy path | Done | `deploy/cloudbuild.mcp.yaml` plus `deploy/gcp/deploy-mcp-staging.ps1` build and deploy the MCP image through Cloud Build and Cloud Run. Latest direct-deployed image is `us-central1-docker.pkg.dev/betterpptx-mcp-staging/betterpptx-mcp/betterpptx-mcp-staging:mc1-billingmap-20260605141304` from Cloud Build `a91db433-c62d-4eb4-9367-02952614f278`. |
+| Cloud Run Git-based deployment pipeline | Done | GitHub connection `betterpptx-github`, repository mapping `betterpptx-mcp`, and trigger `betterpptx-mcp-staging-main` are active. Commit `d88633e` triggered regional Cloud Build `04b7804c-cb47-42f1-bda9-6bdbb8b824cb`, which successfully ran the Docker `gulp ship` build and deployed both Cloud Run services from root `cloudbuild.yaml`. |
+| Cloud Run private staging deployment | Done | Service `betterpptx-mcp-staging` is Ready in `us-central1` on revision `betterpptx-mcp-staging-00016-2qf`, IAM-protected with unauthenticated `/health` returning `403`; authenticated `/health` returns generic BetterPPTX OK. Cloud Run template remains constrained to `autoscaling.knative.dev/maxScale=1`. |
 | Cloud Run black-box/download smoke | Done | Auth-injected deployed MCP verification passed on revision `00003`: `BLACKBOX VERIFY: PASS`; `DOWNLOAD VERIFY: PASS`; signed GCS download returned a valid PPTX ZIP. |
 | Deployed Dodo activation smoke | Done | `verify-freemium-gate.mjs` passed against private Cloud Run: slide-3 gate returned structured `REQUIRES_UPGRADE`, Dodo test activation succeeded, and premium retry succeeded. |
-| Deployed Dodo billing webhook smoke | Done | Authenticated signed synthetic `credit.added` webhook reached private Cloud Run `/webhooks/dodo`, returned `200`, and wrote Firestore billing webhook/customer records with balance snapshot `498`. Real Dodo delivery still needs an externally reachable receiver. |
-| Dodo public webhook-only receiver | Done | Separate public Cloud Run service `betterpptx-dodo-webhook-staging` exposes only `/health` and `/webhooks/dodo`, rejects unsigned/missing-custom-token requests, uses Secret Manager + Firestore, and has no MCP routes. |
+| Deployed Dodo billing webhook smoke | Done | Signed synthetic webhooks and Dodo-origin dashboard delivery write Firestore billing webhook/customer records. The latest Dodo/Svix delivery `msg_3Ehyjo6INiM37iUyZnqStppg1Nf` returned HTTP 200 and processed `subscription.active` as `customer-updated`. |
+| Dodo public webhook-only receiver | Done | Separate public Cloud Run service `betterpptx-dodo-webhook-staging` is Ready on revision `betterpptx-dodo-webhook-staging-00006-z2m`, exposes only `/health` and `/webhooks/dodo`, rejects unsigned/missing-custom-token requests, uses Secret Manager + Firestore, and has no MCP routes. |
 | Billing secret owner controls | Scripted; dashboard pending | Dodo webhook custom header name/token are owner-configurable via `deploy/gcp/update-dodo-webhook-custom-header.ps1`. Mission Control must add owner-only reveal/update/rotate/test controls for all billing-critical user-defined secrets before live launch. |
+| MC1 private Mission Control | Done | Added `betterpptx-mcp/mission-control.mjs` and guarded `/ops/mission-control` plus `/ops/mission-control/data`. Route is disabled unless explicitly enabled and is reachable in staging only through Cloud Run IAM; unauthenticated requests return Cloud Run `403`, authenticated requests return MC1 read-only privacy-safe telemetry. |
+| Deployed Dodo sparse-validation backfill | Done | Dodo activation now backfills sparse `/licenses/validate` responses through authenticated `/license_keys` lookup by transient key, without storing or returning the raw activation key. This fixed staging activation mapping for the saved test checkout key. |
+| Deployed staging stress harness | Done | Added `betterpptx-mcp/verify-deployed-staging-stress.mjs`. Local 1x1 smoke passed, deployed 1x1 billing stress passed, and deployed private stress passed against Cloud Run with `sessions=3`, `iterations=2`: black-box checks passed, Dodo activation mapped, 6 saves succeeded, 6 PPTX downloads verified, and MC1 readback passed. |
 | Deployed Firestore entitlement persistence | Done | Firestore collection `betterpptx_entitlements` contains a fingerprinted entitlement document after deployed Dodo activation; raw license key is not stored. |
 | GCP project cost guard | Done | Created project-scoped budget alert `BetterPPTX MCP Staging` for `$5/month` with 50%, 80%, and 100% thresholds; deleted obsolete GitHub OAuth secret, destroyed stale Dodo secret version, pruned old images, and applied Artifact Registry cleanup policy. |
 | Freemium activation path | Done | `verify-freemium-gate.mjs` passed with Dodo test-mode activation. |
@@ -67,8 +70,9 @@ Scope: Track A private implementation hardening for `betterpptx-mcp`, aligned to
 | A6 | Production shared entitlement store | Staging verified | Firestore adapter boundary is implemented. Deployed Dodo test activation persisted a fingerprinted entitlement document in Firestore. |
 | A7 | Retry semantics | Done locally | All current handlers are classified. Further changes only if new mutating tools are added. |
 | A7.1 | Cross-instance deck/session/idempotency state | Pending | GCS artifacts and Firestore entitlements are shared, but live editable deck/session state remains process-local. Keep Cloud Run max instances at 1 until this is implemented and verified. |
-| A9 | Telemetry/harness | Done locally | Aggregate telemetry, local harness, and failure-injection harness pass. Longer cross-instance stress requires shared stores. |
-| Billing | Firestore-backed private staging billing | Staging synthetic verified | Dodo usage-credit checkout and real Dodo deduction are verified in test mode. Private Cloud Run synthetic webhook writes to Firestore. Real Dodo external callback remains intentionally blocked by IAM until a public webhook-only receiver or tunnel is approved. |
+| MC1 | Private Mission Control | Done | MC1 read-only dashboard/data route is deployed behind Cloud Run IAM and explicit env flags. MC2 owner controls for secret reveal/update/rotate/test remain pending before live launch. |
+| A9 | Telemetry/harness | Deployed stress verified | Aggregate telemetry, local harness, failure-injection harness, and private deployed staging stress all pass. Latest deployed stress: `node betterpptx-mcp/verify-deployed-staging-stress.mjs https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/mcp --use-gcloud-auth --sessions 3 --iterations 2 --require-mission-control`. |
+| Billing | Firestore-backed staging billing | Staging provider-origin verified | Dodo usage-credit checkout and real Dodo deduction are verified in test mode. Public webhook-only receiver writes signed custom-header synthetic webhooks to Firestore, handles Standard Webhooks decoded `whsec_` signing, and has processed a Dodo/Svix dashboard `subscription.active` webhook end-to-end. |
 
 ## Pending Production Inputs
 
@@ -76,8 +80,8 @@ Scope: Track A private implementation hardening for `betterpptx-mcp`, aligned to
 | --- | --- | --- |
 | Production Dodo API key/product | Partially done, pending product | Live API key is saved and verified. Live product creation remains blocked intentionally until test-mode billing flow is validated end-to-end. |
 | Dodo test subscription/credit products | Done | Test credit entitlement, `$5/month` subscription product, `$5` top-up product, and checkout session are saved in the private local Dodo env/status files. |
-| Dodo external webhook receiver | Pending owner/design approval | The MCP service remains IAM-private during harness testing. Real Dodo webhook delivery needs either a separate minimal public webhook-only Cloud Run service or a temporary tunnel. |
-| Object storage bucket | Staging provisioned | GCS private bucket exists for staging with signed URL/lifecycle verification pending after Cloud Run deploy. |
+| Dodo external webhook receiver | Deployed; provider-origin verified | The MCP service remains IAM-private. Public webhook-only receiver is deployed and Dodo test endpoint is pointed at it with custom header configured. Initial dashboard delivery reached Cloud Run but failed 401 due to Standard Webhooks `whsec_` decoding; commit `fca7e51` fixed it, and Dodo/Svix dashboard delivery now returns HTTP 200 and updates Firestore customer state. |
+| Object storage bucket | Staging verified | GCS private bucket exists for staging; deployed saves return signed download URLs and stress harness verified PPTX ZIP downloads. |
 | Shared datastore choice | Staging provisioned | Firestore exists for shared entitlement state. Session/idempotency/deck-state sharing remains a separate implementation milestone before max-instances > 1. |
 | Public GitHub URL/repository decision | Done | Public repo target: `https://github.com/betterpptx/betterpptx`; private MCP repo target: `https://github.com/betterpptx/betterpptx-mcp`. |
 | GitHub private repositories | Done | `gh` is authenticated, both target repos exist privately, and the curated private MCP deploy repo is pushed to `betterpptx/betterpptx-mcp`. Public docs repo remains empty/private until sanitized Track B content is ready. |
@@ -103,6 +107,10 @@ node --check .\betterpptx-mcp\telemetry.mjs
 node --check .\betterpptx-mcp\verify-track-a-local-harness.mjs
 node --check .\betterpptx-mcp\verify-track-a-failure-injection.mjs
 node --check .\betterpptx-mcp\verify-production-store-config.mjs
+node --check .\betterpptx-mcp\mission-control.mjs
+node --check .\betterpptx-mcp\verify-deployed-staging-stress.mjs
+node --check .\betterpptx-mcp\billing\customer-map.mjs
+node --check .\betterpptx-mcp\auth\entitlements.mjs
 node .\betterpptx-mcp\verify-a2-controls.mjs
 node .\betterpptx-mcp\verify-a5-a7-reliability.mjs
 node .\betterpptx-mcp\verify-track-a-local-harness.mjs
@@ -116,22 +124,22 @@ Additional Dodo/private verification passed locally:
 ```powershell
 node .\betterpptx-mcp\dodo-admin-bootstrap.mjs
 node .\betterpptx-mcp\dodo-live-verify.mjs
+node .\betterpptx-mcp\verify-deployed-staging-stress.mjs https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/mcp --use-gcloud-auth --sessions 3 --iterations 2 --require-mission-control
 ```
 
 ## Next Planned Increment
 
-No immediate user action is required for the next private-staging increment.
+No immediate user action is required for private cleanup and hardening. The next owner action is approval before public/live launch.
 
 Continue with:
 
-1. Run the private staging harness/stress path while Cloud Run remains `max-instances=1`.
-2. Decide whether shared deck/session/idempotency state is required before increasing Cloud Run max instances.
-3. Decide the real Dodo webhook delivery shape: preferred is a separate minimal public webhook-only receiver with no MCP routes; fallback is a temporary tunnel.
-4. Recreate/enable the Git-based Cloud Run trigger if GitHub-based deployment remains a requirement.
-5. Reduce container image size if Artifact Registry storage must stay comfortably below the `0.5 GB` free-tier boundary.
-6. Later, after harness/stress approval: public endpoint/domain, public documentation repo content, and live Dodo product creation.
+1. Sync the MC1/stress/billing-map changes into the private GitHub deploy repo and verify the Git-triggered Cloud Run path.
+2. Decide whether shared deck/session/idempotency state is required before increasing Cloud Run max instances. Keep staging at `max-instances=1` until that decision is implemented and verified.
+3. Reduce container image size if Artifact Registry storage must stay comfortably below the `0.5 GB` free-tier boundary.
+4. Prepare MC2 owner-only controls for billing-critical secret reveal/update/rotate/test before live launch.
+5. Later, after owner approval: public endpoint/domain, public documentation repo content, and live Dodo product creation.
 
 Next hard user-action milestone:
 
-1. Before real external Dodo webhook validation, the owner must approve either a separate public webhook-only Cloud Run receiver or a temporary tunnel.
-2. After private staging harness/stress passes, the owner must approve the public endpoint/domain and live Dodo product/pricing switch before any public launch.
+1. Owner approval is required before enabling any public endpoint/domain.
+2. Owner approval is required before creating/switching to live Dodo products and pricing.

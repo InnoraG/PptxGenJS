@@ -32,6 +32,7 @@ import { isPublicBlackBoxMode, publicToolList } from './blackbox.mjs'
 import { artifactTtlMs } from './storage/artifact-store.mjs'
 import { recordDownloadTelemetry } from './telemetry.mjs'
 import { handleDodoWebhookHttp } from './billing/webhooks.mjs'
+import { buildMissionControlSnapshot, missionControlAccess, renderMissionControlPage, sendMissionControlDenied } from './mission-control.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -572,6 +573,24 @@ export async function startBetterPptxHttp(options = {}) {
 	app.get('/tools', (req, res) => {
 		const visibleTools = publicToolList(TOOLS)
 		res.json({ count: visibleTools.length, tools: visibleTools.map(t => ({ name: t.name, title: t.title, description: t.description })) })
+	})
+	app.get('/ops/mission-control', (req, res) => {
+		const access = missionControlAccess(req)
+		if (!access.allowed) return sendMissionControlDenied(res, access)
+		res.setHeader('Cache-Control', 'no-store')
+		res.type('html').send(renderMissionControlPage())
+	})
+	app.get('/ops/mission-control/data', (req, res) => {
+		const access = missionControlAccess(req)
+		if (!access.allowed) return sendMissionControlDenied(res, access)
+		res.setHeader('Cache-Control', 'no-store')
+		res.json(buildMissionControlSnapshot({
+			sessions,
+			visibleTools: publicToolList(TOOLS),
+			authMode,
+			mcpPath,
+			accessMode: access.mode,
+		}))
 	})
 
 	// ---- File download (no auth: gated by the unguessable per-file token in the

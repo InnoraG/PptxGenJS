@@ -3,6 +3,7 @@ import { createEntitlementStore } from './entitlement-store.mjs'
 import {
 	dodoActivationNeedsCustomerMapping,
 	extractDodoBillingIds,
+	lookupDodoBillingIdsForLicenseKey,
 	resolveDodoBillingCustomerForActivation,
 } from '../billing/customer-map.mjs'
 import { hashCustomerId } from '../billing/ledger-store.mjs'
@@ -293,7 +294,14 @@ async function validateDodoLicenseKey(key, provider) {
 	const localTestCustomerId = key === process.env.BETTERPPTX_VERIFY_ACTIVATION_KEY ? String(process.env.BETTERPPTX_DODO_TEST_CUSTOMER_ID || '').trim() : ''
 	const localTestLicenseId = key === process.env.BETTERPPTX_VERIFY_ACTIVATION_KEY ? String(process.env.BETTERPPTX_DODO_TEST_LICENSE_ID || '').trim() : ''
 	const fallbackLicenseId = data.license_key_id || data.id || localTestLicenseId || null
-	const billingIds = extractDodoBillingIds({ providerData: data, providerLicenseId: fallbackLicenseId })
+	let billingIds = extractDodoBillingIds({ providerData: data, providerLicenseId: fallbackLicenseId })
+	if (!billingIds.providerCustomerId) {
+		const privateLookup = await lookupDodoBillingIdsForLicenseKey(key)
+		billingIds = {
+			...billingIds,
+			...Object.fromEntries(Object.entries(privateLookup.ids || {}).filter(([_name, value]) => value !== null && value !== undefined && value !== '')),
+		}
+	}
 	return {
 		ok: true,
 		plan: 'premium',

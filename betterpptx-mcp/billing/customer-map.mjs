@@ -47,6 +47,21 @@ function findContainerId(value, containerKeys, idKeys = ['id', 'customer_id', 'c
 	return null
 }
 
+function extractItems(data) {
+	if (Array.isArray(data)) return data
+	for (const key of ['items', 'data', 'results', 'license_keys', 'licenseKeys']) {
+		if (Array.isArray(data?.[key])) return data[key]
+	}
+	return isObject(data) ? [data] : []
+}
+
+function licenseKeyFromPayload(value) {
+	return firstString(
+		findKeyRecursive(value, ['key', 'license_key', 'licenseKey']),
+		findContainerId(value, ['license', 'license_key', 'licenseKey'], ['key', 'license_key', 'licenseKey']),
+	)
+}
+
 function extractBalance(value) {
 	const raw = findKeyRecursive(value, [
 		'available_balance',
@@ -149,6 +164,7 @@ async function tryDodoLookups(ids = {}) {
 	if (ids.providerLicenseId) {
 		add(`/licenses/${encodeURIComponent(ids.providerLicenseId)}`)
 		add(`/license-keys/${encodeURIComponent(ids.providerLicenseId)}`)
+		add(`/license_keys/${encodeURIComponent(ids.providerLicenseId)}`)
 	}
 	if (ids.providerPaymentId) add(`/payments/${encodeURIComponent(ids.providerPaymentId)}`)
 	if (ids.providerSubscriptionId) add(`/subscriptions/${encodeURIComponent(ids.providerSubscriptionId)}`)
@@ -165,6 +181,49 @@ async function tryDodoLookups(ids = {}) {
 		if (merged.providerCustomerId) return { ids: merged, notes }
 	}
 	return { ids: merged, notes }
+}
+
+export async function lookupDodoBillingIdsForLicenseKey(licenseKey) {
+	const token = dodoApiToken()
+	const key = String(licenseKey || '').trim()
+	if (!token || !key) return { ids: {}, notes: token ? ['license-key-missing'] : ['dodo-api-token-missing'] }
+	const wanted = normalizeKey(key)
+	const notes = []
+	const attempts = [
+		`/license_keys?key=${encodeURIComponent(key)}`,
+		`/license_keys?license_key=${encodeURIComponent(key)}`,
+		'/license_keys',
+	]
+	for (const pathname of attempts) {
+		const response = await dodoGet(pathname, token)
+		if (!response.ok) {
+			notes.push(`lookup ${pathname.split('?')[0]} -> HTTP ${response.status}`)
+			continue
+		}
+		const items = extractItems(response.data)
+		const exact = items.find(item => normalizeKey(licenseKeyFromPayload(item)) === wanted)
+		const candidate = exact || (items.length === 1 && pathname.includes('?') ? items[0] : null)
+		if (!candidate) continue
+		let ids = mergeKnownIds(
+			extractDodoBillingIds({ providerData: candidate }),
+			{
+				providerLicenseId: firstString(
+					candidate.id,
+					candidate.license_key_id,
+					candidate.licenseKeyId,
+					candidate.license_id,
+					candidate.licenseId,
+				),
+			},
+		)
+		if (!ids.providerCustomerId) {
+			const detail = await tryDodoLookups(ids)
+			ids = detail.ids
+			notes.push(...detail.notes)
+		}
+		return { ids, notes }
+	}
+	return { ids: {}, notes }
 }
 
 function mergeKnownIds(...items) {
