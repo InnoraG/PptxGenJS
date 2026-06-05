@@ -33,7 +33,7 @@ Scope: Track A private implementation hardening for `betterpptx-mcp`, aligned to
 | Firestore staging entitlement database | Done | Created Firestore Native `(default)` database in `us-central1`; runtime service account has datastore user access. |
 | Dodo test key in Secret Manager | Done | Stored Dodo test API key in Secret Manager as `betterpptx-dodo-test-api-key`; no API key committed to Git. |
 | Cloud Run direct staging deploy path | Done | `deploy/cloudbuild.mcp.yaml` plus `deploy/gcp/deploy-mcp-staging.ps1` build and deploy the MCP image through Cloud Build and Cloud Run. Latest direct-deployed image is `us-central1-docker.pkg.dev/betterpptx-mcp-staging/betterpptx-mcp/betterpptx-mcp-staging:mc1-billingmap-20260605141304` from Cloud Build `a91db433-c62d-4eb4-9367-02952614f278`. |
-| Cloud Run Git-based deployment pipeline | Done | GitHub connection `betterpptx-github`, repository mapping `betterpptx-mcp`, and trigger `betterpptx-mcp-staging-main` are active. Latest successful regional build `cc300644-38ab-43a8-8e35-a3c996060904` deployed private repo commit `b2642b9` from root `cloudbuild.yaml`. Later tracker-only commits through `3b62c27` used `[skip ci]`; active deployment remains `b2642b9`. |
+| Cloud Run Git-based deployment pipeline | Done | GitHub connection `betterpptx-github`, repository mapping `betterpptx-mcp`, and trigger `betterpptx-mcp-staging-main` are active. Latest successful regional build `cc300644-38ab-43a8-8e35-a3c996060904` deployed private repo commit `b2642b9` from root `cloudbuild.yaml`. Later tracker-only commits use `[skip ci]`; active deployment remains `b2642b9`. |
 | Cloud Run private staging deployment | Done | Service `betterpptx-mcp-staging` is Ready in `us-central1` on revision `betterpptx-mcp-staging-00026-zpf`, IAM-protected with no public invoker binding; authenticated `/health` returns generic BetterPPTX OK. Current image is `us-central1-docker.pkg.dev/betterpptx-mcp-staging/betterpptx-mcp/betterpptx-mcp-staging:b2642b9`; Cloud Run template remains constrained to `autoscaling.knative.dev/maxScale=1`. |
 | Cloud Run black-box/download smoke | Done | Auth-injected deployed MCP verification passed on revision `00003`: `BLACKBOX VERIFY: PASS`; `DOWNLOAD VERIFY: PASS`; signed GCS download returned a valid PPTX ZIP. |
 | Deployed Dodo activation smoke | Done | `verify-freemium-gate.mjs` passed against private Cloud Run: slide-3 gate returned structured `REQUIRES_UPGRADE`, Dodo test activation succeeded, and premium retry succeeded. |
@@ -79,12 +79,13 @@ Scope: Track A private implementation hardening for `betterpptx-mcp`, aligned to
 | MC2 | Private Mission Control owner controls | Done | MC2 dashboard/data plus owner-secret status/reveal/update/rotate/test routes are deployed behind Cloud Run IAM and owner admin token. |
 | A9 | Telemetry/harness | Deployed stress verified | Aggregate telemetry, local harness, failure-injection harness, and private deployed staging stress all pass. Latest deployed stress passed on revision `betterpptx-mcp-staging-00026-zpf` with the MC2 edit-state gate and activation guard enforced: `node betterpptx-mcp/verify-deployed-staging-stress.mjs https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/mcp --use-gcloud-auth --sessions 1 --iterations 1 --require-mission-control --env-file C:\MyDoc\PptxGenJS_Claude\betterpptx-mcp\.betterpptx-mcp-runtime\dodo-local.env --require-activation`; earlier 3x2 stress passed on revision `00017-hcs`. |
 | Billing | Firestore-backed staging billing | Staging provider-origin verified | Dodo usage-credit checkout and real Dodo deduction are verified in test mode. Public webhook-only receiver writes signed custom-header synthetic webhooks to Firestore, handles Standard Webhooks decoded `whsec_` signing, and has processed a Dodo/Svix dashboard `subscription.active` webhook end-to-end. |
+| MC3 | 500-slide pricing/quality evidence run | Planned | New plan and tracker: `plans/betterpptx-mc3-500-slide-realworld-test-plan.md` and `plans/betterpptx-mc3-500-slide-test-tracker.md`. This must collect 100-deck/500-slide evidence before final Dodo pricing. |
 
 ## Pending Production Inputs
 
 | Input | Status | Why Needed |
 | --- | --- | --- |
-| Production Dodo API key/product | Pending owner live approval | Live API key is saved and verified. Test-mode billing, webhook, Mission Control, and deployed stress are validated; live product/pricing creation remains intentionally blocked until explicit owner approval for the public/live step. |
+| Production Dodo API key/product | Pending MC3 data plus owner live approval | Live API key is saved and verified. Test-mode billing, webhook, Mission Control, and deployed stress are validated; live product/pricing creation remains intentionally blocked until MC3 pricing/quality evidence is complete and the owner explicitly approves the public/live step. |
 | Dodo test subscription/credit products | Done | Test credit entitlement, `$5/month` subscription product, `$5` top-up product, and checkout session are saved in the private local Dodo env/status files. |
 | Dodo external webhook receiver | Deployed; provider-origin verified | The MCP service remains IAM-private. Public webhook-only receiver is deployed and Dodo test endpoint is pointed at it with custom header configured. Initial dashboard delivery reached Cloud Run but failed 401 due to Standard Webhooks `whsec_` decoding; commit `fca7e51` fixed it, and Dodo/Svix dashboard delivery now returns HTTP 200 and updates Firestore customer state. |
 | Object storage bucket | Staging verified | GCS private bucket exists for staging; deployed saves return signed download URLs and stress harness verified PPTX ZIP downloads. |
@@ -148,10 +149,11 @@ Private cleanup and hardening are complete for the current launch posture. No im
 
 Continue with:
 
-1. Monitor Artifact Registry repository-size metadata after asynchronous cleanup; the listed images are already down to the two current `b2642b9` tags.
-2. Later, after owner approval: public endpoint/domain and live Dodo product creation/switch.
+1. Implement and run MC3: deterministic 100-deck/500-slide private staging evidence run with local COM repair checks.
+2. Monitor Artifact Registry repository-size metadata after asynchronous cleanup; the listed images are already down to the two current `b2642b9` tags.
+3. Later, after MC3 and owner approval: public endpoint/domain and live Dodo product creation/switch.
 
 Next hard user-action milestone:
 
 1. Owner approval is required before enabling any public endpoint/domain.
-2. Owner approval is required before creating/switching to live Dodo products and pricing.
+2. Owner approval is required before creating/switching to live Dodo products and pricing, after MC3 evidence is complete.

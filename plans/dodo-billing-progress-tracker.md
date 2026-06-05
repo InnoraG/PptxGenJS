@@ -5,7 +5,7 @@ Executor plan: `plans/dodo-billing-integration-plan.md`
 
 ## Current Milestone
 
-Next milestone: owner-gated public/live decisions. MC2 owner-secret Mission Control, the single-instance edit-state guard, private deployed staging stress harness, private Track B docs repo prep, and private cleanup/cost hygiene are now validated in test mode.
+Next milestone: MC3 100-deck/500-slide real-world pricing and quality evidence run. MC2 owner-secret Mission Control, the single-instance edit-state guard, private deployed staging stress harness, private Track B docs repo prep, and private cleanup/cost hygiene are now validated in test mode, but live pricing remains blocked until MC3 data exists.
 
 Local implementation through the billing stress harness is complete. Dodo test checkout authorization, real credit deduction, provider-origin Dodo webhook processing, deployed activation customer mapping, deployed checkpoint saves, MC2 owner-secret controls, and private staging stress are verified. Firestore-backed private Cloud Run staging is deployed. A separate public webhook-only Cloud Run receiver is deployed, requires Dodo HMAC plus an owner-configurable custom header, exposes no MCP routes, and writes signed synthetic and Dodo-origin webhook deliveries to Firestore.
 
@@ -23,7 +23,7 @@ Local implementation through the billing stress harness is complete. Dodo test c
 | Phase 7 - Dodo usage ingestion | Done | Dodo usage client, `/events/ingest` batch flush, deterministic event formatting, retry metadata, reconciler, engine auto-flush, and queued-debt cap are implemented and mock-verified. Real Dodo test mode now deducts credits from the active usage-credit checkout customer. |
 | Phase 8 - billing UX tools | Done | Public-safe billing URLs, Starter/top-up plan explanation, activated balance/pending/queued summary, billing estimate, usage summary, and no-provider-ID verifier are implemented locally. |
 | Phase 9 - billing stress harness | Done locally | Concurrency, idempotency, outage/recovery, zero-balance block, credit-added webhook recovery, and public tool schema black-box checks are implemented and passing locally. |
-| Phase 10 - live readiness | Pending owner approval | MC2/deployed stress now passes in test mode, MCP horizontal scaling is guarded by an enforced max-instance-1 launch posture, and private cleanup/cost hygiene is done. Do not create or switch live products/pricing until the owner explicitly approves public/live launch steps. |
+| Phase 10 - live readiness | Pending MC3 data plus owner approval | MC2/deployed stress now passes in test mode, MCP horizontal scaling is guarded by an enforced max-instance-1 launch posture, and private cleanup/cost hygiene is done. Do not create or switch live products/pricing until MC3 produces pricing-quality evidence and the owner explicitly approves public/live launch steps. |
 
 ## Verification Log
 
@@ -72,6 +72,7 @@ Local implementation through the billing stress harness is complete. Dodo test c
 | 2026-06-05 | Private cost cleanup and slim webhook image | Done. Private repo commit `844e3db` slimmed the webhook container, then follow-up commits `2e8cc56` and `b2642b9` added gallery repair verification and the deployed stress activation guard. Git-triggered build `cc300644-38ab-43a8-8e35-a3c996060904` deployed current MCP revision `betterpptx-mcp-staging-00026-zpf` and webhook revision `betterpptx-dodo-webhook-staging-00015-9pw`; old revisions/images were pruned, and Artifact Registry now lists only two current `b2642b9` image tags: MCP `160.3 MB` and webhook `81.9 MB`. Repository-size metadata still reported about `3.17 GB` immediately after deletion, so the cost report treats that as a lagging/retained-layer observation to monitor. |
 | 2026-06-05 | Public gallery repair oracle | Done locally. `verify-public-gallery-repair.mjs` verified both private Track B gallery decks with static package checks and local desktop PowerPoint open-without-repair checks using COM required: `PUBLIC GALLERY REPAIR VERIFY: PASS decks=2 com=required`. COM/PowerPoint is local-only and is not part of Cloud Run validation. |
 | 2026-06-05 | Deployed stress activation guard | Done. `verify-deployed-staging-stress.mjs` now supports `--env-file` and `--require-activation`, so billing stress fails early if the private Dodo test activation key is not loaded. Final rerun with the local private Dodo env passed against deployed staging revision `betterpptx-mcp-staging-00026-zpf`: `DEPLOYED STAGING STRESS: PASS sessions=1 iterations=1 savedDecks=1 downloadedBytes=23632`. |
+| 2026-06-05 | MC3 pricing evidence plan | Planned. Added `plans/betterpptx-mc3-500-slide-realworld-test-plan.md` and `plans/betterpptx-mc3-500-slide-test-tracker.md`. Final Dodo pricing now requires at least 100 files / 500 slides of deterministic private staging evidence, including local COM repair checks and measured hosting-cost versus consumed-credit analysis. |
 
 ## Active Risks
 
@@ -79,7 +80,7 @@ Local implementation through the billing stress harness is complete. Dodo test c
 - Firestore per-customer balance document is acceptable at launch scale but is the known transaction hotspot.
 - Local Firestore verification requires Application Default Credentials if run from the workstation; deployed Cloud Run uses workload identity and has now written billing documents.
 - Dodo API-created usage subscriptions remain pending without a saved/authorized test payment method; use hosted checkout for any future end-to-end customer billing tests.
-- Live product creation remains intentionally blocked until owner approval, even though test-mode MC2/deployed stress now passes.
+- Live product creation remains intentionally blocked until MC3 data exists and owner approval is given, even though test-mode MC2/deployed stress now passes.
 - MCP editable deck/session/idempotency state is process-local by design for the current launch posture. This is acceptable only while the MCP service stays at max instances 1; true shared edit state remains required before horizontal scaling above one MCP instance.
-- MC2 owner-secret controls are deployed. Live Dodo product/pricing remains intentionally blocked until owner approval, even though test-mode private staging is validated.
+- MC2 owner-secret controls are deployed. Live Dodo product/pricing remains intentionally blocked until MC3 evidence is complete and owner approval is given, even though test-mode private staging is validated.
 - Artifact Registry lists only current images after pruning, but repository-size metadata can lag or count retained layers. Recheck before heavy stress runs if the owner wants tighter free-tier assurance.
