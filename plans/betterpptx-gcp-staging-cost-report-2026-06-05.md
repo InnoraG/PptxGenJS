@@ -23,19 +23,19 @@ The current cost posture after cleanup is acceptable for private staging:
 - MCP is pinned to one max instance for process-local edit-state safety.
 - Old Cloud Run revisions and old image tags were pruned.
 - Webhook image was slimmed from a full MCP runtime image to an approximately `81.9 MB` image.
-- Artifact Registry now lists only two current `844e3db` image tags.
+- Artifact Registry now lists only two current `b2642b9` image tags.
 - Secret Manager active versions were reduced to `5`, below the `6` active-version free threshold.
 - Project-scoped budget alert remains at `$5/month`.
 
-The only cost caveat is Artifact Registry's repository-size metadata. Immediately after image deletion it still reported about `2.98 GB`, even though the visible current images total only about `242 MB`. Treat this as lagging metadata or retained-layer accounting and recheck before heavy stress testing.
+The only cost caveat is Artifact Registry's repository-size metadata. Immediately after image deletion it still reported about `3.17 GB`, even though the visible current images total only about `242 MB`. Treat this as lagging metadata or retained-layer accounting and recheck before heavy stress testing.
 
 ## Current Deployed Footprint
 
 ### Cloud Run: MCP
 
 - Service: `betterpptx-mcp-staging`
-- Current revision: `betterpptx-mcp-staging-00024-wwn`
-- Image: `us-central1-docker.pkg.dev/betterpptx-mcp-staging/betterpptx-mcp/betterpptx-mcp-staging:844e3db`
+- Current revision: `betterpptx-mcp-staging-00026-zpf`
+- Image: `us-central1-docker.pkg.dev/betterpptx-mcp-staging/betterpptx-mcp/betterpptx-mcp-staging:b2642b9`
 - IAM: private; no `allUsers` invoker binding
 - CPU: `1`
 - Memory: `1Gi`
@@ -55,8 +55,8 @@ Cost interpretation:
 ### Cloud Run: Dodo Webhook
 
 - Service: `betterpptx-dodo-webhook-staging`
-- Current revision: `betterpptx-dodo-webhook-staging-00013-db8`
-- Image: `us-central1-docker.pkg.dev/betterpptx-mcp-staging/betterpptx-mcp/betterpptx-dodo-webhook-staging:844e3db`
+- Current revision: `betterpptx-dodo-webhook-staging-00015-9pw`
+- Image: `us-central1-docker.pkg.dev/betterpptx-mcp-staging/betterpptx-mcp/betterpptx-dodo-webhook-staging:b2642b9`
 - IAM: public invoker binding for webhook ingress
 - Routes: `/health` and `/webhooks/dodo`; `/mcp` is not exposed
 - CPU: `1`
@@ -80,9 +80,9 @@ Repository:
 
 Current listed images:
 
-- `betterpptx-mcp-staging:844e3db`: `160,276,594` bytes
-- `betterpptx-dodo-webhook-staging:844e3db`: `81,856,414` bytes
-- Visible listed total: `242,133,008` bytes, about `242 MB`
+- `betterpptx-mcp-staging:b2642b9`: `160,289,060` bytes
+- `betterpptx-dodo-webhook-staging:b2642b9`: `81,857,613` bytes
+- Visible listed total: `242,146,673` bytes, about `242 MB`
 
 Cleanup:
 
@@ -93,21 +93,21 @@ Cleanup:
 Cost interpretation:
 
 - At visible listed image size, Artifact Registry storage should be inside the `0.5 GB` free storage band.
-- Repository metadata still reported `2977.885 MB` immediately after deletion. If that whole amount were billed for a full month, the rough over-free storage cost at `$0.10/GB-month` would be about `$0.25/month`.
+- Repository metadata still reported `3173.006 MB` immediately after deletion. If that whole amount were billed for a full month, the rough over-free storage cost at `$0.10/GB-month` would be about `$0.27/month`.
 - Recheck this number after cleanup metadata settles.
 
 ### Cloud Build
 
 Current observed build minutes from listed regional builds:
 
-- Done builds total: `59.76` minutes
-- Successful builds: `57.36` minutes
-- Latest build: `1c5150ac-cdeb-40f8-a3ad-d1737845c92d`, commit `844e3db`, `3.87` minutes
+- Finished builds total: `69.13` minutes
+- Successful builds: `66.73` minutes
+- Latest build: `cc300644-38ab-43a8-8e35-a3c996060904`, commit `b2642b9`, `4.53` minutes
 
 Cost interpretation:
 
 - Google lists `2,500` free default-pool build minutes per billing account per month and `e2-standard-2` at `$0.006/min`.
-- Paid-equivalent value of the observed `59.76` minutes is about `$0.36`, but it should remain inside the free build-minute band if the billing account has no large build load elsewhere.
+- Paid-equivalent value of the observed `69.13` minutes is about `$0.41`, but it should remain inside the free build-minute band if the billing account has no large build load elsewhere.
 - Repeated deploy loops are the main avoidable build cost driver.
 
 ### Cloud Storage
@@ -116,7 +116,7 @@ Bucket:
 
 - `gs://betterpptx-mcp-staging-artifacts-860007156914`
 - Location: `US-CENTRAL1`
-- Current stored bytes: `483,710`
+- Current stored bytes: `530,980`
 - Public access prevention: enforced
 - Lifecycle: delete objects older than `3` days
 
