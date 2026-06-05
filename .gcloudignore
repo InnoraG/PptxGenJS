@@ -8,9 +8,6 @@
 
 !src/
 !src/**
-!dist/
-!dist/**
-
 !tools/
 tools/*
 !tools/embed-ui-truth-templates.mjs

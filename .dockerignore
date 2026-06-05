@@ -10,6 +10,7 @@ out
 logs
 tmp
 tmp_*
+dist
 dist-mcpb
 dist-claude-plugins
 demos
