@@ -59,6 +59,39 @@ function timingSafeStringEqual(a, b) {
 	return left.length === right.length && crypto.timingSafeEqual(left, right)
 }
 
+function pushUniqueBuffer(list, candidate) {
+	if (!candidate || !candidate.length) return
+	if (list.some(existing => existing.length === candidate.length && crypto.timingSafeEqual(existing, candidate))) return
+	list.push(candidate)
+}
+
+function decodeStandardWebhookSecret(secret) {
+	const text = String(secret || '').trim()
+	if (!text.toLowerCase().startsWith('whsec_')) return null
+	const encoded = text.slice(6).replace(/-/g, '+').replace(/_/g, '/')
+	const padded = encoded.padEnd(encoded.length + ((4 - encoded.length % 4) % 4), '=')
+	try {
+		return Buffer.from(padded, 'base64')
+	} catch {
+		return null
+	}
+}
+
+function webhookSecretKeys(secret) {
+	const text = String(secret || '').trim()
+	const keys = []
+	pushUniqueBuffer(keys, decodeStandardWebhookSecret(text))
+	pushUniqueBuffer(keys, Buffer.from(text, 'utf8'))
+	return keys
+}
+
+function hmacBase64(key, payload) {
+	return crypto
+		.createHmac('sha256', key)
+		.update(payload, 'utf8')
+		.digest('base64')
+}
+
 function verifyCustomHeaderIfConfigured(headers) {
 	const name = customHeaderName()
 	const token = customHeaderToken()
@@ -144,18 +177,22 @@ export function verifyDodoWebhookSignature({ rawBody, headers, secret = webhookS
 		throw new DodoWebhookError('DODO_WEBHOOK_TIMESTAMP_EXPIRED', 'Dodo webhook timestamp is outside the allowed tolerance.', 401)
 	}
 
-	const expected = crypto
-		.createHmac('sha256', secret)
-		.update(`${webhookId}.${timestamp}.${body}`, 'utf8')
-		.digest('base64')
-	const legacyExpected = crypto
-		.createHmac('sha256', secret)
-		.update(`${timestamp}.${body}`, 'utf8')
-		.digest('base64')
-	const ok = signatureCandidates(signature).some(candidate => timingSafeStringEqual(expected, candidate) || timingSafeStringEqual(legacyExpected, candidate))
+	const signedPayload = `${webhookId}.${timestamp}.${body}`
+	const legacySignedPayload = `${timestamp}.${body}`
+	const expectedSignatures = webhookSecretKeys(secret).flatMap(key => [
+		hmacBase64(key, signedPayload),
+		hmacBase64(key, legacySignedPayload),
+	])
+	const ok = signatureCandidates(signature).some(candidate => expectedSignatures.some(expected => timingSafeStringEqual(expected, candidate)))
 	if (!ok) throw new DodoWebhookError('DODO_WEBHOOK_SIGNATURE_INVALID', 'Invalid Dodo webhook signature.', 401)
 
 	return { ok: true, webhookId, timestamp, eventTimeMs, payloadHash: rawPayloadHash(body) }
+}
+
+function diagnosticHash(value) {
+	const text = String(value || '').trim()
+	if (!text) return ''
+	return crypto.createHash('sha256').update(text, 'utf8').digest('hex').slice(0, 16)
 }
 
 function webhookRecord({ webhookId, eventType, payloadHash, event, ids }) {
@@ -262,6 +299,12 @@ export async function handleDodoWebhookHttp(req, res) {
 		const status = err?.statusCode || 500
 		const code = err?.code || 'DODO_WEBHOOK_PROCESSING_FAILED'
 		const publicCode = status === 401 ? 'WEBHOOK_UNAUTHORIZED' : status === 503 ? 'WEBHOOK_NOT_CONFIGURED' : status >= 500 ? 'WEBHOOK_PROCESSING_FAILED' : 'WEBHOOK_REJECTED'
+		console.warn(JSON.stringify({
+			message: 'Dodo webhook rejected.',
+			status,
+			code,
+			webhookIdHash: diagnosticHash(headerValue(req.headers, 'webhook-id')),
+		}))
 		return res.status(status).json({
 			ok: false,
 			error: {
