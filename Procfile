@@ -1,1 +1,1 @@
-web: node claudepptxmcp/server-http.mjs
+web: node betterpptx-mcp/server-http.mjs

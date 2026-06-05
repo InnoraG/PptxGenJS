@@ -1,0 +1,32 @@
+# syntax=docker/dockerfile:1
+
+FROM node:20-bookworm-slim AS builder
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY . .
+ARG BUILD_DIST=1
+RUN if [ "$BUILD_DIST" = "1" ]; then npm run build; fi
+RUN npm prune --omit=dev
+
+FROM node:20-bookworm-slim AS runtime
+ENV NODE_ENV=production \
+    BETTERPPTX_PORT=3344 \
+    BETTERPPTX_HOST=0.0.0.0 \
+    BETTERPPTX_IMPORT_DIST_DIRECT=0 \
+    BETTERPPTX_RUNTIME_DIR=/app/.betterpptx-runtime \
+    BETTERPPTX_TTS_URL=http://piper-tts:5000 \
+    BETTERPPTX_VOICES_MANIFEST=/voices/runtime-manifest.json \
+    BETTERPPTX_OUT_DIR=/out \
+    BETTERPPTX_NARRATION_MODE=production
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/betterpptx-mcp ./betterpptx-mcp
+COPY --from=builder /app/package.json ./package.json
+RUN useradd -u 10001 -m appuser && mkdir -p /out && chown -R appuser /out /app
+USER appuser
+EXPOSE 3344
+HEALTHCHECK --interval=15s --timeout=3s --start-period=20s --retries=3 \
+  CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||process.env.BETTERPPTX_PORT||3344)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+CMD ["node", "betterpptx-mcp/server-http.mjs"]
