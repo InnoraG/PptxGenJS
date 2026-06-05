@@ -394,6 +394,8 @@ async function verifyMissionControl({ base, auth, required }) {
 	if (result.res.status !== 200) fail('Mission Control data endpoint failed', { status: result.res.status, body: result.data })
 	const allowedModes = new Set(['MC1_READ_ONLY', 'MC2_OWNER_SECRET_CONTROLS'])
 	if (!allowedModes.has(result.data?.mode) || !Array.isArray(result.data?.gates)) fail('Mission Control payload was not recognized dashboard data', result.data)
+	const editStateGate = result.data.gates.find(gate => gate?.id === 'cross-instance-state')
+	if (!editStateGate || editStateGate.status !== 'ok') fail('Mission Control edit-state guard is not green', editStateGate || result.data.gates)
 	const issues = textIssues(result.data, 'mission-control')
 	if (issues.length) fail('Mission Control leaked black-box-banned terms', issues)
 	return {

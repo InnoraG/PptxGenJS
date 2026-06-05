@@ -19,6 +19,12 @@ function stableNumber(value, fallback = 0) {
 	return Number.isFinite(n) ? n : fallback
 }
 
+function positiveIntEnv(name) {
+	const n = Number(process.env[name])
+	if (!Number.isFinite(n) || n < 1) return null
+	return Math.floor(n)
+}
+
 function pct(part, whole) {
 	if (!whole) return 0
 	return Math.round((part / whole) * 1000) / 10
@@ -105,6 +111,51 @@ function objectEntries(obj, limit = 12) {
 		.slice(0, limit)
 }
 
+function editStateReadiness() {
+	const mode = String(process.env.BETTERPPTX_EDIT_STATE_MODE || 'process-local').trim().toLowerCase() || 'process-local'
+	const maxInstances = positiveIntEnv('BETTERPPTX_MCP_MAX_INSTANCES')
+	const singleInstanceAccepted = enabledEnv('BETTERPPTX_EDIT_STATE_SINGLE_INSTANCE_ACCEPTED')
+	const sharedModes = new Set(['shared', 'firestore', 'external'])
+	if (sharedModes.has(mode)) {
+		return {
+			status: 'ok',
+			mode,
+			maxInstances,
+			detail: `Editable deck/session/idempotency state is configured as ${mode}.`,
+		}
+	}
+	if (mode !== 'process-local') {
+		return {
+			status: 'warn',
+			mode,
+			maxInstances,
+			detail: `Unknown edit-state mode "${mode}". Use process-local with max instances pinned to 1, or configure shared edit state.`,
+		}
+	}
+	if (singleInstanceAccepted && maxInstances === 1) {
+		return {
+			status: 'ok',
+			mode,
+			maxInstances,
+			detail: 'Process-local editable deck/session/idempotency state is explicitly accepted because MCP max instances is pinned to 1.',
+		}
+	}
+	if (maxInstances && maxInstances > 1) {
+		return {
+			status: 'warn',
+			mode,
+			maxInstances,
+			detail: `Process-local editable deck/session/idempotency state is not safe with MCP max instances set to ${maxInstances}.`,
+		}
+	}
+	return {
+		status: 'warn',
+		mode,
+		maxInstances,
+		detail: 'Process-local editable deck/session/idempotency state requires an explicit single-instance deployment guard before launch.',
+	}
+}
+
 function buildGates({ telemetry }) {
 	const blackBox = isPublicBlackBoxMode()
 	const genericFetchBlocked = process.env.BETTERPPTX_ENABLE_GENERIC_HTTP_FETCH !== '1'
@@ -114,6 +165,7 @@ function buildGates({ telemetry }) {
 	const firestoreBilling = process.env.BETTERPPTX_BILLING_LEDGER_STORE === 'firestore'
 	const dodoTest = process.env.BETTERPPTX_DODO_ENVIRONMENT === 'test'
 	const ownerSecretControls = Boolean(String(process.env.BETTERPPTX_MISSION_CONTROL_ADMIN_TOKEN || '').trim())
+	const editState = editStateReadiness()
 	return [
 		{ id: 'private-staging', name: 'Private staging access', status: 'ok', detail: 'Protected before the app by the private operator access layer.' },
 		{ id: 'black-box', name: 'Public black-box contract', status: blackBox ? 'ok' : 'warn', detail: blackBox ? 'Public responses stay product-facing.' : 'Black-box mode is not enabled on this runtime.' },
@@ -123,7 +175,7 @@ function buildGates({ telemetry }) {
 		{ id: 'billing-ledger', name: 'Billing ledger', status: firestoreBilling && dodoTest ? 'ok' : 'warn', detail: firestoreBilling && dodoTest ? 'Dodo test-mode ledger is backed by shared storage.' : 'Billing ledger/provider state needs review.' },
 		{ id: 'owner-secret-controls', name: 'Owner secret controls', status: ownerSecretControls ? 'ok' : 'warn', detail: ownerSecretControls ? 'MC2 reveal, update, rotate, and test controls are installed behind owner admin auth.' : 'MC2 routes are installed, but the owner admin token is not configured.' },
 		{ id: 'telemetry', name: 'Privacy-safe telemetry', status: 'ok', detail: `${telemetry.toolCalls} tool calls, ${telemetry.downloads} downloads, no raw deck payloads exposed here.` },
-		{ id: 'cross-instance-state', name: 'Cross-instance edit state', status: 'pending', detail: 'Keep max instances at 1 until deck/session/idempotency state is shared or proven unnecessary.' },
+		{ id: 'cross-instance-state', name: 'Cross-instance edit state', status: editState.status, detail: editState.detail },
 		{ id: 'public-domain', name: 'Public endpoint and domain', status: 'deferred', detail: 'Wait for deployed staging stress approval before domain/public rollout.' },
 		{ id: 'live-billing', name: 'Live billing switch', status: 'deferred', detail: 'Keep live Dodo product/pricing switch behind owner approval after test-mode validation.' },
 	]
@@ -131,6 +183,7 @@ function buildGates({ telemetry }) {
 
 function buildDecisions() {
 	const genericFetchBlocked = process.env.BETTERPPTX_ENABLE_GENERIC_HTTP_FETCH !== '1'
+	const editState = editStateReadiness()
 	return [
 		{
 			id: 'mc2',
@@ -140,11 +193,11 @@ function buildDecisions() {
 			nextAction: 'Keep public/live launch gated until owner approval.',
 		},
 		{
-			id: 'stress',
-			severity: 'warn',
-			title: 'Stress while max instances stays 1',
-			detail: 'The current process owns live deck/session objects, so horizontal scaling must wait.',
-			nextAction: 'Run the deployed stress harness and decide A7.1 afterward.',
+			id: 'edit-state',
+			severity: editState.status === 'ok' ? 'info' : 'warn',
+			title: editState.status === 'ok' ? 'Single-instance edit-state guard is active' : 'Horizontal scale is blocked',
+			detail: editState.detail,
+			nextAction: editState.status === 'ok' ? 'Keep MCP max instances pinned until shared edit state is implemented.' : 'Pin MCP max instances to 1 or implement shared edit state before increasing traffic.',
 		},
 		{
 			id: 'fetch',
@@ -166,6 +219,7 @@ export function buildMissionControlSnapshot({ sessions, visibleTools = [], authM
 	const billing = telemetry.billing || {}
 	const mcTokenConfigured = Boolean(String(process.env.BETTERPPTX_MISSION_CONTROL_TOKEN || '').trim())
 	const mcAdminTokenConfigured = Boolean(String(process.env.BETTERPPTX_MISSION_CONTROL_ADMIN_TOKEN || '').trim())
+	const editState = editStateReadiness()
 	return {
 		ok: true,
 		mode: 'MC2_OWNER_SECRET_CONTROLS',
@@ -214,6 +268,7 @@ export function buildMissionControlSnapshot({ sessions, visibleTools = [], authM
 			payloadLogging: valueStatus(process.env.BETTERPPTX_LOG_PAYLOADS !== '1', process.env.BETTERPPTX_LOG_PAYLOADS === '1' ? 'enabled' : 'disabled'),
 			pathLogging: valueStatus(process.env.BETTERPPTX_LOG_PATHS !== '1', process.env.BETTERPPTX_LOG_PATHS === '1' ? 'enabled' : 'disabled'),
 			secretOwnerControls: valueStatus(mcAdminTokenConfigured, mcAdminTokenConfigured ? 'owner-admin actions enabled' : 'routes installed; owner admin token missing'),
+			editState: valueStatus(editState.status === 'ok', editState.detail),
 		},
 		gates: buildGates({ telemetry }),
 		decisions: buildDecisions(),
