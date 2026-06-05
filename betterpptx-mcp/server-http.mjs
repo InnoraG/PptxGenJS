@@ -32,7 +32,15 @@ import { isPublicBlackBoxMode, publicToolList } from './blackbox.mjs'
 import { artifactTtlMs } from './storage/artifact-store.mjs'
 import { recordDownloadTelemetry } from './telemetry.mjs'
 import { handleDodoWebhookHttp } from './billing/webhooks.mjs'
-import { buildMissionControlSnapshot, missionControlAccess, renderMissionControlPage, sendMissionControlDenied } from './mission-control.mjs'
+import { buildMissionControlSnapshot, missionControlAccess, missionControlAdminAccess, renderMissionControlPage, sendMissionControlDenied } from './mission-control.mjs'
+import {
+	getMissionControlSecretsSnapshot,
+	MissionControlSecretError,
+	revealMissionControlSecret,
+	rotateMissionControlSecret,
+	testMissionControlSecret,
+	updateMissionControlSecret,
+} from './mission-control-secrets.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -199,9 +207,26 @@ function applyCorsHeaders(req, res) {
 		res.setHeader('Access-Control-Allow-Origin', '*')
 	}
 	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
-	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, mcp-session-id, mcp-protocol-version')
+	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, mcp-session-id, mcp-protocol-version, x-betterpptx-mission-control-token, x-betterpptx-mission-control-admin-token')
 	res.setHeader('Access-Control-Expose-Headers', 'mcp-session-id')
 	res.setHeader('Access-Control-Max-Age', '86400')
+}
+
+function sendMissionControlSecretError(res, { action = 'unknown', id = '' } = {}, err) {
+	const isMcError = err instanceof MissionControlSecretError
+	const status = isMcError ? err.statusCode : 500
+	const code = isMcError ? err.code : 'MC_SECRET_ERROR'
+	const message = isMcError ? err.message : 'Mission Control secret action failed.'
+	logEvent('mission_control.secret_action', { action, id, status: 'error', code })
+	res.setHeader('Cache-Control', 'no-store')
+	return res.status(status).json({
+		error: {
+			code,
+			message,
+			recoverable: status >= 500,
+			retry_safe: action === 'list' || action === 'test',
+		},
+	})
 }
 
 function configuredClientIdentity(req) {
@@ -591,6 +616,60 @@ export async function startBetterPptxHttp(options = {}) {
 			mcpPath,
 			accessMode: access.mode,
 		}))
+	})
+	app.get('/ops/mission-control/secrets', async (req, res) => {
+		const access = missionControlAccess(req)
+		if (!access.allowed) return sendMissionControlDenied(res, access)
+		try {
+			res.setHeader('Cache-Control', 'no-store')
+			res.json(await getMissionControlSecretsSnapshot())
+		} catch (err) {
+			return sendMissionControlSecretError(res, { action: 'list' }, err)
+		}
+	})
+	app.post('/ops/mission-control/secrets/:id/reveal', async (req, res) => {
+		const access = missionControlAdminAccess(req)
+		if (!access.allowed) return sendMissionControlDenied(res, access)
+		const id = String(req.params.id || '')
+		try {
+			res.setHeader('Cache-Control', 'no-store')
+			res.json(await revealMissionControlSecret(id, { confirm: req.body?.confirm }))
+		} catch (err) {
+			return sendMissionControlSecretError(res, { action: 'reveal', id }, err)
+		}
+	})
+	app.post('/ops/mission-control/secrets/:id/update', async (req, res) => {
+		const access = missionControlAdminAccess(req)
+		if (!access.allowed) return sendMissionControlDenied(res, access)
+		const id = String(req.params.id || '')
+		try {
+			res.setHeader('Cache-Control', 'no-store')
+			res.json(await updateMissionControlSecret(id, { value: req.body?.value, confirm: req.body?.confirm }))
+		} catch (err) {
+			return sendMissionControlSecretError(res, { action: 'update', id }, err)
+		}
+	})
+	app.post('/ops/mission-control/secrets/:id/rotate', async (req, res) => {
+		const access = missionControlAdminAccess(req)
+		if (!access.allowed) return sendMissionControlDenied(res, access)
+		const id = String(req.params.id || '')
+		try {
+			res.setHeader('Cache-Control', 'no-store')
+			res.json(await rotateMissionControlSecret(id, { confirm: req.body?.confirm }))
+		} catch (err) {
+			return sendMissionControlSecretError(res, { action: 'rotate', id }, err)
+		}
+	})
+	app.post('/ops/mission-control/secrets/:id/test', async (req, res) => {
+		const access = missionControlAdminAccess(req)
+		if (!access.allowed) return sendMissionControlDenied(res, access)
+		const id = String(req.params.id || '')
+		try {
+			res.setHeader('Cache-Control', 'no-store')
+			res.json(await testMissionControlSecret(id))
+		} catch (err) {
+			return sendMissionControlSecretError(res, { action: 'test', id }, err)
+		}
 	})
 
 	// ---- File download (no auth: gated by the unguessable per-file token in the
