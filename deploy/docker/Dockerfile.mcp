@@ -6,7 +6,8 @@ COPY package.json package-lock.json ./
 RUN npm ci
 COPY . .
 ARG BUILD_DIST=1
-RUN rm -rf dist src/bld && if [ "$BUILD_DIST" = "1" ]; then npm run build; fi
+RUN rm -rf dist src/bld \
+    && if [ "$BUILD_DIST" = "1" ]; then npm run build && mkdir -p dist && cp src/bld/pptxgen.es.js dist/pptxgen.es.js; fi
 RUN npm prune --omit=dev
 
 FROM node:20-bookworm-slim AS runtime
