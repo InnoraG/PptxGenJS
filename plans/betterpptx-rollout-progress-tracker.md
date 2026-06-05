@@ -79,7 +79,7 @@ Scope: Track A private implementation hardening for `betterpptx-mcp`, aligned to
 | MC2 | Private Mission Control owner controls | Done | MC2 dashboard/data plus owner-secret status/reveal/update/rotate/test routes are deployed behind Cloud Run IAM and owner admin token. |
 | A9 | Telemetry/harness | Deployed stress verified | Aggregate telemetry, local harness, failure-injection harness, and private deployed staging stress all pass. Latest deployed stress passed on revision `betterpptx-mcp-staging-00026-zpf` with the MC2 edit-state gate and activation guard enforced: `node betterpptx-mcp/verify-deployed-staging-stress.mjs https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/mcp --use-gcloud-auth --sessions 1 --iterations 1 --require-mission-control --env-file C:\MyDoc\PptxGenJS_Claude\betterpptx-mcp\.betterpptx-mcp-runtime\dodo-local.env --require-activation`; earlier 3x2 stress passed on revision `00017-hcs`. |
 | Billing | Firestore-backed staging billing | Staging provider-origin verified | Dodo usage-credit checkout and real Dodo deduction are verified in test mode. Public webhook-only receiver writes signed custom-header synthetic webhooks to Firestore, handles Standard Webhooks decoded `whsec_` signing, and has processed a Dodo/Svix dashboard `subscription.active` webhook end-to-end. |
-| MC3 | 500-slide pricing/quality evidence run | Planned | New plan and tracker: `plans/betterpptx-mc3-500-slide-realworld-test-plan.md` and `plans/betterpptx-mc3-500-slide-test-tracker.md`. This must collect 100-deck/500-slide evidence before final Dodo pricing. |
+| MC3 | 500-slide pricing/quality evidence run | Snapshot gate passed | New plan and tracker: `plans/betterpptx-mc3-500-slide-realworld-test-plan.md` and `plans/betterpptx-mc3-500-slide-test-tracker.md`. Harness `betterpptx-mcp/run-mc3-realworld-harness.mjs` generated a 2-deck smoke, 5-deck pilot, and snapshot-gated 1-deck smoke through private staging. Latest pilot `mc3-pilot-20260605-01`: 5 decks / 25 slides / 197,024 downloaded bytes, with static checks and local COM repair verification passing all decks. Snapshot run `mc3-gcp-snapshot-smoke-20260605-04` captured baseline/postrun health, Mission Control, Cloud Run, recent build, and GCS size evidence; its deck passed static package and local COM repair checks. Full 100-deck/500-slide evidence is still required before final Dodo pricing. |
 
 ## Pending Production Inputs
 
@@ -121,6 +121,7 @@ node --check .\betterpptx-mcp\verify-mission-control-secret-routes.mjs
 node --check .\betterpptx-mcp\verify-single-instance-edit-state-guard.mjs
 node --check .\betterpptx-mcp\verify-public-gallery-repair.mjs
 node --check .\betterpptx-mcp\verify-deployed-staging-stress.mjs
+node --check .\betterpptx-mcp\run-mc3-realworld-harness.mjs
 node --check .\betterpptx-mcp\billing\customer-map.mjs
 node --check .\betterpptx-mcp\auth\entitlements.mjs
 node .\betterpptx-mcp\verify-a2-controls.mjs
@@ -132,6 +133,14 @@ node .\betterpptx-mcp\verify-mission-control-secrets.mjs
 node .\betterpptx-mcp\verify-mission-control-secret-routes.mjs
 node .\betterpptx-mcp\verify-single-instance-edit-state-guard.mjs
 node .\betterpptx-mcp\verify-public-gallery-repair.mjs --deck-dir C:\MyDoc\betterpptx-public-private\docs\examples\decks --decypher-index C:\MyDoc\PptxGenJS_Claude\dist\node\pptx-decypher\index.js --require-com
+node .\betterpptx-mcp\run-mc3-realworld-harness.mjs https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/mcp --use-gcloud-auth --env-file C:\MyDoc\PptxGenJS_Claude\betterpptx-mcp\.betterpptx-mcp-runtime\dodo-local.env --require-activation --max-decks 2 --run-id mc3-smoke-20260605-01
+node .\betterpptx-mcp\verify-public-gallery-repair.mjs --deck-dir C:\MyDoc\PptxGenJS_Claude\outputs\mc3-500-slide-run\mc3-smoke-20260605-01\decks --decypher-index C:\MyDoc\PptxGenJS_Claude\dist\node\pptx-decypher\index.js --require-com
+node .\betterpptx-mcp\run-mc3-realworld-harness.mjs https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/mcp --use-gcloud-auth --env-file C:\MyDoc\PptxGenJS_Claude\betterpptx-mcp\.betterpptx-mcp-runtime\dodo-local.env --require-activation --max-decks 5 --run-id mc3-pilot-20260605-01
+node .\betterpptx-mcp\verify-public-gallery-repair.mjs --deck-dir C:\MyDoc\PptxGenJS_Claude\outputs\mc3-500-slide-run\mc3-pilot-20260605-01\decks --decypher-index C:\MyDoc\PptxGenJS_Claude\dist\node\pptx-decypher\index.js --require-com
+node .\betterpptx-mcp\run-mc3-realworld-harness.mjs https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/mcp --use-gcloud-auth --env-file C:\MyDoc\PptxGenJS_Claude\betterpptx-mcp\.betterpptx-mcp-runtime\dodo-local.env --require-activation --max-decks 1 --skip-gcp-snapshot --run-id mc3-harness-code-smoke-20260605-01
+node .\betterpptx-mcp\verify-public-gallery-repair.mjs --deck-dir C:\MyDoc\PptxGenJS_Claude\outputs\mc3-500-slide-run\mc3-harness-code-smoke-20260605-01\decks --decypher-index C:\MyDoc\PptxGenJS_Claude\dist\node\pptx-decypher\index.js --require-com
+node .\betterpptx-mcp\run-mc3-realworld-harness.mjs https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/mcp --use-gcloud-auth --env-file C:\MyDoc\PptxGenJS_Claude\betterpptx-mcp\.betterpptx-mcp-runtime\dodo-local.env --require-activation --max-decks 1 --run-id mc3-gcp-snapshot-smoke-20260605-04
+node .\betterpptx-mcp\verify-public-gallery-repair.mjs --deck-dir C:\MyDoc\PptxGenJS_Claude\outputs\mc3-500-slide-run\mc3-gcp-snapshot-smoke-20260605-04\decks --decypher-index C:\MyDoc\PptxGenJS_Claude\dist\node\pptx-decypher\index.js --require-com
 .\deploy\gcp\deploy-mcp-staging.ps1
 ```
 
@@ -149,7 +158,7 @@ Private cleanup and hardening are complete for the current launch posture. No im
 
 Continue with:
 
-1. Implement and run MC3: deterministic 100-deck/500-slide private staging evidence run with local COM repair checks.
+1. Run MC3 full sequential corpus: deterministic 100-deck/500-slide private staging evidence run with baseline/postrun snapshots and local COM repair checks.
 2. Monitor Artifact Registry repository-size metadata after asynchronous cleanup; the listed images are already down to the two current `b2642b9` tags.
 3. Later, after MC3 and owner approval: public endpoint/domain and live Dodo product creation/switch.
 

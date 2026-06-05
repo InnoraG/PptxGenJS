@@ -4,7 +4,7 @@ Date opened: 2026-06-05
 
 Plan: `plans/betterpptx-mc3-500-slide-realworld-test-plan.md`
 
-Status: Planned, not yet run.
+Status: Snapshot gate passed; full MC3 run not yet started.
 
 Current owner gate: none. Live Dodo pricing remains blocked until MC3 data is complete and reviewed.
 
@@ -21,9 +21,9 @@ Current owner gate: none. Live Dodo pricing remains blocked until MC3 data is co
 | Milestone | Status | Evidence |
 | --- | --- | --- |
 | MC3.0 plan and tracker | Done | Plan and tracker created under `plans/`; rollout and Dodo trackers now point to MC3 as the required pre-pricing evidence track. |
-| MC3.1 harness implementation | Pending | Add deterministic 100-deck deployed harness with JSONL metrics and local repair verifier integration. |
-| MC3.2 baseline snapshots | Pending | Capture Cloud Run, GCS, Artifact Registry, Firestore, Secret Manager, Dodo, and Mission Control baseline before generation. |
-| MC3.3 pilot run | Pending | 5 decks / 25 slides, download, static validation, COM repair check. |
+| MC3.1 harness implementation | Done | Added `betterpptx-mcp/run-mc3-realworld-harness.mjs`. Syntax check passed, help output works, 2-deck deployed smoke `mc3-smoke-20260605-01` passed, 5-deck pilot passed, and post-snapshot-refactor code smoke `mc3-harness-code-smoke-20260605-01` passed. |
+| MC3.2 baseline snapshots | Done | `mc3-gcp-snapshot-smoke-20260605-04` wrote baseline and postrun snapshots with health=200, Mission Control=200, Cloud Run service metadata, recent Cloud Build metadata, and GCS bucket sizes. Baseline GCS size: 948,629 bytes; postrun GCS size: 988,023 bytes. |
+| MC3.3 pilot run | Done | `mc3-pilot-20260605-01` generated 5 decks / 25 slides / 197,024 downloaded bytes; static checks and local COM repair checks passed for all 5 decks. |
 | MC3.4 full sequential run | Pending | 100 decks / 500 slides through private Cloud Run MCP with concurrency 1. |
 | MC3.5 controlled concurrency run | Pending | Representative subset or full run under controlled concurrency while MCP max instances remains 1. |
 | MC3.6 editing/roundtrip run | Pending | B17/B18 inspect/update/duplicate/reorder/delete/open/save scenarios pass. |
@@ -60,20 +60,24 @@ Current owner gate: none. Live Dodo pricing remains blocked until MC3 data is co
 
 | Run ID | Type | Status | Decks attempted | Decks saved | Slides saved | Repair-free decks | Committed credits | Hosting cost estimate | Notes |
 | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| TBD | Pilot | Pending | 0 | 0 | 0 | 0 | 0 | TBD | Awaiting harness. |
-| TBD | Sequential full | Pending | 0 | 0 | 0 | 0 | 0 | TBD | Awaiting pilot pass. |
+| mc3-smoke-20260605-01 | Harness smoke | Done | 2 | 2 | 10 | 2 | TBD | TBD | Private staging generated and downloaded 2 decks / 10 slides / 78,789 bytes; local COM repair verifier passed both decks. |
+| mc3-pilot-20260605-01 | Pilot | Done | 5 | 5 | 25 | 5 | TBD | TBD | Private staging generated and downloaded 5 decks / 25 slides / 197,024 bytes; 200 tool-call rows, 5 deck rows, 5 billing estimate rows; local COM repair verifier passed all decks. |
+| mc3-harness-code-smoke-20260605-01 | Harness code smoke | Done | 1 | 1 | 5 | 1 | TBD | TBD | Post-snapshot-refactor run used `--skip-gcp-snapshot`, generated 1 deck / 5 slides / 39,412 bytes, and passed local COM repair verification. |
+| mc3-gcp-snapshot-smoke-20260605-03 | Snapshot smoke | Done | 1 | 1 | 5 | 1 | 10.26 estimated | Partial | Harness completed with bounded GCP snapshot behavior after the earlier timeout; postrun Cloud Run/Cloud Build metadata succeeded, but baseline metadata and GCS timed out under the first low timeout cap. |
+| mc3-gcp-snapshot-smoke-20260605-04 | Snapshot smoke | Done | 1 | 1 | 5 | 1 | 10.26 estimated | Pending analysis | Harness generated 1 deck / 5 slides / 39,394 bytes; 40 tool rows and 1 billing estimate row; static package check and local COM repair passed; baseline/postrun snapshots captured health, Mission Control, Cloud Run, recent builds, and GCS byte delta. |
+| TBD | Sequential full | Pending | 0 | 0 | 0 | 0 | 0 | TBD | Snapshot gate passed; ready for the 100-deck sequential run. |
 | TBD | Controlled concurrency | Pending | 0 | 0 | 0 | 0 | 0 | TBD | Awaiting sequential run. |
 
 ## Evidence Files To Produce
 
 | File | Status | Notes |
 | --- | --- | --- |
-| `outputs/mc3-500-slide-run/<run-id>/manifest.json` | Pending | Full scenario manifest and deployed revision. |
-| `outputs/mc3-500-slide-run/<run-id>/per-deck-results.jsonl` | Pending | One line per deck. |
-| `outputs/mc3-500-slide-run/<run-id>/per-tool-results.jsonl` | Pending | One line per tool call. |
-| `outputs/mc3-500-slide-run/<run-id>/billing-results.jsonl` | Pending | Billing events, reservations, Dodo usage and balance reconciliation. |
-| `outputs/mc3-500-slide-run/<run-id>/cost-snapshots/baseline.json` | Pending | Pre-run GCP/Dodo/MC snapshot. |
-| `outputs/mc3-500-slide-run/<run-id>/cost-snapshots/postrun.json` | Pending | Post-run snapshot. |
+| `outputs/mc3-500-slide-run/<run-id>/manifest.json` | Smoke produced | `mc3-smoke-20260605-01` wrote the manifest. |
+| `outputs/mc3-500-slide-run/<run-id>/per-deck-results.jsonl` | Smoke produced | `mc3-smoke-20260605-01` wrote 2 deck rows. |
+| `outputs/mc3-500-slide-run/<run-id>/per-tool-results.jsonl` | Smoke produced | `mc3-smoke-20260605-01` wrote 80 tool-call rows. |
+| `outputs/mc3-500-slide-run/<run-id>/billing-results.jsonl` | Smoke produced | `mc3-smoke-20260605-01` wrote 2 pre-save estimate rows; full reconciliation still pending. |
+| `outputs/mc3-500-slide-run/<run-id>/cost-snapshots/baseline.json` | Snapshot produced | `mc3-gcp-snapshot-smoke-20260605-04` wrote baseline health, Mission Control, Cloud Run, recent builds, and GCS size fields. |
+| `outputs/mc3-500-slide-run/<run-id>/cost-snapshots/postrun.json` | Snapshot produced | `mc3-gcp-snapshot-smoke-20260605-04` wrote postrun health, Mission Control, Cloud Run, recent builds, and GCS size fields. |
 | `outputs/mc3-500-slide-run/<run-id>/repair/repair-results.jsonl` | Pending | Local COM repair results. |
 | `outputs/mc3-500-slide-run/<run-id>/report/mc3-pricing-quality-cost-report.md` | Pending | Final evidence report. |
 
@@ -81,10 +85,10 @@ Current owner gate: none. Live Dodo pricing remains blocked until MC3 data is co
 
 | Check | Status | Evidence |
 | --- | --- | --- |
-| At least 100 deck files attempted | Pending | 0/100. |
-| At least 500 slides saved in valid PPTX files | Pending | 0/500. |
-| Every successful deck static package check passes | Pending | No run yet. |
-| Every successful deck opens in PowerPoint without repair | Pending | No COM run yet. |
+| At least 100 deck files attempted | Pending | Pilot: 5/100. |
+| At least 500 slides saved in valid PPTX files | Pending | Pilot: 25/500. |
+| Every successful deck static package check passes | Pilot passed | Pilot: 5/5 static package checks passed. Full run pending. |
+| Every successful deck opens in PowerPoint without repair | Pilot passed | Pilot: 5/5 local COM repair checks passed with `--require-com`. Full run pending. |
 | No public black-box leakage in tool schemas/results | Pending | Reuse deployed verifier plus MC3 scan. |
 | Dodo usage event ingestion is exactly-once for successful billable saves | Pending | No run yet. |
 | Failed/invalid decks are not counted as successful billable value | Pending | No run yet. |
@@ -102,8 +106,8 @@ Current owner gate: none. Live Dodo pricing remains blocked until MC3 data is co
 
 ## Next Actions
 
-1. Implement the deterministic MC3 harness.
-2. Add syntax checks and a 2-deck smoke mode.
-3. Run a 5-deck pilot through private staging.
-4. Run local static and COM repair checks on the pilot decks.
-5. Review pilot telemetry before the full 100-deck run.
+1. Run the full sequential 100-deck / 500-slide corpus with baseline/postrun snapshots.
+2. Run local static and COM repair checks on the full corpus.
+3. Reconcile billing usage: local ledger, Firestore queue, Dodo usage events, and Dodo balance.
+4. Produce the measured hosting-cost versus consumed-credit report.
+5. Draft the data-derived pricing recommendation without creating live Dodo products.
