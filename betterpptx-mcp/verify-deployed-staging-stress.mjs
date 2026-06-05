@@ -392,7 +392,8 @@ async function verifyMissionControl({ base, auth, required }) {
 	const result = await fetchJson(`${base}/ops/mission-control/data`, auth)
 	if (result.res.status === 404 && !required) return { enabled: false, status: 404 }
 	if (result.res.status !== 200) fail('Mission Control data endpoint failed', { status: result.res.status, body: result.data })
-	if (result.data?.mode !== 'MC1_READ_ONLY' || !Array.isArray(result.data?.gates)) fail('Mission Control payload was not MC1 data', result.data)
+	const allowedModes = new Set(['MC1_READ_ONLY', 'MC2_OWNER_SECRET_CONTROLS'])
+	if (!allowedModes.has(result.data?.mode) || !Array.isArray(result.data?.gates)) fail('Mission Control payload was not recognized dashboard data', result.data)
 	const issues = textIssues(result.data, 'mission-control')
 	if (issues.length) fail('Mission Control leaked black-box-banned terms', issues)
 	return {
