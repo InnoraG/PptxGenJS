@@ -116,7 +116,7 @@ Bucket:
 
 - `gs://betterpptx-mcp-staging-artifacts-860007156914`
 - Location: `US-CENTRAL1`
-- Current stored bytes: `530,980`
+- Current stored bytes: `554,612`
 - Public access prevention: enforced
 - Lifecycle: delete objects older than `3` days
 
