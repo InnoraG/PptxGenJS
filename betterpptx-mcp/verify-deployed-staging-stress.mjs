@@ -4,6 +4,7 @@
 // signed artifact URLs.
 
 import { execFileSync } from 'node:child_process'
+import fs from 'node:fs'
 
 const DEFAULT_SESSIONS = 3
 const DEFAULT_ITERATIONS = 2
@@ -14,6 +15,8 @@ function parseArgs(argv) {
 		sessions: DEFAULT_SESSIONS,
 		iterations: DEFAULT_ITERATIONS,
 		requireMissionControl: false,
+		requireActivation: false,
+		envFile: '',
 		useGcloudAuth: false,
 		authorization: '',
 	}
@@ -26,15 +29,34 @@ function parseArgs(argv) {
 		if (arg === '--sessions' && argv[i + 1]) { opts.sessions = Math.max(1, Number(argv[++i]) || DEFAULT_SESSIONS); continue }
 		if (arg === '--iterations' && argv[i + 1]) { opts.iterations = Math.max(1, Number(argv[++i]) || DEFAULT_ITERATIONS); continue }
 		if (arg === '--require-mission-control') { opts.requireMissionControl = true; continue }
+		if (arg === '--require-activation') { opts.requireActivation = true; continue }
+		if (arg === '--env-file' && argv[i + 1]) { opts.envFile = argv[++i]; continue }
 		if (arg === '--use-gcloud-auth' || arg === '--identity-token') { opts.useGcloudAuth = true; continue }
 		if ((arg === '--authorization' || arg === '--auth-header') && argv[i + 1]) { opts.authorization = argv[++i]; continue }
 		if (arg === '--help' || arg === '-h') {
-			console.log('Usage: node betterpptx-mcp/verify-deployed-staging-stress.mjs <mcp-or-base-url> [--use-gcloud-auth] [--sessions 3] [--iterations 2] [--require-mission-control]')
+			console.log('Usage: node betterpptx-mcp/verify-deployed-staging-stress.mjs <mcp-or-base-url> [--use-gcloud-auth] [--sessions 3] [--iterations 2] [--require-mission-control] [--env-file <path>] [--require-activation]')
 			process.exit(0)
 		}
 		throw new Error(`Unknown argument: ${arg}`)
 	}
 	return opts
+}
+
+function loadEnvFile(filePath) {
+	if (!filePath) return
+	const resolved = String(filePath)
+	if (!fs.existsSync(resolved)) throw new Error(`Env file not found: ${resolved}`)
+	const text = fs.readFileSync(resolved, 'utf8')
+	for (const rawLine of text.split(/\r?\n/)) {
+		const line = rawLine.trim()
+		if (!line || line.startsWith('#')) continue
+		const match = line.match(/^([A-Za-z_][A-Za-z0-9_]*)=(.*)$/)
+		if (!match) continue
+		const key = match[1]
+		let value = match[2].trim()
+		if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) value = value.slice(1, -1)
+		if (!process.env[key]) process.env[key] = value
+	}
 }
 
 function normalizeMcpUrl(value) {
@@ -260,9 +282,12 @@ async function verifyBlackBoxSurface({ mcpUrl, base, auth }) {
 	return { toolCount: listed.length, serverName: client.serverName }
 }
 
-async function maybeActivate(tool, sessionIndex) {
+async function maybeActivate(tool, sessionIndex, { requireActivation = false } = {}) {
 	let key = String(process.env.BETTERPPTX_VERIFY_ACTIVATION_KEY || '').trim()
 	if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) key = key.slice(1, -1)
+	if (!key && requireActivation) {
+		fail('Activation key is required for deployed billing stress. Set BETTERPPTX_VERIFY_ACTIVATION_KEY or pass --env-file with the private Dodo test env.', { requireActivation })
+	}
 	if (!key) return null
 	return requireOk('auth.activate_key', await tool('betterpptx.auth.activate_key', {
 		key,
@@ -285,9 +310,9 @@ async function verifyDownload(downloadUrl, base, auth, expectedBytes) {
 	return bytes.length
 }
 
-async function runWorkSession({ mcpUrl, base, auth, sessionIndex, iterations }) {
+async function runWorkSession({ mcpUrl, base, auth, sessionIndex, iterations, requireActivation }) {
 	const client = await createRpc(mcpUrl, auth, `deployed-staging-stress-${sessionIndex}`)
-	await maybeActivate(client.tool, sessionIndex)
+	await maybeActivate(client.tool, sessionIndex, { requireActivation })
 	let savedDecks = 0
 	let downloadedBytes = 0
 	for (let i = 0; i < iterations; i++) {
@@ -409,6 +434,7 @@ async function verifyMissionControl({ base, auth, required }) {
 
 async function main() {
 	const opts = parseArgs(process.argv.slice(2))
+	loadEnvFile(opts.envFile)
 	const mcpUrl = normalizeMcpUrl(opts.mcpUrl)
 	const base = baseUrl(mcpUrl)
 	const auth = authValue(opts)
@@ -421,6 +447,7 @@ async function main() {
 		auth,
 		sessionIndex: i + 1,
 		iterations: opts.iterations,
+		requireActivation: opts.requireActivation,
 	})))
 	const mc = await verifyMissionControl({ base, auth, required: opts.requireMissionControl })
 	console.log(`mission-control -> ${mc.enabled ? `PASS toolCalls=${mc.toolCalls} downloads=${mc.downloads} gates=${mc.gates}` : 'SKIP disabled'}`)

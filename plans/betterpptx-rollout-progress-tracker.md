@@ -139,7 +139,7 @@ Additional Dodo/private verification passed locally:
 ```powershell
 node .\betterpptx-mcp\dodo-admin-bootstrap.mjs
 node .\betterpptx-mcp\dodo-live-verify.mjs
-node .\betterpptx-mcp\verify-deployed-staging-stress.mjs https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/mcp --use-gcloud-auth --sessions 1 --iterations 1 --require-mission-control
+node .\betterpptx-mcp\verify-deployed-staging-stress.mjs https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/mcp --use-gcloud-auth --sessions 1 --iterations 1 --require-mission-control --env-file C:\MyDoc\PptxGenJS_Claude\betterpptx-mcp\.betterpptx-mcp-runtime\dodo-local.env --require-activation
 ```
 
 ## Next Planned Increment
