@@ -73,7 +73,7 @@ Current owner gate: none for continued private hardening. Owner approval is requ
 | mc3-b17-repair-safe-20260605-01 | Replacement subset | Done | 5 | 25 | 5 | 51.3 | Repair-safe B17 replacement passed COM. |
 | mc3-b01-b05-clean-20260605-01 plus replacements | Sequential subset | Done with caveat | 25 | 125 | 25 | 259.2 | Transient session invalidation replacements selected for B05. |
 | mc3-aggregate-20260605-03 | Final aggregate | Done | 100 | 500 | 100 | 1,000.8 | `PUBLIC GALLERY REPAIR VERIFY: PASS decks=100 com=required`. |
-| betterpptx-billing-reconcile-once-v7hhv | Billing reconciler | Done | N/A | N/A | N/A | N/A | Cloud Run Job on active image `db38d11`: `attempted=0 ingested=0 skipped=0 failed=0`. |
+| betterpptx-billing-reconcile-once-tqc62 | Billing reconciler | Done | N/A | N/A | N/A | N/A | Post-deploy Cloud Run Job on private commit `216e964`: `attempted=0 ingested=0 skipped=0 failed=0`. |
 
 ## Evidence Files
 

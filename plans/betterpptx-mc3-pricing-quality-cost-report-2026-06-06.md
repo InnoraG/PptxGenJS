@@ -32,7 +32,7 @@ Hosting-cost conclusion:
 Billing conclusion:
 
 - Dodo test-mode credit deduction is working.
-- The Firestore queued-usage reconciler is fixed and currently reports no queued usage left.
+- The Firestore queued-usage reconciler is fixed and currently reports no queued usage left. Post-deploy execution `betterpptx-billing-reconcile-once-tqc62` on private commit `216e964` returned `attempted=0 ingested=0 skipped=0 failed=0`.
 - Dodo ledger snapshots show provider-side credit deductions and a remaining test balance, but the current test customer was reused across smoke, pilot, failed, replacement, and aggregate runs. Therefore the aggregate should use the harness estimate as the clean pricing denominator.
 - Added `betterpptx-mcp/dodo-test-billing-snapshot.mjs` for clean future before/after provider snapshots.
 
