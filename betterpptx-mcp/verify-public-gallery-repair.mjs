@@ -89,8 +89,20 @@ async function verifyStaticPackage(pptxPath) {
 	let slideCount = 0
 	let danglingRels = 0
 	let forbiddenMatches = 0
+	let duplicateContentTypeOverrides = 0
+	let sharedChartRelationshipTargets = 0
+	const chartTargetSlides = new Map()
 
 	if (!zip.file('[Content_Types].xml')) issues.push('missing [Content_Types].xml')
+	if (zip.file('[Content_Types].xml')) {
+		const contentTypesXml = await zip.file('[Content_Types].xml').async('string')
+		const seenOverrides = new Set()
+		for (const match of contentTypesXml.matchAll(/<Override\b[^>]*\bPartName="([^"]+)"/g)) {
+			const partName = match[1]
+			if (seenOverrides.has(partName)) duplicateContentTypeOverrides += 1
+			else seenOverrides.add(partName)
+		}
+	}
 	if (!zip.file('ppt/presentation.xml')) issues.push('missing ppt/presentation.xml')
 
 	for (const name of names) {
@@ -113,17 +125,29 @@ async function verifyStaticPackage(pptxPath) {
 		const relsName = `ppt/slides/_rels/${match[1]}.xml.rels`
 		const relsXml = zip.file(relsName) ? await zip.file(relsName).async('string') : ''
 		const declaredIds = new Set([...relsXml.matchAll(/Id="([^"]+)"/g)].map(x => x[1]))
+		for (const relMatch of relsXml.matchAll(/<Relationship\b[^>]*>/g)) {
+			const tag = relMatch[0]
+			if (!/relationships\/chart(?:Ex)?"/i.test(tag)) continue
+			const target = tag.match(/\bTarget="([^"]+)"/)?.[1]
+			if (!target) continue
+			const key = target.replace(/\\/g, '/')
+			if (!chartTargetSlides.has(key)) chartTargetSlides.set(key, new Set())
+			chartTargetSlides.get(key).add(name)
+		}
 		for (const ref of xml.matchAll(/r:(?:embed|id|link)="([^"]+)"/g)) {
 			if (!declaredIds.has(ref[1])) danglingRels += 1
 		}
 	}
+	sharedChartRelationshipTargets = [...chartTargetSlides.values()].filter(slides => slides.size > 1).length
 
 	if (slideCount < 1) issues.push('no slides found')
 	if (errors.length) issues.push(`xml parse issues: ${errors.length}`)
 	if (danglingRels) issues.push(`dangling slide relationships: ${danglingRels}`)
 	if (forbiddenMatches) issues.push(`forbidden disclosure text matches: ${forbiddenMatches}`)
+	if (duplicateContentTypeOverrides) issues.push(`duplicate content type overrides: ${duplicateContentTypeOverrides}`)
+	if (sharedChartRelationshipTargets) issues.push(`shared chart relationship targets: ${sharedChartRelationshipTargets}`)
 
-	return { ok: issues.length === 0, bytes: buf.length, slideCount, xmlIssues: errors.length, danglingRels, forbiddenMatches, issues }
+	return { ok: issues.length === 0, bytes: buf.length, slideCount, xmlIssues: errors.length, danglingRels, forbiddenMatches, duplicateContentTypeOverrides, sharedChartRelationshipTargets, issues }
 }
 
 function resolveDecypherIndex(explicitPath) {

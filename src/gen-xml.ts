@@ -1103,11 +1103,12 @@ function slideObjectToXml(slide: PresSlide | SlideLayout): string {
 					// eslint-disable-next-line @typescript-eslint/no-explicit-any
 					const mediaLocalShapeId = (slideItemObj.options as any).spid || idx + 2
 					const mediaLocalCreationId = (slide._slideNum * 10000) + Number(mediaLocalShapeId)
+					const mediaFileTag = slideItemObj.mtype === 'audio' ? 'audioFile' : 'videoFile'
 					strSlideXml += `<p:cNvPr id="${mediaLocalShapeId}" name="${slideItemObj.options.objectName
 						}" creationId="${mediaLocalCreationId}"><a:hlinkClick r:id="" action="ppaction://media"/></p:cNvPr>`
 					strSlideXml += ' <p:cNvPicPr><a:picLocks noChangeAspect="1"/></p:cNvPicPr>'
 					strSlideXml += ' <p:nvPr>'
-					strSlideXml += `  <a:videoFile r:link="rId${slideItemObj.mediaRid}"/>`
+					strSlideXml += `  <a:${mediaFileTag} r:link="rId${slideItemObj.mediaRid}"/>`
 					strSlideXml += '  <p:extLst>'
 					strSlideXml += '   <p:ext uri="{DAA4B4D4-6D71-4841-9C94-3DE7FCFB9230}">'
 					strSlideXml += `    <p14:media r:embed="rId${slideItemObj.mediaRid + 1}"/>`
@@ -2175,6 +2176,9 @@ export function makeXmlContTypes(
 	if (usedExtensions.has('m4v')) {
 		strXml += '<Default Extension="m4v" ContentType="video/mp4"/>'
 	}
+	if (usedExtensions.has('m4a')) {
+		strXml += '<Default Extension="m4a" ContentType="audio/mp4"/>'
+	}
 	if (usedExtensions.has('mp4')) {
 		strXml += '<Default Extension="mp4" ContentType="video/mp4"/>'
 	}
@@ -2210,26 +2214,38 @@ export function makeXmlContTypes(
 		}
 	})
 
+	const overridePartNames = new Set<string>()
+	const addContentTypeOverride = (partName: string, contentType: string) => {
+		if (!partName || !contentType) return
+		const normalizedPartName = partName.startsWith('/') ? partName : `/${partName}`
+		if (overridePartNames.has(normalizedPartName)) return
+		overridePartNames.add(normalizedPartName)
+		strXml += `<Override PartName="${encodeXmlEntities(normalizedPartName)}" ContentType="${encodeXmlEntities(contentType)}"/>`
+	}
+
 	// STEP 2: Add presentation and slide master(s)/slide(s)
 	strXml += `<Override PartName="/ppt/presentation.xml" ContentType="${encodeXmlEntities(rawPresentationContentType || 'application/vnd.openxmlformats-officedocument.presentationml.presentation.main+xml')}"/>`
+	overridePartNames.add('/ppt/presentation.xml')
 	strXml += '<Override PartName="/ppt/notesMasters/notesMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.notesMaster+xml"/>'
+	overridePartNames.add('/ppt/notesMasters/notesMaster1.xml')
 	// Add slide master(s) - typically just 1 master, not one per slide
 	strXml += '<Override PartName="/ppt/slideMasters/slideMaster1.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideMaster+xml"/>'
+	overridePartNames.add('/ppt/slideMasters/slideMaster1.xml')
 	// Add each slide
 	slides.forEach((slide, idx) => {
-		strXml += `<Override PartName="/ppt/slides/slide${idx + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slide+xml"/>`
+		addContentTypeOverride(`/ppt/slides/slide${idx + 1}.xml`, 'application/vnd.openxmlformats-officedocument.presentationml.slide+xml')
 		// Add charts if any
 		slide._relsChart.forEach(rel => {
 			const chartPartName = rel.Target.startsWith('../charts/') ? `/ppt/charts/${rel.Target.substring('../charts/'.length)}` : rel.Target
 			const chartContentType = rel.chartFamily === 'chartEx'
 				? 'application/vnd.ms-office.chartex+xml'
 				: 'application/vnd.openxmlformats-officedocument.drawingml.chart+xml'
-			strXml += `<Override PartName="${chartPartName}" ContentType="${chartContentType}"/>`
+			addContentTypeOverride(chartPartName, chartContentType)
 			const rawOpts = rel.opts as any
 			const chartStyleName = rawOpts._rawChartStyleName || (rel.chartFamily === 'chartEx' ? `style${rel.globalId}.xml` : null)
 			const chartColorsName = rawOpts._rawChartColorsName || (rel.chartFamily === 'chartEx' ? `colors${rel.globalId}.xml` : null)
-			if (chartStyleName) strXml += `<Override PartName="/ppt/charts/${chartStyleName}" ContentType="application/vnd.ms-office.chartstyle+xml"/>`
-			if (chartColorsName) strXml += `<Override PartName="/ppt/charts/${chartColorsName}" ContentType="application/vnd.ms-office.chartcolorstyle+xml"/>`
+			if (chartStyleName) addContentTypeOverride(`/ppt/charts/${chartStyleName}`, 'application/vnd.ms-office.chartstyle+xml')
+			if (chartColorsName) addContentTypeOverride(`/ppt/charts/${chartColorsName}`, 'application/vnd.ms-office.chartcolorstyle+xml')
 		})
 	})
 
@@ -2241,16 +2257,16 @@ export function makeXmlContTypes(
 
 	// STEP 4: Add Slide Layouts
 slideLayouts.forEach((layout, idx) => {
-strXml += `<Override PartName="/ppt/slideLayouts/slideLayout${idx + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml"/>`
+addContentTypeOverride(`/ppt/slideLayouts/slideLayout${idx + 1}.xml`, 'application/vnd.openxmlformats-officedocument.presentationml.slideLayout+xml')
 ; (layout._relsChart || []).forEach(rel => {
 const chartPartName = rel.Target.startsWith('../charts/') ? `/ppt/charts/${rel.Target.substring('../charts/'.length)}` : rel.Target
 const chartContentType = rel.chartFamily === 'chartEx' ? 'application/vnd.ms-office.chartex+xml' : 'application/vnd.openxmlformats-officedocument.drawingml.chart+xml'
-strXml += ' <Override PartName="' + chartPartName + '" ContentType="' + chartContentType + '"/>'
+addContentTypeOverride(chartPartName, chartContentType)
 const rawOpts = rel.opts as any
 const chartStyleName = rawOpts._rawChartStyleName || (rel.chartFamily === 'chartEx' ? `style${rel.globalId}.xml` : null)
 const chartColorsName = rawOpts._rawChartColorsName || (rel.chartFamily === 'chartEx' ? `colors${rel.globalId}.xml` : null)
-if (chartStyleName) strXml += ' <Override PartName="/ppt/charts/' + chartStyleName + '" ContentType="application/vnd.ms-office.chartstyle+xml"/>'
-if (chartColorsName) strXml += ' <Override PartName="/ppt/charts/' + chartColorsName + '" ContentType="application/vnd.ms-office.chartcolorstyle+xml"/>'
+if (chartStyleName) addContentTypeOverride('/ppt/charts/' + chartStyleName, 'application/vnd.ms-office.chartstyle+xml')
+if (chartColorsName) addContentTypeOverride('/ppt/charts/' + chartColorsName, 'application/vnd.ms-office.chartcolorstyle+xml')
 })
 })
 
@@ -2263,22 +2279,19 @@ if (chartColorsName) strXml += ' <Override PartName="/ppt/charts/' + chartColors
 	;(masterSlide?._relsChart || []).forEach(rel => {
 		const chartPartName = rel.Target.startsWith('../charts/') ? `/ppt/charts/${rel.Target.substring('../charts/'.length)}` : rel.Target
 		const chartContentType = rel.chartFamily === 'chartEx' ? 'application/vnd.ms-office.chartex+xml' : 'application/vnd.openxmlformats-officedocument.drawingml.chart+xml'
-		strXml += ' <Override PartName="' + chartPartName + '" ContentType="' + chartContentType + '"/>'
+		addContentTypeOverride(chartPartName, chartContentType)
 		const rawOpts = rel.opts as any
 		const chartStyleName = rawOpts._rawChartStyleName || (rel.chartFamily === 'chartEx' ? `style${rel.globalId}.xml` : null)
 		const chartColorsName = rawOpts._rawChartColorsName || (rel.chartFamily === 'chartEx' ? `colors${rel.globalId}.xml` : null)
-		if (chartStyleName) strXml += ' <Override PartName="/ppt/charts/' + chartStyleName + '" ContentType="application/vnd.ms-office.chartstyle+xml"/>'
-		if (chartColorsName) strXml += ' <Override PartName="/ppt/charts/' + chartColorsName + '" ContentType="application/vnd.ms-office.chartcolorstyle+xml"/>'
+		if (chartStyleName) addContentTypeOverride('/ppt/charts/' + chartStyleName, 'application/vnd.ms-office.chartstyle+xml')
+		if (chartColorsName) addContentTypeOverride('/ppt/charts/' + chartColorsName, 'application/vnd.ms-office.chartcolorstyle+xml')
 	})
 
 	// STEP 7: Add raw package passthrough overrides for decyphered template infrastructure.
 	const addOverride = (partPath: string, contentType: string) => {
 		let normalizedPath = partPath
 		while (normalizedPath.startsWith('/')) normalizedPath = normalizedPath.substring(1)
-		const partName = '/' + normalizedPath
-		if (!strXml.includes(`PartName="${partName}"`)) {
-			strXml += ` <Override PartName="${partName}" ContentType="${contentType}"/>`
-		}
+		addContentTypeOverride('/' + normalizedPath, contentType)
 	}
 	;(rawPackageParts || []).forEach(part => {
 		let partPath = part?.path || ''

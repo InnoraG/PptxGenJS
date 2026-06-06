@@ -446,6 +446,46 @@ function dataSeries(s, slideNo) {
 	]
 }
 
+const STORY_BEATS = ['Signal', 'Proof', 'Decision', 'Action', 'Outcome']
+const FAMILY_STORIES = {
+	1: ['Executive health snapshot', 'Revenue and margin signal', 'Risk-adjusted decision', 'Operating action plan', 'Board-ready outcome'],
+	2: ['Product promise', 'Feature adoption proof', 'Plan and pricing signal', 'Customer workflow impact', 'Expansion-ready close'],
+	3: ['Operations control room', 'SLA pressure points', 'Capacity and queue proof', 'Exception response loop', 'Daily operating outcome'],
+	4: ['Data question', 'Trend proof', 'Segment comparison', 'Decision threshold', 'Narrative conclusion'],
+	5: ['Structured report brief', 'Metric comparison', 'Variance review', 'Owner action table', 'Executive summary table'],
+	6: ['Brand foundation', 'Palette behavior', 'Typography hierarchy', 'Component system', 'Theme consistency'],
+	7: ['Image-led context', 'Media crop decision', 'Proof annotation', 'Visual emphasis', 'Campaign-ready frame'],
+	8: ['Vector concept', 'Custom geometry proof', 'Icon system', 'Diagram construction', 'Reusable visual language'],
+	9: ['Type as signal', 'Expressive emphasis', 'Text depth proof', 'Readable highlight', 'Editorial finish'],
+	10: ['Shape grammar', 'Gradient proof', 'Depth and shadow', 'Effect hierarchy', 'Polished component set'],
+	11: ['Process map', 'Role hierarchy', 'Architecture proof', 'Dependency path', 'Execution model'],
+	12: ['Technical question', 'Formula proof', 'Assumption model', 'Sensitivity readout', 'Decision equation'],
+	13: ['Motion intent', 'Reveal sequence', 'Emphasis proof', 'Timing discipline', 'Animated close'],
+	14: ['Transition intent', 'Morph continuity', 'Directional movement', 'Pacing proof', 'Autoplay-ready flow'],
+	15: ['Narration opening', 'Voice-timed proof', 'Cue-synced reveal', 'Caption and notes', 'Repair-safe narrated close'],
+	16: ['3D context', 'Model placement', 'Perspective proof', 'Scene explanation', 'Spatial close'],
+	17: ['Existing deck intake', 'Targeted edit proof', 'Duplicate and reorder', 'Correction review', 'Saved edited result'],
+	18: ['Correction request', 'Before signal', 'Patch application', 'Retry-safe update', 'Final corrected view'],
+	19: ['Boundary condition', 'Unsafe fetch denial', 'Valid fallback', 'Telemetry evidence', 'Safe artifact result'],
+	20: ['Customer brief', 'Multi-feature build', 'Validation loop', 'Billing estimate', 'Final deliverable'],
+}
+
+function storyFor(s, slideNo) {
+	const titles = FAMILY_STORIES[s.batchNumber] || []
+	const title = titles[slideNo] || `${s.family} proof ${slideNo + 1}`
+	const beat = STORY_BEATS[slideNo] || `Step ${slideNo + 1}`
+	return {
+		title,
+		beat,
+		subtitle: `${beat} for ${s.family.toLowerCase()} variant ${s.variant}`,
+		proof: `Measures quality, speed, cost, and delivery confidence from a saved PowerPoint artifact.`,
+	}
+}
+
+function publicObjectName(scenario, slideIndex, token, extra = '') {
+	return `bp${scenario.batchNumber}v${scenario.variant}s${slideIndex}-${token}${extra}`
+}
+
 class HarnessRecorder {
 	constructor({ runId, runDir }) {
 		this.runId = runId
@@ -586,9 +626,16 @@ async function maybeActivate(client, recorder, scenario, requireActivation) {
 }
 
 async function addSlideWithBase({ client, recorder, scenario, deckId, slideNo }) {
-	const background = slideNo % 2
-		? { color: 'F8FAFC' }
-		: { color: 'FFFFFF' }
+	const story = storyFor(scenario, slideNo)
+	const background = {
+		type: 'gradient',
+		gradientAngle: slideNo % 2 ? 20 : 340,
+		gradientStops: [
+			{ color: slideNo % 2 ? 'F8FAFC' : 'FFFFFF', position: 0 },
+			{ color: slideNo % 2 ? 'E0F2FE' : 'ECFDF5', position: 58 },
+			{ color: slideNo % 2 ? 'FFF7ED' : 'F8FAFC', position: 100 },
+		],
+	}
 	const slidePayload = await callTool({
 		client,
 		recorder,
@@ -598,7 +645,7 @@ async function addSlideWithBase({ client, recorder, scenario, deckId, slideNo })
 			deckId,
 			background,
 			transition: { type: slideNo === 1 ? 'morph' : 'fade', option: slideNo === 1 ? 'byObject' : undefined, duration: 500 + slideNo * 50 },
-			notes: `${scenario.scenarioId} slide ${slideNo + 1} private MC3 evidence.`,
+			notes: `${story.title}. ${story.proof}`,
 			idempotencyKey: `${scenario.scenarioId}-slide-${slideNo}`,
 		},
 	})
@@ -607,18 +654,85 @@ async function addSlideWithBase({ client, recorder, scenario, deckId, slideNo })
 		client,
 		recorder,
 		scenario,
+		toolName: 'betterpptx.slide.add_shape',
+		args: {
+			deckId,
+			slideIndex: slide.slideIndex,
+			shapeName: 'roundRect',
+			options: {
+				x: 0.38,
+				y: 0.22,
+				w: 12.45,
+				h: 6.72,
+				fill: { color: 'FFFFFF', transparency: 8 },
+				line: { color: 'E2E8F0', transparency: 30, width: 1 },
+				shadow: { type: 'outer', color: '94A3B8', opacity: 0.18, blur: 2, angle: 45, distance: 1.2 },
+				objectName: `${scenario.scenarioId}-s${slideNo}-canvas-panel`,
+			},
+			idempotencyKey: `${scenario.scenarioId}-s${slideNo}-canvas-panel`,
+		},
+	})
+	await callTool({
+		client,
+		recorder,
+		scenario,
+		toolName: 'betterpptx.slide.add_shape',
+		args: {
+			deckId,
+			slideIndex: slide.slideIndex,
+			shapeName: 'rect',
+			options: {
+				x: 0.38,
+				y: 0.22,
+				w: 0.16,
+				h: 6.72,
+				fill: { color: accentFor(scenario, slideNo) },
+				line: { color: accentFor(scenario, slideNo), transparency: 100 },
+				objectName: `${scenario.scenarioId}-s${slideNo}-accent-rail`,
+			},
+			idempotencyKey: `${scenario.scenarioId}-s${slideNo}-accent-rail`,
+		},
+	})
+	for (let i = 0; i < 3; i++) {
+		await callTool({
+			client,
+			recorder,
+			scenario,
+			toolName: 'betterpptx.slide.add_shape',
+			args: {
+				deckId,
+				slideIndex: slide.slideIndex,
+				shapeName: 'ellipse',
+				options: {
+					x: 10.72 + i * 0.42,
+					y: 0.42,
+					w: 0.16,
+					h: 0.16,
+					fill: { color: accentFor(scenario, slideNo + i) },
+					line: { color: accentFor(scenario, slideNo + i), transparency: 100 },
+					shadow: { type: 'outer', color: 'CBD5E1', opacity: 0.18, blur: 1, angle: 45, distance: 0.5 },
+					objectName: `${scenario.scenarioId}-s${slideNo}-proof-dot-${i}`,
+				},
+				idempotencyKey: `${scenario.scenarioId}-s${slideNo}-proof-dot-${i}`,
+			},
+		})
+	}
+	await callTool({
+		client,
+		recorder,
+		scenario,
 		toolName: 'betterpptx.slide.add_text',
 		args: {
 			deckId,
 			slideIndex: slide.slideIndex,
-			text: `${scenario.family} ${slideNo + 1}`,
+			text: story.title,
 			options: {
 				x: 0.55,
 				y: 0.35,
 				w: 8.6,
-				h: 0.42,
+				h: 0.62,
 				fontFace: 'Aptos Display',
-				fontSize: 19,
+				fontSize: 24,
 				bold: true,
 				color: colorFor(scenario),
 				objectName: `${scenario.scenarioId}-s${slideNo}-title`,
@@ -634,9 +748,31 @@ async function addSlideWithBase({ client, recorder, scenario, deckId, slideNo })
 		args: {
 			deckId,
 			slideIndex: slide.slideIndex,
+			text: story.subtitle,
+			options: {
+				x: 0.62,
+				y: 0.88,
+				w: 8.8,
+				h: 0.28,
+				fontFace: 'Aptos',
+				fontSize: 10.5,
+				color: '64748B',
+				objectName: `${scenario.scenarioId}-s${slideNo}-subtitle`,
+			},
+			idempotencyKey: `${scenario.scenarioId}-s${slideNo}-subtitle`,
+		},
+	})
+	await callTool({
+		client,
+		recorder,
+		scenario,
+		toolName: 'betterpptx.slide.add_text',
+		args: {
+			deckId,
+			slideIndex: slide.slideIndex,
 			text: [
-				{ text: `Scenario ${scenario.scenarioId}: `, options: { bold: true } },
-				{ text: 'deterministic scenario data for quality, speed, billing, and stability.' },
+				{ text: `${String(slideNo + 1).padStart(2, '0')} / 05  `, options: { bold: true, color: accentFor(scenario, slideNo) } },
+				{ text: `${story.beat}: ${story.proof}` },
 			],
 			options: {
 				x: 0.6,
@@ -654,27 +790,39 @@ async function addSlideWithBase({ client, recorder, scenario, deckId, slideNo })
 	return slide.slideIndex
 }
 
-async function addKpiCards(ctx, slideIndex) {
+async function addKpiCards(ctx, slideIndex, layout = {}) {
 	const { client, recorder, scenario, deckId } = ctx
+	const cards = layout.cards || [
+		['Speed', `${80 + scenario.variant * 2}%`],
+		['Quality', `${81 + scenario.variant * 2}%`],
+		['Cost', `${82 + scenario.variant * 2}%`],
+	]
+	const x = layout.x ?? 0.75
+	const y = layout.y ?? 1.25
+	const w = layout.w ?? 2.55
+	const h = layout.h ?? 1.05
+	const gap = layout.gap ?? 0.7
+	const fontSize = layout.fontSize ?? 13
 	for (let i = 0; i < 3; i++) {
+		const [label, value] = cards[i] || cards[cards.length - 1]
 		await callTool({
 			client, recorder, scenario, toolName: 'betterpptx.slide.add_shape',
 			args: {
 				deckId,
 				slideIndex,
 				shapeName: 'roundRect',
-				text: `${['Speed', 'Quality', 'Cost'][i]}\n${80 + scenario.variant * 2 + i}%`,
+				text: `${label}\n${value}`,
 				options: {
-					x: 0.75 + i * 3.25,
-					y: 1.25,
-					w: 2.55,
-					h: 1.05,
+					x: x + i * (w + gap),
+					y,
+					w,
+					h,
 					fill: { color: i === 0 ? accentFor(scenario) : 'FFFFFF' },
 					line: { color: accentFor(scenario), width: 1 },
 					shadow: { type: 'outer', color: 'CBD5E1', opacity: 0.28, blur: 1, angle: 45, distance: 1 },
-					objectName: `${scenario.scenarioId}-kpi-${slideIndex}-${i}`,
+					objectName: publicObjectName(scenario, slideIndex, 'metric', `-${i}`),
 				},
-				textOptions: { fontSize: 13, bold: true, color: colorFor(scenario), align: 'center', valign: 'mid' },
+				textOptions: { fontSize, bold: true, color: colorFor(scenario), align: 'center', valign: 'mid' },
 				idempotencyKey: `${scenario.scenarioId}-kpi-${slideIndex}-${i}`,
 			},
 		})
@@ -706,8 +854,9 @@ async function addSingleCallout(ctx, slideIndex) {
 	})
 }
 
-async function addChart(ctx, slideIndex, chartType = 'bar') {
+async function addChart(ctx, slideIndex, chartType = 'bar', layout = {}) {
 	const { client, recorder, scenario, deckId } = ctx
+	const key = layout.key ? `-${layout.key}` : ''
 	await callTool({
 		client, recorder, scenario, toolName: 'betterpptx.slide.add_chart',
 		args: {
@@ -716,49 +865,222 @@ async function addChart(ctx, slideIndex, chartType = 'bar') {
 			chartType,
 			data: dataSeries(scenario, slideIndex),
 			options: {
-				x: 0.85,
-				y: 1.25,
-				w: 5.2,
-				h: 3.2,
+				x: layout.x ?? 0.85,
+				y: layout.y ?? 1.25,
+				w: layout.w ?? 5.2,
+				h: layout.h ?? 3.2,
 				showTitle: true,
-				title: `${chartType} comparison`,
+				title: layout.title || `${chartType} comparison`,
 				chartColors: [accentFor(scenario), colorFor(scenario, 2)],
 				showLegend: true,
 				dataLabelPosition: 'bestFit',
-				objectName: `${scenario.scenarioId}-chart-${slideIndex}-${chartType}`,
+				objectName: publicObjectName(scenario, slideIndex, 'viz', `-${chartType}${key}`),
 			},
-			idempotencyKey: `${scenario.scenarioId}-chart-${slideIndex}-${chartType}`,
+			idempotencyKey: `${scenario.scenarioId}-chart-${slideIndex}-${chartType}${key}`,
 		},
 	})
 }
 
-async function addTable(ctx, slideIndex) {
+async function addTable(ctx, slideIndex, layout = {}) {
 	const { client, recorder, scenario, deckId } = ctx
+	const key = layout.key ? `-${layout.key}` : ''
 	await callTool({
 		client, recorder, scenario, toolName: 'betterpptx.slide.add_table',
 		args: {
 			deckId,
 			slideIndex,
-			rows: [
+			rows: layout.rows || [
 				[{ text: 'Metric', options: { bold: true } }, { text: 'Value', options: { bold: true } }],
 				[{ text: 'Quality' }, { text: `${85 + scenario.variant}%` }],
 			],
 			options: {
-				x: 0.85,
-				y: 1.25,
-				w: 4.4,
-				h: 0.95,
-				colW: [2.3, 1.6],
+				x: layout.x ?? 0.85,
+				y: layout.y ?? 1.25,
+				w: layout.w ?? 4.4,
+				h: layout.h ?? 0.95,
+				colW: layout.colW || [2.3, 1.6],
 				border: { color: 'CBD5E1', width: 1 },
 				fill: { color: 'F8FAFC' },
-				fontSize: 10,
+				fontSize: layout.fontSize ?? 10,
 				headerRow: true,
 				bandedRows: true,
-				objectName: `${scenario.scenarioId}-table-${slideIndex}`,
+				objectName: publicObjectName(scenario, slideIndex, 'readout', key),
 			},
-			idempotencyKey: `${scenario.scenarioId}-table-${slideIndex}`,
+			idempotencyKey: `${scenario.scenarioId}-table-${slideIndex}${key}`,
 		},
 	})
+}
+
+async function addInsightPanel(ctx, slideIndex, slideNo, layout = {}) {
+	const { client, recorder, scenario, deckId } = ctx
+	const story = storyFor(scenario, slideNo)
+	const x = layout.x ?? 6.35
+	const y = layout.y ?? 1.25
+	await callTool({
+		client, recorder, scenario, toolName: 'betterpptx.slide.add_shape',
+		args: {
+			deckId,
+			slideIndex,
+			shapeName: 'roundRect',
+			text: `${story.beat}\n${story.proof}`,
+			options: {
+				x,
+				y,
+				w: layout.w ?? 4.9,
+				h: layout.h ?? 1.05,
+				fill: { color: 'F8FAFC' },
+				line: { color: 'CBD5E1', width: 1 },
+				shadow: { type: 'outer', color: 'CBD5E1', opacity: 0.2, blur: 1, angle: 45, distance: 0.9 },
+				objectName: publicObjectName(scenario, slideIndex, 'note'),
+			},
+			textOptions: { fontSize: layout.fontSize ?? 9.3, bold: true, color: colorFor(scenario), valign: 'mid' },
+			idempotencyKey: `${scenario.scenarioId}-insight-${slideIndex}`,
+		},
+	})
+}
+
+async function addEvidenceChips(ctx, slideIndex, slideNo, layout = {}) {
+	const { client, recorder, scenario, deckId } = ctx
+	const labels = layout.labels || ['Input', 'Model', 'Output']
+	const x = layout.x ?? 6.35
+	const y = layout.y ?? 2.52
+	const w = layout.w ?? 1.45
+	const h = layout.h ?? 0.52
+	const gap = layout.gap ?? 0.22
+	for (let i = 0; i < 3; i++) {
+		await callTool({
+			client, recorder, scenario, toolName: 'betterpptx.slide.add_shape',
+			args: {
+				deckId,
+				slideIndex,
+				shapeName: 'roundRect',
+				text: labels[i],
+				options: {
+					x: x + i * (w + gap),
+					y,
+					w,
+					h,
+					fill: { color: i === slideNo % 3 ? accentFor(scenario, i) : 'FFFFFF', transparency: i === slideNo % 3 ? 0 : 4 },
+					line: { color: accentFor(scenario, i), width: 0.8 },
+					shadow: { type: 'outer', color: 'CBD5E1', opacity: 0.14, blur: 0.8, angle: 45, distance: 0.5 },
+					objectName: publicObjectName(scenario, slideIndex, 'tag', `-${i}`),
+				},
+				textOptions: { fontSize: 8.2, bold: true, color: i === slideNo % 3 ? 'FFFFFF' : colorFor(scenario), align: 'center', valign: 'mid' },
+				idempotencyKey: `${scenario.scenarioId}-chip-${slideIndex}-${i}`,
+			},
+		})
+	}
+}
+
+async function addBusinessProof(ctx, slideIndex, slideNo) {
+	const chartTypes = ['bar', 'line', 'doughnut', 'bar', 'line']
+	await addChart(ctx, slideIndex, chartTypes[slideNo] || 'bar', {
+		x: 0.85,
+		y: 1.32,
+		w: 5.25,
+		h: 3.05,
+		title: `${storyFor(ctx.scenario, slideNo).beat} proof`,
+		key: 'proof',
+	})
+	await addInsightPanel(ctx, slideIndex, slideNo)
+	await addEvidenceChips(ctx, slideIndex, slideNo, { labels: ['Signal', 'Decision', 'Impact'] })
+	await addKpiCards(ctx, slideIndex, {
+		x: 6.35,
+		y: 3.22,
+		w: 1.38,
+		h: 0.72,
+		gap: 0.22,
+		fontSize: 8.6,
+		cards: [['Quality', `${86 + ctx.scenario.variant}%`], ['Time', `${22 + slideNo}m`], ['Credits', `${10 + ctx.scenario.variant}.${slideNo}`]],
+	})
+}
+
+async function addDataStoryProof(ctx, slideIndex, slideNo) {
+	const chartTypes = ['line', 'bar', 'doughnut', 'line', 'bar']
+	await addChart(ctx, slideIndex, chartTypes[slideNo] || 'line', {
+		x: 0.85,
+		y: 1.28,
+		w: 5.55,
+		h: 3.15,
+		title: `${storyFor(ctx.scenario, slideNo).title}`,
+		key: 'story',
+	})
+	await addTable(ctx, slideIndex, {
+		x: 6.65,
+		y: 2.68,
+		w: 3.9,
+		h: 1.08,
+		fontSize: 8.8,
+		key: 'evidence',
+		rows: [
+			[{ text: 'Readout', options: { bold: true } }, { text: 'Value', options: { bold: true } }],
+			[{ text: storyFor(ctx.scenario, slideNo).beat }, { text: `${82 + ctx.scenario.variant + slideNo}%` }],
+		],
+		colW: [2.2, 1.2],
+	})
+	await addInsightPanel(ctx, slideIndex, slideNo, { x: 6.65, y: 1.28, w: 4.25, h: 1.02 })
+}
+
+async function addReportTableProof(ctx, slideIndex, slideNo) {
+	await addTable(ctx, slideIndex, {
+		x: 0.85,
+		y: 1.28,
+		w: 5.75,
+		h: 1.42,
+		fontSize: 8.8,
+		key: 'report',
+		rows: [
+			[{ text: 'Workstream', options: { bold: true } }, { text: 'Owner', options: { bold: true } }, { text: 'Status', options: { bold: true } }],
+			[{ text: storyFor(ctx.scenario, slideNo).beat }, { text: 'Ops' }, { text: `${84 + ctx.scenario.variant}%` }],
+			[{ text: 'Repair check' }, { text: 'QA' }, { text: 'clean' }],
+		],
+		colW: [2.4, 1.3, 1.3],
+	})
+	if (slideNo % 2 === 0) await addChart(ctx, slideIndex, 'bar', { x: 7.0, y: 1.38, w: 3.6, h: 2.25, title: 'Variance', key: 'variance' })
+	else await addInsightPanel(ctx, slideIndex, slideNo, { x: 7.0, y: 1.38, w: 3.8, h: 1.15 })
+	await addKpiCards(ctx, slideIndex, { x: 0.9, y: 3.25, w: 1.65, h: 0.7, gap: 0.25, fontSize: 8.5 })
+}
+
+async function addProcessDiagram(ctx, slideIndex, slideNo) {
+	const { client, recorder, scenario, deckId } = ctx
+	const labels = ['Brief', 'Generate', 'Validate', 'Deliver']
+	for (let i = 0; i < labels.length; i++) {
+		await callTool({
+			client, recorder, scenario, toolName: 'betterpptx.slide.add_shape',
+			args: {
+				deckId,
+				slideIndex,
+				shapeName: i < labels.length - 1 ? 'chevron' : 'roundRect',
+				text: labels[i],
+				options: {
+					x: 0.92 + i * 2.22,
+					y: 3.42,
+					w: 1.78,
+					h: 0.78,
+					fill: { color: i === slideNo % labels.length ? accentFor(scenario, i) : 'FFFFFF' },
+					line: { color: accentFor(scenario, i), width: 1 },
+					shadow: { type: 'outer', color: 'CBD5E1', opacity: 0.2, blur: 1, angle: 45, distance: 0.7 },
+					objectName: publicObjectName(scenario, slideIndex, 'flow', `-${i}`),
+				},
+				textOptions: { fontSize: 9, bold: true, color: i === slideNo % labels.length ? 'FFFFFF' : colorFor(scenario), align: 'center', valign: 'mid' },
+				idempotencyKey: `${scenario.scenarioId}-process-${slideIndex}-${i}`,
+			},
+		})
+	}
+}
+
+async function addTechnicalProof(ctx, slideIndex, slideNo) {
+	await addEquation(ctx, slideIndex)
+	await addChart(ctx, slideIndex, slideNo % 2 ? 'line' : 'bar', {
+		x: 0.9,
+		y: 2.18,
+		w: 5.0,
+		h: 2.25,
+		title: 'Sensitivity',
+		key: 'sensitivity',
+	})
+	await addInsightPanel(ctx, slideIndex, slideNo, { x: 6.35, y: 1.35, w: 4.7, h: 1.15 })
+	await addEvidenceChips(ctx, slideIndex, slideNo, { labels: ['Formula', 'Assumption', 'Result'], y: 2.8 })
 }
 
 async function addImage(ctx, slideIndex) {
@@ -790,7 +1112,7 @@ async function addWordArt(ctx, slideIndex) {
 		args: {
 			deckId,
 			slideIndex,
-			text: `MC3 ${scenario.batch} WordArt`,
+			text: `${storyFor(scenario, slideIndex).beat} headline`,
 			options: {
 				x: 1.0,
 				y: 1.4,
@@ -811,7 +1133,7 @@ async function addWordArt(ctx, slideIndex) {
 				},
 				glow: { color: accentFor(scenario), size: 3, opacity: 0.45 },
 				reflection: { type: 'tight' },
-				objectName: `${scenario.scenarioId}-wordart-${slideIndex}`,
+				objectName: publicObjectName(scenario, slideIndex, 'headline'),
 			},
 			idempotencyKey: `${scenario.scenarioId}-wordart-${slideIndex}`,
 		},
@@ -846,7 +1168,7 @@ async function addEffects(ctx, slideIndex) {
 					glow: { color: accentFor(scenario, i), size: 3, opacity: 0.35 },
 					softEdges: { size: 1 },
 					rotate: i * 8,
-					objectName: `${scenario.scenarioId}-effect-${slideIndex}-${i}`,
+					objectName: publicObjectName(scenario, slideIndex, 'accent', `-${i}`),
 				},
 				textOptions: { fontSize: 9, color: colorFor(scenario), align: 'center', valign: 'mid' },
 				idempotencyKey: `${scenario.scenarioId}-effect-${slideIndex}-${i}`,
@@ -870,8 +1192,8 @@ async function addSmartArt(ctx, slideIndex) {
 			y: 1.2,
 			w: 6.6,
 			h: 2.1,
-			title: `${scenario.scenarioId} flow`,
-			objectName: `${scenario.scenarioId}-smartart-${slideIndex}`,
+			title: `${storyFor(scenario, slideIndex).beat} flow`,
+			objectName: publicObjectName(scenario, slideIndex, 'orgflow'),
 			idempotencyKey: `${scenario.scenarioId}-smartart-${slideIndex}`,
 		},
 	})
@@ -893,7 +1215,7 @@ async function addEquation(ctx, slideIndex) {
 			h: 0.7,
 			fontSize: 20,
 			color: colorFor(scenario),
-			objectName: `${scenario.scenarioId}-equation-${slideIndex}`,
+			objectName: publicObjectName(scenario, slideIndex, 'formula'),
 			idempotencyKey: `${scenario.scenarioId}-equation-${slideIndex}`,
 		},
 	})
@@ -923,7 +1245,7 @@ async function addFreeform(ctx, slideIndex) {
 			fill: { color: accentFor(scenario) },
 			line: { color: colorFor(scenario), width: 1 },
 			shadow: { type: 'outer', color: '94A3B8', opacity: 0.25, blur: 1, angle: 45, distance: 1 },
-			objectName: `${scenario.scenarioId}-freeform-${slideIndex}`,
+			objectName: publicObjectName(scenario, slideIndex, 'path'),
 			idempotencyKey: `${scenario.scenarioId}-freeform-${slideIndex}`,
 		},
 	})
@@ -945,6 +1267,97 @@ async function addAnimations(ctx, slideIndex) {
 	})
 }
 
+async function addNarrationVisual(ctx, slideIndex) {
+	const { client, recorder, scenario, deckId } = ctx
+	const steps = [
+		['Prompt', 'story intent'],
+		['Render', 'visual proof'],
+		['Validate', 'audio + repair'],
+	]
+	for (let i = 0; i < steps.length; i++) {
+		const [label, detail] = steps[i]
+		await callTool({
+			client, recorder, scenario, toolName: 'betterpptx.slide.add_shape',
+			args: {
+				deckId,
+				slideIndex,
+				shapeName: 'roundRect',
+				text: `${label}\n${detail}`,
+				options: {
+					x: 1.0 + i * 3.15,
+					y: 1.35,
+					w: 2.45,
+					h: 1.05,
+					fill: { color: i === 1 ? accentFor(scenario, i) : 'FFFFFF', transparency: i === 1 ? 0 : 3 },
+					line: { color: accentFor(scenario, i), width: 1.1 },
+					shadow: { type: 'outer', color: '64748B', opacity: 0.22, blur: 1.5, angle: 45, distance: 1 },
+					objectName: publicObjectName(scenario, slideIndex, 'cue', `-${i}`),
+				},
+				textOptions: { fontSize: 11.5, bold: true, color: i === 1 ? 'FFFFFF' : colorFor(scenario), align: 'center', valign: 'mid' },
+				idempotencyKey: `${scenario.scenarioId}-narration-step-${slideIndex}-${i}`,
+			},
+		})
+	}
+	await callTool({
+		client, recorder, scenario, toolName: 'betterpptx.slide.add_chart',
+		args: {
+			deckId,
+			slideIndex,
+			chartType: 'doughnut',
+			data: [{ name: 'Narration quality', labels: ['Speech', 'Timing', 'Repair'], values: [42 + scenario.variant, 34, 24] }],
+			options: {
+				x: 8.55,
+				y: 1.18,
+				w: 2.35,
+				h: 2.1,
+				showTitle: false,
+				showLegend: true,
+				chartColors: [accentFor(scenario), colorFor(scenario, 2), accentFor(scenario, 3)],
+				objectName: publicObjectName(scenario, slideIndex, 'narrviz'),
+			},
+			idempotencyKey: `${scenario.scenarioId}-narration-chart-${slideIndex}`,
+		},
+	})
+	await callTool({
+		client, recorder, scenario, toolName: 'betterpptx.slide.add_shape',
+		args: {
+			deckId,
+			slideIndex,
+			shapeName: 'roundRect',
+			text: `Approved voice\n${scenario.variant % 2 ? 'en_US-ljspeech-high' : 'fr_FR-gilles-low'}`,
+			options: {
+				x: 1.02,
+				y: 3.0,
+				w: 4.85,
+				h: 0.72,
+				fill: { color: 'F8FAFC' },
+				line: { color: 'CBD5E1', width: 1 },
+				shadow: { type: 'outer', color: '94A3B8', opacity: 0.18, blur: 1, angle: 45, distance: 0.8 },
+				objectName: publicObjectName(scenario, slideIndex, 'voice'),
+			},
+			textOptions: { fontSize: 12, color: colorFor(scenario), bold: true, align: 'center', valign: 'mid' },
+			idempotencyKey: `${scenario.scenarioId}-narration-voice-card-${slideIndex}`,
+		},
+	})
+	await callTool({
+		client, recorder, scenario, toolName: 'betterpptx.slide.animate_shapes',
+		required: Boolean(ctx.strictAutoshowcase),
+		args: {
+			deckId,
+			slideIndex,
+			names: [
+				publicObjectName(scenario, slideIndex, 'cue', '-0'),
+				publicObjectName(scenario, slideIndex, 'cue', '-1'),
+				publicObjectName(scenario, slideIndex, 'cue', '-2'),
+				publicObjectName(scenario, slideIndex, 'narrviz'),
+			],
+			animation: { type: 'entrance', effect: 'fade', trigger: 'afterPrevious', duration: 350 },
+			staggerMs: 160,
+			idempotencyKey: `${scenario.scenarioId}-narration-visual-animate-${slideIndex}`,
+		},
+	})
+}
+
 async function addNarration(ctx, slideIndex) {
 	const { client, recorder, scenario, deckId, includeHeavy, strictAutoshowcase } = ctx
 	if (!includeHeavy) {
@@ -960,6 +1373,7 @@ async function addNarration(ctx, slideIndex) {
 		})
 		return
 	}
+	await addNarrationVisual(ctx, slideIndex)
 	await callTool({
 		client, recorder, scenario, toolName: 'betterpptx.slide.add_narration',
 		required: Boolean(strictAutoshowcase),
@@ -968,6 +1382,11 @@ async function addNarration(ctx, slideIndex) {
 			slideIndex,
 			script: `${scenario.family} ${scenario.variant} demonstrates a finished BetterPPTX autoshowcase slide with synchronized speech, timing, package stability, and billing telemetry.`,
 			lang: 'en_US',
+			cues: [
+				{ atMs: 650, target: publicObjectName(scenario, slideIndex, 'cue', '-0'), type: 'emphasis', effect: 'pulse' },
+				{ atMs: 1650, target: publicObjectName(scenario, slideIndex, 'cue', '-1'), type: 'emphasis', effect: 'pulse' },
+				{ atMs: 2650, target: publicObjectName(scenario, slideIndex, 'cue', '-2'), type: 'emphasis', effect: 'pulse' },
+			],
 			captions: { enabled: true, stackStatic: true },
 			paddingMs: 700,
 			idempotencyKey: `${scenario.scenarioId}-narration-${slideIndex}`,
@@ -994,14 +1413,54 @@ async function addModelAttempt(ctx, slideIndex) {
 		await addEffects(ctx, slideIndex)
 		return
 	}
+	const rotations = [
+		{ x: -18, y: 34, z: -6, rotate: -4 },
+		{ x: 12, y: -38, z: 18, rotate: 5 },
+		{ x: -26, y: 22, z: 20, rotate: -7 },
+		{ x: 18, y: 44, z: -14, rotate: 6 },
+		{ x: -12, y: -32, z: 24, rotate: -3 },
+	]
+	const pose = rotations[slideIndex % rotations.length]
+	const objectName = publicObjectName(scenario, slideIndex, 'spatial')
 	await callTool({
 		client, recorder, scenario, toolName: 'betterpptx.slide.add_model3d',
 		required: Boolean(strictAutoshowcase),
 		args: {
 			deckId,
 			slideIndex,
-			options: { ...opts, x: 0.9, y: 1.25, w: 2.6, h: 2.1, objectName: `${scenario.scenarioId}-model-${slideIndex}` },
+			options: {
+				...opts,
+				x: 0.9,
+				y: 1.25,
+				w: 2.6,
+				h: 2.1,
+				rotate: pose.rotate,
+				trans: { ...(opts.trans || {}), rot: { x: pose.x, y: pose.y, z: pose.z } },
+				camera: opts.camera || { pos: { x: 0, y: 0, z: 72000000 }, fov: 34 },
+				ambientLight: opts.ambientLight || { illuminance: 0.8 },
+				shadow: opts.shadow || { type: 'outer', color: '64748B', opacity: 0.24, blur: 1.4, angle: 45, distance: 1 },
+				objectName,
+			},
 			idempotencyKey: `${scenario.scenarioId}-model-${slideIndex}`,
+		},
+	})
+	await callTool({
+		client, recorder, scenario, toolName: 'betterpptx.slide.animate_shapes',
+		required: Boolean(strictAutoshowcase),
+		args: {
+			deckId,
+			slideIndex,
+			names: [objectName],
+			animation: {
+				type: 'emphasis',
+				effect: slideIndex % 2 ? 'swing' : 'turntable',
+				direction: slideIndex % 2 ? 'right' : 'clockwise',
+				rotationAxis: 'object',
+				intensity: 'moderate',
+				trigger: 'afterPrevious',
+				duration: 1500,
+			},
+			idempotencyKey: `${scenario.scenarioId}-model-motion-${slideIndex}`,
 		},
 	})
 }
@@ -1024,27 +1483,28 @@ async function addBoundaryCase(ctx, slideIndex) {
 
 async function addFamilyContent(ctx, slideIndex, slideNo) {
 	const batchNo = ctx.scenario.batchNumber
-	if ([1, 2, 3].includes(batchNo)) return slideNo % 2 ? addChart(ctx, slideIndex, 'bar') : addKpiCards(ctx, slideIndex)
-	if (batchNo === 4) return [0, 2].includes(slideNo) ? addChart(ctx, slideIndex, ['line', 'doughnut'][slideNo / 2]) : addKpiCards(ctx, slideIndex)
-	if (batchNo === 5) return [0, 3].includes(slideNo) ? addTable(ctx, slideIndex) : (slideNo === 1 ? addChart(ctx, slideIndex, 'bar') : addKpiCards(ctx, slideIndex))
-	if (batchNo === 6) return slideNo % 2 ? addWordArt(ctx, slideIndex) : addEffects(ctx, slideIndex)
+	if ([1, 2, 3].includes(batchNo)) return addBusinessProof(ctx, slideIndex, slideNo)
+	if (batchNo === 4) return addDataStoryProof(ctx, slideIndex, slideNo)
+	if (batchNo === 5) return addReportTableProof(ctx, slideIndex, slideNo)
+	if (batchNo === 6) { await addEffects(ctx, slideIndex); return addInsightPanel(ctx, slideIndex, slideNo, { x: 6.35, y: 1.35, w: 4.65, h: 1.2 }) }
 	if (batchNo === 7) return addImage(ctx, slideIndex)
 	if (batchNo === 8) return addFreeform(ctx, slideIndex)
 	if (batchNo === 9) { await addWordArt(ctx, slideIndex); return addSingleCallout(ctx, slideIndex) }
 	if (batchNo === 10) return addEffects(ctx, slideIndex)
-	if (batchNo === 11) { await addSmartArt(ctx, slideIndex); return addSingleCallout(ctx, slideIndex) }
-	if (batchNo === 12) { await addEquation(ctx, slideIndex); return addSingleCallout(ctx, slideIndex) }
-	if (batchNo === 13) { await addEffects(ctx, slideIndex); return addAnimations(ctx, slideIndex) }
-	if (batchNo === 14) { await addKpiCards(ctx, slideIndex); return addAnimations(ctx, slideIndex) }
+	if (batchNo === 11) { await addSmartArt(ctx, slideIndex); return addProcessDiagram(ctx, slideIndex, slideNo) }
+	if (batchNo === 12) return addTechnicalProof(ctx, slideIndex, slideNo)
+	if (batchNo === 13) { await addEffects(ctx, slideIndex); await addInsightPanel(ctx, slideIndex, slideNo, { x: 6.35, y: 1.35, w: 4.65, h: 1.2 }); return addAnimations(ctx, slideIndex) }
+	if (batchNo === 14) { await addBusinessProof(ctx, slideIndex, slideNo); return addAnimations(ctx, slideIndex) }
 	if (batchNo === 15) return addNarration(ctx, slideIndex)
 	if (batchNo === 16) return addModelAttempt(ctx, slideIndex)
-	if (batchNo === 17) return slideNo === 0 ? addChart(ctx, slideIndex, 'bar') : (slideNo === 1 ? addTable(ctx, slideIndex) : addKpiCards(ctx, slideIndex))
-	if (batchNo === 18) return slideNo === 0 ? addEffects(ctx, slideIndex) : addKpiCards(ctx, slideIndex)
-	if (batchNo === 19) return slideNo === 0 ? addBoundaryCase(ctx, slideIndex) : addKpiCards(ctx, slideIndex)
-	if (slideNo === 0) return addKpiCards(ctx, slideIndex)
-	if (slideNo === 1) return addTable(ctx, slideIndex)
-	if (slideNo === 2) return addAnimations(ctx, slideIndex)
-	return addImage(ctx, slideIndex)
+	if (batchNo === 17) return slideNo === 0 ? addChart(ctx, slideIndex, 'bar') : (slideNo === 1 ? addTable(ctx, slideIndex) : addBusinessProof(ctx, slideIndex, slideNo))
+	if (batchNo === 18) { await addEffects(ctx, slideIndex); return addBusinessProof(ctx, slideIndex, slideNo) }
+	if (batchNo === 19) return slideNo === 0 ? addBoundaryCase(ctx, slideIndex) : addBusinessProof(ctx, slideIndex, slideNo)
+	if (slideNo === 0) return addBusinessProof(ctx, slideIndex, slideNo)
+	if (slideNo === 1) return addReportTableProof(ctx, slideIndex, slideNo)
+	if (slideNo === 2) { await addEffects(ctx, slideIndex); return addAnimations(ctx, slideIndex) }
+	if (slideNo === 3) return addImage(ctx, slideIndex)
+	return addTechnicalProof(ctx, slideIndex, slideNo)
 }
 
 async function runPostBuildEditing(ctx) {
@@ -1080,7 +1540,7 @@ async function runPostBuildEditing(ctx) {
 			args: {
 				deckId,
 				slideIndex: 2,
-				target: { objectName: `${scenario.scenarioId}-kpi-2-0` },
+				target: { objectName: publicObjectName(scenario, 2, 'metric', '-0') },
 				patch: { text: `Edited\n${90 + scenario.variant}%`, fill: { color: 'FFFFFF' }, line: { color: colorFor(scenario), width: 1.25 } },
 				idempotencyKey: `${scenario.scenarioId}-update-kpi`,
 			},
@@ -1091,9 +1551,9 @@ async function runPostBuildEditing(ctx) {
 				args: {
 					deckId,
 					slideIndex: 0,
-					target: { objectName: `${scenario.scenarioId}-chart-0-bar` },
+					target: { objectName: publicObjectName(scenario, 0, 'viz', '-bar') },
 					data: dataSeries(scenario, 6),
-					optionsPatch: { showLegend: true, title: `${scenario.scenarioId} edited chart` },
+					optionsPatch: { showLegend: true, title: 'Edited readout' },
 					idempotencyKey: `${scenario.scenarioId}-update-chart`,
 				},
 			})
@@ -1102,7 +1562,7 @@ async function runPostBuildEditing(ctx) {
 				args: {
 					deckId,
 					slideIndex: 1,
-					target: { objectName: `${scenario.scenarioId}-table-1` },
+					target: { objectName: publicObjectName(scenario, 1, 'readout') },
 					operations: [
 						{ op: 'setCell', row: 1, col: 1, text: `${91 + scenario.variant}%` },
 						{ op: 'addRow', cells: ['Review', 'Passed'] },
@@ -1167,6 +1627,9 @@ async function verifyStaticPackage(buffer) {
 	let shadowCount = 0
 	let textWarpCount = 0
 	let text3DCount = 0
+	let duplicateContentTypeOverrides = 0
+	let sharedChartRelationshipTargets = 0
+	const chartTargetSlides = new Map()
 	const chartCount = names.filter(n => /^ppt\/charts\/chart\d+\.xml$/i.test(n)).length
 	const imageMediaCount = names.filter(n => /^ppt\/media\/.+\.(png|jpe?g|gif|webp|svg)$/i.test(n)).length
 	const audioMediaCount = names.filter(n => /^ppt\/media\/.+\.(wav|mp3|m4a|aac)$/i.test(n)).length
@@ -1176,6 +1639,15 @@ async function verifyStaticPackage(buffer) {
 	const showNarration = /\bshowNarration="1"/.test(presPropsXml)
 	const useTimings = /\buseTimings="1"/.test(presPropsXml)
 	if (!zip.file('[Content_Types].xml')) issues.push('missing [Content_Types].xml')
+	if (zip.file('[Content_Types].xml')) {
+		const contentTypesXml = await zip.file('[Content_Types].xml').async('string')
+		const seenOverrides = new Set()
+		for (const match of contentTypesXml.matchAll(/<Override\b[^>]*\bPartName="([^"]+)"/g)) {
+			const partName = match[1]
+			if (seenOverrides.has(partName)) duplicateContentTypeOverrides += 1
+			else seenOverrides.add(partName)
+		}
+	}
 	if (!zip.file('ppt/presentation.xml')) issues.push('missing ppt/presentation.xml')
 	for (const name of names) {
 		const file = zip.file(name)
@@ -1204,18 +1676,32 @@ async function verifyStaticPackage(buffer) {
 		const relsName = `ppt/slides/_rels/${match[1]}.xml.rels`
 		const relsXml = zip.file(relsName) ? await zip.file(relsName).async('string') : ''
 		const declaredIds = new Set([...relsXml.matchAll(/Id="([^"]+)"/g)].map(x => x[1]))
+		for (const relMatch of relsXml.matchAll(/<Relationship\b[^>]*>/g)) {
+			const tag = relMatch[0]
+			if (!/relationships\/chart(?:Ex)?"/i.test(tag)) continue
+			const target = tag.match(/\bTarget="([^"]+)"/)?.[1]
+			if (!target) continue
+			const key = target.replace(/\\/g, '/')
+			if (!chartTargetSlides.has(key)) chartTargetSlides.set(key, new Set())
+			chartTargetSlides.get(key).add(name)
+		}
 		for (const ref of xml.matchAll(/r:(?:embed|id|link)="([^"]+)"/g)) {
 			if (!declaredIds.has(ref[1])) danglingRels += 1
 		}
 	}
+	sharedChartRelationshipTargets = [...chartTargetSlides.values()].filter(slides => slides.size > 1).length
 	if (slideCount !== 5) issues.push(`expected 5 slides, found ${slideCount}`)
 	if (errors.length) issues.push(`xml parse issues: ${errors.length}`)
 	if (danglingRels) issues.push(`dangling slide relationships: ${danglingRels}`)
+	if (duplicateContentTypeOverrides) issues.push(`duplicate content type overrides: ${duplicateContentTypeOverrides}`)
+	if (sharedChartRelationshipTargets) issues.push(`shared chart relationship targets: ${sharedChartRelationshipTargets}`)
 	return {
 		ok: issues.length === 0,
 		slideCount,
 		xmlIssues: errors.length,
 		danglingRels,
+		duplicateContentTypeOverrides,
+		sharedChartRelationshipTargets,
 		chartCount,
 		tableCount,
 		imageMediaCount,
@@ -1256,6 +1742,8 @@ function strictFeatureCoverageIssues(scenario, stat, designData, narrationData) 
 	const issues = []
 	const batchNo = scenario.batchNumber
 	const visualProofObjects = designMetric(designData, 'visualProofObjects')
+	const savedVisualProofObjects = stat.chartCount + stat.tableCount + stat.imageMediaCount + stat.customGeometryCount + stat.modelMediaCount + stat.equationCount
+	const proofObjects = Math.max(visualProofObjects, savedVisualProofObjects)
 	const diagramSlides = designMetric(designData, 'diagramSlides')
 	const animatedSlides = designMetric(designData, 'animatedSlides')
 	const model3DObjects = designMetric(designData, 'model3DObjects')
@@ -1263,7 +1751,7 @@ function strictFeatureCoverageIssues(scenario, stat, designData, narrationData) 
 	const captionSlides = designMetric(designData, 'captionSlides')
 
 	if (designData?.ok === false) issues.push(`design gate failed score=${designData.score}/${designData.minScore}: ${shortIssues(designData.issues)}`)
-	if ([1, 2, 3, 4].includes(batchNo) && visualProofObjects < 5) issues.push(`expected executive/product/dashboard/data visual proof across 5 slides, found ${visualProofObjects}`)
+	if ([1, 2, 3, 4].includes(batchNo) && proofObjects < 5) issues.push(`expected executive/product/dashboard/data visual proof across 5 slides, found design=${visualProofObjects} saved=${savedVisualProofObjects}`)
 	if (batchNo === 4 && stat.chartCount < 2) issues.push(`expected at least 2 chart parts for data storytelling, found ${stat.chartCount}`)
 	if (batchNo === 5 && stat.tableCount < 2) issues.push(`expected at least 2 table objects, found ${stat.tableCount}`)
 	if (batchNo === 7 && stat.imageMediaCount < 1) issues.push(`expected embedded image media, found ${stat.imageMediaCount}`)
@@ -1341,7 +1829,7 @@ async function runDeckScenario({ scenario, opts, mcpUrl, base, auth, recorder, d
 			recorder,
 			scenario,
 			toolName: 'betterpptx.deck.new',
-			args: { title: `${scenario.scenarioId} ${scenario.family}`, layout: 'LAYOUT_WIDE', idempotencyKey: `${scenario.scenarioId}-deck` },
+			args: { title: `${scenario.family} autoshowcase`, layout: 'LAYOUT_WIDE', idempotencyKey: `${scenario.scenarioId}-deck` },
 		})
 		const deck = requireData('deck.new', deckPayload)
 		const deckId = deck.deckId
@@ -1354,7 +1842,7 @@ async function runDeckScenario({ scenario, opts, mcpUrl, base, auth, recorder, d
 				args: {
 					deckId,
 					slideIndex,
-					notes: `MC3 evidence notes for ${scenario.scenarioId}, ${scenario.family}, slide ${slideNo + 1}.`,
+					notes: `${storyFor(scenario, slideNo).title}. ${storyFor(scenario, slideNo).proof}`,
 					idempotencyKey: `${scenario.scenarioId}-notes-${slideNo}`,
 				},
 			})

@@ -5632,9 +5632,11 @@ function inferImageExtension(contentType, buf, url) {
 }
 
 async function materializeRemoteImageOptions(options) {
-	if (!options || typeof options !== 'object' || Array.isArray(options) || !isRemoteUrl(options.path)) return options
+	if (!options || typeof options !== 'object' || Array.isArray(options)) return options
+	const remoteInput = options.path || options.url || options.src || options.imageUrl
+	if (!isRemoteUrl(remoteInput)) return options
 
-	const fetched = await safeFetchToBuffer(options.path, {
+	const fetched = await safeFetchToBuffer(remoteInput, {
 		headers: REMOTE_IMAGE_FETCH_HEADERS,
 		maxBytes: REMOTE_IMAGE_MAX_BYTES,
 		timeoutMs: 30000,
@@ -5648,7 +5650,7 @@ async function materializeRemoteImageOptions(options) {
 		throw new Error(`slide.add_image: remote image is too large (${buf.length} bytes; max ${REMOTE_IMAGE_MAX_BYTES})`)
 	}
 	const contentType = fetched.headers['content-type'] || ''
-	const ext = inferImageExtension(contentType, buf, options.path)
+	const ext = inferImageExtension(contentType, buf, remoteInput)
 	if (!ext || (!String(contentType).toLowerCase().startsWith('image/') && !['jpg', 'png', 'gif', 'webp', 'svg', 'bmp', 'tiff'].includes(ext))) {
 		throw new Error(`slide.add_image: remote URL did not return an image (content-type: ${contentType || 'unknown'})`)
 	}
@@ -5657,7 +5659,8 @@ async function materializeRemoteImageOptions(options) {
 	await fs.mkdir(cacheDir, { recursive: true })
 	const filePath = path.join(cacheDir, `remote-image-${Date.now().toString(36)}-${crypto.randomBytes(6).toString('hex')}.${ext}`)
 	await fs.writeFile(filePath, buf)
-	return { ...options, path: filePath }
+	const { url: _url, src: _src, imageUrl: _imageUrl, ...rest } = options
+	return { ...rest, path: filePath }
 }
 
 async function handleIoReadJson(args) {
@@ -8120,6 +8123,32 @@ function _deepCloneData(v) {
 	try { return structuredClone(v) } catch (_) { return JSON.parse(JSON.stringify(v)) }
 }
 
+function _findChartRelForObject(sourceChartRels, chartObj) {
+	const rels = Array.isArray(sourceChartRels) ? sourceChartRels : []
+	return rels.find(rel => Number(rel?.rId) === Number(chartObj?.chartRid))
+		|| rels.find(rel => rel?.opts === chartObj?.options)
+		|| rels.find(rel => rel?.opts?.objectName && rel.opts.objectName === chartObj?.options?.objectName)
+		|| null
+}
+
+function _appendRecreatedChartClone(newSlide, clonedObj, sourceChartRels) {
+	if (_shapeKind(clonedObj) !== 'chart' || typeof newSlide?.addChart !== 'function') return false
+	const sourceRel = _findChartRelForObject(sourceChartRels, clonedObj)
+	const chartOptions = _deepCloneData(sourceRel?.opts || clonedObj?.options || {})
+	const chartType = chartOptions?._type || sourceRel?.type
+	if (!chartType) return false
+	const chartData = _deepCloneData(sourceRel?.data || [])
+	const beforeCount = Array.isArray(newSlide._slideObjects) ? newSlide._slideObjects.length : 0
+	newSlide.addChart(chartType, chartData, chartOptions)
+	const recreated = newSlide._slideObjects?.[newSlide._slideObjects.length - 1]
+	if (!recreated || newSlide._slideObjects.length === beforeCount) return false
+	for (const [key, value] of Object.entries(clonedObj || {})) {
+		if (['_type', 'type', 'text', 'options', 'chartRid'].includes(key)) continue
+		if (recreated[key] === undefined) recreated[key] = _deepCloneData(value)
+	}
+	return true
+}
+
 // Duplicate a slide into a NEW appended slide — a faithful, IDENTITY-PRESERVING
 // clone (objects + their objectName/spid, all three rel arrays, background,
 // layout). Preserving object identity is what lets PowerPoint MORPH match the
@@ -8151,11 +8180,29 @@ async function handleDuplicateSlide(args) {
 		// NOTE: imported passthrough shapes keep their relationships in `_rawRels`
 		// (separate from the standard arrays); it MUST be cloned too or the clone's
 		// passthrough r:embed/r:id refs dangle and PowerPoint refuses to open.
-		newSlide._slideObjects = _deepCloneData(source._slideObjects) || []
 		newSlide._rels = _deepCloneData(source._rels) || []
-		newSlide._relsChart = _deepCloneData(source._relsChart) || []
 		newSlide._relsMedia = _deepCloneData(source._relsMedia) || []
 		newSlide._rawRels = _deepCloneData(source._rawRels) || []
+		const clonedObjects = _deepCloneData(source._slideObjects) || []
+		const sourceChartRels = source._relsChart || []
+		newSlide._slideObjects = []
+		newSlide._relsChart = []
+		let recreatedCharts = 0
+		for (const clonedObj of clonedObjects) {
+			if (_appendRecreatedChartClone(newSlide, clonedObj, sourceChartRels)) {
+				recreatedCharts++
+			} else {
+				newSlide._slideObjects.push(clonedObj)
+			}
+		}
+		if (sourceChartRels.length && recreatedCharts < sourceChartRels.length) {
+			const clonedChartRels = _deepCloneData(sourceChartRels) || []
+			for (const rel of clonedChartRels) {
+				if (!newSlide._relsChart.some(existing => Number(existing?.rId) === Number(rel?.rId))) {
+					newSlide._relsChart.push(rel)
+				}
+			}
+		}
 		// Transition (e.g. morph) goes on the slide being transitioned TO (the clone)
 		if (args.transition) newSlide.transition = { ...args.transition }
 		newSlideIndexes.push(pptx.slides.length - 1)
@@ -10033,6 +10080,433 @@ async function handlePassthroughXml(args) {
 	return { ok: true, slideIndex: args.slideIndex }
 }
 
+function previewEscapeXml(value) {
+	return String(value ?? '').replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' }[ch]))
+}
+
+function previewCleanHex(value, fallback = 'FFFFFF') {
+	const raw = String(value || '').replace(/^#/, '').trim()
+	return /^[0-9A-Fa-f]{6}$/.test(raw) ? raw.toUpperCase() : fallback
+}
+
+function previewOpacity(transparency) {
+	const n = Number(transparency)
+	if (!Number.isFinite(n)) return 1
+	return Math.max(0, Math.min(1, 1 - (n / 100)))
+}
+
+function previewInches(value, totalInches, fallback = 0) {
+	if (typeof value === 'string' && value.trim().endsWith('%')) {
+		const n = Number(value.trim().slice(0, -1))
+		return Number.isFinite(n) ? totalInches * n / 100 : fallback
+	}
+	const n = Number(value)
+	if (!Number.isFinite(n)) return fallback
+	return Math.abs(n) > 1000 ? n / 914400 : n
+}
+
+function previewSlideLayout(pptx) {
+	const layout = pptx?.presLayout || pptx?._presLayout || {}
+	let width = Number(layout.width || layout._sizeW || 0)
+	let height = Number(layout.height || layout._sizeH || 0)
+	if (!Number.isFinite(width) || width <= 0) width = 12192000
+	if (!Number.isFinite(height) || height <= 0) height = 6858000
+	if (width > 1000) width = width / 914400
+	if (height > 1000) height = height / 914400
+	return { widthInches: width || 13.333, heightInches: height || 7.5 }
+}
+
+function previewPixelContext(pptx, args = {}) {
+	const layout = previewSlideLayout(pptx)
+	const width = Math.max(320, Math.min(2560, Math.round(Number(args.width || 1280) || 1280)))
+	const scale = width / layout.widthInches
+	const height = Math.max(180, Math.round(layout.heightInches * scale))
+	return { ...layout, width, height, scale }
+}
+
+function previewBox(opts = {}, ctx) {
+	const x = previewInches(opts.x, ctx.widthInches, 0) * ctx.scale
+	const y = previewInches(opts.y, ctx.heightInches, 0) * ctx.scale
+	const w = Math.max(1, previewInches(opts.w, ctx.widthInches, 1) * ctx.scale)
+	const h = Math.max(1, previewInches(opts.h, ctx.heightInches, 1) * ctx.scale)
+	return { x, y, w, h, cx: x + w / 2, cy: y + h / 2 }
+}
+
+function previewGradientFill(fill, ctx, fallback = 'EEF2F7') {
+	if (!fill || typeof fill !== 'object' || !Array.isArray(fill.gradientStops) || fill.gradientStops.length === 0) {
+		return { fill: `#${previewCleanHex(fill?.color || fill, fallback)}`, opacity: previewOpacity(fill?.transparency) }
+	}
+	const id = `g${ctx.nextGradient++}`
+	const stops = fill.gradientStops.map((stop, i) => {
+		const posRaw = stop?.position ?? (fill.gradientStops.length === 1 ? 0 : i / (fill.gradientStops.length - 1))
+		const pos = Number(posRaw) <= 1 ? Number(posRaw) * 100 : Number(posRaw)
+		return `<stop offset="${Math.max(0, Math.min(100, Number.isFinite(pos) ? pos : 0))}%" stop-color="#${previewCleanHex(stop?.color, fallback)}" stop-opacity="${previewOpacity(stop?.transparency)}"/>`
+	}).join('')
+	ctx.defs.push(`<linearGradient id="${id}" x1="0%" y1="0%" x2="100%" y2="100%">${stops}</linearGradient>`)
+	return { fill: `url(#${id})`, opacity: previewOpacity(fill?.transparency) }
+}
+
+function previewFillAttrs(fill, ctx, fallback = 'EEF2F7') {
+	if (fill === null || fill === false || fill?.type === 'none' || fill?.color === 'none') return 'fill="none"'
+	const f = previewGradientFill(fill, ctx, fallback)
+	return `fill="${f.fill}" fill-opacity="${f.opacity}"`
+}
+
+function previewStrokeAttrs(line = {}, fallback = 'CBD5E1') {
+	if (line === false || line?.type === 'none' || line?.color === 'none' || line?.transparency >= 100) return 'stroke="none"'
+	const width = Math.max(0.5, Number(line?.width || line?.size || 1))
+	const dash = line?.dash || line?.dashType
+	const dashAttr = dash && dash !== 'solid' ? ' stroke-dasharray="8 6"' : ''
+	return `stroke="#${previewCleanHex(line?.color, fallback)}" stroke-opacity="${previewOpacity(line?.transparency)}" stroke-width="${width}"${dashAttr}`
+}
+
+function previewTransform(opts = {}, box) {
+	const rotate = Number(opts.rotate || 0)
+	if (!Number.isFinite(rotate) || rotate === 0) return ''
+	return ` transform="rotate(${rotate} ${box.cx} ${box.cy})"`
+}
+
+function previewTextRuns(value) {
+	if (value == null) return ''
+	if (typeof value === 'string' || typeof value === 'number') return String(value)
+	if (Array.isArray(value)) return value.map(item => {
+		if (typeof item === 'string' || typeof item === 'number') return String(item)
+		return String(item?.text ?? '')
+	}).join('')
+	if (typeof value === 'object') return String(value.text ?? value.value ?? '')
+	return String(value)
+}
+
+function previewWrapText(text, maxWidth, fontPx, maxLines = 12) {
+	const clean = String(text || '').replace(/\s+/g, ' ').trim()
+	if (!clean) return []
+	const avg = Math.max(4, fontPx * 0.54)
+	const maxChars = Math.max(4, Math.floor(maxWidth / avg))
+	const words = clean.split(' ')
+	const lines = []
+	let current = ''
+	for (const word of words) {
+		const next = current ? `${current} ${word}` : word
+		if (next.length <= maxChars || !current) current = next
+		else {
+			lines.push(current)
+			current = word
+		}
+		if (lines.length >= maxLines) break
+	}
+	if (current && lines.length < maxLines) lines.push(current)
+	if (lines.length === maxLines && words.join(' ').length > lines.join(' ').length) {
+		lines[lines.length - 1] = `${lines[lines.length - 1].replace(/\.*$/, '')}...`
+	}
+	return lines
+}
+
+function previewTextSvg(text, opts = {}, box, ctx) {
+	const fontPt = Math.max(6, Math.min(96, Number(opts.fontSize || opts.fontSizePt || 18)))
+	const fontPx = fontPt * ctx.scale / 72
+	const lineHeight = fontPx * 1.18
+	const marginInches = Number(opts.margin ?? 0.08)
+	const margin = Math.max(3, marginInches * ctx.scale)
+	const lines = previewWrapText(text, Math.max(1, box.w - margin * 2), fontPx, Math.max(1, Math.floor((box.h - margin * 2) / lineHeight)))
+	const valign = String(opts.valign || opts.verticalAlign || 'top').toLowerCase()
+	let y = box.y + margin + fontPx
+	const textHeight = lines.length * lineHeight
+	if (valign === 'mid' || valign === 'middle' || valign === 'center') y = box.y + Math.max(margin + fontPx, (box.h - textHeight) / 2 + fontPx * 0.85)
+	else if (valign === 'bottom') y = box.y + Math.max(margin + fontPx, box.h - margin - textHeight + fontPx)
+	const align = String(opts.align || 'left').toLowerCase()
+	const anchor = align === 'center' ? 'middle' : align === 'right' ? 'end' : 'start'
+	const x = align === 'center' ? box.x + box.w / 2 : align === 'right' ? box.x + box.w - margin : box.x + margin
+	const weight = opts.bold ? '700' : '400'
+	const style = opts.italic ? 'italic' : 'normal'
+	const color = previewCleanHex(opts.color || opts.fontColor, '111827')
+	return `<text x="${x.toFixed(2)}" y="${y.toFixed(2)}" fill="#${color}" font-family="${previewEscapeXml(opts.fontFace || 'Aptos, Arial, sans-serif')}" font-size="${fontPx.toFixed(2)}" font-weight="${weight}" font-style="${style}" text-anchor="${anchor}">${lines.map((line, i) => `<tspan x="${x.toFixed(2)}" dy="${i === 0 ? 0 : lineHeight.toFixed(2)}">${previewEscapeXml(line)}</tspan>`).join('')}</text>`
+}
+
+function previewShapeSvg(shapeName, opts = {}, box, ctx) {
+	const shape = String(shapeName || opts.shape || opts.shapeName || 'rect').toLowerCase()
+	const fill = previewFillAttrs(opts.fill || (shape === 'line' ? { type: 'none' } : { color: opts.color || 'EEF2F7' }), ctx)
+	const stroke = previewStrokeAttrs(opts.line, '64748B')
+	const transform = previewTransform(opts, box)
+	const radius = Math.min(box.w, box.h) * (shape.includes('round') ? 0.12 : 0.02)
+	if (shape === 'ellipse' || shape === 'arc' || shape === 'pie' || shape.includes('circle')) {
+		return `<ellipse cx="${box.cx.toFixed(2)}" cy="${box.cy.toFixed(2)}" rx="${(box.w / 2).toFixed(2)}" ry="${(box.h / 2).toFixed(2)}" ${fill} ${stroke}${transform}/>`
+	}
+	if (shape === 'line') {
+		return `<line x1="${box.x.toFixed(2)}" y1="${box.y.toFixed(2)}" x2="${(box.x + box.w).toFixed(2)}" y2="${(box.y + box.h).toFixed(2)}" ${stroke}${transform}/>`
+	}
+	if (shape.includes('triangle')) {
+		const points = `${box.cx.toFixed(2)},${box.y.toFixed(2)} ${(box.x + box.w).toFixed(2)},${(box.y + box.h).toFixed(2)} ${box.x.toFixed(2)},${(box.y + box.h).toFixed(2)}`
+		return `<polygon points="${points}" ${fill} ${stroke}${transform}/>`
+	}
+	if (shape.includes('diamond')) {
+		const points = `${box.cx.toFixed(2)},${box.y.toFixed(2)} ${(box.x + box.w).toFixed(2)},${box.cy.toFixed(2)} ${box.cx.toFixed(2)},${(box.y + box.h).toFixed(2)} ${box.x.toFixed(2)},${box.cy.toFixed(2)}`
+		return `<polygon points="${points}" ${fill} ${stroke}${transform}/>`
+	}
+	return `<rect x="${box.x.toFixed(2)}" y="${box.y.toFixed(2)}" width="${box.w.toFixed(2)}" height="${box.h.toFixed(2)}" rx="${radius.toFixed(2)}" ${fill} ${stroke}${transform}/>`
+}
+
+function previewShadowSvg(opts = {}, box) {
+	if (!opts.shadow) return ''
+	const opacity = Number(opts.shadow.opacity ?? opts.shadow.transparency)
+	const alpha = Number.isFinite(opacity) && opacity <= 1 ? opacity : 0.18
+	const blur = Math.max(2, Number(opts.shadow.blur || 8))
+	const angle = Number(opts.shadow.angle || 45) * Math.PI / 180
+	const dist = Math.max(2, Number(opts.shadow.distance || 3))
+	const dx = Math.cos(angle) * dist
+	const dy = Math.sin(angle) * dist
+	return `<rect x="${(box.x + dx).toFixed(2)}" y="${(box.y + dy).toFixed(2)}" width="${box.w.toFixed(2)}" height="${box.h.toFixed(2)}" rx="${Math.min(box.w, box.h, 20).toFixed(2)}" fill="#000000" opacity="${Math.max(0.04, Math.min(0.35, alpha))}" filter="url(#previewShadow${blur > 10 ? 'Soft' : ''})"/>`
+}
+
+function previewMediaRel(slide, rid) {
+	return (slide?._relsMedia || []).find(rel => Number(rel.rId) === Number(rid)) || null
+}
+
+function previewMimeFromPath(filePath, fallback = 'image/png') {
+	const ext = String(path.extname(filePath || '')).toLowerCase()
+	if (ext === '.jpg' || ext === '.jpeg') return 'image/jpeg'
+	if (ext === '.gif') return 'image/gif'
+	if (ext === '.webp') return 'image/webp'
+	if (ext === '.svg') return 'image/svg+xml'
+	if (ext === '.png') return 'image/png'
+	return fallback
+}
+
+async function previewImageHref(obj, slide) {
+	const rel = previewMediaRel(slide, obj?.imageRid || obj?.rasterRid)
+	const data = obj?.options?.data || rel?.data
+	if (typeof data === 'string' && data.trim()) {
+		const normalized = normalizeImageDataUri(data)
+		if (normalized) return normalized
+		if (/^image\/[A-Za-z0-9.+-]+;base64,/i.test(data)) return `data:${data}`
+	}
+	const imgPath = obj?.options?.path || rel?.path || obj?.image
+	if (typeof imgPath === 'string' && imgPath && imgPath !== 'preencoded.png') {
+		const resolved = path.isAbsolute(imgPath) ? imgPath : path.resolve(process.cwd(), imgPath)
+		if (fsNode.existsSync(resolved) && fsNode.statSync(resolved).isFile()) {
+			const buf = await fs.readFile(resolved)
+			return `data:${previewMimeFromPath(resolved, rel?.type || 'image/png')};base64,${buf.toString('base64')}`
+		}
+	}
+	return ''
+}
+
+async function previewImageSvg(obj, slide, box, ctx, label = 'Image') {
+	const href = await previewImageHref(obj, slide)
+	const transform = previewTransform(obj?.options || {}, box)
+	if (href) {
+		return `<image x="${box.x.toFixed(2)}" y="${box.y.toFixed(2)}" width="${box.w.toFixed(2)}" height="${box.h.toFixed(2)}" preserveAspectRatio="xMidYMid slice" href="${previewEscapeXml(href)}"${transform}/>`
+	}
+	return `${previewShapeSvg('rect', { fill: { color: 'E2E8F0' }, line: { color: '94A3B8', dash: 'dash' } }, box, ctx)}${previewTextSvg(label, { fontSize: 16, color: '475569', align: 'center', valign: 'middle' }, box, ctx)}`
+}
+
+function previewChartSvg(obj, slide, box, ctx) {
+	const rel = (slide?._relsChart || []).find(item => item?.opts === obj?.options || Number(item?.rId) === Number(obj?.chartRid)) || null
+	const data = Array.isArray(rel?.data) ? rel.data : []
+	const opts = obj?.options || {}
+	const type = String(opts._type || rel?.type || 'chart').toLowerCase()
+	const bg = previewShapeSvg('roundRect', { fill: { color: 'FFFFFF' }, line: { color: 'CBD5E1' } }, box, ctx)
+	const plot = { x: box.x + box.w * 0.1, y: box.y + box.h * 0.18, w: box.w * 0.78, h: box.h * 0.62 }
+	const palette = ['2563EB', '14B8A6', 'F59E0B', 'EF4444', '8B5CF6']
+	const series = data.filter(item => Array.isArray(item?.values) && item.values.length)
+	if (type.includes('pie') || type.includes('doughnut')) {
+		const vals = series[0]?.values || [1, 1, 1]
+		const total = vals.reduce((sum, v) => sum + Math.max(0, Number(v) || 0), 0) || 1
+		let a0 = -90
+		const cx = box.cx, cy = box.cy, r = Math.min(box.w, box.h) * 0.28
+		const parts = vals.slice(0, 8).map((v, i) => {
+			const a1 = a0 + 360 * Math.max(0, Number(v) || 0) / total
+			const large = a1 - a0 > 180 ? 1 : 0
+			const p0 = [cx + r * Math.cos(a0 * Math.PI / 180), cy + r * Math.sin(a0 * Math.PI / 180)]
+			const p1 = [cx + r * Math.cos(a1 * Math.PI / 180), cy + r * Math.sin(a1 * Math.PI / 180)]
+			const pathData = `M ${cx} ${cy} L ${p0[0]} ${p0[1]} A ${r} ${r} 0 ${large} 1 ${p1[0]} ${p1[1]} Z`
+			a0 = a1
+			return `<path d="${pathData}" fill="#${palette[i % palette.length]}" opacity="0.9"/>`
+		}).join('')
+		return `${bg}${parts}<text x="${box.cx}" y="${(box.y + box.h - 12).toFixed(2)}" fill="#334155" font-size="${(12 * ctx.scale / 72).toFixed(2)}" text-anchor="middle">${previewEscapeXml(opts.title || 'Chart preview')}</text>`
+	}
+	const values = series[0]?.values || [3, 7, 5, 9, 4]
+	const max = Math.max(1, ...values.map(v => Number(v) || 0))
+	const barW = plot.w / Math.max(1, values.length) * 0.62
+	const bars = values.slice(0, 12).map((v, i) => {
+		const h = plot.h * Math.max(0, Number(v) || 0) / max
+		const x = plot.x + i * plot.w / Math.max(1, values.length) + barW * 0.3
+		const y = plot.y + plot.h - h
+		return `<rect x="${x.toFixed(2)}" y="${y.toFixed(2)}" width="${barW.toFixed(2)}" height="${h.toFixed(2)}" fill="#${palette[i % palette.length]}" rx="3"/>`
+	}).join('')
+	return `${bg}<line x1="${plot.x}" y1="${plot.y + plot.h}" x2="${plot.x + plot.w}" y2="${plot.y + plot.h}" stroke="#94A3B8" stroke-width="1"/>${bars}<text x="${box.cx}" y="${(box.y + box.h - 12).toFixed(2)}" fill="#334155" font-size="${(12 * ctx.scale / 72).toFixed(2)}" text-anchor="middle">${previewEscapeXml(opts.title || `${type} chart`)}</text>`
+}
+
+function previewTableSvg(obj, box, ctx) {
+	const rows = Array.isArray(obj?.arrTabRows) ? obj.arrTabRows.slice(0, 12) : []
+	const cols = Math.max(1, ...rows.map(row => Array.isArray(row) ? row.length : 0))
+	const cellW = box.w / cols
+	const cellH = box.h / Math.max(1, rows.length || 3)
+	const parts = [previewShapeSvg('rect', { fill: { color: 'FFFFFF' }, line: { color: 'CBD5E1' } }, box, ctx)]
+	rows.forEach((row, r) => {
+		for (let c = 0; c < cols; c++) {
+			const cell = Array.isArray(row) ? row[c] : null
+			const cellBox = { x: box.x + c * cellW, y: box.y + r * cellH, w: cellW, h: cellH, cx: box.x + c * cellW + cellW / 2, cy: box.y + r * cellH + cellH / 2 }
+			const fill = r === 0 ? 'DBEAFE' : (r % 2 ? 'F8FAFC' : 'FFFFFF')
+			parts.push(`<rect x="${cellBox.x.toFixed(2)}" y="${cellBox.y.toFixed(2)}" width="${cellBox.w.toFixed(2)}" height="${cellBox.h.toFixed(2)}" fill="#${fill}" stroke="#CBD5E1" stroke-width="1"/>`)
+			parts.push(previewTextSvg(previewTextRuns(cell?.text ?? cell ?? ''), { fontSize: r === 0 ? 11 : 10, bold: r === 0, color: '1E293B' }, cellBox, ctx))
+		}
+	})
+	return parts.join('')
+}
+
+function previewFreeformSvg(obj, box, ctx) {
+	const pts = Array.isArray(obj?.options?.points) ? obj.options.points : []
+	if (!pts.length) return previewShapeSvg('rect', obj?.options || {}, box, ctx)
+	const xs = pts.map(p => Number(p.x ?? p[0]) || 0)
+	const ys = pts.map(p => Number(p.y ?? p[1]) || 0)
+	const minX = Math.min(...xs), maxX = Math.max(...xs), minY = Math.min(...ys), maxY = Math.max(...ys)
+	const spanX = maxX - minX || 1, spanY = maxY - minY || 1
+	const points = pts.map(p => {
+		const x = box.x + ((Number(p.x ?? p[0]) || 0) - minX) / spanX * box.w
+		const y = box.y + ((Number(p.y ?? p[1]) || 0) - minY) / spanY * box.h
+		return `${x.toFixed(2)},${y.toFixed(2)}`
+	}).join(' ')
+	return `<polygon points="${points}" ${previewFillAttrs(obj?.options?.fill, ctx, 'EEF2F7')} ${previewStrokeAttrs(obj?.options?.line, '64748B')}${previewTransform(obj?.options || {}, box)}/>`
+}
+
+function previewPlaceholderSvg(label, opts, box, ctx) {
+	return `${previewShapeSvg('roundRect', { fill: { color: 'F8FAFC' }, line: { color: '94A3B8', dash: 'dash' } }, box, ctx)}${previewTextSvg(label, { fontSize: 14, color: '475569', align: 'center', valign: 'middle', bold: true }, box, ctx)}`
+}
+
+async function previewObjectSvg(obj, slide, ctx) {
+	const opts = obj?.options || {}
+	const kind = String(obj?._type || obj?.type || '').toLowerCase()
+	if (kind === 'notes') return ''
+	const box = previewBox(opts, ctx)
+	const shape = obj?.shape || opts.shape || opts.shapeName
+	if (kind === 'image') return previewShadowSvg(opts, box) + await previewImageSvg(obj, slide, box, ctx)
+	if (kind === 'chart') return previewShadowSvg(opts, box) + previewChartSvg(obj, slide, box, ctx)
+	if (kind === 'table') return previewShadowSvg(opts, box) + previewTableSvg(obj, box, ctx)
+	if (kind === 'model3d') {
+		if (obj.rasterRid) return previewShadowSvg(opts, box) + await previewImageSvg({ ...obj, imageRid: obj.rasterRid }, slide, box, ctx, '3D model poster')
+		const camera = opts.camera ? 'camera set' : 'native 3D'
+		return previewShadowSvg(opts, box) + previewPlaceholderSvg(`3D model\n${camera}`, opts, box, ctx)
+	}
+	if (kind === 'media') return previewShadowSvg(opts, box) + previewPlaceholderSvg(String(opts.type || obj.mediaType || 'media').toUpperCase(), opts, box, ctx)
+	if (kind === 'freeform' || shape === 'custGeom') return previewShadowSvg(opts, box) + previewFreeformSvg(obj, box, ctx)
+	const hasText = obj?.text != null || opts.text != null
+	const shapeKey = String(shape || '').toLowerCase()
+	const visibleLine = opts.line && opts.line.type !== 'none' && opts.line.color !== 'none' && opts.line.transparency < 100
+	const explicitFrame = !!(opts.fill || visibleLine || (shape && !['rect', 'rectangle'].includes(shapeKey)))
+	const parts = []
+	if (opts.shadow) parts.push(previewShadowSvg(opts, box))
+	if (explicitFrame) parts.push(previewShapeSvg(shape || 'rect', opts, box, ctx))
+	if (hasText) parts.push(previewTextSvg(previewTextRuns(obj?.text ?? opts.text), opts, box, ctx))
+	if (!parts.length) parts.push(previewPlaceholderSvg(kind || 'object', opts, box, ctx))
+	return parts.join('')
+}
+
+function previewSlideBackground(slide, ctx) {
+	const bg = slide?.background || {}
+	if (bg.fill || bg.color) {
+		return `<rect x="0" y="0" width="${ctx.width}" height="${ctx.height}" ${previewFillAttrs(bg.fill || { color: bg.color }, ctx, 'FFFFFF')}/>`
+	}
+	if (slide?.color) return `<rect x="0" y="0" width="${ctx.width}" height="${ctx.height}" fill="#${previewCleanHex(slide.color, 'FFFFFF')}"/>`
+	return `<rect x="0" y="0" width="${ctx.width}" height="${ctx.height}" fill="#FFFFFF"/>`
+}
+
+async function renderSlidePreviewSvg(entry, slideIndex, args = {}) {
+	const { pptx } = entry
+	const slide = pptx.slides[slideIndex]
+	if (!slide) throw new Error(`preview: bad slide index ${slideIndex} (deck has ${pptx.slides.length} slides).`)
+	const ctx = { ...previewPixelContext(pptx, args), defs: [
+		'<filter id="previewShadow" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="2"/><feOffset dx="2" dy="2"/><feComponentTransfer><feFuncA type="linear" slope="0.22"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>',
+		'<filter id="previewShadowSoft" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4"/><feOffset dx="3" dy="4"/><feComponentTransfer><feFuncA type="linear" slope="0.18"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>',
+	], nextGradient: 1 }
+	const objectSvgs = []
+	for (const obj of (slide._slideObjects || [])) objectSvgs.push(await previewObjectSvg(obj, slide, ctx))
+	const defs = ctx.defs.length ? `<defs>${ctx.defs.join('')}</defs>` : ''
+	const svg = `<?xml version="1.0" encoding="UTF-8"?><svg xmlns="http://www.w3.org/2000/svg" width="${ctx.width}" height="${ctx.height}" viewBox="0 0 ${ctx.width} ${ctx.height}">${defs}${previewSlideBackground(slide, ctx)}${objectSvgs.join('')}</svg>`
+	return {
+		svg,
+		width: ctx.width,
+		height: ctx.height,
+		objectCount: (slide._slideObjects || []).filter(obj => String(obj?._type || obj?.type || '').toLowerCase() !== 'notes').length,
+	}
+}
+
+async function previewBufferFromSvg(svg, format) {
+	if (format === 'svg') return Buffer.from(svg, 'utf8')
+	const sharp = (await import('sharp')).default
+	return sharp(Buffer.from(svg, 'utf8'), { density: 96 }).png().toBuffer()
+}
+
+async function publishPreviewArtifact(entry, deckId, slideIndex, rendered, args = {}) {
+	const format = args.format === 'svg' ? 'svg' : 'png'
+	const fileName = args.fileName || `betterpptx_preview_slide_${slideIndex + 1}.${format}`
+	const artifact = await _artifactStore.prepareArtifactTarget({
+		fileName,
+		outputDir: args.outputDir,
+		deckId,
+		kind: 'preview',
+		extension: `.${format}`,
+		contentType: format === 'svg' ? 'image/svg+xml' : 'image/png',
+	})
+	const buffer = await previewBufferFromSvg(rendered.svg, format)
+	await fs.writeFile(artifact.target, buffer)
+	const stat = await fs.stat(artifact.target)
+	const finalizedArtifact = _artifactStore.finalizeSaveTarget ? await _artifactStore.finalizeSaveTarget(artifact) : artifact
+	return {
+		slideIndex,
+		slideNumber: slideIndex + 1,
+		format,
+		width: rendered.width,
+		height: rendered.height,
+		objectCount: rendered.objectCount,
+		bytes: stat.size,
+		artifact: {
+			state: finalizedArtifact.downloadUrl ? 'download_ready' : 'saved',
+			expiresAt: finalizedArtifact.expiresAt,
+		},
+		...(finalizedArtifact.downloadUrl ? { downloadUrl: finalizedArtifact.downloadUrl, downloadName: finalizedArtifact.downloadName } : {}),
+		...(isPublicBlackBoxMode() ? {} : { filePath: artifact.target }),
+		...(args.includeSvg === true && !isPublicBlackBoxMode() ? { svg: rendered.svg } : {}),
+	}
+}
+
+function previewRendererInfo() {
+	return {
+		type: 'live-authoring-preview',
+		powerPointExact: false,
+		cloudRunCompatible: true,
+		notes: [
+			'Rendered from the in-progress deck model before save.',
+			'Use for layout, crop, text fit, hierarchy, contrast, and 3D placement review.',
+			'Keep deck.validate and final PowerPoint/package checks for authoritative PPTX compatibility.',
+		],
+	}
+}
+
+async function handleSlidePreview(args) {
+	const entry = getDeck(args.deckId)
+	const slideIndex = Number(args.slideIndex)
+	if (!Number.isInteger(slideIndex)) throw new Error('slide.preview: slideIndex must be a zero-based integer.')
+	const rendered = await renderSlidePreviewSvg(entry, slideIndex, args)
+	const preview = await publishPreviewArtifact(entry, args.deckId, slideIndex, rendered, args)
+	return { ok: true, preview, renderer: previewRendererInfo() }
+}
+
+async function handleDeckPreview(args) {
+	const entry = getDeck(args.deckId)
+	const slideCount = entry.pptx.slides.length
+	const requested = Array.isArray(args.slides) && args.slides.length
+		? args.slides.map(n => Number(n))
+		: Array.from({ length: Math.min(5, slideCount) }, (_v, i) => i)
+	const unique = Array.from(new Set(requested)).filter(n => Number.isInteger(n) && n >= 0 && n < slideCount).slice(0, 12)
+	if (!unique.length) throw new Error(`deck.preview: no valid slide indexes for deck with ${slideCount} slides.`)
+	const previews = []
+	for (const slideIndex of unique) {
+		const rendered = await renderSlidePreviewSvg(entry, slideIndex, args)
+		previews.push(await publishPreviewArtifact(entry, args.deckId, slideIndex, rendered, args))
+	}
+	return { ok: true, slideCount, previews, renderer: previewRendererInfo() }
+}
+
 async function handleSummary(args) {
 	const entry = getDeck(args.deckId)
 	const { pptx, createdAt } = entry
@@ -10476,7 +10950,7 @@ export function getDownloadConfig() { return _artifactStore.describe() }
 
 const PUBLIC_OUTPUT_SHAPE_MIN_SLIDES = Math.max(4, Number(process.env.BETTERPPTX_PUBLIC_OUTPUT_SHAPE_MIN_SLIDES || 5))
 const PUBLIC_OUTPUT_FEATURE_SURFACE_RE = /\b(?:animations?|transitions?|effects?|motion paths?|smart\s*art|smartart|word\s*art|wordart|equations?|chart types?|table styles?|shape types?|layouts?|presets?|features?|options?|variants?|enums?)\b/i
-const PUBLIC_OUTPUT_FEATURE_ID_RE = /\b(?:anim(?:ation)?|trans(?:ition)?|smart\s*art|smartart|word\s*art|wordart|effect|motion\s*path|preset|layout|shape|chart|table|feature|option|enum|fixture|specimen|case)\s*(?::|#|\b(?:id|type|name|effect|preset|layout|variant|sample|case|style|option|enum|fixture|specimen)\b)\s*[a-z0-9][a-z0-9_.-]*|\b(?:anim(?:ation)?|trans(?:ition)?|smart\s*art|smartart|word\s*art|wordart|effect|motion\s*path|preset|layout|shape|chart|table|feature|option|enum|fixture|specimen|case)\s*[-_]\s*(?:id|type|name|effect|preset|layout|variant|sample|case|style|option|enum|fixture|specimen|v?\d+|[a-z]?\d{1,4})\b/i
+const PUBLIC_OUTPUT_FEATURE_ID_RE = /\b(?:anim(?:ation)?|trans(?:ition)?|smart\s*art|smartart|word\s*art|wordart|effect|motion\s*path|preset|layout|shape|chart|table|feature|option|enum|fixture|specimen|case)\s*(?::|#|-|_|\b(?:id|type|name|effect|preset|layout|variant|sample|case)\b)\s*[a-z0-9][a-z0-9_.-]*/i
 const PUBLIC_OUTPUT_NUMBERED_FEATURE_RE = /\b(?:feature|case|specimen|fixture)\s*#?\s*\d+\b/i
 const PUBLIC_OUTPUT_INTERNAL_LABEL_RE = /\b(?:ooxml|drawingml|raw\s+xml|xml\s+part|r:id|rid\d+|spid|cnvpr|txbody|graphicframe|p14|p15|p16|decypher|comparator|parity|frozen\s+reference|capability\s+ledger|option\s+registry|preset\s+id|source\s+path|filesystem|package\s+relationship)\b/i
 const PUBLIC_OUTPUT_CATALOG_PHRASE_RE = /\b(?:all|complete|full|exhaustive|systematic|matrix|catalog|gallery|inventory|coverage|reference|sample\s+deck|test\s+deck|fixture\s+deck)\b.{0,80}\b(?:animations?|transitions?|effects?|motion paths?|smart\s*art|word\s*art|equations?|chart types?|table styles?|shape types?|layouts?|presets?|features?|options?)\b|\b(?:animations?|transitions?|effects?|motion paths?|smart\s*art|word\s*art|equations?|chart types?|table styles?|shape types?|layouts?|presets?|features?|options?)\b.{0,80}\b(?:catalog|matrix|gallery|inventory|coverage|reference|all|complete|full|exhaustive|systematic)\b/i
@@ -10991,6 +11465,7 @@ const HANDLERS = {
 	'betterpptx.deck.open_existing': handleOpenExisting,
 	'betterpptx.deck.open_uploaded': handleOpenUploaded,
 	'betterpptx.deck.summary': handleSummary,
+	'betterpptx.deck.preview': handleDeckPreview,
 	'betterpptx.deck.inspect_layouts': handleInspectLayouts,
 	'betterpptx.deck.sections': handleSections,
 	'betterpptx.deck.validate': handleValidate,
@@ -11006,6 +11481,7 @@ const HANDLERS = {
 	// ---- slide primitives
 	'betterpptx.slide.add': handleAddSlide,
 	'betterpptx.slide.inspect': handleInspectSlide,
+	'betterpptx.slide.preview': handleSlidePreview,
 	'betterpptx.slide.update': handleUpdateSlide,
 	'betterpptx.slide.duplicate': handleDuplicateSlide,
 	'betterpptx.slide.delete': handleDeleteSlide,
@@ -11072,6 +11548,8 @@ const HEAVY_TOOLS = new Set([
 	'betterpptx.deck.transform_shapes',
 	'betterpptx.deck.validate',
 	'betterpptx.deck.validate_narration',
+	'betterpptx.deck.preview',
+	'betterpptx.slide.preview',
 	'betterpptx.deck.add_narration',
 	'betterpptx.slide.add_narration',
 	'betterpptx.narration.synthesize',
@@ -11091,7 +11569,7 @@ function releaseHeavy() {
 	if (_heavyQueue.length && _heavyActive < MAX_CONCURRENCY) { _heavyActive++; (_heavyQueue.shift())() }
 }
 
-const READ_ONLY_TOOL_RE = /\.(capabilities|version|status|voices|list|summary|inspect|search|inspect_layouts|editability_report|validate|validate_design|validate_narration|list_shapes|inspect_shapes|read_file|read_json|list_dir|find|catalog|recommend|sample_palette|list_xml_groups|polygon_to_custgeom|simplify_path|fetch|explain_plan|portal)$/
+const READ_ONLY_TOOL_RE = /\.(capabilities|version|status|voices|list|summary|inspect|preview|search|inspect_layouts|editability_report|validate|validate_design|validate_narration|list_shapes|inspect_shapes|read_file|read_json|list_dir|find|catalog|recommend|sample_palette|list_xml_groups|polygon_to_custgeom|simplify_path|fetch|explain_plan|portal)$/
 const DECK_CREATION_TOOLS = new Set([
 	'betterpptx.deck.new',
 	'betterpptx.deck.open_uploaded',

@@ -68,6 +68,7 @@ Scope: Track A private implementation hardening for `betterpptx-mcp`, aligned to
 | A9 aggregate telemetry | Done | `telemetry.mjs` records in-memory counters for tool calls, failures, idempotent replays/conflicts, artifact saves/downloads, auth activation outcomes, and byte buckets without raw args or paths. Public health stays generic. |
 | Track A local harness | Done | `verify-track-a-local-harness.mjs` drives multiple local MCP sessions through create/edit/save/download/idempotency flows and verifies aggregate telemetry. |
 | Track A failure-injection harness | Done | `verify-track-a-failure-injection.mjs` verifies quota replay bypass, structured idempotency conflict, structured rate-limit failure, missing-artifact telemetry, and failure counters. |
+| Corrected MC3 local autoshowcase corpus | Done locally | `mc3c-full-500-realworld-20260606-01` generated 100 strict real-world autoshowcase decks / 500 slides through the local HTTP MCP endpoint with production Piper TTS, strict feature/design/narration/package gates, Dodo test-mode billing, and local PowerPoint COM repair verification. Result: 100/100 strict pass, 100/100 COM repair pass, actual committed billing 1,833.60 credits. |
 
 ## Current Work Queue
 
@@ -80,13 +81,13 @@ Scope: Track A private implementation hardening for `betterpptx-mcp`, aligned to
 | MC2 | Private Mission Control owner controls | Done | MC2 dashboard/data plus owner-secret status/reveal/update/rotate/test routes are deployed behind Cloud Run IAM and owner admin token. |
 | A9 | Telemetry/harness | Deployed stress verified | Aggregate telemetry, local harness, failure-injection harness, and private deployed staging stress all pass. Latest deployed stress passed on revision `betterpptx-mcp-staging-00028-74h` with the MC2 edit-state gate and activation guard enforced: `node betterpptx-mcp/verify-deployed-staging-stress.mjs https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/mcp --use-gcloud-auth --sessions 1 --iterations 1 --require-mission-control --env-file C:\MyDoc\PptxGenJS_Claude\betterpptx-mcp\.betterpptx-mcp-runtime\dodo-local.env --require-activation`; earlier 3x2 stress passed on revision `00017-hcs`. |
 | Billing | Firestore-backed staging billing | Staging provider-origin verified | Dodo usage-credit checkout and real Dodo deduction are verified in test mode. Public webhook-only receiver writes signed custom-header synthetic webhooks to Firestore, handles Standard Webhooks decoded `whsec_` signing, and has processed a Dodo/Svix dashboard `subscription.active` webhook end-to-end. |
-| MC3 | 500-slide pricing/quality evidence run | Reopened for autoshowcase correction | Prior aggregate `mc3-aggregate-20260605-03`: 100 selected decks / 500 slides / 3,289,055 downloaded bytes / 1,000.8 estimated credits, with static package and local desktop PowerPoint COM repair checks passed 100/100. Reclassified as infrastructure/billing stress evidence only because the decks were too repetitive/shallow and B15 narration was notes-only after failed TTS calls. Corrected autoshowcase corpus is pending with strict feature, design, approved-voice narration, repair, Dodo, and reporting gates. |
+| MC3 | 500-slide pricing/quality evidence run | Done locally; private Cloud Run cost rerun pending | Corrected local corpus `mc3c-full-500-realworld-20260606-01`: 100/100 strict decks, 500 slides, 15,635,633 downloaded bytes, 100/100 local COM repair pass, actual committed billing 1,833.60 credits. This proves product/package/billing logic locally. It does not prove Cloud Run host cost because the run used local HTTP MCP with `--skip-gcp-snapshot`. |
 
 ## Pending Production Inputs
 
 | Input | Status | Why Needed |
 | --- | --- | --- |
-| Production Dodo API key/product | Pending corrected calibration plus owner live approval | Live API key is saved and verified. Test-mode billing, webhook, Mission Control, deployed stress, and infrastructure MC3 evidence are validated; live product/pricing creation remains intentionally blocked until the corrected autoshowcase billing calibration and owner public/live approval. |
+| Production Dodo API key/product | Pending private Cloud Run cost calibration plus owner live approval | Live API key is saved and verified. Corrected local autoshowcase billing evidence exists, but live product/pricing creation remains intentionally blocked until private Cloud Run cost/load data, fresh-customer Dodo calibration, and owner public/live approval. |
 | Dodo test subscription/credit products | Done | Test credit entitlement, `$5/month` subscription product, `$5` top-up product, and checkout session are saved in the private local Dodo env/status files. |
 | Dodo external webhook receiver | Deployed; provider-origin verified | The MCP service remains IAM-private. Public webhook-only receiver is deployed and Dodo test endpoint is pointed at it with custom header configured. Initial dashboard delivery reached Cloud Run but failed 401 due to Standard Webhooks `whsec_` decoding; commit `fca7e51` fixed it, and Dodo/Svix dashboard delivery now returns HTTP 200 and updates Firestore customer state. |
 | Object storage bucket | Staging verified | GCS private bucket exists for staging; deployed saves return signed download URLs and stress harness verified PPTX ZIP downloads. |
@@ -158,14 +159,14 @@ node .\betterpptx-mcp\verify-deployed-staging-stress.mjs https://betterpptx-mcp-
 
 ## Next Planned Increment
 
-Continue private hardening through the corrected MC3 autoshowcase run. No immediate user action is required unless the owner wants to change the public/live boundary.
+Continue private hardening through private Cloud Run cost/load calibration. No immediate user action is required unless the owner wants to change the public/live boundary.
 
 Continue with:
 
-1. Run a clean Dodo billing calibration with a fresh test customer or explicit before/after provider snapshots.
-2. Configure a production-safe TTS provider and rerun B15.
-3. Fix or keep gated the B17 repair-risky chart/table semantic edit path.
-4. Sync the MC3 harness, billing snapshot utility, reports, and deploy-job image guard to the private GitHub deploy repo.
+1. Sync the corrected MC3 harness, repair gates, engine fixes, reports, and deploy-impacting changes to the private GitHub deploy repo.
+2. Deploy private Cloud Run staging from Git and rerun the strict 100-file harness with GCP snapshots enabled.
+3. Run a fresh-customer Dodo billing calibration or explicit before/after provider snapshots for the deployed run.
+4. Fix the billing UX/estimator gap: pre-save estimate was 1,422.70 credits but actual committed billing was 1,833.60 credits.
 5. Later, after owner approval: public endpoint/domain and live Dodo product creation/switch.
 
 Next hard user-action milestone:
