@@ -1,0 +1,47 @@
+services:
+  mcp-server:
+    build:
+      context: .
+      dockerfile: deploy/docker/Dockerfile.mcp
+      args:
+        BUILD_DIST: "1"
+    environment:
+      BETTERPPTX_TOKEN: ${BETTERPPTX_TOKEN:?set a token}
+      BETTERPPTX_TTS_URL: http://piper-tts:5000
+      BETTERPPTX_VOICES_MANIFEST: /voices/runtime-manifest.json
+      BETTERPPTX_NARRATION_MODE: production
+      BETTERPPTX_OUT_DIR: /out
+      BETTERPPTX_ALLOWED_AUDIO_DIRS: /out
+      BETTERPPTX_TTS_TIMEOUT_MS: "300000"
+    volumes:
+      - ./out:/out
+      - ./betterpptx-mcp/narration/voices/runtime:/voices:ro
+      - ./licenses:/licenses:ro
+    depends_on:
+      piper-tts:
+        condition: service_healthy
+    ports:
+      - "3344:3344"
+    restart: unless-stopped
+
+  piper-tts:
+    build:
+      context: ./deploy/docker
+      dockerfile: Dockerfile.piper
+    environment:
+      PIPER_VOICES_DIR: /voices
+      PIPER_SYNTH_TIMEOUT_SECONDS: "300"
+    volumes:
+      - ./betterpptx-mcp/narration/voices/runtime:/voices:ro
+    ports:
+      - "127.0.0.1:5000:5000"
+    restart: unless-stopped
+
+  ingress:
+    image: cloudflare/cloudflared:latest
+    command: ["tunnel", "--no-autoupdate", "--url", "http://mcp-server:3344"]
+    depends_on:
+      mcp-server:
+        condition: service_healthy
+    profiles:
+      - public

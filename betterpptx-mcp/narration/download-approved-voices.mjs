@@ -13,7 +13,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const SRC = path.resolve(process.env.BETTERPPTX_VOICE_MANIFEST_SOURCE || path.join(__dirname, 'voices', 'manifest.json'))
 const OUT_DIR = path.resolve(process.env.BETTERPPTX_VOICE_OUTPUT_DIR || path.join(__dirname, 'voices', 'runtime'))
 const OUT = path.join(OUT_DIR, 'runtime-manifest.json')
-const REQUIRE_LANGS = String(process.env.BETTERPPTX_REQUIRED_VOICE_LANGS || 'en,fr').split(',').map(s => s.trim()).filter(Boolean)
+const REQUIRE_LANGS_RAW = String(process.env.BETTERPPTX_REQUIRED_VOICE_LANGS || 'en,fr').trim()
 const INCLUDE_ATTRIBUTION = process.env.BETTERPPTX_ALLOW_ATTRIBUTION_VOICES === '1'
 
 function sha256(buffer) {
@@ -37,16 +37,34 @@ function usable(v) {
 	return false
 }
 
+function requiredLanguages(selected) {
+	if (!REQUIRE_LANGS_RAW) return []
+	if (REQUIRE_LANGS_RAW.toLowerCase() === 'approved') {
+		return [...new Set(selected.map(v => v.language).filter(Boolean))].sort()
+	}
+	return REQUIRE_LANGS_RAW.split(',').map(s => s.trim()).filter(Boolean)
+}
+
 async function main() {
 	const manifest = JSON.parse(await fs.readFile(SRC, 'utf8'))
 	const selected = (manifest.voices || []).filter(usable)
 	if (!selected.length) throw new Error(`No approved voices in ${SRC}. Set reviewStatus:"approved" on reviewed rows first.`)
+	const REQUIRE_LANGS = requiredLanguages(selected)
 	for (const lang of REQUIRE_LANGS) {
 		if (!selected.some(v => v.language === lang || String(v.locale || '').toLowerCase().startsWith(`${lang.toLowerCase()}_`))) {
 			throw new Error(`Missing approved required voice for language: ${lang}`)
 		}
 	}
 	await fs.mkdir(OUT_DIR, { recursive: true })
+	const selectedRuntimeFiles = new Set(selected.flatMap(voice => [`${voice.id}.onnx`, `${voice.id}.onnx.json`]))
+	for (const entry of await fs.readdir(OUT_DIR, { withFileTypes: true }).catch(() => [])) {
+		if (!entry.isFile()) continue
+		if (entry.name === 'runtime-manifest.json') continue
+		if (!entry.name.endsWith('.onnx') && !entry.name.endsWith('.onnx.json')) continue
+		if (!selectedRuntimeFiles.has(entry.name)) {
+			await fs.unlink(path.join(OUT_DIR, entry.name))
+		}
+	}
 	const runtime = []
 	for (const voice of selected) {
 		if (voice.commercialUse === 'attribution' && !voice.attributionText && !voice.datasetUrl && !voice.modelCardUrl) {

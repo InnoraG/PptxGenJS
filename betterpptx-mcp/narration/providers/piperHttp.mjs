@@ -1,4 +1,4 @@
-const DEFAULT_TIMEOUT_MS = Number(process.env.BETTERPPTX_TTS_TIMEOUT_MS || 180000)
+const DEFAULT_TIMEOUT_MS = Number(process.env.BETTERPPTX_TTS_TIMEOUT_MS || 300000)
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = DEFAULT_TIMEOUT_MS) {
 	const ctrl = new AbortController()

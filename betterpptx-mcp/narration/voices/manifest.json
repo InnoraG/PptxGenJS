@@ -106,10 +106,11 @@
       "datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "ca_ES-upc_ona-medium",
@@ -231,10 +232,11 @@
       "datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "cy_GB-bu_tts-medium",
@@ -306,10 +308,11 @@
       "datasetUrl": "https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-21/",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "de_DE-eva_k-x_low",
@@ -506,10 +509,11 @@
       "datasetUrl": "https://github.com/thorstenMueller/Thorsten-Voice",
       "finetunedFrom": "U.S. English lessac voice (high quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "de_DE-thorsten-low",
@@ -606,10 +610,11 @@
       "datasetUrl": "https://www.kaggle.com/datasets/bryanpark/greek-single-speaker-speech-dataset",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "en_GB-alan-low",
@@ -1359,7 +1364,7 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-human-approved-2026-05-30",
-      "notes": "; approved as default CC0 no-lineage v1 narration voice",
+      "notes": "; approved as default CC0 no-lineage v1 narration voice; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
       "reviewedAt": "2026-05-30"
     },
     {
@@ -1732,10 +1737,11 @@
       "datasetUrl": "https://huggingface.co/spaces/HirCoir/Piper-TTS-Spanish",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "eu_ES-antton-medium",
@@ -1857,10 +1863,11 @@
       "datasetUrl": "https://tts.datacula.com/",
       "finetunedFrom": "fa_IR Amir voice (medium quality)",
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "fa_IR-gyro-medium",
@@ -1957,10 +1964,11 @@
       "datasetUrl": "https://www.kaggle.com/bryanpark/finnish-single-speaker-speech-dataset",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "fr_FR-gilles-low",
@@ -1985,7 +1993,7 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-human-approved-2026-05-30",
-      "notes": "; approved as default CC0 no-lineage v1 narration voice",
+      "notes": "; approved as default CC0 no-lineage v1 narration voice; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
       "reviewedAt": "2026-05-30"
     },
     {
@@ -2233,10 +2241,11 @@
       "datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "hu_HU-berta-medium",
@@ -2633,10 +2642,11 @@
       "datasetUrl": "https://huggingface.co/RaivisDejus/Piper-lv_LV-Aivars-medium",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "ml_IN-arjun-medium",
@@ -2708,10 +2718,11 @@
       "datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "ne_NP-google-medium",
@@ -2833,10 +2844,11 @@
       "datasetUrl": "https://github.com/r-dh/dutch-vl-tts",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "nl_BE-rdh-x_low",
@@ -3058,10 +3070,11 @@
       "datasetUrl": "https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-15/",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "pl_PL-bass-high",
@@ -3108,10 +3121,11 @@
       "datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "pl_PL-gosia-medium",
@@ -3208,10 +3222,11 @@
       "datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "pt_BR-edresson-low",
@@ -3333,10 +3348,11 @@
       "datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "ru_RU-denis-medium",
@@ -3358,10 +3374,11 @@
       "datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "ru_RU-dmitri-medium",
@@ -3458,10 +3475,11 @@
       "datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "sl_SI-artur-medium",
@@ -3508,10 +3526,11 @@
       "datasetUrl": "https://huggingface.co/edonseki/folsh.ai",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "sr_RS-serbski_institut-medium",
@@ -3608,10 +3627,11 @@
       "datasetUrl": "https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-17/",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "sw_CD-lanfrica-medium",
@@ -3783,10 +3803,11 @@
       "datasetUrl": "https://github.com/egorsmkv/ukrainian-tts-datasets",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "uk_UA-oleksa-high",
@@ -3883,10 +3904,11 @@
       "datasetUrl": null,
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "reviewedBy": "codex-owner-directed-2026-06-06",
+      "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "reviewedAt": "2026-06-06"
     },
     {
       "id": "vi_VN-25hours_single-low",
@@ -3986,7 +4008,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "not approved for runtime 2026-06-06: synthesis requires the heavy g2pw/Torch/full offline Chinese phonemizer model path; keep as candidate until deterministic CJK sidecar/image profile is implemented and costed"
     },
     {
       "id": "zh_CN-huayan-medium",
@@ -4063,5 +4085,7 @@
       "reviewedBy": "automated:build-voice-manifest.mjs",
       "notes": "non-commercial"
     }
-  ]
+  ],
+  "updatedAt": "2026-06-06T00:00:00.000Z",
+  "approvalPolicy": "Runtime production voices are selected as one best commercially allowed voice per language, using Piper quality tier first, then clean lineage, previous approval, default flag, and deterministic id tie-breaks. Attribution, forbidden, unknown-license, and runtime-failing voices remain excluded until an attribution/counsel or deterministic runtime path exists."
 }

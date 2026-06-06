@@ -69,8 +69,6 @@ export function listVoices({ includeCandidates = false, allowUnreviewedVoices = 
 			reviewStatus: v.reviewStatus,
 			attributionRequired: v.commercialUse === 'attribution',
 			lineageReview: Boolean(v.lineageReview),
-			modelPath: v.modelPath,
-			configPath: v.configPath,
 		})),
 	}
 }
@@ -79,19 +77,23 @@ export function resolveVoice({ voice, lang, allowUnreviewedVoices = false } = {}
 	const manifest = loadVoiceManifest()
 	const mode = narrationMode()
 	const requested = normalizeLanguage(voice || lang || '')
+	const usableVoices = manifest.voices.filter(v =>
+		isApprovedForProduction(v)
+		|| (mode !== 'production' && isAllowedInDevelopment(v, allowUnreviewedVoices))
+	)
 	let found = null
 	if (voice) {
 		found = manifest.voices.find(v => v.id === voice)
 	} else if (lang) {
-		found = manifest.voices.find(v => v.isDefaultForLocale && normalizeLanguage(v.locale) === requested)
-			|| manifest.voices.find(v => v.isDefaultForLocale && normalizeLanguage(v.language) === requested)
-			|| manifest.voices.find(v => normalizeLanguage(v.locale) === requested)
-			|| manifest.voices.find(v => normalizeLanguage(v.language) === requested)
+		found = usableVoices.find(v => v.isDefaultForLocale && normalizeLanguage(v.locale) === requested)
+			|| usableVoices.find(v => v.isDefaultForLocale && normalizeLanguage(v.language) === requested)
+			|| usableVoices.find(v => normalizeLanguage(v.locale) === requested)
+			|| usableVoices.find(v => normalizeLanguage(v.language) === requested)
 	} else {
-		found = manifest.voices.find(v => v.isDefaultForLocale && normalizeLanguage(v.locale) === 'en_us')
-			|| manifest.voices.find(v => v.isDefaultForLocale && normalizeLanguage(v.language) === 'en')
-			|| manifest.voices.find(v => normalizeLanguage(v.language) === 'en')
-			|| manifest.voices[0]
+		found = usableVoices.find(v => v.isDefaultForLocale && normalizeLanguage(v.locale) === 'en_us')
+			|| usableVoices.find(v => v.isDefaultForLocale && normalizeLanguage(v.language) === 'en')
+			|| usableVoices.find(v => normalizeLanguage(v.language) === 'en')
+			|| usableVoices[0]
 	}
 	if (!found) throw new Error(`No narration voice found for ${voice || lang || 'default language'}`)
 
