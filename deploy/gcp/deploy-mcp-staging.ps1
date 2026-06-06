@@ -143,7 +143,8 @@ $updateArgs = @(
   "--image=$image",
   "--port=8080",
   "--max-instances=1",
-  "--update-env-vars=BETTERPPTX_MCP_MAX_INSTANCES=1,BETTERPPTX_EDIT_STATE_MODE=process-local,BETTERPPTX_EDIT_STATE_SINGLE_INSTANCE_ACCEPTED=1"
+  "--update-env-vars=BETTERPPTX_MCP_MAX_INSTANCES=1,BETTERPPTX_EDIT_STATE_MODE=process-local,BETTERPPTX_EDIT_STATE_SINGLE_INSTANCE_ACCEPTED=1",
+  "--remove-env-vars=BETTERPPTX_TTS_PROVIDER"
 )
 if (-not $SkipSketchfabSecret) {
   $updateArgs += @(

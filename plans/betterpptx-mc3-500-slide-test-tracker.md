@@ -8,7 +8,7 @@ Plan: `plans/betterpptx-mc3-500-slide-realworld-test-plan.md`
 
 Report: `plans/betterpptx-mc3-pricing-quality-cost-report-2026-06-06.md`
 
-Status: MC3 core private-staging aggregate is complete. Live Dodo pricing remains blocked until owner approval and final billing-pricing calibration.
+Status: The prior 100-deck aggregate is reclassified as **MC3 infrastructure/billing stress evidence only**. It is not accepted as the product-quality autoshowcase corpus and must not be used to finalize live Dodo pricing. A corrected 100-file / 500-slide autoshowcase run is pending with strict feature, design, narration, repair, billing, and reporting gates.
 
 Current owner gate: none for continued private hardening. Owner approval is required only before public endpoint/domain or live Dodo product/pricing.
 
@@ -18,6 +18,8 @@ Current owner gate: none for continued private hardening. Owner approval is requ
 - In progress: implementation or run active.
 - Done: completed and evidence recorded.
 - Done with caveat: completed, but follow-up is required before live launch.
+- Infra-only: useful for infrastructure, repair, download, idempotency, or billing-plumbing evidence, but not accepted as product-quality/pricing evidence.
+- Superseded for product quality: replaced by the corrected autoshowcase acceptance track for quality/pricing decisions.
 - Failed: completed but failed acceptance.
 
 ## Milestones
@@ -28,12 +30,13 @@ Current owner gate: none for continued private hardening. Owner approval is requ
 | MC3.1 harness implementation | Done | `betterpptx-mcp/run-mc3-realworld-harness.mjs`; `node --check` passed. |
 | MC3.2 baseline snapshots | Done | Snapshot-gated smoke `mc3-gcp-snapshot-smoke-20260605-04` captured health, Mission Control, Cloud Run, Cloud Build, and GCS evidence. |
 | MC3.3 pilot run | Done | `mc3-pilot-20260605-01`: 5 decks / 25 slides; static and local COM repair passed. |
-| MC3.4 full sequential run | Done | Final selected aggregate `mc3-aggregate-20260605-03`: 100 decks / 500 slides. |
+| MC3.4 full sequential run | Superseded for product quality | Aggregate `mc3-aggregate-20260605-03`: 100 decks / 500 slides. Valid for infrastructure, repair, download, idempotency, and billing-plumbing stress only; rejected as final autoshowcase quality evidence because the decks were shallow/repetitive and B15 narration was notes-only after failed TTS calls. |
 | MC3.5 controlled concurrency run | Done with caveat | Current launch posture intentionally keeps MCP max instances at 1. The aggregate used sequential private staging; broader concurrency above 1 remains blocked by shared edit-state work. |
 | MC3.6 editing/roundtrip run | Done with caveat | B17/B18 repair-safe edit, duplicate, reorder, delete, save, and idempotent replay paths passed. Repair-risky chart/table semantic edits are gated off pending a serialization fix. |
 | MC3.7 billing reconciliation | Done with caveat | Reconciler job image drift fixed; execution `betterpptx-billing-reconcile-once-v7hhv` reported `attempted=0`. Dodo test ledger shows deductions, but the reused customer prevents an exact MC3-only provider debit denominator. |
-| MC3.8 cost analysis | Done | Report calculates host-only Cloud Run cost band `$0.0395` to `$0.0852`. |
-| MC3.9 pricing recommendation | Done with caveat | Test-mode recommendation drafted. Live Dodo pricing/product remains owner-gated. |
+| MC3.8 cost analysis | Infra-only | Report calculates host-only Cloud Run cost band `$0.0395` to `$0.0852` for the infrastructure stress run. It excludes real approved-voice TTS cost and should not drive final pricing alone. |
+| MC3.9 pricing recommendation | Pending corrected corpus | Live Dodo pricing/product remains owner-gated. Test-mode pricing remains provisional until the corrected autoshowcase corpus and clean billing snapshots exist. |
+| MC3.10 strict autoshowcase correction | In progress | `betterpptx-mcp/run-mc3-realworld-harness.mjs` now supports strict autoshowcase gates for feature proof, design validation, required narration, package checks, and unsafe fetch denial. |
 
 ## Batch Tracker
 
@@ -53,7 +56,7 @@ Current owner gate: none for continued private hardening. Owner approval is requ
 | B12 | Equations/technical decks | MC3-B12-V01..V05 | Done | Final aggregate includes 5 repair-free decks. |
 | B13 | Animation basics | MC3-B13-V01..V05 | Done | Final aggregate includes 5 repair-free decks. |
 | B14 | Motion/transition flows | MC3-B14-V01..V05 | Done | Final aggregate includes 5 repair-free decks. |
-| B15 | Narrated decks | MC3-B15-V01..V05 | Done with caveat | Decks pass repair, but optional narration calls failed because the tone provider is unavailable in production mode. |
+| B15 | Narrated decks | MC3-B15-V01..V05 | Failed for autoshowcase | Decks pass repair, but narration calls failed and the saved decks contain notes only, not embedded approved-voice speech. This invalidates the prior aggregate for product-quality narration and TTS-cost decisions. |
 | B16 | 3D/model decks | MC3-B16-V01..V05 | Done | Final aggregate includes 5 repair-free decks. |
 | B17 | Existing deck editing | MC3-B17-V01..V05 | Done with caveat | Repair-safe edit run passed. Risky chart/table semantic edits remain gated. |
 | B18 | Correction/edit loops | MC3-B18-V01..V05 | Done | Edit/retry/correction loop decks passed. |
@@ -72,7 +75,7 @@ Current owner gate: none for continued private hardening. Owner approval is requ
 | mc3-b16-b20-clean-20260605-01 | Sequential subset | Done with caveat | 20 | 100 | 20 | 194.3 | B17 from this run was replaced because risky chart/table edits caused repair failures. |
 | mc3-b17-repair-safe-20260605-01 | Replacement subset | Done | 5 | 25 | 5 | 51.3 | Repair-safe B17 replacement passed COM. |
 | mc3-b01-b05-clean-20260605-01 plus replacements | Sequential subset | Done with caveat | 25 | 125 | 25 | 259.2 | Transient session invalidation replacements selected for B05. |
-| mc3-aggregate-20260605-03 | Final aggregate | Done | 100 | 500 | 100 | 1,000.8 | `PUBLIC GALLERY REPAIR VERIFY: PASS decks=100 com=required`. |
+| mc3-aggregate-20260605-03 | Infrastructure/billing stress aggregate | Superseded for product quality | 100 | 500 | 100 | 1,000.8 | Repair/download/idempotency/billing-plumbing evidence only. Not accepted as final autoshowcase corpus. |
 | betterpptx-billing-reconcile-once-tqc62 | Billing reconciler | Done | N/A | N/A | N/A | N/A | Post-deploy Cloud Run Job on private commit `216e964`: `attempted=0 ingested=0 skipped=0 failed=0`. |
 
 ## Evidence Files
@@ -91,8 +94,8 @@ Current owner gate: none for continued private hardening. Owner approval is requ
 
 | Check | Status | Evidence |
 | --- | --- | --- |
-| At least 100 deck files attempted/selected | Done | Final aggregate selected 100 passed decks. |
-| At least 500 slides saved in valid PPTX files | Done | Final aggregate selected 500 slides. |
+| At least 100 deck files attempted/selected | Infra-only done | Prior aggregate selected 100 passed decks; corrected autoshowcase run still pending. |
+| At least 500 slides saved in valid PPTX files | Infra-only done | Prior aggregate selected 500 slides; corrected autoshowcase run still pending. |
 | Every selected deck static package check passes | Done | 100/100. |
 | Every selected deck opens in PowerPoint without repair | Done | 100/100 local COM repair pass. |
 | No public black-box leakage in tested public tool outputs | Done | Reused deployed black-box guard and aggregate public-safe output posture. |
@@ -102,6 +105,10 @@ Current owner gate: none for continued private hardening. Owner approval is requ
 | Idempotent retries do not double-mutate saves | Done | Each selected deck had two `deck.save` calls with the same key; replay returned `idempotentReplay=true`. |
 | Cost report separates generation hosting cost from engineering/deploy cost | Done | Report uses host-only Cloud Run compute band and calls out exclusions. |
 | Break-even credit price calculated from measured run data | Done | Report calculates host-only cost per credit and per slide. |
+| Real autoshowcase content across all feature families | Pending corrected run | Prior decks were too repetitive/shallow for product-quality evidence. |
+| Approved-voice narration embeds real audio where narration is required | Failed in prior run | B15 had failed TTS tool calls and no audio media. Corrected run must use the approved Piper voices from `plans/narration-tts-docker-executor-plan.md`. |
+| Feature proof exists in saved PPTX packages, not only in tool-call intent | Pending corrected run | Strict package counters now check charts, tables, media, equations, custom geometry, effects, transitions, animation timing, narration flags, and model evidence. |
+| Clean Dodo before/after debit denominator | Pending corrected run | Use a fresh customer or explicit Dodo ledger snapshots around the corrected autoshowcase run. |
 
 ## Known Constraints
 
@@ -113,8 +120,8 @@ Current owner gate: none for continued private hardening. Owner approval is requ
 
 ## Next Actions
 
-1. Run a clean Dodo billing calibration with a fresh test customer or explicit before/after Dodo snapshots.
-2. Configure a production-safe TTS provider and rerun B15.
-3. Fix the B17 chart/table semantic edit serialization path before enabling those edits publicly.
-4. Sync the MC3 harness, billing snapshot utility, reports, and deploy-job image guard to the private GitHub deploy repo.
+1. Run a small strict autoshowcase pilot against the existing approved-voice Piper path.
+2. If the pilot passes, run the corrected 100-file / 500-slide autoshowcase corpus with clean Dodo before/after snapshots.
+3. Use the prior aggregate only as infrastructure stress context, not final pricing evidence.
+4. Fix the B17 chart/table semantic edit serialization path before enabling those edits publicly.
 5. Continue private hardening until only public endpoint/domain and live Dodo product/pricing remain.

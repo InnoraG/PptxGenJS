@@ -79,13 +79,13 @@ Scope: Track A private implementation hardening for `betterpptx-mcp`, aligned to
 | MC2 | Private Mission Control owner controls | Done | MC2 dashboard/data plus owner-secret status/reveal/update/rotate/test routes are deployed behind Cloud Run IAM and owner admin token. |
 | A9 | Telemetry/harness | Deployed stress verified | Aggregate telemetry, local harness, failure-injection harness, and private deployed staging stress all pass. Latest deployed stress passed on revision `betterpptx-mcp-staging-00028-74h` with the MC2 edit-state gate and activation guard enforced: `node betterpptx-mcp/verify-deployed-staging-stress.mjs https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/mcp --use-gcloud-auth --sessions 1 --iterations 1 --require-mission-control --env-file C:\MyDoc\PptxGenJS_Claude\betterpptx-mcp\.betterpptx-mcp-runtime\dodo-local.env --require-activation`; earlier 3x2 stress passed on revision `00017-hcs`. |
 | Billing | Firestore-backed staging billing | Staging provider-origin verified | Dodo usage-credit checkout and real Dodo deduction are verified in test mode. Public webhook-only receiver writes signed custom-header synthetic webhooks to Firestore, handles Standard Webhooks decoded `whsec_` signing, and has processed a Dodo/Svix dashboard `subscription.active` webhook end-to-end. |
-| MC3 | 500-slide pricing/quality evidence run | Done with caveats | Final aggregate `mc3-aggregate-20260605-03`: 100 selected decks / 500 slides / 3,289,055 downloaded bytes / 1,000.8 estimated credits. Static package checks and local desktop PowerPoint COM repair checks passed 100/100 decks. Reports: `plans/betterpptx-mc3-pricing-quality-cost-report-2026-06-06.md` and `outputs/mc3-500-slide-run/mc3-aggregate-20260605-03/report/mc3-pricing-quality-cost-report.md`. Remaining caveats: clean Dodo before/after calibration, production-safe TTS validation, and B17 repair-risky chart/table edit fix. |
+| MC3 | 500-slide pricing/quality evidence run | Reopened for autoshowcase correction | Prior aggregate `mc3-aggregate-20260605-03`: 100 selected decks / 500 slides / 3,289,055 downloaded bytes / 1,000.8 estimated credits, with static package and local desktop PowerPoint COM repair checks passed 100/100. Reclassified as infrastructure/billing stress evidence only because the decks were too repetitive/shallow and B15 narration was notes-only after failed TTS calls. Corrected autoshowcase corpus is pending with strict feature, design, approved-voice narration, repair, Dodo, and reporting gates. |
 
 ## Pending Production Inputs
 
 | Input | Status | Why Needed |
 | --- | --- | --- |
-| Production Dodo API key/product | Pending calibration plus owner live approval | Live API key is saved and verified. Test-mode billing, webhook, Mission Control, deployed stress, and MC3 core evidence are validated; live product/pricing creation remains intentionally blocked until final billing calibration and owner public/live approval. |
+| Production Dodo API key/product | Pending corrected calibration plus owner live approval | Live API key is saved and verified. Test-mode billing, webhook, Mission Control, deployed stress, and infrastructure MC3 evidence are validated; live product/pricing creation remains intentionally blocked until the corrected autoshowcase billing calibration and owner public/live approval. |
 | Dodo test subscription/credit products | Done | Test credit entitlement, `$5/month` subscription product, `$5` top-up product, and checkout session are saved in the private local Dodo env/status files. |
 | Dodo external webhook receiver | Deployed; provider-origin verified | The MCP service remains IAM-private. Public webhook-only receiver is deployed and Dodo test endpoint is pointed at it with custom header configured. Initial dashboard delivery reached Cloud Run but failed 401 due to Standard Webhooks `whsec_` decoding; commit `fca7e51` fixed it, and Dodo/Svix dashboard delivery now returns HTTP 200 and updates Firestore customer state. |
 | Object storage bucket | Staging verified | GCS private bucket exists for staging; deployed saves return signed download URLs and stress harness verified PPTX ZIP downloads. |
@@ -157,7 +157,7 @@ node .\betterpptx-mcp\verify-deployed-staging-stress.mjs https://betterpptx-mcp-
 
 ## Next Planned Increment
 
-Private cleanup and hardening are complete for the current launch posture. No immediate user action is required unless the owner wants to change the public/live boundary.
+Continue private hardening through the corrected MC3 autoshowcase run. No immediate user action is required unless the owner wants to change the public/live boundary.
 
 Continue with:
 

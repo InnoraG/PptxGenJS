@@ -1,5 +1,4 @@
 import { createPiperHttpProvider } from './piperHttp.mjs'
-import { createToneProvider } from './tone.mjs'
 
 const MAX_TEXT_CHARS = Number(process.env.BETTERPPTX_TTS_MAX_TEXT_CHARS || 4000)
 const MAX_SYNTH_CONCURRENCY = Number(process.env.BETTERPPTX_TTS_MAX_CONCURRENCY || 2)
@@ -40,6 +39,8 @@ export async function withSynthSlot(fn) {
 export function getProvider(name) {
 	const provider = String(name || process.env.BETTERPPTX_TTS_PROVIDER || 'piper-http').toLowerCase()
 	if (provider === 'piper' || provider === 'piper-http') return createPiperHttpProvider()
-	if (provider === 'tone' || provider === 'test-tone') return createToneProvider()
+	if (provider === 'tone' || provider === 'test-tone') {
+		throw new Error('The tone test provider has been removed. Configure piper-http or pass explicit external audio.')
+	}
 	throw new Error(`Unknown TTS provider: ${name}`)
 }

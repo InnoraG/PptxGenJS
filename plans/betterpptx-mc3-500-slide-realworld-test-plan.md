@@ -4,7 +4,9 @@ Date: 2026-06-05
 
 Last updated: 2026-06-06
 
-Status: Executed in private staging. Final aggregate evidence is `outputs/mc3-500-slide-run/mc3-aggregate-20260605-03`; plan-level report is `plans/betterpptx-mc3-pricing-quality-cost-report-2026-06-06.md`.
+Status: Executed once in private staging, then reclassified on 2026-06-06. Aggregate `outputs/mc3-500-slide-run/mc3-aggregate-20260605-03` is retained as infrastructure/billing stress evidence only. It is not accepted as the final product-quality autoshowcase corpus.
+
+Correction: the next run must follow `plans/betterpptx-mc3-autoshowcase-500-slide-correction-plan.md`. The original aggregate should not be used to finalize live Dodo pricing because the decks were too repetitive/shallow, B15 narration saved notes-only files after TTS failures, and the original harness did not hard-gate feature proof and design quality across every family.
 
 Scope: Deterministic private staging test that produces at least 100 PowerPoint files with 5 slides each, for at least 500 generated slides. The run exists to collect quality, ergonomics, speed, hosting load/cost, billing, generation, editing, repair, and reporting evidence before any live Dodo product/pricing decision.
 
@@ -20,6 +22,9 @@ Scope: Deterministic private staging test that produces at least 100 PowerPoint 
 - Run static package checks on every downloaded PPTX.
 - Run PowerPoint/COM repair-open checks locally on every downloaded PPTX. COM is local-only and is never a Cloud Run dependency.
 - Do not count a failed, missing, corrupt, or repair-required deck as successful billable value.
+- Do not count a shallow/repetitive deck as product-quality autoshowcase evidence merely because it is repair-free.
+- Do not count notes-only narration as narrated-deck evidence.
+- Do not use tone/test audio providers for MC3 pricing data. Narration must use the approved Piper voice path from `plans/narration-tts-docker-executor-plan.md` or explicit real external audio.
 - Do not create or switch live Dodo products/pricing until the final MC3 evidence report is complete and reviewed.
 
 ## Primary Questions

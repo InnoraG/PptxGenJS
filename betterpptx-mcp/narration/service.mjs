@@ -30,20 +30,14 @@ export async function synthesizeNarration(args = {}) {
 	let voice = args.voice ? { id: args.voice } : null
 	let license = null
 	let warnings = []
-	if (provider.name === 'tone') {
-		warnings.push('TEST_TONE_PROVIDER')
-		voice = { id: 'test-tone', language: 'test', quality: 'synthetic' }
-		license = { spdx: 'N/A', commercialUse: 'test-only', attributionRequired: false, source: 'generated tone' }
-	} else {
-		voiceDecision = resolveVoice({
-			voice: args.voice,
-			lang: args.lang,
-			allowUnreviewedVoices: args.allowUnreviewedVoices,
-		})
-		voice = voiceDecision.voice
-		license = voiceDecision.license
-		warnings = warnings.concat(voiceDecision.warnings)
-	}
+	voiceDecision = resolveVoice({
+		voice: args.voice,
+		lang: args.lang,
+		allowUnreviewedVoices: args.allowUnreviewedVoices,
+	})
+	voice = voiceDecision.voice
+	license = voiceDecision.license
+	warnings = warnings.concat(voiceDecision.warnings)
 
 	const textHash = hashText(text)
 	logEvent('narration.tts.request', {

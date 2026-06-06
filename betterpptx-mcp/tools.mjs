@@ -642,7 +642,7 @@ export const TOOLS = [
 				text: { type: 'string' },
 				voice: { type: 'string', description: 'Voice id from betterpptx.narration.voices.' },
 				lang: { type: 'string', description: 'Language/locale fallback, e.g. en, en_US, fr_FR.' },
-				provider: { type: 'string', description: 'TTS provider: piper-http by default; tone is development/test only.' },
+				provider: { type: 'string', description: 'TTS provider. Omit for the production default, currently piper-http.' },
 				speaker: { type: 'number' },
 				lengthScale: { type: 'number' },
 				noiseScale: { type: 'number' },

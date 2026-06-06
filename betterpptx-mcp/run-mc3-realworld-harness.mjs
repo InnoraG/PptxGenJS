@@ -54,6 +54,9 @@ Options:
   --output-root <dir>   Output root. Default: outputs/mc3-500-slide-run.
   --run-id <id>         Stable run id. Default: timestamped.
   --include-heavy       Try narration and 3D/model heavy paths.
+  --strict-autoshowcase Treat missing feature/design/narration proof as a failed deck. Enabled by --full-run.
+  --no-strict-autoshowcase
+                        Disable strict autoshowcase gates for exploratory full runs.
   --skip-static         Skip local static package checks.
   --skip-gcp-snapshot   Skip gcloud-based baseline/postrun snapshots.
   --deep-gcp-snapshot   Include slower inventory fields in GCP snapshots.
@@ -80,6 +83,7 @@ function parseArgs(argv) {
 		outputRoot: DEFAULT_OUTPUT_ROOT,
 		runId: '',
 		includeHeavy: false,
+		strictAutoshowcase: false,
 		skipStatic: false,
 		skipGcpSnapshot: false,
 		gcpProject: 'betterpptx-mcp-staging',
@@ -102,11 +106,13 @@ function parseArgs(argv) {
 		}
 		if (arg === '--max-decks' && argv[i + 1]) { opts.maxDecks = Math.max(1, Number(argv[++i]) || 5); continue }
 		if (arg === '--start-index' && argv[i + 1]) { opts.startIndex = Math.max(1, Number(argv[++i]) || 1); continue }
-		if (arg === '--full-run') { opts.fullRun = true; opts.maxDecks = 100; opts.includeHeavy = true; continue }
+		if (arg === '--full-run') { opts.fullRun = true; opts.maxDecks = 100; opts.includeHeavy = true; opts.strictAutoshowcase = true; continue }
 		if (arg === '--concurrency' && argv[i + 1]) { opts.concurrency = Math.max(1, Number(argv[++i]) || 1); continue }
 		if (arg === '--output-root' && argv[i + 1]) { opts.outputRoot = path.resolve(argv[++i]); continue }
 		if (arg === '--run-id' && argv[i + 1]) { opts.runId = String(argv[++i]).trim(); continue }
 		if (arg === '--include-heavy') { opts.includeHeavy = true; continue }
+		if (arg === '--strict-autoshowcase') { opts.strictAutoshowcase = true; opts.includeHeavy = true; continue }
+		if (arg === '--no-strict-autoshowcase') { opts.strictAutoshowcase = false; continue }
 		if (arg === '--skip-static') { opts.skipStatic = true; continue }
 		if (arg === '--skip-gcp-snapshot') { opts.skipGcpSnapshot = true; continue }
 		if (arg === '--deep-gcp-snapshot') { opts.deepGcpSnapshot = true; continue }
@@ -547,7 +553,10 @@ async function callTool({ client, recorder, scenario, toolName, args = {}, requi
 	}
 	recorder.tool(row)
 	if (runtimeToolSpacingMs > 0) await delay(runtimeToolSpacingMs)
-	if (expectedError) return payload || { ok: false, error: row.error }
+	if (expectedError) {
+		if (ok && required) throw new Error(`${toolName} unexpectedly succeeded for ${scenario.scenarioId}`)
+		return payload || { ok: false, error: row.error }
+	}
 	if (!ok && required) throw new Error(`${toolName} failed for ${scenario.scenarioId}: ${row.error.code || row.error.message}`)
 	return payload
 }
@@ -847,10 +856,10 @@ async function addEffects(ctx, slideIndex) {
 }
 
 async function addSmartArt(ctx, slideIndex) {
-	const { client, recorder, scenario, deckId } = ctx
+	const { client, recorder, scenario, deckId, strictAutoshowcase } = ctx
 	await callTool({
 		client, recorder, scenario, toolName: 'betterpptx.slide.add_smartart',
-		required: false,
+		required: Boolean(strictAutoshowcase),
 		args: {
 			deckId,
 			slideIndex,
@@ -869,10 +878,10 @@ async function addSmartArt(ctx, slideIndex) {
 }
 
 async function addEquation(ctx, slideIndex) {
-	const { client, recorder, scenario, deckId } = ctx
+	const { client, recorder, scenario, deckId, strictAutoshowcase } = ctx
 	await callTool({
 		client, recorder, scenario, toolName: 'betterpptx.slide.add_equation',
-		required: false,
+		required: Boolean(strictAutoshowcase),
 		args: {
 			deckId,
 			slideIndex,
@@ -891,10 +900,10 @@ async function addEquation(ctx, slideIndex) {
 }
 
 async function addFreeform(ctx, slideIndex) {
-	const { client, recorder, scenario, deckId } = ctx
+	const { client, recorder, scenario, deckId, strictAutoshowcase } = ctx
 	await callTool({
 		client, recorder, scenario, toolName: 'betterpptx.slide.add_freeform',
-		required: false,
+		required: Boolean(strictAutoshowcase),
 		args: {
 			deckId,
 			slideIndex,
@@ -921,10 +930,10 @@ async function addFreeform(ctx, slideIndex) {
 }
 
 async function addAnimations(ctx, slideIndex) {
-	const { client, recorder, scenario, deckId } = ctx
+	const { client, recorder, scenario, deckId, strictAutoshowcase } = ctx
 	await callTool({
 		client, recorder, scenario, toolName: 'betterpptx.slide.animate_shapes',
-		required: false,
+		required: Boolean(strictAutoshowcase),
 		args: {
 			deckId,
 			slideIndex,
@@ -937,8 +946,9 @@ async function addAnimations(ctx, slideIndex) {
 }
 
 async function addNarration(ctx, slideIndex) {
-	const { client, recorder, scenario, deckId, includeHeavy } = ctx
+	const { client, recorder, scenario, deckId, includeHeavy, strictAutoshowcase } = ctx
 	if (!includeHeavy) {
+		if (strictAutoshowcase) throw new Error(`${scenario.scenarioId} strict autoshowcase requires real narration, not notes placeholders.`)
 		await callTool({
 			client, recorder, scenario, toolName: 'betterpptx.slide.add_notes',
 			args: {
@@ -952,12 +962,11 @@ async function addNarration(ctx, slideIndex) {
 	}
 	await callTool({
 		client, recorder, scenario, toolName: 'betterpptx.slide.add_narration',
-		required: false,
+		required: Boolean(strictAutoshowcase),
 		args: {
 			deckId,
 			slideIndex,
-			script: `This is a deterministic MC3 narration sample for ${scenario.scenarioId}. It measures timing, package stability, and billing behavior.`,
-			provider: process.env.BETTERPPTX_MC3_TTS_PROVIDER || undefined,
+			script: `${scenario.family} ${scenario.variant} demonstrates a finished BetterPPTX autoshowcase slide with synchronized speech, timing, package stability, and billing telemetry.`,
 			lang: 'en_US',
 			captions: { enabled: true, stackStatic: true },
 			paddingMs: 700,
@@ -967,25 +976,27 @@ async function addNarration(ctx, slideIndex) {
 }
 
 async function addModelAttempt(ctx, slideIndex) {
-	const { client, recorder, scenario, deckId, includeHeavy } = ctx
+	const { client, recorder, scenario, deckId, includeHeavy, strictAutoshowcase } = ctx
 	if (!includeHeavy) {
+		if (strictAutoshowcase) throw new Error(`${scenario.scenarioId} strict autoshowcase requires a real 3D/model attempt.`)
 		await addEffects(ctx, slideIndex)
 		return
 	}
 	const catalog = await callTool({
 		client, recorder, scenario, toolName: 'betterpptx.assets.catalog',
-		required: false,
+		required: Boolean(strictAutoshowcase),
 		args: { kind: 'model3d', query: 'business device', maxResults: 1, sizePolicy: 'compact' },
 	})
 	const asset = catalog?.data?.assets?.[0] || catalog?.data?.results?.[0] || null
 	const opts = asset?.addModel3DOptions || (asset?.modelAsset ? { modelAsset: asset.modelAsset } : null)
 	if (!opts) {
+		if (strictAutoshowcase) throw new Error(`${scenario.scenarioId} strict autoshowcase found no usable 3D asset.`)
 		await addEffects(ctx, slideIndex)
 		return
 	}
 	await callTool({
 		client, recorder, scenario, toolName: 'betterpptx.slide.add_model3d',
-		required: false,
+		required: Boolean(strictAutoshowcase),
 		args: {
 			deckId,
 			slideIndex,
@@ -996,10 +1007,10 @@ async function addModelAttempt(ctx, slideIndex) {
 }
 
 async function addBoundaryCase(ctx, slideIndex) {
-	const { client, recorder, scenario, deckId } = ctx
+	const { client, recorder, scenario, deckId, strictAutoshowcase } = ctx
 	await callTool({
 		client, recorder, scenario, toolName: 'betterpptx.slide.add_image',
-		required: false,
+		required: Boolean(strictAutoshowcase),
 		expectedError: true,
 		args: {
 			deckId,
@@ -1041,7 +1052,7 @@ async function runPostBuildEditing(ctx) {
 	if (scenario.batchNumber === 14) {
 		await callTool({
 			client, recorder, scenario, toolName: 'betterpptx.deck.set_transitions_all',
-			required: false,
+			required: Boolean(ctx.strictAutoshowcase),
 			args: {
 				deckId,
 				variants: [
@@ -1147,13 +1158,44 @@ async function verifyStaticPackage(buffer) {
 	const parser = makeParser(errors)
 	let slideCount = 0
 	let danglingRels = 0
+	let tableCount = 0
+	let customGeometryCount = 0
+	let equationCount = 0
+	let transitionCount = 0
+	let animationTimingCount = 0
+	let gradientFillCount = 0
+	let shadowCount = 0
+	let textWarpCount = 0
+	let text3DCount = 0
+	const chartCount = names.filter(n => /^ppt\/charts\/chart\d+\.xml$/i.test(n)).length
+	const imageMediaCount = names.filter(n => /^ppt\/media\/.+\.(png|jpe?g|gif|webp|svg)$/i.test(n)).length
+	const audioMediaCount = names.filter(n => /^ppt\/media\/.+\.(wav|mp3|m4a|aac)$/i.test(n)).length
+	const modelMediaCount = names.filter(n => /^ppt\/media\/.+\.(glb|gltf|obj|stl|3mf)$/i.test(n) || /^ppt\/embeddings\/.+\.(glb|gltf|obj|stl|3mf)$/i.test(n)).length
+	const notesSlideCount = names.filter(n => /^ppt\/notesSlides\/notesSlide\d+\.xml$/i.test(n)).length
+	const presPropsXml = zip.file('ppt/presProps.xml') ? await zip.file('ppt/presProps.xml').async('string') : ''
+	const showNarration = /\bshowNarration="1"/.test(presPropsXml)
+	const useTimings = /\buseTimings="1"/.test(presPropsXml)
 	if (!zip.file('[Content_Types].xml')) issues.push('missing [Content_Types].xml')
 	if (!zip.file('ppt/presentation.xml')) issues.push('missing ppt/presentation.xml')
 	for (const name of names) {
 		const file = zip.file(name)
 		if (!file || file.dir) continue
-		if (/\.(xml|rels)$/i.test(name)) parser.parseFromString(await file.async('string'), 'text/xml')
-		if (/ppt\/slides\/slide\d+\.xml$/i.test(name)) slideCount += 1
+		if (/\.(xml|rels)$/i.test(name)) {
+			const xml = await file.async('string')
+			parser.parseFromString(xml, 'text/xml')
+			if (/ppt\/slides\/slide\d+\.xml$/i.test(name)) {
+				slideCount += 1
+				tableCount += (xml.match(/<a:tbl\b/g) || []).length
+				customGeometryCount += (xml.match(/<a:custGeom\b/g) || []).length
+				equationCount += (xml.match(/<m:oMath\b|<m:oMathPara\b/g) || []).length
+				transitionCount += (xml.match(/<p:transition\b/g) || []).length
+				animationTimingCount += (xml.match(/<p:timing\b/g) || []).length
+				gradientFillCount += (xml.match(/<a:gradFill\b/g) || []).length
+				shadowCount += (xml.match(/<a:(?:outerShdw|innerShdw)\b/g) || []).length
+				textWarpCount += (xml.match(/<a:prstTxWarp\b/g) || []).length
+				text3DCount += (xml.match(/<a:scene3d\b|<a:sp3d\b/g) || []).length
+			}
+		}
 	}
 	for (const name of names) {
 		const match = name.match(/^ppt\/slides\/(slide\d+)\.xml$/i)
@@ -1169,7 +1211,79 @@ async function verifyStaticPackage(buffer) {
 	if (slideCount !== 5) issues.push(`expected 5 slides, found ${slideCount}`)
 	if (errors.length) issues.push(`xml parse issues: ${errors.length}`)
 	if (danglingRels) issues.push(`dangling slide relationships: ${danglingRels}`)
-	return { ok: issues.length === 0, slideCount, xmlIssues: errors.length, danglingRels, issues }
+	return {
+		ok: issues.length === 0,
+		slideCount,
+		xmlIssues: errors.length,
+		danglingRels,
+		chartCount,
+		tableCount,
+		imageMediaCount,
+		audioMediaCount,
+		modelMediaCount,
+		notesSlideCount,
+		customGeometryCount,
+		equationCount,
+		transitionCount,
+		animationTimingCount,
+		gradientFillCount,
+		shadowCount,
+		textWarpCount,
+		text3DCount,
+		showNarration,
+		useTimings,
+		issues,
+	}
+}
+
+function designMetric(designData, key) {
+	return Number(designData?.metrics?.[key] ?? 0) || 0
+}
+
+function shortIssues(issues, limit = 5) {
+	if (!Array.isArray(issues) || !issues.length) return ''
+	return issues.slice(0, limit).map(issue => {
+		if (typeof issue === 'string') return issue
+		return issue.code || issue.label || issue.message || JSON.stringify(issue).slice(0, 120)
+	}).join('; ')
+}
+
+function assertResultOk(label, data) {
+	if (data && data.ok === false) throw new Error(`${label} failed: ${shortIssues(data.issues) || 'ok=false'}`)
+}
+
+function strictFeatureCoverageIssues(scenario, stat, designData, narrationData) {
+	const issues = []
+	const batchNo = scenario.batchNumber
+	const visualProofObjects = designMetric(designData, 'visualProofObjects')
+	const diagramSlides = designMetric(designData, 'diagramSlides')
+	const animatedSlides = designMetric(designData, 'animatedSlides')
+	const model3DObjects = designMetric(designData, 'model3DObjects')
+	const narratedSlides = designMetric(designData, 'narratedSlides')
+	const captionSlides = designMetric(designData, 'captionSlides')
+
+	if (designData?.ok === false) issues.push(`design gate failed score=${designData.score}/${designData.minScore}: ${shortIssues(designData.issues)}`)
+	if ([1, 2, 3, 4].includes(batchNo) && visualProofObjects < 5) issues.push(`expected executive/product/dashboard/data visual proof across 5 slides, found ${visualProofObjects}`)
+	if (batchNo === 4 && stat.chartCount < 2) issues.push(`expected at least 2 chart parts for data storytelling, found ${stat.chartCount}`)
+	if (batchNo === 5 && stat.tableCount < 2) issues.push(`expected at least 2 table objects, found ${stat.tableCount}`)
+	if (batchNo === 7 && stat.imageMediaCount < 1) issues.push(`expected embedded image media, found ${stat.imageMediaCount}`)
+	if (batchNo === 8 && stat.customGeometryCount < 1) issues.push(`expected custom/freeform geometry, found ${stat.customGeometryCount}`)
+	if (batchNo === 9 && (stat.textWarpCount < 1 && stat.text3DCount < 1)) issues.push('expected WordArt/text effect XML, found none')
+	if (batchNo === 10 && (stat.gradientFillCount < 3 || stat.shadowCount < 1)) issues.push(`expected shape/effect XML with gradients/shadows, found gradients=${stat.gradientFillCount} shadows=${stat.shadowCount}`)
+	if (batchNo === 11 && diagramSlides < 1) issues.push(`expected diagram/process visual proof, found diagramSlides=${diagramSlides}`)
+	if (batchNo === 12 && stat.equationCount < 1) issues.push(`expected equation XML, found ${stat.equationCount}`)
+	if (batchNo === 13 && (animatedSlides < 3 && stat.animationTimingCount < 3)) issues.push(`expected animation coverage, found animatedSlides=${animatedSlides} timingParts=${stat.animationTimingCount}`)
+	if (batchNo === 14 && stat.transitionCount < 5) issues.push(`expected transitions on all 5 slides, found ${stat.transitionCount}`)
+	if (batchNo === 15) {
+		if (narrationData?.ok === false) issues.push(`narration validator failed: ${shortIssues(narrationData.issues)}`)
+		if (stat.audioMediaCount < 5) issues.push(`expected one audio media part per narrated slide, found ${stat.audioMediaCount}`)
+		if (!stat.showNarration) issues.push('ppt/presProps.xml missing showNarration=1')
+		if (!stat.useTimings) issues.push('ppt/presProps.xml missing useTimings=1')
+		if (narratedSlides < 5) issues.push(`expected 5 narrated slides in design metrics, found ${narratedSlides}`)
+		if (captionSlides < 5) issues.push(`expected 5 captioned slides in design metrics, found ${captionSlides}`)
+	}
+	if (batchNo === 16 && (model3DObjects < 1 && stat.modelMediaCount < 1)) issues.push(`expected 3D/model proof, found model3DObjects=${model3DObjects} modelMedia=${stat.modelMediaCount}`)
+	return issues
 }
 
 async function downloadDeck({ downloadUrl, base, auth, outPath, expectedBytes }) {
@@ -1209,6 +1323,11 @@ async function runDeckScenario({ scenario, opts, mcpUrl, base, auth, recorder, d
 		downloadedBytes: 0,
 		staticOk: false,
 		staticIssues: [],
+		featureGateOk: false,
+		featureGateIssues: [],
+		designScore: null,
+		designOk: null,
+		narrationOk: null,
 		billingEstimatedCredits: 0,
 		downloadPath: '',
 		error: '',
@@ -1226,7 +1345,7 @@ async function runDeckScenario({ scenario, opts, mcpUrl, base, auth, recorder, d
 		})
 		const deck = requireData('deck.new', deckPayload)
 		const deckId = deck.deckId
-		const ctx = { client, recorder, scenario, deckId, includeHeavy: opts.includeHeavy }
+		const ctx = { client, recorder, scenario, deckId, includeHeavy: opts.includeHeavy, strictAutoshowcase: opts.strictAutoshowcase }
 		for (let slideNo = 0; slideNo < 5; slideNo++) {
 			const slideIndex = await addSlideWithBase({ client, recorder, scenario, deckId, slideNo })
 			await addFamilyContent(ctx, slideIndex, slideNo)
@@ -1243,7 +1362,47 @@ async function runDeckScenario({ scenario, opts, mcpUrl, base, auth, recorder, d
 		await runPostBuildEditing(ctx)
 		const summary = requireData('deck.summary', await callTool({ client, recorder, scenario, toolName: 'betterpptx.deck.summary', args: { deckId }, required: false }))
 		row.slideCount = Number(summary.slideCount || 0)
-		await callTool({ client, recorder, scenario, toolName: 'betterpptx.deck.validate', args: { deckId, mode: 'normal' }, required: false })
+		const packageValidation = requireData('deck.validate', await callTool({
+			client,
+			recorder,
+			scenario,
+			toolName: 'betterpptx.deck.validate',
+			args: { deckId, mode: 'normal' },
+			required: opts.strictAutoshowcase,
+		}))
+		if (opts.strictAutoshowcase) assertResultOk('deck.validate', packageValidation)
+		const designValidation = requireData('deck.validate_design', await callTool({
+			client,
+			recorder,
+			scenario,
+			toolName: 'betterpptx.deck.validate_design',
+			args: {
+				deckId,
+				profile: scenario.batchNumber === 15 ? 'narrated-showcase' : 'modern',
+				minScore: scenario.batchNumber === 15 ? 80 : 70,
+				requireNarration: scenario.batchNumber === 15,
+				requireMotion: [13, 14, 15, 16].includes(scenario.batchNumber),
+				requireVisualProof: true,
+				requireExpressive3D: scenario.batchNumber === 16,
+			},
+			required: opts.strictAutoshowcase,
+		}))
+		row.designScore = Number(designValidation.score ?? 0)
+		row.designOk = Boolean(designValidation.ok)
+		if (opts.strictAutoshowcase) assertResultOk('deck.validate_design', designValidation)
+		let narrationValidation = null
+		if (scenario.batchNumber === 15) {
+			narrationValidation = requireData('deck.validate_narration', await callTool({
+				client,
+				recorder,
+				scenario,
+				toolName: 'betterpptx.deck.validate_narration',
+				args: { deckId },
+				required: opts.strictAutoshowcase,
+			}))
+			row.narrationOk = Boolean(narrationValidation.ok)
+			if (opts.strictAutoshowcase) assertResultOk('deck.validate_narration', narrationValidation)
+		}
 		const estimatePayload = await callTool({
 			client, recorder, scenario, toolName: 'betterpptx.billing.estimate',
 			args: { toolName: 'betterpptx.deck.save', deckId },
@@ -1275,7 +1434,33 @@ async function runDeckScenario({ scenario, opts, mcpUrl, base, auth, recorder, d
 			row.packageSlideCount = stat.slideCount
 			row.packageXmlIssues = stat.xmlIssues
 			row.danglingRels = stat.danglingRels
+			row.packageFeatureCounts = {
+				charts: stat.chartCount,
+				tables: stat.tableCount,
+				images: stat.imageMediaCount,
+				audio: stat.audioMediaCount,
+				models: stat.modelMediaCount,
+				notes: stat.notesSlideCount,
+				customGeometry: stat.customGeometryCount,
+				equations: stat.equationCount,
+				transitions: stat.transitionCount,
+				animationTiming: stat.animationTimingCount,
+				gradients: stat.gradientFillCount,
+				shadows: stat.shadowCount,
+				textWarp: stat.textWarpCount,
+				text3D: stat.text3DCount,
+				showNarration: stat.showNarration,
+				useTimings: stat.useTimings,
+			}
 			if (!stat.ok) throw new Error(`static package check failed: ${stat.issues.join('; ')}`)
+			if (opts.strictAutoshowcase) {
+				const featureIssues = strictFeatureCoverageIssues(scenario, stat, designValidation, narrationValidation)
+				row.featureGateIssues = featureIssues
+				row.featureGateOk = featureIssues.length === 0
+				if (featureIssues.length) throw new Error(`strict autoshowcase feature gate failed: ${featureIssues.join('; ')}`)
+			} else {
+				row.featureGateOk = true
+			}
 		}
 		await callTool({ client, recorder, scenario, toolName: 'betterpptx.billing.usage_summary', args: {}, required: false })
 		row.status = 'passed'
@@ -1394,6 +1579,7 @@ async function main() {
 	runtimeRetryBaseMs = opts.retryBaseMs
 	runtimeToolSpacingMs = opts.toolSpacingMs
 	opts.mcpUrl = normalizeMcpUrl(opts.mcpUrl)
+	if (opts.strictAutoshowcase && opts.skipStatic) throw new Error('--strict-autoshowcase requires static package validation; remove --skip-static.')
 	const base = baseUrl(opts.mcpUrl)
 	const baselineAuth = authValue(opts)
 	const runDir = path.join(opts.outputRoot, opts.runId)
@@ -1419,6 +1605,7 @@ async function main() {
 		fullRun: opts.fullRun,
 		concurrency: opts.concurrency,
 		includeHeavy: opts.includeHeavy,
+		strictAutoshowcase: opts.strictAutoshowcase,
 		requireActivation: opts.requireActivation,
 		staticValidation: !opts.skipStatic,
 		scenarios,
