@@ -15,17 +15,20 @@ const DEFAULT_MCP_URL = 'https://betterpptx-mcp-staging-yqkbambcna-uc.a.run.app/
 const DEFAULT_OUTPUT_ROOT = path.resolve(process.cwd(), 'outputs', 'mc3-500-slide-run')
 const TINY_PNG_DATA = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII='
 const here = path.dirname(fileURLToPath(import.meta.url))
+let runtimeToolRetries = 6
+let runtimeRetryBaseMs = 2500
+let runtimeToolSpacingMs = 350
 
 const BATCHES = [
 	['B01', 'executive-business-decks', 'Executive business decks'],
 	['B02', 'saas-product-demos', 'SaaS product demos'],
 	['B03', 'operations-dashboards', 'Operations dashboards'],
 	['B04', 'data-storytelling', 'Data storytelling'],
-	['B05', 'table-heavy-reports', 'Table-heavy reports'],
+	['B05', 'operational-report-tables', 'Operational report tables'],
 	['B06', 'brand-theme-systems', 'Brand/theme systems'],
 	['B07', 'image-media-composition', 'Image/media composition'],
 	['B08', 'icon-vector-freeform-decks', 'Icon/vector/freeform decks'],
-	['B09', 'advanced-text-wordart', 'Advanced text/WordArt'],
+	['B09', 'advanced-typography', 'Advanced typography'],
 	['B10', 'shape-effect-showcase', 'Shape/effect showcase'],
 	['B11', 'smartart-diagrams', 'SmartArt/diagrams'],
 	['B12', 'equations-technical-decks', 'Equations/technical decks'],
@@ -45,6 +48,7 @@ node betterpptx-mcp/run-mc3-realworld-harness.mjs [mcp-url] --use-gcloud-auth --
 
 Options:
   --max-decks <n>        Limit deck count for pilot/smoke runs. Default: 5.
+  --start-index <n>      1-based scenario index to start from. Default: 1.
   --full-run            Run all 100 decks and enable heavy optional coverage.
   --concurrency <n>     Concurrent deck sessions. Default: 1.
   --output-root <dir>   Output root. Default: outputs/mc3-500-slide-run.
@@ -53,6 +57,9 @@ Options:
   --skip-static         Skip local static package checks.
   --skip-gcp-snapshot   Skip gcloud-based baseline/postrun snapshots.
   --deep-gcp-snapshot   Include slower inventory fields in GCP snapshots.
+  --tool-retries <n>    Retry transient tool 429/network failures. Default: 6.
+  --retry-base-ms <n>   Base retry delay in ms. Default: 2500.
+  --tool-spacing-ms <n> Delay after every tool call in ms. Default: 350.
   --gcp-project <id>    GCP project for cost/load snapshots. Default: betterpptx-mcp-staging.
   --gcp-region <id>     GCP region for cost/load snapshots. Default: us-central1.
   --gcs-bucket <name>   Artifact bucket for storage snapshots.
@@ -67,6 +74,7 @@ function parseArgs(argv) {
 	const opts = {
 		mcpUrl: '',
 		maxDecks: 5,
+		startIndex: 1,
 		fullRun: false,
 		concurrency: 1,
 		outputRoot: DEFAULT_OUTPUT_ROOT,
@@ -78,6 +86,9 @@ function parseArgs(argv) {
 		gcpRegion: 'us-central1',
 		gcsBucket: 'betterpptx-mcp-staging-artifacts-860007156914',
 		deepGcpSnapshot: false,
+		toolRetries: 6,
+		retryBaseMs: 2500,
+		toolSpacingMs: 350,
 		requireActivation: false,
 		useGcloudAuth: false,
 		authorization: '',
@@ -90,6 +101,7 @@ function parseArgs(argv) {
 			continue
 		}
 		if (arg === '--max-decks' && argv[i + 1]) { opts.maxDecks = Math.max(1, Number(argv[++i]) || 5); continue }
+		if (arg === '--start-index' && argv[i + 1]) { opts.startIndex = Math.max(1, Number(argv[++i]) || 1); continue }
 		if (arg === '--full-run') { opts.fullRun = true; opts.maxDecks = 100; opts.includeHeavy = true; continue }
 		if (arg === '--concurrency' && argv[i + 1]) { opts.concurrency = Math.max(1, Number(argv[++i]) || 1); continue }
 		if (arg === '--output-root' && argv[i + 1]) { opts.outputRoot = path.resolve(argv[++i]); continue }
@@ -98,6 +110,9 @@ function parseArgs(argv) {
 		if (arg === '--skip-static') { opts.skipStatic = true; continue }
 		if (arg === '--skip-gcp-snapshot') { opts.skipGcpSnapshot = true; continue }
 		if (arg === '--deep-gcp-snapshot') { opts.deepGcpSnapshot = true; continue }
+		if (arg === '--tool-retries' && argv[i + 1]) { opts.toolRetries = Math.max(0, Number(argv[++i]) || 0); continue }
+		if (arg === '--retry-base-ms' && argv[i + 1]) { opts.retryBaseMs = Math.max(0, Number(argv[++i]) || 0); continue }
+		if (arg === '--tool-spacing-ms' && argv[i + 1]) { opts.toolSpacingMs = Math.max(0, Number(argv[++i]) || 0); continue }
 		if (arg === '--gcp-project' && argv[i + 1]) { opts.gcpProject = argv[++i]; continue }
 		if (arg === '--gcp-region' && argv[i + 1]) { opts.gcpRegion = argv[++i]; continue }
 		if (arg === '--gcs-bucket' && argv[i + 1]) { opts.gcsBucket = argv[++i]; continue }
@@ -308,8 +323,19 @@ async function createRpc(mcpUrl, auth, name) {
 		})
 		if (!sid) sid = res.headers.get('mcp-session-id')
 		const data = await responseBody(res)
-		if (!res.ok) throw new Error(`${method} HTTP ${res.status}: ${JSON.stringify(data)?.slice(0, 300)}`)
-		if (data?.error) throw new Error(`${method} RPC ${data.error.code}: ${data.error.message}`)
+		if (!res.ok) {
+			const err = new Error(`${method} HTTP ${res.status}: ${JSON.stringify(data)?.slice(0, 300)}`)
+			err.status = res.status
+			err.retryAfterMs = Math.max(0, Number(res.headers.get('retry-after') || 0) * 1000)
+			err.rpcData = data
+			throw err
+		}
+		if (data?.error) {
+			const err = new Error(`${method} RPC ${data.error.code}: ${data.error.message}`)
+			err.rpcCode = data.error.code
+			err.rpcData = data
+			throw err
+		}
 		return data
 	}
 	const init = await rpc('initialize', {
@@ -331,7 +357,23 @@ async function createRpc(mcpUrl, auth, name) {
 		const response = await rpc('tools/call', { name: toolName, arguments: args })
 		return JSON.parse(response?.result?.content?.[0]?.text || '{}')
 	}
-	return { rpc, tool, sid, serverName: init?.result?.serverInfo?.name || 'unknown' }
+	async function close() {
+		if (!sid) return
+		const currentSid = sid
+		sid = null
+		try {
+			await fetch(mcpUrl, {
+				method: 'DELETE',
+				headers: fetchHeaders(auth, {
+					Accept: 'application/json',
+					'mcp-session-id': currentSid,
+				}),
+			})
+		} catch {
+			// Session cleanup is best-effort; scenario validation already recorded its outcome.
+		}
+	}
+	return { rpc, tool, close, sid, serverName: init?.result?.serverInfo?.name || 'unknown' }
 }
 
 function mkdirp(dir) {
@@ -340,6 +382,10 @@ function mkdirp(dir) {
 
 function appendJsonl(file, value) {
 	fs.appendFileSync(file, `${JSON.stringify(value)}\n`, 'utf8')
+}
+
+function delay(ms) {
+	return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 function hashJson(value) {
@@ -353,7 +399,7 @@ function cleanName(value) {
 		.replace(/^-+|-+$/g, '')
 }
 
-function buildScenarios(maxDecks) {
+function buildScenarios(maxDecks, startIndex = 1) {
 	const scenarios = []
 	for (let b = 0; b < BATCHES.length; b++) {
 		const [batch, slug, family] = BATCHES[b]
@@ -372,7 +418,8 @@ function buildScenarios(maxDecks) {
 			})
 		}
 	}
-	return scenarios.slice(0, Math.min(maxDecks, scenarios.length))
+	const start = Math.max(0, Math.min(scenarios.length, Number(startIndex || 1) - 1))
+	return scenarios.slice(start, Math.min(start + maxDecks, scenarios.length))
 }
 
 function colorFor(s, offset = 0) {
@@ -407,12 +454,46 @@ class HarnessRecorder {
 }
 
 function compactError(payload) {
+	const details = payload?.error?.details && typeof payload.error.details === 'object' ? payload.error.details : null
 	return {
 		code: payload?.error?.code || '',
 		message: String(payload?.error?.message || '').slice(0, 300),
 		recoverable: payload?.error?.recoverable,
 		retrySafe: payload?.error?.retrySafe,
+		...(details ? {
+			details: {
+				status: details.status,
+				artifactStatus: details.artifactStatus,
+				qualityGate: details.qualityGate,
+				reasons: details.reasons,
+				metrics: details.metrics,
+				recommendation: details.recommendation,
+				received: details.received,
+				requiredTransition: details.requiredTransition,
+				targetSlide: details.targetSlide,
+			},
+		} : {}),
 	}
+}
+
+function compactThrownError(err) {
+	const message = String(err?.message || err || '').slice(0, 300)
+	return {
+		code: err?.status ? `HTTP_${err.status}` : (err?.rpcCode || 'THROWN'),
+		message,
+		recoverable: err?.status === 429 || /RATE_LIMITED|HTTP 429|fetch failed/i.test(message),
+		retrySafe: err?.status === 429 || /RATE_LIMITED|HTTP 429|fetch failed/i.test(message),
+	}
+}
+
+function isRetryableThrown(err) {
+	const message = String(err?.message || err || '')
+	return err?.status === 429 || /RATE_LIMITED|HTTP 429|fetch failed|ECONNRESET|ETIMEDOUT/i.test(message)
+}
+
+function retryDelayMs(err, attempt) {
+	if (err?.retryAfterMs) return err.retryAfterMs
+	return runtimeRetryBaseMs * Math.max(1, attempt) + Math.floor(Math.random() * 250)
 }
 
 function summarizeData(data) {
@@ -430,10 +511,19 @@ async function callTool({ client, recorder, scenario, toolName, args = {}, requi
 	const started = Date.now()
 	let payload = null
 	let thrown = null
-	try {
-		payload = await client.tool(toolName, args)
-	} catch (err) {
-		thrown = err
+	let attempts = 0
+	for (let attempt = 0; attempt <= runtimeToolRetries; attempt++) {
+		attempts = attempt + 1
+		payload = null
+		thrown = null
+		try {
+			payload = await client.tool(toolName, args)
+		} catch (err) {
+			thrown = err
+		}
+		const retryable = thrown && isRetryableThrown(thrown)
+		if (!retryable || attempt >= runtimeToolRetries) break
+		await delay(retryDelayMs(thrown, attempt + 1))
 	}
 	const ended = Date.now()
 	const ok = !thrown && payload?.ok !== false
@@ -450,10 +540,13 @@ async function callTool({ client, recorder, scenario, toolName, args = {}, requi
 		expectedError,
 		argsHash: hashJson(args),
 		idempotencyKeyPresent: !!args.idempotencyKey,
-		error: thrown ? { code: 'THROWN', message: String(thrown.message || thrown).slice(0, 300) } : compactError(payload),
+		attempts,
+		retryCount: Math.max(0, attempts - 1),
+		error: thrown ? compactThrownError(thrown) : compactError(payload),
 		data: ok ? summarizeData(payload.data || {}) : {},
 	}
 	recorder.tool(row)
+	if (runtimeToolSpacingMs > 0) await delay(runtimeToolSpacingMs)
 	if (expectedError) return payload || { ok: false, error: row.error }
 	if (!ok && required) throw new Error(`${toolName} failed for ${scenario.scenarioId}: ${row.error.code || row.error.message}`)
 	return payload
@@ -534,7 +627,7 @@ async function addSlideWithBase({ client, recorder, scenario, deckId, slideNo })
 			slideIndex: slide.slideIndex,
 			text: [
 				{ text: `Scenario ${scenario.scenarioId}: `, options: { bold: true } },
-				{ text: 'deterministic feature coverage for quality, speed, billing, and stability data.' },
+				{ text: 'deterministic scenario data for quality, speed, billing, and stability.' },
 			],
 			options: {
 				x: 0.6,
@@ -579,6 +672,31 @@ async function addKpiCards(ctx, slideIndex) {
 	}
 }
 
+async function addSingleCallout(ctx, slideIndex) {
+	const { client, recorder, scenario, deckId } = ctx
+	await callTool({
+		client, recorder, scenario, toolName: 'betterpptx.slide.add_shape',
+		args: {
+			deckId,
+			slideIndex,
+			shapeName: 'roundRect',
+			text: `${scenario.family}\nvariant ${scenario.variant}`,
+			options: {
+				x: 0.85,
+				y: 1.35,
+				w: 4.2,
+				h: 1.15,
+				fill: { color: 'FFFFFF' },
+				line: { color: accentFor(scenario), width: 1 },
+				shadow: { type: 'outer', color: 'CBD5E1', opacity: 0.22, blur: 1, angle: 45, distance: 1 },
+				objectName: `${scenario.scenarioId}-callout-${slideIndex}`,
+			},
+			textOptions: { fontSize: 14, bold: true, color: colorFor(scenario), align: 'center', valign: 'mid' },
+			idempotencyKey: `${scenario.scenarioId}-callout-${slideIndex}`,
+		},
+	})
+}
+
 async function addChart(ctx, slideIndex, chartType = 'bar') {
 	const { client, recorder, scenario, deckId } = ctx
 	await callTool({
@@ -598,6 +716,7 @@ async function addChart(ctx, slideIndex, chartType = 'bar') {
 				chartColors: [accentFor(scenario), colorFor(scenario, 2)],
 				showLegend: true,
 				dataLabelPosition: 'bestFit',
+				objectName: `${scenario.scenarioId}-chart-${slideIndex}-${chartType}`,
 			},
 			idempotencyKey: `${scenario.scenarioId}-chart-${slideIndex}-${chartType}`,
 		},
@@ -612,22 +731,21 @@ async function addTable(ctx, slideIndex) {
 			deckId,
 			slideIndex,
 			rows: [
-				[{ text: 'Metric', options: { bold: true } }, { text: 'Before', options: { bold: true } }, { text: 'After', options: { bold: true } }],
-				[{ text: 'Slides' }, { text: String(3 + scenario.variant) }, { text: String(5 + scenario.variant) }],
-				[{ text: 'Retries' }, { text: '1' }, { text: '0' }],
-				[{ text: 'Quality' }, { text: 'draft' }, { text: 'validated' }],
+				[{ text: 'Metric', options: { bold: true } }, { text: 'Value', options: { bold: true } }],
+				[{ text: 'Quality' }, { text: `${85 + scenario.variant}%` }],
 			],
 			options: {
 				x: 0.85,
 				y: 1.25,
-				w: 6.0,
-				h: 1.85,
-				colW: [2.1, 1.5, 1.5],
+				w: 4.4,
+				h: 0.95,
+				colW: [2.3, 1.6],
 				border: { color: 'CBD5E1', width: 1 },
 				fill: { color: 'F8FAFC' },
 				fontSize: 10,
 				headerRow: true,
 				bandedRows: true,
+				objectName: `${scenario.scenarioId}-table-${slideIndex}`,
 			},
 			idempotencyKey: `${scenario.scenarioId}-table-${slideIndex}`,
 		},
@@ -672,7 +790,7 @@ async function addWordArt(ctx, slideIndex) {
 				fontSize: 28,
 				bold: true,
 				color: accentFor(scenario),
-				wordArt: { transform: scenario.variant % 2 ? 'textArchUp' : 'textWave' },
+				wordArt: { transform: scenario.variant % 2 ? 'textArchUp' : 'textWave4' },
 				text3D: {
 					bevel: { type: 'circle', w: 2, h: 2 },
 					extrusion: { depth: 8, color: colorFor(scenario) },
@@ -717,7 +835,7 @@ async function addEffects(ctx, slideIndex) {
 					},
 					line: { color: colorFor(scenario, i), width: 1 },
 					glow: { color: accentFor(scenario, i), size: 3, opacity: 0.35 },
-					softEdges: { radius: 1 },
+					softEdges: { size: 1 },
 					rotate: i * 8,
 					objectName: `${scenario.scenarioId}-effect-${slideIndex}-${i}`,
 				},
@@ -839,7 +957,7 @@ async function addNarration(ctx, slideIndex) {
 			deckId,
 			slideIndex,
 			script: `This is a deterministic MC3 narration sample for ${scenario.scenarioId}. It measures timing, package stability, and billing behavior.`,
-			provider: 'tone',
+			provider: process.env.BETTERPPTX_MC3_TTS_PROVIDER || undefined,
 			lang: 'en_US',
 			captions: { enabled: true, stackStatic: true },
 			paddingMs: 700,
@@ -896,25 +1014,26 @@ async function addBoundaryCase(ctx, slideIndex) {
 async function addFamilyContent(ctx, slideIndex, slideNo) {
 	const batchNo = ctx.scenario.batchNumber
 	if ([1, 2, 3].includes(batchNo)) return slideNo % 2 ? addChart(ctx, slideIndex, 'bar') : addKpiCards(ctx, slideIndex)
-	if (batchNo === 4) return addChart(ctx, slideIndex, ['bar', 'line', 'doughnut', 'pie', 'scatter'][slideNo % 5])
-	if (batchNo === 5) return addTable(ctx, slideIndex)
+	if (batchNo === 4) return [0, 2].includes(slideNo) ? addChart(ctx, slideIndex, ['line', 'doughnut'][slideNo / 2]) : addKpiCards(ctx, slideIndex)
+	if (batchNo === 5) return [0, 3].includes(slideNo) ? addTable(ctx, slideIndex) : (slideNo === 1 ? addChart(ctx, slideIndex, 'bar') : addKpiCards(ctx, slideIndex))
 	if (batchNo === 6) return slideNo % 2 ? addWordArt(ctx, slideIndex) : addEffects(ctx, slideIndex)
 	if (batchNo === 7) return addImage(ctx, slideIndex)
 	if (batchNo === 8) return addFreeform(ctx, slideIndex)
-	if (batchNo === 9) return addWordArt(ctx, slideIndex)
+	if (batchNo === 9) { await addWordArt(ctx, slideIndex); return addSingleCallout(ctx, slideIndex) }
 	if (batchNo === 10) return addEffects(ctx, slideIndex)
-	if (batchNo === 11) return addSmartArt(ctx, slideIndex)
-	if (batchNo === 12) return addEquation(ctx, slideIndex)
+	if (batchNo === 11) { await addSmartArt(ctx, slideIndex); return addSingleCallout(ctx, slideIndex) }
+	if (batchNo === 12) { await addEquation(ctx, slideIndex); return addSingleCallout(ctx, slideIndex) }
 	if (batchNo === 13) { await addEffects(ctx, slideIndex); return addAnimations(ctx, slideIndex) }
 	if (batchNo === 14) { await addKpiCards(ctx, slideIndex); return addAnimations(ctx, slideIndex) }
 	if (batchNo === 15) return addNarration(ctx, slideIndex)
 	if (batchNo === 16) return addModelAttempt(ctx, slideIndex)
-	if (batchNo === 17) return slideNo % 2 ? addTable(ctx, slideIndex) : addChart(ctx, slideIndex, 'bar')
-	if (batchNo === 18) return slideNo % 2 ? addEffects(ctx, slideIndex) : addKpiCards(ctx, slideIndex)
+	if (batchNo === 17) return slideNo === 0 ? addChart(ctx, slideIndex, 'bar') : (slideNo === 1 ? addTable(ctx, slideIndex) : addKpiCards(ctx, slideIndex))
+	if (batchNo === 18) return slideNo === 0 ? addEffects(ctx, slideIndex) : addKpiCards(ctx, slideIndex)
 	if (batchNo === 19) return slideNo === 0 ? addBoundaryCase(ctx, slideIndex) : addKpiCards(ctx, slideIndex)
-	await addKpiCards(ctx, slideIndex)
-	await addTable(ctx, slideIndex)
-	return addAnimations(ctx, slideIndex)
+	if (slideNo === 0) return addKpiCards(ctx, slideIndex)
+	if (slideNo === 1) return addTable(ctx, slideIndex)
+	if (slideNo === 2) return addAnimations(ctx, slideIndex)
+	return addImage(ctx, slideIndex)
 }
 
 async function runPostBuildEditing(ctx) {
@@ -935,10 +1054,8 @@ async function runPostBuildEditing(ctx) {
 		})
 	}
 	if (scenario.batchNumber === 17 || scenario.batchNumber === 18) {
-		await callTool({ client, recorder, scenario, toolName: 'betterpptx.slide.inspect_shapes', required: false, args: { deckId, slideIndex: 0 } })
 		await callTool({
 			client, recorder, scenario, toolName: 'betterpptx.slide.update_shape',
-			required: false,
 			args: {
 				deckId,
 				slideIndex: 0,
@@ -948,13 +1065,65 @@ async function runPostBuildEditing(ctx) {
 			},
 		})
 		await callTool({
-			client, recorder, scenario, toolName: 'betterpptx.deck.transform_shapes',
-			required: false,
+			client, recorder, scenario, toolName: 'betterpptx.slide.update_shape',
 			args: {
 				deckId,
-				colorTransform: 'saturate:0.08',
-				filter: { slideRange: [0, 4] },
-				idempotencyKey: `${scenario.scenarioId}-transform`,
+				slideIndex: 2,
+				target: { objectName: `${scenario.scenarioId}-kpi-2-0` },
+				patch: { text: `Edited\n${90 + scenario.variant}%`, fill: { color: 'FFFFFF' }, line: { color: colorFor(scenario), width: 1.25 } },
+				idempotencyKey: `${scenario.scenarioId}-update-kpi`,
+			},
+		})
+		if (scenario.batchNumber === 17 && process.env.BETTERPPTX_MC3_ENABLE_REPAIR_RISKY_CHART_TABLE_EDITS === '1') {
+			await callTool({
+				client, recorder, scenario, toolName: 'betterpptx.slide.update_chart',
+				args: {
+					deckId,
+					slideIndex: 0,
+					target: { objectName: `${scenario.scenarioId}-chart-0-bar` },
+					data: dataSeries(scenario, 6),
+					optionsPatch: { showLegend: true, title: `${scenario.scenarioId} edited chart` },
+					idempotencyKey: `${scenario.scenarioId}-update-chart`,
+				},
+			})
+			await callTool({
+				client, recorder, scenario, toolName: 'betterpptx.slide.update_table',
+				args: {
+					deckId,
+					slideIndex: 1,
+					target: { objectName: `${scenario.scenarioId}-table-1` },
+					operations: [
+						{ op: 'setCell', row: 1, col: 1, text: `${91 + scenario.variant}%` },
+						{ op: 'addRow', cells: ['Review', 'Passed'] },
+					],
+					idempotencyKey: `${scenario.scenarioId}-update-table`,
+				},
+			})
+		}
+		await callTool({
+			client, recorder, scenario, toolName: 'betterpptx.slide.duplicate',
+			args: {
+				deckId,
+				slideIndex: 2,
+				transition: { type: 'morph', option: 'byObject', duration: 550 },
+				idempotencyKey: `${scenario.scenarioId}-duplicate-slide`,
+			},
+		})
+		await callTool({
+			client, recorder, scenario, toolName: 'betterpptx.slide.reorder',
+			args: {
+				deckId,
+				fromIndex: 5,
+				toIndex: 3,
+				idempotencyKey: `${scenario.scenarioId}-reorder-slide`,
+			},
+		})
+		await callTool({
+			client, recorder, scenario, toolName: 'betterpptx.slide.delete',
+			args: {
+				deckId,
+				slideIndex: 5,
+				idempotencyKey: `${scenario.scenarioId}-delete-slide`,
 			},
 		})
 	}
@@ -1023,6 +1192,7 @@ function extractCredits(payload) {
 
 async function runDeckScenario({ scenario, opts, mcpUrl, base, auth, recorder, dirs }) {
 	const started = Date.now()
+	let client = null
 	const row = {
 		runId: recorder.runId,
 		scenarioId: scenario.scenarioId,
@@ -1044,7 +1214,7 @@ async function runDeckScenario({ scenario, opts, mcpUrl, base, auth, recorder, d
 		error: '',
 	}
 	try {
-		const client = await createRpc(mcpUrl, auth, `mc3-${scenario.scenarioId}`)
+		client = await createRpc(mcpUrl, auth, `mc3-${scenario.scenarioId}`)
 		await maybeActivate(client, recorder, scenario, opts.requireActivation)
 		await callTool({ client, recorder, scenario, toolName: 'betterpptx.auth.status', args: {}, required: false })
 		const deckPayload = await callTool({
@@ -1113,6 +1283,7 @@ async function runDeckScenario({ scenario, opts, mcpUrl, base, auth, recorder, d
 		row.status = 'failed'
 		row.error = String(err?.message || err).slice(0, 500)
 	} finally {
+		if (client?.close) await client.close()
 		row.endedAt = new Date().toISOString()
 		row.totalMs = Date.now() - started
 		recorder.deck(row)
@@ -1199,6 +1370,7 @@ async function writeSnapshot({ label, base, auth, recorder, dirs, opts, scenario
 		at: new Date().toISOString(),
 		mcpUrl: redactUrl(opts.mcpUrl),
 		maxDecks: opts.maxDecks,
+		startIndex: opts.startIndex,
 		concurrency: opts.concurrency,
 		includeHeavy: opts.includeHeavy,
 		scenarioCount: scenarios.length,
@@ -1218,6 +1390,9 @@ async function writeSnapshot({ label, base, auth, recorder, dirs, opts, scenario
 async function main() {
 	const opts = parseArgs(process.argv.slice(2))
 	loadEnvFile(opts.envFile)
+	runtimeToolRetries = opts.toolRetries
+	runtimeRetryBaseMs = opts.retryBaseMs
+	runtimeToolSpacingMs = opts.toolSpacingMs
 	opts.mcpUrl = normalizeMcpUrl(opts.mcpUrl)
 	const base = baseUrl(opts.mcpUrl)
 	const baselineAuth = authValue(opts)
@@ -1231,7 +1406,7 @@ async function main() {
 	}
 	Object.values(dirs).forEach(mkdirp)
 	const recorder = new HarnessRecorder({ runId: opts.runId, runDir })
-	const scenarios = buildScenarios(opts.maxDecks)
+	const scenarios = buildScenarios(opts.maxDecks, opts.startIndex)
 	fs.writeFileSync(path.join(runDir, 'manifest.json'), JSON.stringify({
 		runId: opts.runId,
 		createdAt: new Date().toISOString(),
@@ -1240,6 +1415,7 @@ async function main() {
 		mcpUrl: redactUrl(opts.mcpUrl),
 		outputRoot: opts.outputRoot,
 		maxDecks: opts.maxDecks,
+		startIndex: opts.startIndex,
 		fullRun: opts.fullRun,
 		concurrency: opts.concurrency,
 		includeHeavy: opts.includeHeavy,

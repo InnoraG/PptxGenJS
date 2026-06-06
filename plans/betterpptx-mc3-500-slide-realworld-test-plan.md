@@ -2,7 +2,9 @@
 
 Date: 2026-06-05
 
-Status: Required before final Dodo pricing.
+Last updated: 2026-06-06
+
+Status: Executed in private staging. Final aggregate evidence is `outputs/mc3-500-slide-run/mc3-aggregate-20260605-03`; plan-level report is `plans/betterpptx-mc3-pricing-quality-cost-report-2026-06-06.md`.
 
 Scope: Deterministic private staging test that produces at least 100 PowerPoint files with 5 slides each, for at least 500 generated slides. The run exists to collect quality, ergonomics, speed, hosting load/cost, billing, generation, editing, repair, and reporting evidence before any live Dodo product/pricing decision.
 

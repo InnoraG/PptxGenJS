@@ -2,6 +2,7 @@ substitutions:
   _REGION: us-central1
   _REPOSITORY: betterpptx-mcp
   _MCP_SERVICE: betterpptx-mcp-staging
+  _BILLING_RECONCILE_JOB: betterpptx-billing-reconcile-once
   _WEBHOOK_SERVICE: betterpptx-dodo-webhook-staging
   _WEBHOOK_SERVICE_ACCOUNT: bpptx-dodo-wh-runtime@betterpptx-mcp-staging.iam.gserviceaccount.com
   _WEBHOOK_SECRET_NAME: betterpptx-dodo-webhook-secret
@@ -40,6 +41,24 @@ steps:
       - --max-instances=1
       - --update-env-vars=BETTERPPTX_MCP_MAX_INSTANCES=1,BETTERPPTX_EDIT_STATE_MODE=process-local,BETTERPPTX_EDIT_STATE_SINGLE_INSTANCE_ACCEPTED=1
       - --quiet
+
+  - id: update-billing-reconcile-job
+    name: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+    entrypoint: bash
+    args:
+      - -c
+      - |
+        set -euo pipefail
+        image="${_REGION}-docker.pkg.dev/${PROJECT_ID}/${_REPOSITORY}/${_MCP_SERVICE}:${SHORT_SHA}"
+        if gcloud run jobs describe "${_BILLING_RECONCILE_JOB}" --project="${PROJECT_ID}" --region="${_REGION}" >/dev/null 2>&1; then
+          gcloud run jobs update "${_BILLING_RECONCILE_JOB}" \
+            --project="${PROJECT_ID}" \
+            --region="${_REGION}" \
+            --image="${image}" \
+            --quiet
+        else
+          echo "Billing reconcile job ${_BILLING_RECONCILE_JOB} not found; skipping image update."
+        fi
 
   - id: build-dodo-webhook
     name: gcr.io/cloud-builders/docker

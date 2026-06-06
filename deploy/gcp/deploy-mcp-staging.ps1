@@ -9,8 +9,10 @@ param(
   [string]$SketchfabSecretName = "betterpptx-sketchfab-api-key",
   [string]$SketchfabApiKey = "",
   [string]$SketchfabApiKeyFile = "",
+  [string]$BillingReconcileJob = "betterpptx-billing-reconcile-once",
   [switch]$PromptForSketchfabApiKey,
   [switch]$SkipSketchfabSecret,
+  [switch]$SkipBillingReconcileJobUpdate,
   [int]$BuildTimeoutSeconds = 1800,
   [switch]$SkipDeploy,
   [switch]$SkipHealthCheck
@@ -152,6 +154,24 @@ if (-not $SkipSketchfabSecret) {
 $updateArgs += "--quiet"
 & gcloud @updateArgs
 Assert-NativeSuccess "gcloud run services update"
+
+if (-not $SkipBillingReconcileJobUpdate -and $BillingReconcileJob) {
+  gcloud run jobs describe $BillingReconcileJob `
+    --project=$ProjectId `
+    --region=$Region `
+    --format="value(metadata.name)" 2>$null | Out-Null
+  if ($LASTEXITCODE -eq 0) {
+    gcloud run jobs update $BillingReconcileJob `
+      --project=$ProjectId `
+      --region=$Region `
+      --image=$image `
+      --quiet
+    Assert-NativeSuccess "gcloud run jobs update billing reconciler"
+    Write-Host "Billing reconcile job image updated: $BillingReconcileJob"
+  } else {
+    Write-Host "Billing reconcile job not found, skipping image update: $BillingReconcileJob"
+  }
+}
 
 $serviceUrl = gcloud run services describe $Service `
   --project=$ProjectId `
