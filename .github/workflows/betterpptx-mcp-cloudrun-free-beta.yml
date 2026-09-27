@@ -101,8 +101,8 @@ jobs:
         INSTALL_HMAC_SECRET_NAME: betterpptx-install-hmac-secret
         OPERATION_WORKER_SECRET_NAME: betterpptx-operation-worker-token
         SWEEPER_INVOKER_SERVICE_ACCOUNT: betterpptx-maintenance-invoker@betterpptx-mcp-20260926.iam.gserviceaccount.com
-        GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
-        GCP_DEPLOY_SERVICE_ACCOUNT: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+        GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_FREE_BETA_WORKLOAD_IDENTITY_PROVIDER }}
+        GCP_DEPLOY_SERVICE_ACCOUNT: ${{ vars.GCP_FREE_BETA_DEPLOY_SERVICE_ACCOUNT }}
         BETTERPPTX_PUBLIC_BASE: ${{ vars.BETTERPPTX_PUBLIC_BASE }}
         BETTERPPTX_OAUTH_ISSUER: ${{ vars.BETTERPPTX_OAUTH_ISSUER }}
         BETTERPPTX_OAUTH_AUDIENCE: ${{ vars.BETTERPPTX_OAUTH_AUDIENCE }}
@@ -373,6 +373,6 @@ jobs:
             echo "- Private worker revision: \`$worker_revision\`"
             echo '- Billing profile: bounded free-publication only (3 downloadable decks per rolling 30 days); paid payment routes disabled.'
             echo '- Production rendering: disabled; deterministic validation only.'
-            echo '- Domain routing: unchanged. Cloudflare edge publication and a fresh ChatGPT client test remain separate gates.'
+            echo '- Fresh ChatGPT client testing remains a separate gate; the earlier step records whether the custom-domain Worker route was published and verified.'
             echo '- Distributed-runtime verification flag remains off until restart, quota, and task-handoff failure tests pass.'
           } >> "$GITHUB_STEP_SUMMARY"
