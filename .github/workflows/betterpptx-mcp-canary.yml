@@ -78,6 +78,12 @@ jobs:
       CLOUD_RUN_SERVICE: betterpptx-canary
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
       GCP_DEPLOY_SERVICE_ACCOUNT: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+      BETTERPPTX_PUBLIC_BASE: ${{ vars.BETTERPPTX_PUBLIC_BASE }}
+      BETTERPPTX_OAUTH_ISSUER: ${{ vars.BETTERPPTX_OAUTH_ISSUER }}
+      BETTERPPTX_OAUTH_AUDIENCE: ${{ vars.BETTERPPTX_OAUTH_AUDIENCE }}
+      BETTERPPTX_OAUTH_JWKS_URL: ${{ vars.BETTERPPTX_OAUTH_JWKS_URL }}
+      BETTERPPTX_OAUTH_CLIENT_ID: ${{ vars.BETTERPPTX_OAUTH_CLIENT_ID }}
+      BETTERPPTX_INSTALL_HMAC_SECRET_NAME: betterpptx-install-hmac-secret
     steps:
       - name: Check out the exact triggering revision
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -90,6 +96,34 @@ jobs:
           set -euo pipefail
           test -n "$GCP_WORKLOAD_IDENTITY_PROVIDER" || { echo "Missing repository/environment variable GCP_WORKLOAD_IDENTITY_PROVIDER" >&2; exit 1; }
           test -n "$GCP_DEPLOY_SERVICE_ACCOUNT" || { echo "Missing repository/environment variable GCP_DEPLOY_SERVICE_ACCOUNT" >&2; exit 1; }
+          test -n "$BETTERPPTX_PUBLIC_BASE" || { echo "Missing BETTERPPTX_PUBLIC_BASE in the betterpptx-canary GitHub environment." >&2; exit 1; }
+          test -n "$BETTERPPTX_OAUTH_ISSUER" || { echo "Missing BETTERPPTX_OAUTH_ISSUER in the betterpptx-canary GitHub environment." >&2; exit 1; }
+          test -n "$BETTERPPTX_OAUTH_AUDIENCE" || { echo "Missing BETTERPPTX_OAUTH_AUDIENCE in the betterpptx-canary GitHub environment." >&2; exit 1; }
+          test -n "$BETTERPPTX_OAUTH_JWKS_URL" || { echo "Missing BETTERPPTX_OAUTH_JWKS_URL in the betterpptx-canary GitHub environment." >&2; exit 1; }
+          test -n "$BETTERPPTX_OAUTH_CLIENT_ID" || { echo "Missing BETTERPPTX_OAUTH_CLIENT_ID in the betterpptx-canary GitHub environment." >&2; exit 1; }
+          [[ "$BETTERPPTX_PUBLIC_BASE" == https://* && "$BETTERPPTX_PUBLIC_BASE" != */ ]]
+          [[ "$BETTERPPTX_OAUTH_ISSUER" == "$BETTERPPTX_PUBLIC_BASE/identity/realms/betterpptx" ]]
+          [[ "$BETTERPPTX_OAUTH_AUDIENCE" == "$BETTERPPTX_PUBLIC_BASE" ]]
+          [[ "$BETTERPPTX_OAUTH_JWKS_URL" == "$BETTERPPTX_OAUTH_ISSUER/protocol/openid-connect/certs" ]]
+
+      - name: Verify the configured identity issuer and signing keys
+        shell: bash
+        run: |
+          set -euo pipefail
+          discovery="$RUNNER_TEMP/betterpptx-oidc-discovery.json"
+          jwks="$RUNNER_TEMP/betterpptx-oidc-jwks.json"
+          curl --fail --silent --show-error --max-time 20 \
+            "$BETTERPPTX_OAUTH_ISSUER/.well-known/openid-configuration" -o "$discovery"
+          jq -e --arg issuer "$BETTERPPTX_OAUTH_ISSUER" --arg jwks "$BETTERPPTX_OAUTH_JWKS_URL" \
+            '.issuer == $issuer and .jwks_uri == $jwks' "$discovery" >/dev/null || {
+              echo "The live identity discovery document does not match the configured issuer and JWKS endpoint." >&2
+              exit 1
+            }
+          curl --fail --silent --show-error --max-time 20 "$BETTERPPTX_OAUTH_JWKS_URL" -o "$jwks"
+          jq -e '(.keys | type == "array") and (.keys | length > 0)' "$jwks" >/dev/null || {
+            echo "The configured identity JWKS endpoint did not return public signing keys." >&2
+            exit 1
+          }
 
       - name: Build the container before cloud credentials are created
         env:
@@ -157,6 +191,8 @@ jobs:
             --project "$GCP_PROJECT_ID" \
             --region "$GCP_REGION" \
             --image "$IMAGE_REF" \
+            --update-env-vars="BETTERPPTX_AUTH=oauth,BETTERPPTX_PUBLIC_BLACK_BOX=1,BETTERPPTX_PUBLIC_BASE=${BETTERPPTX_PUBLIC_BASE},BETTERPPTX_OAUTH_ISSUER=${BETTERPPTX_OAUTH_ISSUER},BETTERPPTX_OAUTH_AUDIENCE=${BETTERPPTX_OAUTH_AUDIENCE},BETTERPPTX_OAUTH_JWKS_URL=${BETTERPPTX_OAUTH_JWKS_URL},BETTERPPTX_OAUTH_TOKEN_PROFILE=keycloak,BETTERPPTX_OAUTH_CLIENT_ID=${BETTERPPTX_OAUTH_CLIENT_ID},BETTERPPTX_SELF_HOSTED_IDENTITY=0,BETTERPPTX_MC_SECRET_BACKEND=gcp-secret-manager,BETTERPPTX_GCP_PROJECT=${GCP_PROJECT_ID}" \
+            --update-secrets="BETTERPPTX_INSTALL_HMAC_SECRET=${BETTERPPTX_INSTALL_HMAC_SECRET_NAME}:latest" \
             --no-allow-unauthenticated \
             --quiet
 
@@ -164,6 +200,7 @@ jobs:
         id: verify-deployment
         env:
           IMAGE_REF: ${{ steps.image.outputs.image_ref }}
+          INSTALL_HMAC_SECRET_NAME: betterpptx-install-hmac-secret
         shell: bash
         run: |
           set -euo pipefail
@@ -182,6 +219,27 @@ jobs:
           jq -e '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' \
             "$RUNNER_TEMP/iam-after.json" >/dev/null || {
               echo "Deployment verification failed: the canary has a public invoker binding." >&2
+              exit 1
+            }
+          jq -e --arg base "$BETTERPPTX_PUBLIC_BASE" \
+            --arg issuer "$BETTERPPTX_OAUTH_ISSUER" \
+            --arg audience "$BETTERPPTX_OAUTH_AUDIENCE" \
+            --arg jwks "$BETTERPPTX_OAUTH_JWKS_URL" \
+            --arg client "$BETTERPPTX_OAUTH_CLIENT_ID" \
+            --arg secret "$INSTALL_HMAC_SECRET_NAME" '
+              def envv($name): ([.spec.template.spec.containers[0].env[]? | select(.name == $name) | .value][0] // null);
+              def secretv($name): ([.spec.template.spec.containers[0].env[]? | select(.name == $name) | .valueFrom.secretKeyRef.name][0] // null);
+              envv("BETTERPPTX_AUTH") == "oauth" and
+              envv("BETTERPPTX_PUBLIC_BASE") == $base and
+              envv("BETTERPPTX_OAUTH_ISSUER") == $issuer and
+              envv("BETTERPPTX_OAUTH_AUDIENCE") == $audience and
+              envv("BETTERPPTX_OAUTH_JWKS_URL") == $jwks and
+              envv("BETTERPPTX_OAUTH_TOKEN_PROFILE") == "keycloak" and
+              envv("BETTERPPTX_OAUTH_CLIENT_ID") == $client and
+              envv("BETTERPPTX_SELF_HOSTED_IDENTITY") == "0" and
+              secretv("BETTERPPTX_INSTALL_HMAC_SECRET") == $secret
+            ' "$RUNNER_TEMP/service-after.json" >/dev/null || {
+              echo "Deployment verification failed: the active OAuth issuer, audience, JWKS or identity-secret binding differs from the approved configuration." >&2
               exit 1
             }
           revision="$(jq -r '.status.latestReadyRevisionName' "$RUNNER_TEMP/service-after.json")"
