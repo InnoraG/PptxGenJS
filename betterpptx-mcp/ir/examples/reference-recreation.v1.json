@@ -1,0 +1,119 @@
+{
+  "schemaVersion": "betterpptx.deck-spec.v1",
+  "title": "Reference Recreation Candidate",
+  "audience": "Maintainers validating faithful recreation",
+  "objective": "Represent a public-safe reference recreation workflow without exposing source paths or internal package details.",
+  "layout": "LAYOUT_WIDE",
+  "authoringContract": {
+    "level": "deterministic",
+    "coordinateSystem": "inches",
+    "layerModel": "flat-object-array",
+    "objectIdentity": "stable-names-required",
+    "textPolicy": "Use shape only for geometry. Use textBox for standalone text and textShape for text inside a PowerPoint shape.",
+    "requires": ["slide.id", "content[].name", "slide.notes", "altText for visual proof", "validation before save"]
+  },
+  "styleIntent": {
+    "density": "reference-faithful",
+    "tone": "precise",
+    "visualSystem": "recreate-observed-reference",
+    "avoid": ["private path leakage", "unsupported silent drops", "broad raw XML passthrough"]
+  },
+  "theme": {
+    "name": "Observed Reference Theme",
+    "palette": ["0F172A", "7C3AED", "06B6D4", "F97316", "F8FAFC"],
+    "fontFace": "Aptos"
+  },
+  "sections": [
+    {
+      "id": "reference",
+      "title": "Reference",
+      "slideIds": ["reference-cover", "reference-structure"]
+    }
+  ],
+  "assets": [
+    {
+      "name": "reference-deck",
+      "kind": "reference",
+      "handle": "asset_reference_uploaded_opaque",
+      "intent": "Opaque uploaded presentation used for public-safe analysis.",
+      "altText": "Uploaded reference deck"
+    },
+    {
+      "name": "hero-image-observed",
+      "kind": "image",
+      "handle": "asset_image_observed_hero",
+      "intent": "Observed hero media recreated as an editable picture placeholder.",
+      "altText": "Abstract product visual from the reference deck"
+    }
+  ],
+  "data": [
+    {
+      "name": "reference-inventory-summary",
+      "dataSource": "reference-analysis-run",
+      "provenance": "Public-safe reference analyzer output, run ref_an_20260606",
+      "verified": true,
+      "rows": [
+        ["Object class", "Observed count", "Recreate mode"],
+        ["Text", "14", "editable"],
+        ["Pictures", "3", "asset-backed"],
+        ["Charts", "1", "native where supported"]
+      ]
+    }
+  ],
+  "validation": {
+    "previewBeforeSave": true,
+    "validateBeforeSave": true,
+    "minDesignScore": 84,
+    "requireAccessibility": true
+  },
+  "slides": [
+    {
+      "id": "reference-cover",
+      "title": "Reference Cover",
+      "role": "reference-recreation",
+      "message": "The cover slide should preserve the reference hierarchy while keeping text and image objects editable.",
+      "layoutIntent": "image-left-copy-right",
+      "content": [
+        {
+          "kind": "image-feature",
+          "name": "observed-hero",
+          "assetRef": "hero-image-observed"
+        },
+        {
+          "kind": "title",
+          "name": "observed-title",
+          "text": "Reference Cover"
+        },
+        {
+          "kind": "body",
+          "name": "observed-subtitle",
+          "text": "Editable recreation with public-safe handles and no internal package disclosure."
+        }
+      ],
+      "notes": "Compare visually and structurally after generation."
+    },
+    {
+      "id": "reference-structure",
+      "title": "Reference Structure",
+      "role": "analysis-summary",
+      "message": "Supported objects are recreated; unsupported preserve-only items are reported explicitly.",
+      "layoutIntent": "comparison",
+      "content": [
+        {
+          "kind": "table-panel",
+          "name": "inventory-table",
+          "dataRef": "reference-inventory-summary",
+          "dataSource": "reference-analysis-run",
+          "provenance": "Public-safe reference analyzer output, run ref_an_20260606",
+          "verified": true
+        },
+        {
+          "kind": "callout",
+          "name": "unsupported-callout",
+          "text": "Unsupported details must be disclosed as preserve-only findings, not silently removed."
+        }
+      ],
+      "notes": "The analyzer output is product-level and opaque."
+    }
+  ]
+}

@@ -1,12 +1,5 @@
-import { Server } from '@modelcontextprotocol/sdk/server/index.js'
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import {
-	CallToolRequestSchema,
-	ListResourcesRequestSchema,
-	ListToolsRequestSchema,
-	ReadResourceRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js'
-
+import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
+import { Server } from "@modelcontextprotocol/server";
 import {
 	BETTERPPTX_MCP_BRAND,
 	BetterPptxMcpRuntimeOptions,
@@ -65,11 +58,11 @@ export function createBetterPptxMcpMcpServer(options: BetterPptxMcpRuntimeOption
 		instructions: serverInstructions(options),
 	})
 
-	server.setRequestHandler(ListToolsRequestSchema, async () => ({
+	server.setRequestHandler('tools/list', async () => ({
 		tools: getBetterPptxMcpTools(options).map(sdkTool),
 	}))
 
-	server.setRequestHandler(CallToolRequestSchema, async request => {
+	server.setRequestHandler('tools/call', async request => {
 		const name = request.params.name
 		const args = request.params.arguments || {}
 		return withStdoutRedirected(async () => {
@@ -78,11 +71,11 @@ export function createBetterPptxMcpMcpServer(options: BetterPptxMcpRuntimeOption
 		})
 	})
 
-	server.setRequestHandler(ListResourcesRequestSchema, async () => ({
+	server.setRequestHandler('resources/list', async () => ({
 		resources: [],
 	}))
 
-	server.setRequestHandler(ReadResourceRequestSchema, async request => {
+	server.setRequestHandler('resources/read', async request => {
 		const uri = request.params.uri
 		if (!uri.startsWith('betterpptx-mcp-artifact://')) {
 			return {

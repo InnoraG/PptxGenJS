@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "betterpptx.deck-spec.v1",
+  "title": "Connected identity lesson",
+  "authoringContract": {
+    "workflow": "ai-sovereign-v1",
+    "creativeAuthority": "ai",
+    "directorMode": "off",
+    "verificationMode": "complete",
+    "geometryAuthority": "ai",
+    "placementPolicy": "ai-authored-geometry-v1",
+    "coordinateSystem": "inches"
+  },
+  "styleIntent": {
+    "artDirection": "editorial",
+    "mode": "dark"
+  },
+  "validation": {
+    "validateBeforeSave": true,
+    "requireAccessibility": true
+  },
+  "slides": [
+    {
+      "id": "before",
+      "title": "Before",
+      "content": [
+        {
+          "kind": "textBox",
+          "name": "product-name",
+          "text": "WERT",
+          "rect": {
+            "x": 1,
+            "y": 2.5,
+            "w": 4,
+            "h": 1
+          }
+        }
+      ]
+    },
+    {
+      "id": "after",
+      "title": "After",
+      "transition": {
+        "type": "morph",
+        "option": "byObject"
+      },
+      "content": [
+        {
+          "kind": "textBox",
+          "name": "product-name",
+          "text": "WERT",
+          "rect": {
+            "x": 7.8,
+            "y": 0.8,
+            "w": 4,
+            "h": 1
+          }
+        }
+      ]
+    }
+  ]
+}

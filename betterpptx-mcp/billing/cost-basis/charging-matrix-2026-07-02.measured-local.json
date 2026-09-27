@@ -1,0 +1,580 @@
+{
+  "schemaVersion": "betterpptx.charging-matrix.v1",
+  "version": "2026-07-03.measured.9c0227cc5009",
+  "status": "measured",
+  "generatedAt": "2026-07-03T06:25:52.716Z",
+  "pricingDecision": "owner_multiplier_pending",
+  "currency": "USD",
+  "provenance": "measured-local",
+  "costBasis": "serial_ceiling",
+  "overheadPolicy": "coefficient_included",
+  "cloudRunBillingMode": "request_based",
+  "catalogDigest": "70fb4264d2f1947e7edddba1232fbdb0cf0b6d89ef36d8a606fda2b73383487c",
+  "workloadsCovered": [
+    "A10G-anchor",
+    "commit_M_0",
+    "commit_M_1",
+    "commit_M_2",
+    "commit_S_0",
+    "commit_S_1",
+    "commit_S_2",
+    "commit_dense_0",
+    "commit_dense_1",
+    "commit_dense_2",
+    "commit_rich_0",
+    "commit_rich_1",
+    "commit_rich_2",
+    "media_0",
+    "media_1",
+    "media_2",
+    "model3d_0",
+    "model3d_1",
+    "model3d_2",
+    "narr_long_0",
+    "narr_long_1",
+    "narr_short_0",
+    "narr_short_1",
+    "renarrate_0",
+    "renarrate_1",
+    "renarrate_2",
+    "restyle_0",
+    "restyle_1",
+    "restyle_2",
+    "save_M_0",
+    "save_M_1",
+    "save_M_2",
+    "save_S_0",
+    "save_S_1",
+    "save_S_2",
+    "save_dense_0",
+    "save_dense_1",
+    "save_dense_2",
+    "save_rich_0",
+    "save_rich_1",
+    "save_rich_2",
+    "upload_S_0",
+    "upload_S_1",
+    "upload_S_2",
+    "upload_rich_0",
+    "upload_rich_1",
+    "upload_rich_2"
+  ],
+  "sourceFiles": [
+    {
+      "file": "D:\\PptxGenJS_Claude\\tmp_autonomous_test\\outputs\\cost-refresh\\final-2026-07-03-85880\\matrix-feature-rows.ndjson",
+      "sha256": "229e5e6aaa8182680644bdc10d2d40b469eb8c44b3df5b0d8130e483430b3f87"
+    }
+  ],
+  "summary": {
+    "count": 48,
+    "measuredUsdMean": 0.0009148318,
+    "measuredUsdMedian": 0.000004088084,
+    "measuredUsdP95": 0.005215833595,
+    "coefficientOfVariation": 3.218325,
+    "totalUsd": 0.04391192641
+  },
+  "scenarios": {
+    "commit_S_0": {
+      "count": 1,
+      "measuredUsdMean": 0.000002303999,
+      "measuredUsdMedian": 0.000002303999,
+      "measuredUsdP95": 0.000002303999,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000002303999
+    },
+    "commit_S_1": {
+      "count": 1,
+      "measuredUsdMean": 9.76799e-7,
+      "measuredUsdMedian": 9.76799e-7,
+      "measuredUsdP95": 9.76799e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 9.76799e-7
+    },
+    "commit_S_2": {
+      "count": 1,
+      "measuredUsdMean": 7.01093e-7,
+      "measuredUsdMedian": 7.01093e-7,
+      "measuredUsdP95": 7.01093e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 7.01093e-7
+    },
+    "save_S_0": {
+      "count": 1,
+      "measuredUsdMean": 0.000008456371,
+      "measuredUsdMedian": 0.000008456371,
+      "measuredUsdP95": 0.000008456371,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000008456371
+    },
+    "save_S_1": {
+      "count": 1,
+      "measuredUsdMean": 0.000003397203,
+      "measuredUsdMedian": 0.000003397203,
+      "measuredUsdP95": 0.000003397203,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000003397203
+    },
+    "save_S_2": {
+      "count": 1,
+      "measuredUsdMean": 0.000003148448,
+      "measuredUsdMedian": 0.000003148448,
+      "measuredUsdP95": 0.000003148448,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000003148448
+    },
+    "commit_M_0": {
+      "count": 1,
+      "measuredUsdMean": 0.000001075035,
+      "measuredUsdMedian": 0.000001075035,
+      "measuredUsdP95": 0.000001075035,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000001075035
+    },
+    "commit_M_1": {
+      "count": 1,
+      "measuredUsdMean": 8.0606e-7,
+      "measuredUsdMedian": 8.0606e-7,
+      "measuredUsdP95": 8.0606e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 8.0606e-7
+    },
+    "commit_M_2": {
+      "count": 1,
+      "measuredUsdMean": 0.000001097268,
+      "measuredUsdMedian": 0.000001097268,
+      "measuredUsdP95": 0.000001097268,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000001097268
+    },
+    "save_M_0": {
+      "count": 1,
+      "measuredUsdMean": 0.00000553737,
+      "measuredUsdMedian": 0.00000553737,
+      "measuredUsdP95": 0.00000553737,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.00000553737
+    },
+    "save_M_1": {
+      "count": 1,
+      "measuredUsdMean": 0.000005293278,
+      "measuredUsdMedian": 0.000005293278,
+      "measuredUsdP95": 0.000005293278,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000005293278
+    },
+    "save_M_2": {
+      "count": 1,
+      "measuredUsdMean": 0.000004168433,
+      "measuredUsdMedian": 0.000004168433,
+      "measuredUsdP95": 0.000004168433,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000004168433
+    },
+    "commit_dense_0": {
+      "count": 1,
+      "measuredUsdMean": 0.000001707006,
+      "measuredUsdMedian": 0.000001707006,
+      "measuredUsdP95": 0.000001707006,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000001707006
+    },
+    "commit_dense_1": {
+      "count": 1,
+      "measuredUsdMean": 0.000001374961,
+      "measuredUsdMedian": 0.000001374961,
+      "measuredUsdP95": 0.000001374961,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000001374961
+    },
+    "commit_dense_2": {
+      "count": 1,
+      "measuredUsdMean": 9.93944e-7,
+      "measuredUsdMedian": 9.93944e-7,
+      "measuredUsdP95": 9.93944e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 9.93944e-7
+    },
+    "save_dense_0": {
+      "count": 1,
+      "measuredUsdMean": 0.000005622859,
+      "measuredUsdMedian": 0.000005622859,
+      "measuredUsdP95": 0.000005622859,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000005622859
+    },
+    "save_dense_1": {
+      "count": 1,
+      "measuredUsdMean": 0.00000516894,
+      "measuredUsdMedian": 0.00000516894,
+      "measuredUsdP95": 0.00000516894,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.00000516894
+    },
+    "save_dense_2": {
+      "count": 1,
+      "measuredUsdMean": 0.000004324942,
+      "measuredUsdMedian": 0.000004324942,
+      "measuredUsdP95": 0.000004324942,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000004324942
+    },
+    "commit_rich_0": {
+      "count": 1,
+      "measuredUsdMean": 7.79427e-7,
+      "measuredUsdMedian": 7.79427e-7,
+      "measuredUsdP95": 7.79427e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 7.79427e-7
+    },
+    "commit_rich_1": {
+      "count": 1,
+      "measuredUsdMean": 6.80264e-7,
+      "measuredUsdMedian": 6.80264e-7,
+      "measuredUsdP95": 6.80264e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 6.80264e-7
+    },
+    "commit_rich_2": {
+      "count": 1,
+      "measuredUsdMean": 8.0272e-7,
+      "measuredUsdMedian": 8.0272e-7,
+      "measuredUsdP95": 8.0272e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 8.0272e-7
+    },
+    "save_rich_0": {
+      "count": 1,
+      "measuredUsdMean": 0.000004007736,
+      "measuredUsdMedian": 0.000004007736,
+      "measuredUsdP95": 0.000004007736,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000004007736
+    },
+    "save_rich_1": {
+      "count": 1,
+      "measuredUsdMean": 0.000005953817,
+      "measuredUsdMedian": 0.000005953817,
+      "measuredUsdP95": 0.000005953817,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000005953817
+    },
+    "save_rich_2": {
+      "count": 1,
+      "measuredUsdMean": 0.000004185234,
+      "measuredUsdMedian": 0.000004185234,
+      "measuredUsdP95": 0.000004185234,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000004185234
+    },
+    "upload_S_0": {
+      "count": 1,
+      "measuredUsdMean": 0.000025156247,
+      "measuredUsdMedian": 0.000025156247,
+      "measuredUsdP95": 0.000025156247,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000025156247
+    },
+    "upload_S_1": {
+      "count": 1,
+      "measuredUsdMean": 0.000029377379,
+      "measuredUsdMedian": 0.000029377379,
+      "measuredUsdP95": 0.000029377379,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000029377379
+    },
+    "upload_S_2": {
+      "count": 1,
+      "measuredUsdMean": 0.000027380922,
+      "measuredUsdMedian": 0.000027380922,
+      "measuredUsdP95": 0.000027380922,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000027380922
+    },
+    "upload_rich_0": {
+      "count": 1,
+      "measuredUsdMean": 0.000032081598,
+      "measuredUsdMedian": 0.000032081598,
+      "measuredUsdP95": 0.000032081598,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000032081598
+    },
+    "upload_rich_1": {
+      "count": 1,
+      "measuredUsdMean": 0.000033665026,
+      "measuredUsdMedian": 0.000033665026,
+      "measuredUsdP95": 0.000033665026,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000033665026
+    },
+    "upload_rich_2": {
+      "count": 1,
+      "measuredUsdMean": 0.000029021537,
+      "measuredUsdMedian": 0.000029021537,
+      "measuredUsdP95": 0.000029021537,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.000029021537
+    },
+    "narr_short_diff_narr_short_0": {
+      "count": 1,
+      "measuredUsdMean": 0.004299883455,
+      "measuredUsdMedian": 0.004299883455,
+      "measuredUsdP95": 0.004299883455,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.004299883455
+    },
+    "narr_short_diff_narr_short_1": {
+      "count": 1,
+      "measuredUsdMean": 0.003468716467,
+      "measuredUsdMedian": 0.003468716467,
+      "measuredUsdP95": 0.003468716467,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.003468716467
+    },
+    "narr_long_diff_narr_long_0": {
+      "count": 1,
+      "measuredUsdMean": 0.007380024962,
+      "measuredUsdMedian": 0.007380024962,
+      "measuredUsdP95": 0.007380024962,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.007380024962
+    },
+    "narr_long_diff_narr_long_1": {
+      "count": 1,
+      "measuredUsdMean": 0.005709037517,
+      "measuredUsdMedian": 0.005709037517,
+      "measuredUsdP95": 0.005709037517,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.005709037517
+    },
+    "renarrate_0_diff": {
+      "count": 1,
+      "measuredUsdMean": 0.0008627256,
+      "measuredUsdMedian": 0.0008627256,
+      "measuredUsdP95": 0.0008627256,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.0008627256
+    },
+    "renarrate_1_diff": {
+      "count": 1,
+      "measuredUsdMean": 0.001088472263,
+      "measuredUsdMedian": 0.001088472263,
+      "measuredUsdP95": 0.001088472263,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.001088472263
+    },
+    "renarrate_2_diff": {
+      "count": 1,
+      "measuredUsdMean": 0.00144912873,
+      "measuredUsdMedian": 0.00144912873,
+      "measuredUsdP95": 0.00144912873,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.00144912873
+    },
+    "media_0_diff": {
+      "count": 1,
+      "measuredUsdMean": 4.265e-7,
+      "measuredUsdMedian": 4.265e-7,
+      "measuredUsdP95": 4.265e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 4.265e-7
+    },
+    "media_1_diff": {
+      "count": 1,
+      "measuredUsdMean": 4.265e-7,
+      "measuredUsdMedian": 4.265e-7,
+      "measuredUsdP95": 4.265e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 4.265e-7
+    },
+    "media_2_diff": {
+      "count": 1,
+      "measuredUsdMean": 4.265e-7,
+      "measuredUsdMedian": 4.265e-7,
+      "measuredUsdP95": 4.265e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 4.265e-7
+    },
+    "model3d_0_diff": {
+      "count": 1,
+      "measuredUsdMean": 4.265e-7,
+      "measuredUsdMedian": 4.265e-7,
+      "measuredUsdP95": 4.265e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 4.265e-7
+    },
+    "model3d_1_diff": {
+      "count": 1,
+      "measuredUsdMean": 4.265e-7,
+      "measuredUsdMedian": 4.265e-7,
+      "measuredUsdP95": 4.265e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 4.265e-7
+    },
+    "model3d_2_diff": {
+      "count": 1,
+      "measuredUsdMean": 4.265e-7,
+      "measuredUsdMedian": 4.265e-7,
+      "measuredUsdP95": 4.265e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 4.265e-7
+    },
+    "restyle_0_diff": {
+      "count": 1,
+      "measuredUsdMean": 4.265e-7,
+      "measuredUsdMedian": 4.265e-7,
+      "measuredUsdP95": 4.265e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 4.265e-7
+    },
+    "restyle_1_diff": {
+      "count": 1,
+      "measuredUsdMean": 4.265e-7,
+      "measuredUsdMedian": 4.265e-7,
+      "measuredUsdP95": 4.265e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 4.265e-7
+    },
+    "restyle_2_diff": {
+      "count": 1,
+      "measuredUsdMean": 4.265e-7,
+      "measuredUsdMedian": 4.265e-7,
+      "measuredUsdP95": 4.265e-7,
+      "coefficientOfVariation": 0,
+      "totalUsd": 4.265e-7
+    },
+    "avatar_base_anchor": {
+      "count": 1,
+      "measuredUsdMean": 0.0180004265,
+      "measuredUsdMedian": 0.0180004265,
+      "measuredUsdP95": 0.0180004265,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.0180004265
+    },
+    "avatar_per_second_anchor": {
+      "count": 1,
+      "measuredUsdMean": 0.0014004265,
+      "measuredUsdMedian": 0.0014004265,
+      "measuredUsdP95": 0.0014004265,
+      "coefficientOfVariation": 0,
+      "totalUsd": 0.0014004265
+    }
+  },
+  "models": {
+    "checkpoint": {
+      "rowCount": 24,
+      "features": [
+        "deckSaveBase",
+        "perFinalObject",
+        "perFinalSlide",
+        "perOutputMb",
+        "perRichObject"
+      ],
+      "coefficientsUsd": {
+        "deckSaveBase": 0.000001243892,
+        "perFinalObject": 0,
+        "perFinalSlide": 0,
+        "perOutputMb": 0.000135941636,
+        "perRichObject": 0
+      },
+      "measuredUsdMedian": 0.000002726223,
+      "measuredUsdP95": 0.000005904173,
+      "coefficientOfVariation": 0.732997,
+      "fitCoverageWithin15Pct": 0.333333,
+      "medianAbsoluteErrorUsd": 4.52143e-7,
+      "p95AbsoluteErrorUsd": 0.000001160963
+    },
+    "heavy": {
+      "rowCount": 24,
+      "features": [
+        "avatarBase",
+        "avatarPerSecond",
+        "batchTransformBase",
+        "batchTransformPerObject",
+        "mediaImportBase",
+        "mediaImportPerMb",
+        "model3dBase",
+        "model3dPerMb",
+        "narrationBase",
+        "narrationPer1000Chars",
+        "openUploadedBase",
+        "openUploadedPerMb"
+      ],
+      "coefficientsUsd": {
+        "avatarBase": 0.0180004265,
+        "avatarPerSecond": 0.0014004265,
+        "batchTransformBase": 4.265e-7,
+        "batchTransformPerObject": 0,
+        "mediaImportBase": 4.265e-7,
+        "mediaImportPerMb": 0,
+        "model3dBase": 4.265e-7,
+        "model3dPerMb": 0,
+        "narrationBase": 0.000396223322,
+        "narrationPer1000Chars": 0.002303757787,
+        "openUploadedBase": 0.000018735775,
+        "openUploadedPerMb": 0.000428453742
+      },
+      "measuredUsdMedian": 0.000029199458,
+      "measuredUsdP95": 0.007129376845,
+      "coefficientOfVariation": 2.188357,
+      "fitCoverageWithin15Pct": 0.833333,
+      "medianAbsoluteErrorUsd": 2.84141e-7,
+      "p95AbsoluteErrorUsd": 0.000837075703
+    }
+  },
+  "rateCardUsd": {
+    "checkpoint": {
+      "deckSaveBase": 0.000001243892,
+      "perFinalObject": 0,
+      "perFinalSlide": 0,
+      "perOutputMb": 0.000135941636,
+      "perRichObject": 0
+    },
+    "heavy": {
+      "avatarBase": 0.0180004265,
+      "avatarPerSecond": 0.0014004265,
+      "batchTransformBase": 4.265e-7,
+      "batchTransformPerObject": 0,
+      "mediaImportBase": 4.265e-7,
+      "mediaImportPerMb": 0,
+      "model3dBase": 4.265e-7,
+      "model3dPerMb": 0,
+      "narrationBase": 0.000396223322,
+      "narrationPer1000Chars": 0.002303757787,
+      "openUploadedBase": 0.000018735775,
+      "openUploadedPerMb": 0.000428453742
+    }
+  },
+  "serialBaselineRateCardUsd": {
+    "checkpoint": {
+      "deckSaveBase": 0.000001243892,
+      "perFinalObject": 0,
+      "perFinalSlide": 0,
+      "perOutputMb": 0.000135941636,
+      "perRichObject": 0
+    },
+    "heavy": {
+      "avatarBase": 0.0180004265,
+      "avatarPerSecond": 0.0014004265,
+      "batchTransformBase": 4.265e-7,
+      "batchTransformPerObject": 0,
+      "mediaImportBase": 4.265e-7,
+      "mediaImportPerMb": 0,
+      "model3dBase": 4.265e-7,
+      "model3dPerMb": 0,
+      "narrationBase": 0.000396223322,
+      "narrationPer1000Chars": 0.002303757787,
+      "openUploadedBase": 0.000018735775,
+      "openUploadedPerMb": 0.000428453742
+    }
+  },
+  "productionAdjustedRateCardUsd": null,
+  "productionAdjustment": {
+    "available": false,
+    "method": "none",
+    "topologyRunId": null,
+    "amortizableInstanceFactor": 1,
+    "nonAmortizableRequestFactor": 1,
+    "amortizableFractionUsed": 0.557769
+  },
+  "overheadAllocation": null
+}

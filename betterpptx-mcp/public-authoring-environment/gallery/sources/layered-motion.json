@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "betterpptx.deck-spec.v1",
+  "title": "Layered motion lesson",
+  "authoringContract": {
+    "workflow": "ai-sovereign-v1",
+    "creativeAuthority": "ai",
+    "directorMode": "off",
+    "verificationMode": "complete",
+    "geometryAuthority": "ai",
+    "placementPolicy": "ai-authored-geometry-v1",
+    "coordinateSystem": "inches"
+  },
+  "styleIntent": {
+    "artDirection": "editorial",
+    "mode": "dark"
+  },
+  "validation": {
+    "validateBeforeSave": true,
+    "requireAccessibility": true
+  },
+  "slides": [
+    {
+      "id": "journey",
+      "title": "State change",
+      "content": [
+        {
+          "kind": "shape",
+          "name": "signal",
+          "shapeName": "ellipse",
+          "rect": {
+            "x": 1.2,
+            "y": 3,
+            "w": 0.6,
+            "h": 0.6
+          },
+          "style": {
+            "fill": {
+              "color": "22C55E"
+            }
+          }
+        }
+      ],
+      "timeline": [
+        {
+          "objectName": "signal",
+          "type": "entrance",
+          "effect": "fade",
+          "trigger": "afterPrevious",
+          "durationMs": 350
+        },
+        {
+          "objectName": "signal",
+          "type": "motion",
+          "motionPath": "arcUp",
+          "trigger": "afterPrevious",
+          "durationMs": 1400
+        },
+        {
+          "objectName": "signal",
+          "type": "emphasis",
+          "effect": "colorWave",
+          "trigger": "withPrevious",
+          "delayMs": 0,
+          "durationMs": 1400
+        },
+        {
+          "objectName": "signal",
+          "type": "exit",
+          "effect": "fade",
+          "trigger": "afterPrevious",
+          "durationMs": 300
+        },
+        {
+          "objectName": "signal",
+          "type": "entrance",
+          "effect": "fade",
+          "trigger": "afterPrevious",
+          "delayMs": 500,
+          "durationMs": 300
+        }
+      ]
+    }
+  ]
+}

@@ -286,7 +286,7 @@ async function maybeActivate(tool, sessionIndex, { requireActivation = false } =
 	let key = String(process.env.BETTERPPTX_VERIFY_ACTIVATION_KEY || '').trim()
 	if ((key.startsWith('"') && key.endsWith('"')) || (key.startsWith("'") && key.endsWith("'"))) key = key.slice(1, -1)
 	if (!key && requireActivation) {
-		fail('Activation key is required for deployed billing stress. Set BETTERPPTX_VERIFY_ACTIVATION_KEY or pass --env-file with the private Dodo test env.', { requireActivation })
+		fail('Activation key is required for deployed billing stress. Set BETTERPPTX_VERIFY_ACTIVATION_KEY or pass --env-file with the private staging billing env.', { requireActivation })
 	}
 	if (!key) return null
 	return requireOk('auth.activate_key', await tool('betterpptx.auth.activate_key', {

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "betterpptx.g5-source-correction-authorization.v1",
+  "status": "APPROVED",
+  "recordedAt": "2026-09-04",
+  "authorizationKind": "task-authorized-native-axis-source-correction",
+  "authorizationBasis": "The user explicitly requested that backward-arm defects discovered through the 96-motion showcase be corrected in the shared engine/source path, not hidden by slide-specific offsets.",
+  "decisionScope": "These exact versioned skeletal source derivatives may be selected server-side after source-derived numerical and native playback proof.",
+  "semanticCatalogSelectionAllowed": true,
+  "rawAssetDistributionAllowed": false,
+  "ownerVisualAcceptanceRecorded": false,
+  "productionPromotionAuthorized": false,
+  "assets": [
+    {
+      "id": "interaction-greet-bow-native-v1",
+      "path": "betterpptx-mcp/assets/interaction-greet-bow-native-v1.glb",
+      "sha256": "f480562c7cc5165f1d71f8f3ec49e30f65534e93855f0248b6425ef85bd3d83c",
+      "bytes": 445152,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "interaction-agree-nod-native-v1",
+      "path": "betterpptx-mcp/assets/interaction-agree-nod-native-v1.glb",
+      "sha256": "6b1e64bdf040c209b222efdf50db5f9cd76f624b0358edfc4e349ca345efc1b0",
+      "bytes": 327016,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "interaction-disagree-shake-native-v1",
+      "path": "betterpptx-mcp/assets/interaction-disagree-shake-native-v1.glb",
+      "sha256": "dd070db73d075cfd66666b6c3076f3afe54ff5ce927629c9a835f4f0cb7bcfb4",
+      "bytes": 327056,
+      "decision": "APPROVED"
+    }
+  ],
+  "sourceLineage": {
+    "existingGovernedAssetId": "authoring-interaction-clips-v3-proven",
+    "nativeAdapter": "betterpptx-mcp/assets/native-bvh-motion-source.mjs",
+    "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v1\\staging-report.json",
+    "nativeProofReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v1\\powerpoint-proof\\powerpoint-native-proof.json",
+    "nativeProofSha256": "712397f08b494be3b1ee15bbcd3d075db4d0cee2e6cc7773beddb165f017c165",
+    "visualReview": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v1\\native-visual-review.json",
+    "visualReviewSha256": "dd8eb19b10622563a4576f3bb5b67ae67dc5b26b06be74ad23d2e6c6b1ae8bd3",
+    "oldFrozenAssetsAndDecisionsModified": false
+  },
+  "scopeExclusions": [
+    "raw BVH or reusable motion-library redistribution",
+    "independent owner visual acceptance",
+    "public production promotion or service deployment"
+  ]
+}

@@ -84,8 +84,30 @@ export interface BackgroundProps extends DataOrPathProps, ShapeFillProps {
  * @example 'FF3399'
  */
 export type HexColor = string
-export type ThemeColor = 'tx1' | 'tx2' | 'bg1' | 'bg2' | 'accent1' | 'accent2' | 'accent3' | 'accent4' | 'accent5' | 'accent6'
+export type ThemeColor =
+	| 'tx1' | 'tx2' | 'bg1' | 'bg2'
+	| 'dk1' | 'lt1' | 'dk2' | 'lt2'
+	| 'accent1' | 'accent2' | 'accent3' | 'accent4' | 'accent5' | 'accent6'
+	| 'hlink' | 'folHlink' | 'phClr'
 export type Color = HexColor | ThemeColor
+
+/** A color endpoint used by native picture duotone/recolor mappings. */
+export interface PictureColorEndpoint {
+	/** Hex, theme, or preset color name. */
+	color?: Color
+	/** Theme color alias, such as accent4. */
+	scheme?: ThemeColor
+	/** PowerPoint preset color name, such as black or white. */
+	preset?: string
+	/** Tint amount, normalized from 0 to 1. */
+	tint?: number
+	/** Shade amount, normalized from 0 to 1. */
+	shade?: number
+	/** Saturation multiplier from 0 to 4. */
+	saturation?: number
+	/** Opacity from 0 to 1. */
+	opacity?: number
+}
 export type Margin = number | [number, number, number, number]
 export type HAlign = 'left' | 'center' | 'right' | 'justify'
 export type VAlign = 'top' | 'middle' | 'bottom'
@@ -128,6 +150,54 @@ export interface HyperlinkProps {
 	 * Hyperlink Tooltip
 	 */
 	tooltip?: string
+	/**
+	 * Native target frame for an external URL hyperlink (for example `_blank`).
+	 * Not valid for internal slide hyperlinks.
+	 */
+	target?: string
+}
+
+/** Embedded WAV payload played by a PowerPoint click/hover action. */
+export interface InteractiveActionSoundProps {
+	source: string
+	format: 'wav'
+	name?: string
+	/** @internal Slide relationship allocated immediately before package encoding. */
+	_soundRid?: number
+}
+
+/** Closed, repair-safe PowerPoint Action Settings endpoint. */
+export interface InteractiveActionEndpointProps {
+	type: 'url' | 'slide' | 'jump' | 'endShow' | 'customShow' | 'none'
+	url?: string
+	targetSlideId?: string
+	/** One-based slide number resolved by the semantic compiler. */
+	targetSlide?: number
+	jump?: 'firstSlide' | 'lastSlide' | 'lastSlideViewed' | 'nextSlide' | 'previousSlide'
+	customShow?: string
+	customShowId?: number
+	showAndReturn?: true
+	tooltip?: string | null
+	history?: boolean | null
+	highlightClick?: boolean | null
+	endSound?: boolean | null
+	sound?: InteractiveActionSoundProps | null
+	/** @internal URL/slide relationship allocated immediately before package encoding. */
+	_rId?: number
+}
+
+/** Independent click and hover action settings attached to one native object carrier. */
+export interface InteractiveActionSetProps {
+	click?: InteractiveActionEndpointProps | null
+	hover?: InteractiveActionEndpointProps | null
+}
+
+/** Presentation-level custom show using zero-based slide indexes at runtime. */
+export interface CustomShowProps {
+	name: string
+	id: number
+	slides?: string[]
+	slideIndexes: number[]
 }
 // used by: chart, text, image
 export interface ShadowProps {
@@ -170,6 +240,26 @@ export interface ShadowProps {
 	 * @default false
 	 */
 	rotateWithShape?: boolean
+	/**
+	 * Horizontal scale of the shadow (1 = 100%)
+	 * @default 1
+	 */
+	scaleX?: number
+	/**
+	 * Vertical scale of the shadow (1 = 100%)
+	 * @default 1
+	 */
+	scaleY?: number
+	/**
+	 * Horizontal skew in degrees
+	 * @default 0
+	 */
+	skewX?: number
+	/**
+	 * Vertical skew in degrees
+	 * @default 0
+	 */
+	skewY?: number
 }
 
 // ============================================================================
@@ -193,12 +283,13 @@ export interface GradientStopProps {
 	 */
 	pos?: number
 	/**
-	 * Stop color
-	 * - `HexColor` or `ThemeColor`
+	 * Stop color. A structured colour object keeps the complete DrawingML
+	 * transform chain editable instead of collapsing the stop to a preset.
+	 * - `HexColor`, `ThemeColor`, or `PictureStyleColorProps`
 	 * @example 'FF0000' // hex color (red)
-	 * @example pptx.SchemeColor.accent1 // Theme color
+	 * @example { color: 'accent1', tint: 0.2, luminance: 1.1 }
 	 */
-	color: Color
+	color: Color | PictureStyleColorProps
 	/**
 	 * Stop transparency (0-100)
 	 * @default 0
@@ -250,6 +341,20 @@ export interface GradientRectProps {
 	b?: number
 }
 
+/** Native glyph fill. Unlike a panel fill, this never accepts image payloads. */
+export interface TextFillProps {
+	type?: 'solid' | 'none' | 'gradient'
+	color?: Color | null
+	transparency?: number | null
+	gradientDirection?: GradientDirection | null
+	gradientAngle?: number | null
+	gradientStops?: GradientStopProps[]
+	rotateGradientWithShape?: boolean | null
+	gradientFlip?: 'none' | 'x' | 'y' | 'xy' | null
+	fillToRect?: GradientRectProps | null
+	tileRect?: GradientRectProps | null
+}
+
 // used by: shape, table, text
 export interface ShapeFillProps {
 	/**
@@ -270,7 +375,7 @@ export interface ShapeFillProps {
 	 * Fill type
 	 * @default 'solid'
 	 */
-	type?: 'none' | 'solid' | 'gradient'
+	type?: 'none' | 'solid' | 'gradient' | 'pattern' | 'texture' | 'picture'
 
 	// ========== GRADIENT PROPERTIES ==========
 
@@ -324,6 +429,59 @@ export interface ShapeFillProps {
 	tileRect?: GradientRectProps
 
 	/**
+	 * Native pattern fill
+	 */
+	pattern?: {
+		preset?: string
+		foreground?: Color
+		background?: Color
+	}
+
+	/**
+	 * Picture or generated texture fill. `type` should be `texture` or `picture`.
+	 * Placement maps to DrawingML `a:tile` / `a:stretch`. The image is stored as a media part.
+	 */
+	texture?: {
+		data?: string
+		path?: string
+		asset?: string
+		tile?: boolean
+		scaleX?: number
+		scaleY?: number
+		offsetX?: number
+		offsetY?: number
+		alignment?: string
+		flip?: string
+		rotateWithShape?: boolean
+		transparency?: number
+		placement?: {
+			mode?: 'tile' | 'stretch'
+			scaleX?: number
+			scaleY?: number
+			offsetX?: number
+			offsetY?: number
+			alignment?: string
+			flip?: string
+			rotateWithShape?: boolean
+		}
+		source?: {
+			kind?: 'asset' | 'nativePreset' | 'generated'
+			asset?: string
+			presetId?: string
+			recipe?: Record<string, unknown>
+		}
+	}
+
+	/** Stretch-to-shape picture fill. Same media embedding as `texture`. */
+	picture?: {
+		data?: string
+		path?: string
+	}
+
+	/** Assigned during serialization: relationship id of the texture/picture blip. */
+	_blipRid?: number
+
+	/**
 	 * Transparency (percent)
 	 * @deprecated v3.3.0 - use `transparency`
 	 */
@@ -336,6 +494,11 @@ export interface ShapeLineProps extends ShapeFillProps {
 	 * @default 1
 	 */
 	width?: number
+	/**
+	 * Native line endpoint cap. Rounded caps also round the ends of open freeforms.
+	 * Omitted caps preserve the existing flat/default behavior.
+	 */
+	cap?: 'flat' | 'round' | 'square'
 	/**
 	 * Dash type
 	 * @default 'solid'
@@ -351,8 +514,20 @@ export interface ShapeLineProps extends ShapeFillProps {
 	 * @since v3.3.0
 	 */
 	endArrowType?: 'none' | 'arrow' | 'diamond' | 'oval' | 'stealth' | 'triangle'
-	// FUTURE: beginArrowSize (1-9)
-	// FUTURE: endArrowSize (1-9)
+	/**
+	 * Begin arrowhead width. PowerPoint exposes the small/medium/large
+	 * arrow-size grid independently from the arrowhead type.
+	 */
+	beginArrowWidth?: 'sm' | 'med' | 'lg'
+	/**
+	 * Begin arrowhead length. PowerPoint exposes the small/medium/large
+	 * arrow-size grid independently from the arrowhead type.
+	 */
+	beginArrowLength?: 'sm' | 'med' | 'lg'
+	/** End arrowhead width from the native PowerPoint size grid. */
+	endArrowWidth?: 'sm' | 'med' | 'lg'
+	/** End arrowhead length from the native PowerPoint size grid. */
+	endArrowLength?: 'sm' | 'med' | 'lg'
 
 	/**
 	 * Dash type
@@ -516,6 +691,11 @@ export interface TextBaseProps {
 	 */
 	fontSize?: number
 	/**
+	 * Complex-script typeface for this run. When omitted, fontFace remains the
+	 * portable fallback for Latin, East Asian, and complex-script text.
+	 */
+	fontFaceComplexScript?: string
+	/**
 	 * Text highlight color (hex format)
 	 * @example 'FFFF00' // yellow
 	 */
@@ -578,6 +758,8 @@ export interface TextBaseProps {
 		| 'dashLongHeavy'
 		| 'dbl'
 		| 'dotDash'
+		| 'dotDashHeavy'
+		/** @deprecated Historical library typo; normalized to dotDashHeavy by the authoring boundary. */
 		| 'dotDashHeave'
 		| 'dotDotDash'
 		| 'dotDotDashHeavy'
@@ -600,6 +782,10 @@ export interface TextBaseProps {
 export interface PlaceholderProps extends PositionProps, TextBaseProps {
 	name: string
 	type: PLACEHOLDER_TYPE
+	/** PresentationML placeholder orientation. */
+	orient?: 'horz' | 'vert'
+	/** Whether PowerPoint should expose the authored placeholder prompt. */
+	hasCustomPrompt?: boolean
 	/**
 	 * margin (points)
 	 */
@@ -615,12 +801,21 @@ export interface ObjectNameProps {
 	 * @example 'Antenna Design 9'
 	 */
 	objectName?: string
+	/** Accessible title stored on the native p:cNvPr carrier. */
+	accessibilityTitle?: string | null
+	/** Accessible description stored on the native p:cNvPr carrier. */
+	altText?: string | null
+	/** Whether PowerPoint's Reading Order pane excludes this object. */
+	isDecorative?: boolean | null
 }
 export type SmartArtLayout = 'process' | 'cycle' | 'hierarchy' | 'matrix' | 'pyramid' | 'list' | 'relationship' | 'picture' | 'timeline' | 'team'
+export type SmartArtNodeSemanticRole = 'root' | 'manager' | 'member' | 'peer' | 'node' | 'image' | 'caption' | 'assistant'
 export interface SmartArtNode {
 	text?: string
 	title?: string
 	subtitle?: string
+	/** Semantic role used for applicability validation and native hierarchy serialization. */
+	role?: SmartArtNodeSemanticRole
 	/**
 	 * Image for picture SmartArt nodes. Native picture layouts require an image
 	 * on every node; use a base64 data URL in hosted/MCP flows, or imagePath
@@ -664,15 +859,25 @@ export interface SmartArtProps extends PositionProps, ObjectNameProps {
 	quickStyleName?: string
 	colorStyleId?: string
 	colorStyleName?: string
+	/**
+	 * Behavior when an explicitly requested native layout/style/color is not in
+	 * the catalog. Omit (or use `reject`) to fail before mutation; use `default`
+	 * only when the caller has deliberately accepted the documented fallback.
+	 */
+	presetFallback?: 'reject' | 'default'
 	rightToLeft?: boolean
 	/**
 	 * Node labels or node objects. For hierarchy, the first node may carry children.
 	 */
 	nodes?: Array<string | SmartArtNode>
 	title?: string
+	/** Concise accessible description written to the SmartArt graphic frame. */
+	altText?: string | null
 	fontFace?: string
 	fontSize?: number
 	color?: HexColor
+	/** Optional per-node text colors for native presets with alternating light/dark fills. */
+	textColors?: HexColor[]
 	palette?: HexColor[]
 	fill?: ShapeFillProps
 	line?: ShapeLineProps
@@ -693,7 +898,30 @@ export interface SmartArtProps extends PositionProps, ObjectNameProps {
 	/** @internal Relationship part for extracted native SmartArt drawing XML. */
 	_rawDrawingRelsXml?: string
 }
+/**
+ * Theme color scheme — the 12 OOXML clrScheme slots. Hex values without a
+ * leading '#'. Any slot left undefined falls back to the Office default, so a
+ * caller can override just the accents (e.g. to make the whole deck adopt a
+ * brand / art-direction palette) without restating the neutrals.
+ */
+export interface ThemeColorScheme {
+	dk1?: string
+	lt1?: string
+	dk2?: string
+	lt2?: string
+	accent1?: string
+	accent2?: string
+	accent3?: string
+	accent4?: string
+	accent5?: string
+	accent6?: string
+	hlink?: string
+	folHlink?: string
+}
+
 export interface ThemeProps {
+	/** Semantic theme and scheme name used by native PowerPoint galleries. */
+	name?: string
 	/**
 	 * Headings font face name
 	 * @example 'Arial Narrow'
@@ -706,10 +934,170 @@ export interface ThemeProps {
 	 * @default 'Calibri'
 	 */
 	bodyFontFace?: string
+	/** BCP-47 language inherited by the master text-style defaults. */
+	lang?: string
+	/**
+	 * Theme color scheme (accent1..6, dk2, lt2, hlink, …). Drives every element
+	 * that references a scheme color — notably native SmartArt and theme-driven
+	 * chart series — so the deck's diagrams adopt the brand palette instead of
+	 * the Office default. Undefined slots keep the Office default color.
+	 */
+	palette?: ThemeColorScheme
+}
+
+export interface InheritanceColorMap {
+	bg1?: keyof ThemeColorScheme
+	tx1?: keyof ThemeColorScheme
+	bg2?: keyof ThemeColorScheme
+	tx2?: keyof ThemeColorScheme
+	accent1?: keyof ThemeColorScheme
+	accent2?: keyof ThemeColorScheme
+	accent3?: keyof ThemeColorScheme
+	accent4?: keyof ThemeColorScheme
+	accent5?: keyof ThemeColorScheme
+	accent6?: keyof ThemeColorScheme
+	hlink?: keyof ThemeColorScheme
+	folHlink?: keyof ThemeColorScheme
+}
+
+export interface InheritanceTextStyle {
+	fontFace?: string | null
+	fontSize?: number | null
+	color?: string | null
+	bold?: boolean | null
+	italic?: boolean | null
+	align?: 'left' | 'center' | 'right' | 'justify' | null
+}
+
+export interface InheritanceTextStyles {
+	title?: InheritanceTextStyle | null
+	body?: InheritanceTextStyle | null
+	other?: InheritanceTextStyle | null
+}
+
+export interface PlaceholderVisualStyle extends InheritanceTextStyle {
+	preset?: SHAPE_NAME | string | null
+	fill?: ShapeFillProps | null
+	line?: ShapeLineProps | null
+	shadow?: ShadowProps | null
+	valign?: TEXT_VALIGN | null
+	styleRefs?: {
+		line?: { index?: number; color?: string }
+		fill?: { index?: number; color?: string }
+		effect?: { index?: number; color?: string }
+		font?: { role?: 'major' | 'minor' | 'none'; color?: string }
+	} | null
 }
 
 // image / media ==================================================================================
 export type MediaType = 'audio' | 'online' | 'video'
+
+/**
+ * Cameo (live camera feed) properties.
+ * A cameo is a native PowerPoint 2021+/2024 object: a picture marked with `alf:liveFeedProps`
+ * that shows the presenter's live camera during a show. Authored as the camera-glyph placeholder.
+ * @since v4.0.1
+ * @see plans/cameo-ooxml-ground-truth.md
+ */
+export interface CameoProps extends PositionProps, ObjectNameProps {
+	/**
+	 * Frame shape (preset geometry) for the cameo.
+	 * @default 'ellipse' (PowerPoint's default cameo is a circle)
+	 */
+	shape?: 'ellipse' | 'rect' | 'roundRect' | string
+	/**
+	 * Alt Text value ("How would you describe this object and its contents to someone who is blind?")
+	 */
+	altText?: string | null
+	/**
+	 * Advanced: override the placeholder image with a custom SVG data URI
+	 * (`data:image/svg+xml;base64,...`). Defaults to PowerPoint's camera-glyph placeholder.
+	 */
+	posterSvgDataUri?: string
+}
+
+/**
+ * Slide Zoom (zoom navigation) properties.
+ * A native PowerPoint 2019+/2024 Slide Zoom: a clickable thumbnail that jumps to a target slide
+ * during a show. Emitted as `mc:AlternateContent` (pslz:sldZm Choice + hyperlinked picture Fallback).
+ * @since v4.0.1
+ * @see plans/zoom-ooxml-ground-truth.md
+ */
+export interface ZoomProps extends PositionProps, ObjectNameProps {
+	/** 1-based index of the target slide this zoom navigates to. Required. */
+	targetSlide: number
+	/** Zoom out back to the parent slide after the target. @default false */
+	returnToParent?: boolean
+	/** Zoom transition duration in milliseconds. @default 1000 */
+	transitionDur?: number
+	/**
+	 * Advanced: override the thumbnail with a custom PNG/JPEG data URI
+	 * (`data:image/png;base64,...`). Defaults to a neutral placeholder PowerPoint refreshes on edit.
+	 */
+	thumbnailDataUri?: string
+	/** Alt Text value. */
+	altText?: string | null
+}
+
+/**
+ * Section Zoom (zoom navigation to a section) properties.
+ * A native PowerPoint 2019+/2024 Section Zoom: a clickable thumbnail that jumps to a section
+ * during a show. Emitted as `mc:AlternateContent` (psez:sectionZm Choice + hyperlinked picture
+ * Fallback to the section's first slide). The deck must already have the target section.
+ * @since v4.0.1
+ * @see plans/section-zoom-ooxml-ground-truth.md
+ */
+export interface SectionZoomProps extends PositionProps, ObjectNameProps {
+	/** Target section to navigate to: its title (string) or 1-based section index (number). Required. */
+	targetSection: string | number
+	/** Durable public semantic section id retained across rename/reorder. */
+	targetSectionId?: string
+	/** Zoom transition duration in milliseconds. @default 1000 */
+	transitionDur?: number
+	/**
+	 * Advanced: override the thumbnail with a custom PNG/JPEG data URI
+	 * (`data:image/png;base64,...`). Defaults to a neutral placeholder PowerPoint refreshes on edit.
+	 */
+	thumbnailDataUri?: string
+	/** Alt Text value. */
+	altText?: string | null
+}
+
+/**
+ * Summary Zoom (zoom navigation summary slide) properties.
+ * A native PowerPoint 2019+/2024 Summary Zoom: a generated slide with one clickable thumbnail per
+ * section, laid out in a grid. Emitted as `mc:AlternateContent` (psuz:summaryZm Choice with one
+ * `summaryZmObj` per section + a locked grpSp picture Fallback). The deck must already have sections;
+ * a new "Summary Section" + summary slide are appended.
+ * @since v4.0.1
+ * @see plans/summary-zoom-ooxml-ground-truth.md
+ */
+export interface SummaryZoomProps extends ObjectNameProps {
+	/**
+	 * Which sections to include, by title or 1-based section index, in order.
+	 * @default every existing content section (excludes the generated Summary Section), in order.
+	 */
+	sections?: Array<string | number>
+	/** Durable public semantic section ids, in summary order. */
+	sectionIds?: string[]
+	/** Durable semantic identity for the generated summary section. */
+	summarySectionId?: string
+	/** Durable semantic identity for the generated summary slide. */
+	summarySlideId?: string
+	/** Title for the generated Summary Section. @default 'Summary Section' */
+	summarySectionTitle?: string
+	/** Zoom transition duration in milliseconds. @default 1000 */
+	transitionDur?: number
+	/** Object name for the summary-zoom graphic. @default 'Summary Zoom 1' */
+	objectName?: string
+	/**
+	 * Advanced: override the per-section thumbnails with a custom PNG/JPEG data URI
+	 * (`data:image/png;base64,...`). Defaults to a neutral placeholder PowerPoint refreshes on edit.
+	 */
+	thumbnailDataUri?: string
+	/** Alt Text value. */
+	altText?: string | null
+}
 
 /**
  * 3D Model properties
@@ -733,8 +1121,14 @@ export interface Model3DProps extends PositionProps, ObjectNameProps {
 	 */
 	nativeOnly?: boolean
 	/**
+	 * Alt Text value ("How would you describe this object and its contents to someone who is blind?")
+	 * - PowerPoint: [right-click on a 3D model] > "Edit Alt Text..."
+	 */
+	altText?: string | null
+	/**
 	 * Rotation (degrees)
 	 * - range: -360 to 360
+	 * - native serializer precision: 1/60000 degree
 	 * @default 0
 	 */
 	rotate?: number
@@ -794,6 +1188,27 @@ export interface Model3DProps extends PositionProps, ObjectNameProps {
 	 * Object viewport size
 	 */
 	objViewport?: number
+	/** Internal authored gallery selector retained for semantic export/readback. */
+	_model3dViewPresetId?: string
+	/** Internal sparse manual view overrides used to reapply presets during updates. */
+	_model3dAuthoredOverrides?: Record<string, unknown>
+	/**
+	 * Embedded-animation ("Scene") selection for rigged glTF/GLB models.
+	 *
+	 * PowerPoint activates the selected embedded glTF animation through the slide timing
+	 * tree's `embeddedN` channel. Static/edit posture comes from the GLB base transforms;
+	 * `am3d:raster` remains the compatibility fallback/anchor.
+	 *
+	 * - `animId`       – 0-based glTF animation index (the "scene" to activate).
+	 * - `length`       – clip length in milliseconds. PowerPoint recomputes it, but a
+	 *                    correct value keeps playback timing right; omit if unknown.
+	 * - `loop`         – play indefinitely (default) vs a single pass.
+	 */
+	scene?: {
+		animId: number
+		length?: number
+		loop?: boolean
+	}
 	/**
 	 * Used internally by library
 	 * @private
@@ -822,12 +1237,134 @@ export interface Model3DProps extends PositionProps, ObjectNameProps {
 	_originalRasterRid?: string
 }
 
+/** Theme- or RGB-aware colour plus editable DrawingML colour transforms. */
+export interface PictureStyleColorProps {
+	/** RGB hex, theme/scheme token, or preset colour token. */
+	color?: Color | string
+	/** Explicit theme token when a client prefers a named field over `color`. */
+	scheme?: ThemeColor
+	/** Explicit PowerPoint preset token when a client prefers a named field over `color`. */
+	preset?: string
+	/** Optional colour vocabulary used when `color` is not an RGB hex value. */
+	colorType?: 'rgb' | 'scheme' | 'preset'
+	/** Normalized 0..1 tint transform. */
+	tint?: number
+	/** Normalized 0..1 shade transform. */
+	shade?: number
+	/** Saturation multiplier; 1 is neutral. */
+	saturation?: number
+	/** Luminance multiplier; 1 is neutral. */
+	luminance?: number
+	/** Luminance offset; 0 is neutral and maps to DrawingML lumOff. */
+	luminanceOffset?: number
+	/** Normalized 0..1 opacity. */
+	opacity?: number
+}
+
+/** Exact editable picture geometry used by Picture Styles. */
+export interface PictureStyleGeometryProps {
+	/** PowerPoint preset geometry, for example rect, ellipse, roundRect, round2DiagRect, or snip2DiagRect. */
+	preset: string
+	/** Named adj/adjN geometry handles as normalized 0..1 values; 0.08594 serializes as PowerPoint val 8594. */
+	adjustments?: Record<string, number>
+}
+
+/** Exact editable picture frame fill used by Picture Styles. */
+export interface PictureStyleFillProps {
+	type: 'none' | 'solid'
+	color?: PictureStyleColorProps
+}
+
+/** Expanded Picture Style border controls, including gallery-only line options. */
+export interface PictureStyleLineProps {
+	type?: 'none' | 'solid'
+	widthPt?: number
+	cap?: 'flat' | 'round' | 'square'
+	compound?: 'single' | 'double' | 'thickThin' | 'thinThick' | 'triple'
+	alignment?: 'center' | 'inset'
+	dash?: string
+	join?: 'miter' | 'round' | 'bevel'
+	miterLimit?: number
+	color?: PictureStyleColorProps
+}
+
+export type PictureStyleEffectProps =
+	| {
+		type: 'outerShadow' | 'innerShadow'
+		blurPt?: number
+		distancePt?: number
+		directionDeg?: number
+		alignment?: 'topLeft' | 'top' | 'topRight' | 'left' | 'center' | 'right' | 'bottomLeft' | 'bottom' | 'bottomRight'
+		rotateWithShape?: boolean
+		scaleX?: number
+		scaleY?: number
+		skewXDeg?: number
+		skewYDeg?: number
+		color?: PictureStyleColorProps
+	}
+	| {
+		type: 'reflection'
+		blurPt?: number
+		startOpacity?: number
+		endOpacity?: number
+		startPosition?: number
+		endPosition?: number
+		distancePt?: number
+		directionDeg?: number
+		scaleX?: number
+		scaleY?: number
+		alignment?: 'topLeft' | 'top' | 'topRight' | 'left' | 'center' | 'right' | 'bottomLeft' | 'bottom' | 'bottomRight'
+		rotateWithShape?: boolean
+	}
+	| { type: 'softEdge', radiusPt: number }
+
+export interface PictureStyle3DProps {
+	camera?: {
+		preset: string
+		perspectiveDeg?: number
+		/** Alias for perspectiveDeg, matching PowerPoint's FieldOfView terminology. */
+		fieldOfView?: number
+		rotation?: { xDeg?: number, yDeg?: number, zDeg?: number }
+	}
+	lightRig?: {
+		preset: string
+		direction?: string
+		rotation?: { xDeg?: number, yDeg?: number, zDeg?: number }
+	}
+	format?: {
+		material?: string
+		extrusionDepthPt?: number
+		extrusionColor?: PictureStyleColorProps
+		contourWidthPt?: number
+		contourColor?: PictureStyleColorProps
+		bevelTop?: { type?: string, widthPt?: number, heightPt?: number }
+		bevelBottom?: { type?: string, widthPt?: number, heightPt?: number }
+	}
+}
+
+/** Preset-free, fully typed decomposition of a native PowerPoint Picture Style. */
+export interface PictureStyleProps {
+	geometry?: PictureStyleGeometryProps | null
+	fill?: PictureStyleFillProps | null
+	line?: PictureStyleLineProps | null
+	effects?: PictureStyleEffectProps[] | null
+	threeD?: PictureStyle3DProps | null
+}
+
 export interface ImageProps extends PositionProps, DataOrPathProps, ObjectNameProps {
+	/**
+	 * Exact native picture preset geometry captured from an Office gallery tile.
+	 * Position and extent remain engine-owned and are never included here.
+	 * @private
+	 */
+	_rawPicPrstGeomXml?: string
+	/** Preset-free editable Picture Style decomposition. Structured values override matching captured preset components. */
+	pictureStyle?: PictureStyleProps | null
 	/**
 	 * Alt Text value ("How would you describe this object and its contents to someone who is blind?")
 	 * - PowerPoint: [right-click on an image] > "Edit Alt Text..."
 	 */
-	altText?: string
+	altText?: string | null
 	/**
 	 * Flip horizontally?
 	 * @default false
@@ -849,10 +1386,75 @@ export interface ImageProps extends PositionProps, DataOrPathProps, ObjectNamePr
 	/**
 	 * Image rotation (degrees)
 	 * - range: -360 to 360
+	 * - native serializer precision: 1/60000 degree
 	 * @default 0
 	 * @example 180 // rotate image 180 degrees
 	 */
 	rotate?: number
+	/**
+	 * Native picture corrections, duotone, grayscale, and transparency.
+	 */
+	imageAdjustments?: {
+		brightness?: number
+		contrast?: number
+		/** Native Picture Format sharpen/soften amount, from -1 (soften) to 1 (sharpen). */
+		sharpness?: number
+		/** Native picture saturation multiplier, from 0 (no saturation) to 4. Neutral is 1. */
+		saturation?: number
+		/** Native picture color temperature in Kelvin, clamped by PowerPoint to 1500..11500. Neutral is 6500. */
+		temperature?: number
+		transparency?: number
+		colorMode?: 'normal' | 'grayscale' | 'duotone' | 'recolor'
+		duotone?: { dark?: Color | PictureColorEndpoint, light?: Color | PictureColorEndpoint }
+		/** Alias of duotone using Picture Format's Recolor terminology. */
+		recolor?: { dark?: Color | PictureColorEndpoint, light?: Color | PictureColorEndpoint }
+		/**
+		 * Optional pre-encoded PowerPoint HD Photo layer for runtimes that cannot
+		 * create the editable Picture Format source automatically. Advanced transport
+		 * override for sharpness, saturation, temperature, and Artistic Effects.
+		 */
+		nativeImage?: { path?: string, data?: string }
+		/** Optional rendered preview paired with nativeImage. */
+		previewImage?: { path?: string, data?: string }
+		artisticEffect?: {
+			/** Native artistic effect type; every persistent Format Picture slider is serialized with its PowerPoint-authored range. */
+			type?: string
+			id?: string
+			/** Optional nested parameter form; top-level parameter fields are accepted as aliases. */
+			parameters?: Record<string, number>
+			/** Effect transparency as a normalized 0..1 value. */
+			transparency?: number
+			/** Backward-compatible raw OOXML fixed-percentage transparency (0..100000). */
+			trans?: number
+			radius?: number
+			brightness?: number
+			contrast?: number
+			pressure?: number
+			intensity?: number
+			smoothness?: number
+			scaling?: number
+			brushSize?: number
+			pencilSize?: number
+			grainSize?: number
+			gridSize?: number
+			crackSpacing?: number
+			numberOfShades?: number
+			detail?: number
+			size?: number
+			temperature?: number
+			amount?: number
+			/**
+			 * Optional pre-encoded PowerPoint HD Photo layer for runtimes that cannot
+			 * create one automatically. This is an advanced transport override; it is
+			 * removed from the stored authoring options after the media relationship is
+			 * created and is never serialized as JSON metadata.
+			 */
+			nativeImage?: { path?: string, data?: string }
+			/** Optional pre-rendered effect preview paired with nativeImage. */
+			previewImage?: { path?: string, data?: string }
+			[key: string]: unknown
+		}
+	}
 	/**
 	 * Enable image rounding
 	 * @default false
@@ -865,6 +1467,35 @@ export interface ImageProps extends PositionProps, DataOrPathProps, ObjectNamePr
 	 * { type: 'outer', color: '000000', opacity: 0.5, blur: 20,  offset: 20, angle: 270 }
 	 */
 	shadow?: ShadowProps
+	/**
+	 * Native picture border.
+	 * - PowerPoint: Picture Format > Picture Border
+	 */
+	line?: ShapeLineProps
+	/**
+	 * Native picture glow.
+	 * - PowerPoint: Picture Format > Picture Effects > Glow
+	 */
+	glow?: TextGlowProps
+	/**
+	 * Native picture reflection.
+	 * - PowerPoint: Picture Format > Picture Effects > Reflection
+	 */
+	reflection?: ShapeReflectionProps
+	/**
+	 * Native picture soft edges.
+	 * - PowerPoint: Picture Format > Picture Effects > Soft Edges
+	 */
+	softEdges?: ShapeSoftEdgesProps
+	/** Native DrawingML blur on the picture surface. */
+	blur?: { radiusPt?: number, size?: number, grow?: boolean }
+	/** Native DrawingML fill-overlay blend on the picture surface. */
+	fillOverlay?: { blend?: string, fill?: ShapeFillProps }
+	/**
+	 * Native picture 3-D format/rotation.
+	 * - PowerPoint: Picture Format > Picture Effects > 3-D Format / 3-D Rotation
+	 */
+	effect3D?: Text3DProps
 	/**
 	 * Image sizing options
 	 */
@@ -923,12 +1554,44 @@ export interface MediaProps extends PositionProps, DataOrPathProps, ObjectNamePr
 	 * - Use 'online' to embed a YouTube video (only supported in recent versions of PowerPoint)
 	 */
 	type: MediaType
+	/** Semantic/native placeholder role retained on the media p:nvPr carrier. */
+	placeholder?: PLACEHOLDER_TYPE
+	/** Native PresentationML placeholder type alias used by import/replay. */
+	phType?: PLACEHOLDER_TYPE
+	/** Native placeholder index. Zero is a valid explicit value. */
+	phIdx?: number
+	/** Native placeholder size. */
+	phSz?: 'full' | 'half' | 'quarter'
+	/** Native placeholder orientation. */
+	phOrient?: 'horz' | 'vert'
+	/** Native custom-prompt flag; false is retained explicitly in the object model. */
+	phHasCustomPrompt?: boolean
+	/** Semantic alias for phHasCustomPrompt. */
+	hasCustomPrompt?: boolean
+	/** Preserve an imported bare p:ph carrier. */
+	hasBarePh?: boolean
+	/** Accessible description emitted on the native media cNvPr carrier. */
+	altText?: string | null
 	/**
 	 * Cover image
 	 * @since 3.9.0
 	 * @default "play button" image, gray background
 	 */
 	cover?: string
+	/**
+	 * Aspect-preserving media framing. `cover` fills the target box and crops
+	 * the source instead of distorting the video frame. Source dimensions are
+	 * supplied internally by media-aware callers when available.
+	 */
+	sizing?: {
+		type: 'contain' | 'cover' | 'crop'
+		w: Coord
+		h: Coord
+		x?: Coord
+		y?: Coord
+	}
+	/** Clip the media frame to an ellipse; a square target becomes a circle. */
+	rounding?: boolean
 	/**
 	 * Cover image transparency (percent)
 	 * - Useful for hidden narration/audio controls
@@ -969,6 +1632,39 @@ export interface MediaProps extends PositionProps, DataOrPathProps, ObjectNamePr
 	 * by generated media timing nodes when playback animations are present.
 	 */
 	mediaVolume?: number
+	/**
+	 * Low-level serializer flag for native PowerPoint narration metadata.
+	 * Product authoring should use the dedicated narration or Record Studio
+	 * capture APIs instead of promoting ordinary media with this flag.
+	 */
+	isNarration?: boolean
+	/**
+	 * Whether the media control remains visible when playback stops.
+	 * Native audio narration defaults this to false, matching PowerPoint recording output.
+	 */
+	showWhenStopped?: boolean
+	/**
+	 * End the audio timing node when PowerPoint raises the onStopAudio event.
+	 * Native audio narration defaults this to true.
+	 */
+	endOnStopAudio?: boolean
+	/**
+	 * Native PowerPoint closed-caption tracks bound to this audio/video object.
+	 * Each track is WebVTT stored as a PPTX Track part. These never become slide text boxes.
+	 */
+	closedCaptionTracks?: Array<{
+		format?: 'webvtt'
+		language?: string
+		lang?: string
+		label?: string
+		id?: string
+		vtt?: string
+		text?: string
+		data?: string
+		path?: string
+		embed?: boolean
+		default?: boolean
+	}>
 }
 
 // shapes =========================================================================================
@@ -1124,6 +1820,7 @@ export interface ShapeProps extends PositionProps, ObjectNameProps {
 	/**
 	 * Rotation (degrees)
 	 * - range: -360 to 360
+	 * - native serializer precision: 1/60000 degree
 	 * @default 0
 	 * @example 180 // rotate 180 degrees
 	 */
@@ -1139,6 +1836,14 @@ export interface ShapeProps extends PositionProps, ObjectNameProps {
 	 * @example { size: 10 } // 10pt soft edge
 	 */
 	softEdges?: ShapeSoftEdgesProps
+	/**
+	 * Native DrawingML blur
+	 */
+	blur?: { radiusPt?: number, size?: number, grow?: boolean }
+	/**
+	 * Native fill overlay blend
+	 */
+	fillOverlay?: { blend?: string, fill?: ShapeFillProps }
 	/**
 	 * 3D format effect for shape (bevel, material, lighting, depth)
 	 * - PowerPoint: Format Shape > Shape Effects > 3-D Format
@@ -1301,6 +2006,16 @@ export interface TableCellProps extends TextBaseProps {
 }
 export interface TableProps extends PositionProps, TextBaseProps, ObjectNameProps {
 	_arrObjTabHeadRows?: TableRow[]
+	/** Named layout placeholder used by this editable table graphic frame. */
+	placeholder?: string
+	/** Native table placeholder role (`tbl`). */
+	phType?: PLACEHOLDER_TYPE
+	phIdx?: number
+	phSz?: 'full' | 'half' | 'quarter'
+	phOrient?: 'horz' | 'vert'
+	phHasCustomPrompt?: boolean
+	hasCustomPrompt?: boolean
+	hasBarePh?: boolean
 
 	/**
 	 * PowerPoint table style GUID used in <a:tblPr><a:tableStyleId>.
@@ -1308,6 +2023,8 @@ export interface TableProps extends PositionProps, TextBaseProps, ObjectNameProp
 	 * be preserved through the raw table property path.
 	 */
 	tableStyleId?: string
+	/** Opaque PowerPoint Table Design gallery id resolved by the authoring engine. */
+	tableStylePresetId?: string
 	/**
 	 * PowerPoint Table Design option: Header Row
 	 */
@@ -1534,8 +2251,9 @@ export interface WordArtProps {
 	 */
 	transform: WordArtTransform
 	/**
-	 * Optional adjustment values for the transform (in 1/100000 of shape dimension)
-	 * Most transforms have 0-2 adjustment values that control the curvature/shape
+	 * Optional native adjustment guide for the transform (in 1/100000 of shape dimension).
+	 * PowerPoint persists one `adj` guide only for the transform families exposed by
+	 * the BetterPPTX option catalog; unsupported families remain discrete selectors.
 	 * @example [50000] // 50% adjustment
 	 */
 	adjustments?: number[]
@@ -1711,6 +2429,7 @@ export interface Text3DProps {
 	 * - PowerPoint: Format Shape > Text Effects > 3-D Format > Depth
 	 * - Creates 3D depth effect
 	 * - NOTE: Depth is only visible when 3D rotation is also applied!
+	 * - PowerPoint range: 0..5000 points; native serializer resolution: 1/12700 point
 	 * @default 0
 	 */
 	extrusion?: number
@@ -1796,8 +2515,28 @@ export interface TextPropsOptions extends PositionProps, DataOrPathProps, TextBa
 	_lineIdx?: number
 	/** When true, suppresses extra default XML tags added by PptxGenJS that are absent in native PowerPoint files. */
 	_nativeMinimal?: boolean
+	/** @internal Keep a populated slide placeholder bound to layout/master geometry and style. */
+	_nativePlaceholderInheritance?: boolean
+	/** @internal Emit p:spPr without a local a:xfrm so placeholder geometry inherits. */
+	_omitTransform?: boolean
+	/** @internal Emit an empty p:spPr for a fully inherited placeholder. */
+	_emptySpPr?: boolean
+	/** @internal Omit preset geometry when a slide authors only style components. */
+	_omitShapePrstGeom?: boolean
+	/** @internal Structured p:style references for inherited/native shape styling. */
+	_shapeStyleRefs?: PlaceholderVisualStyle['styleRefs']
+	/** @internal Canonical public placeholder style retained for exact export. */
+	_betterpptxPlaceholderStyle?: PlaceholderVisualStyle | null
 
 	baseline?: number
+	/**
+	 * Native DrawingML text field carried by this run. The public compiler
+	 * supplies a canonical GUID before serialization.
+	 */
+	field?: {
+		id: string
+		type: string
+	}
 	/**
 	 * Character spacing
 	 */
@@ -1825,6 +2564,17 @@ export interface TextPropsOptions extends PositionProps, DataOrPathProps, TextBa
 	 * @example { color:pptx.SchemeColor.accent1 } // theme color Accent1
 	 */
 	fill?: ShapeFillProps
+	/**
+	 * Text character fill, independent from the containing text-box shape fill.
+	 * PowerPoint: Format Shape > Text Options > Text Fill & Outline > Text Fill.
+	 * Transparency is a 0–100 percentage value and is serialized on the text run.
+	 */
+	textFill?: TextFillProps | null
+	/**
+	 * Text character outline, independent from the containing text-box shape line.
+	 * Transparency is a 0–100 percentage; widthPt is the glyph stroke width in points.
+	 */
+	textOutline?: { color?: Color, transparency?: number, widthPt?: number }
 	/**
 	 * Flip shape horizontally?
 	 * @default false
@@ -1875,6 +2625,10 @@ export interface TextPropsOptions extends PositionProps, DataOrPathProps, TextBa
 	 */
 	textReflection?: TextReflectionProps
 	indentLevel?: number
+	/** Paragraph left indentation in points. */
+	indent?: number
+	/** Paragraph hanging indentation in points. */
+	hanging?: number
 	isTextBox?: boolean
 	line?: ShapeLineProps
 	/**
@@ -1996,6 +2750,8 @@ export type EquationTemplate =
 			| 'subscript'
 			| 'sub'
 			| 'subsup'
+			| 'presubsup'
+			| 'preSubSup'
 			| 'radical'
 			| 'sqrt'
 			| 'nary'
@@ -2016,8 +2772,12 @@ export type EquationTemplate =
 			| 'boxed'
 			| 'limit'
 			| 'limlow'
+			| 'limitUpper'
+			| 'limupp'
 			| 'log'
 			| 'operator'
+			| 'groupChar'
+			| 'groupchr'
 			| 'matrix'
 		text?: string
 		value?: string
@@ -2027,6 +2787,8 @@ export type EquationTemplate =
 		expression?: EquationTemplate
 		numerator?: EquationTemplate
 		denominator?: EquationTemplate
+		/** Office Math fraction presentation: stacked/bar, skewed, linear, or no-bar/small. */
+		fractionType?: 'bar' | 'skw' | 'lin' | 'noBar'
 		num?: EquationTemplate
 		den?: EquationTemplate
 		exponent?: EquationTemplate
@@ -2041,10 +2803,17 @@ export type EquationTemplate =
 		left?: string
 		right?: string
 		separator?: string
-		functionName?: string
+		functionName?: EquationTemplate
 		name?: string
 		accentChar?: string
 		position?: 'top' | 'bottom'
+		groupChar?: string
+		verticalJustification?: 'top' | 'bottom'
+		limitLocation?: 'undOvr' | 'subSup'
+		hideSub?: boolean
+		hideSup?: boolean
+		grow?: boolean
+		italic?: boolean
 		rows?: EquationTemplate[][]
 		cells?: EquationTemplate[][]
 		symbol?: string
@@ -2072,7 +2841,7 @@ export interface EquationProps extends PositionProps, TextBaseProps, ObjectNameP
 	 * Optional caller-supplied fallback image. The library does not rasterize math by default.
 	 */
 	fallback?: false | EquationFallbackProps
-	altText?: string
+	altText?: string | null
 	lang?: string
 	rotate?: number
 	fontFace?: string
@@ -2563,13 +3332,137 @@ export interface IChartOpts
 	 * Alt Text value ("How would you describe this object and its contents to someone who is blind?")
 	 * - PowerPoint: [right-click on a chart] > "Edit Alt Text..."
 	 */
-	altText?: string
+	altText?: string | null
+	/** Named layout placeholder used by this editable chart graphic frame. */
+	placeholder?: string
+	/** Native chart placeholder role (`chart`). */
+	phType?: PLACEHOLDER_TYPE
+	phIdx?: number
+	phSz?: 'full' | 'half' | 'quarter'
+	phOrient?: 'horz' | 'vert'
+	phHasCustomPrompt?: boolean
+	hasCustomPrompt?: boolean
+	hasBarePh?: boolean
 	/**
 	 * Override the ChartEx layoutId for modern Office chart families.
 	 * Used for chart types such as treemap, sunburst, histogram, pareto,
 	 * boxWhisker, waterfall, funnel, and regionMap.
 	 */
 	chartExLayoutId?: string
+	/** PowerPoint chart gallery style variant (1-49 in the bundled Office corpus). */
+	chartGalleryVariant?: number
+	/** Native legacy chart style number (PowerPoint gallery style value). */
+	chartStyleId?: number
+	/** Office modern chart-style ID (101–112) used with the c14 compatibility branch. */
+	chartStyleModernId?: number
+	/** Optional ChartEx color-style gallery variant. */
+	chartColorStyleId?: number
+}
+
+/**
+ * A video payload authored as a native PowerPoint Record Studio capture.
+ *
+ * This is intentionally distinct from ordinary media. The presentation
+ * authoring layer is responsible for attaching native slide notes, the
+ * Record Studio timing tree, slide advance timing, and any native recorded
+ * ink/laser actions that belong to the same session.
+ */
+export type RecordStudioCaptureProps = Omit<MediaProps, 'type' | 'isNarration' | 'showWhenStopped' | 'endOnStopAudio'> & {
+	type?: 'video'
+}
+
+/**
+ * Native PowerPoint connector properties.
+ *
+ * A connector is intentionally distinct from a line shape: PowerPoint stores
+ * it as `p:cxnSp`, which preserves endpoint attachment/editability in the
+ * native connector UI. The endpoint IDs/connection indices are optional so a
+ * free connector can still be authored, while callers that know the target
+ * shapes can request native binding.
+ */
+export interface ConnectorProps extends PositionProps, ObjectNameProps {
+	connectorType?: 'straightConnector1' | 'elbowConnector2' | 'elbowConnector3' | 'elbowConnector4' | 'curvedConnector2' | 'curvedConnector3' | 'curvedConnector4'
+	rotate?: number
+	flipH?: boolean
+	flipV?: boolean
+	routing?: 'auto' | 'straight' | 'orthogonal' | 'elbow' | 'curved'
+	startShapeId?: number
+	startConnectionIndex?: number
+	endShapeId?: number
+	endConnectionIndex?: number
+	line?: ShapeLineProps
+	shadow?: ShadowProps
+	/** Native connector effects, independent from the line and endpoint bindings. */
+	glow?: TextGlowProps
+	reflection?: TextReflectionProps
+	softEdges?: ShapeSoftEdgesProps
+	objectName?: string
+	spid?: number
+	/** Internal exact connector-gallery composition state. */
+	_connectorStyleState?: {
+		schemaVersion: 'betterpptx.connector-style-state.v1'
+		connectorStylePresetId: string | null
+		themeStyle?: {
+			lineRef?: { index?: number, color?: PictureStyleColorProps }
+			fillRef?: { index?: number, color?: PictureStyleColorProps }
+			effectRef?: { index?: number, color?: PictureStyleColorProps }
+			fontRef?: { role?: string, color?: PictureStyleColorProps }
+		} | null
+		presetLineDefaults?: ShapeLineProps
+		authoredLineOverrides?: ShapeLineProps
+		effectiveLine?: ShapeLineProps
+	}
+	/** Internal narrow DrawingML compatibility carriers for imported/gallery connectors. */
+	_rawConnectorLineXml?: string
+	_rawConnectorStyleXml?: string
+}
+
+/** Native editable group composed from engine-laid-out child objects. */
+export interface GroupChildProps extends PositionProps, ObjectNameProps {
+	kind?: 'shape' | 'connector' | 'group' | 'freeform' | 'customGeometry' | 'custom-geometry' | 'text' | 'textBox' | 'textShape' | 'image' | 'image-feature'
+	shape?: SHAPE_NAME
+	shapeName?: SHAPE_NAME
+	text?: string | TextProps[]
+	style?: Partial<TextPropsOptions & ImageProps>
+	imageOptions?: Partial<ImageProps>
+	data?: string
+	path?: string
+	rotate?: number
+	rotation?: number
+	flipH?: boolean
+	flipV?: boolean
+	/** Prepared only by native authoring; never accepted from a public client. */
+	_nativeObject?: ISlideObject
+	connectorType?: ConnectorProps['connectorType']
+	routing?: ConnectorProps['routing']
+	startShapeId?: number
+	startConnectionIndex?: number
+	endShapeId?: number
+	endConnectionIndex?: number
+	children?: GroupChildProps[]
+	chOff?: PositionProps
+	chExt?: PositionProps
+	points?: ShapeProps['points']
+	paths?: ShapeProps['points'][]
+	booleanOperation?: 'combine' | 'fragment' | 'intersect' | 'subtract' | 'union'
+	handle?: string
+	geometryId?: string
+	fill?: ShapeFillProps
+	line?: ShapeLineProps
+	glow?: TextGlowProps
+	shadow?: ShadowProps
+	reflection?: TextReflectionProps
+	softEdges?: ShapeSoftEdgesProps
+}
+
+export interface GroupProps extends PositionProps, ObjectNameProps {
+	children: GroupChildProps[]
+	rotate?: number
+	rotation?: number
+	flipH?: boolean
+	flipV?: boolean
+	chOff?: PositionProps
+	chExt?: PositionProps
 }
 export interface IChartOptsLib extends IChartOpts {
 	_type?: CHART_NAME | IChartMulti[] // TODO: v3.4.0 - move to `IChartOpts`, remove `IChartOptsLib`
@@ -2600,9 +3493,13 @@ export interface ISlideRel {
 	extn?: string
 	globalId?: number
 	rId: number
+	/** Relationship owned by the structured Action Settings lifecycle. */
+	_interactiveActionOwned?: boolean
 }
 export interface ISlideRelMedia {
 	type: string
+	/** Explicit OOXML relationship role for native media with shared targets. */
+	mediaRelationshipRole?: 'primary' | 'companion' | 'cover' | 'online'
 	opts?: MediaProps
 	path?: string
 	extn?: string
@@ -2613,8 +3510,25 @@ export interface ISlideRelMedia {
 	svgSize?: { w: number, h: number }
 	/** internal package dedupe scope for model3d assets */
 	model3dAsset?: 'glb' | 'poster'
+	/** Image relationship owned exclusively by the slide or layout background lifecycle. */
+	isBackground?: boolean
 	rId: number
 	Target: string
+	/** Native media caption track (WebVTT) bound to audio/video */
+	isCaptionTrack?: boolean
+	/** PowerPoint HD Photo layer used by native Picture Format Artistic Effects. */
+	isArtisticEffectWdp?: boolean
+	/** Visible raster relationship that supplies pixels for automatic HD Photo encoding. */
+	artisticEffectSourceRid?: number
+	/** Internal structured effect request used to create PowerPoint's cached preview. */
+	artisticEffectSpec?: Record<string, unknown>
+	/** Full structured Picture Format adjustment request used to create the cached preview and editable HD Photo source. */
+	pictureAdjustmentSpec?: Record<string, unknown>
+	/** Optional pre-rendered effect preview for runtimes without native Office rendering. */
+	artisticEffectPreviewPath?: string
+	artisticEffectPreviewData?: string
+	/** Relationship/media part owned by the structured Action Settings lifecycle. */
+	_interactiveActionOwned?: boolean
 }
 export interface NativePackagePart {
 	path: string
@@ -2634,6 +3548,18 @@ export interface NativeSmartArtInfo {
 	quickStyleId: string
 	colorStyleId: string
 	nodes: string[]
+	/** Structured authored node tree retained for semantic export/update. */
+	authoredNodes?: Array<string | SmartArtNode>
+	/** Authored selector/format state retained alongside the flattened package model. */
+	authoredOptions?: Partial<SmartArtProps>
+	rightToLeft?: boolean
+	fontFace?: string
+	fontSize?: number
+	color?: HexColor
+	textColors?: HexColor[]
+	palette?: HexColor[]
+	title?: string
+	altText?: string | null
 	partPaths: {
 		data: string
 		layout: string
@@ -2658,6 +3584,8 @@ export interface ISlideObject {
 	// image:
 	image?: string
 	imageRid?: number
+	/** PowerPoint HD Photo relationship used by native Picture Format Artistic Effects. */
+	artisticEffectRid?: number
 	fallbackRid?: number
 	hyperlink?: HyperlinkProps
 	// media
@@ -2669,7 +3597,13 @@ export interface ISlideObject {
 	// animation (can be single or multiple)
 	animation?: AnimationProps | AnimationProps[]
 	mediaRid?: number
+	/** Explicit companion Office-media relationship for native audio/video. */
+	mediaCompanionRid?: number
+	/** Explicit preview-image relationship for native/online media. */
+	mediaCoverRid?: number
 	shape?: SHAPE_NAME
+	connector?: ConnectorProps
+	group?: GroupProps
 	// passthrough (raw OOXML)
 	type?: string  // for passthrough type identification
 	passthrough?: {
@@ -2693,6 +3627,13 @@ export interface WriteBaseProps {
 	 * @since v4.0.0
 	 */
 	noOffSlideAutoCorrect?: boolean
+	/**
+	 * Preserve off-slide geometry instead of auto-correcting it.
+	 * Intended for exact round-trip/decypher workflows where the source deck already contains off-slide elements.
+	 * @default false
+	 * @since v4.0.0
+	 */
+	preserveOffSlide?: boolean
 }
 export interface WriteProps extends WriteBaseProps {
 	/**
@@ -2712,6 +3653,15 @@ export interface WriteFileProps extends WriteBaseProps {
 export interface SectionProps {
 	_type: 'user' | 'default'
 	_slides: PresSlide[]
+	/**
+	 * Stable section GUID (ST_Guid, braces, upper), assigned lazily and reused across writes.
+	 * Required so a Section Zoom can reference this section by id. @see plans/section-zoom-ooxml-ground-truth.md
+	 */
+	_id?: string
+	/** Public semantic identity. Never serialized as a native section GUID. */
+	_betterpptxSemanticId?: string
+	/** Engine ownership marker for a generated Summary Zoom graph. */
+	_betterpptxSummaryZoomOwner?: string
 
 	/**
 	 * Section title
@@ -2726,6 +3676,40 @@ export interface SectionProps {
 export interface PresLayout {
 	_sizeW?: number
 	_sizeH?: number
+	type?: string
+	/**
+	 * Optional native objects owned by this slide-layout part.  These are most
+	 * commonly placeholder definitions, but the carrier also accepts the same
+	 * editable object vocabulary as a slide master.
+	 */
+	objects?: SlideMasterProps['objects'] | null
+	placeholders?: Array<{
+		name: string
+		type?: string
+		idx?: number
+		size?: string
+		orient?: 'horz' | 'vert'
+		hasCustomPrompt?: boolean
+		x?: Coord
+		y?: Coord
+		w?: Coord
+		h?: Coord
+		margin?: Margin
+		text?: string | Array<{ text?: string }>
+		style?: PlaceholderVisualStyle | null
+	}> | null
+	background?: BackgroundProps | null
+	margin?: Margin
+	slideNumber?: SlideNumberProps | null
+	/**
+	 * Native PowerPoint header/footer visibility policy for this layout.
+	 * The four leaves map directly to PresentationML p:hf attributes and are
+	 * independently inherited by slides that use the layout.
+	 */
+	headerFooter?: HeaderFooterProps | null
+	/** Layout-level overrideClrMapping; null/omission uses the master mapping. */
+	colorMapOverride?: InheritanceColorMap | null
+	bkgd?: string | BackgroundProps
 
 	/**
 	 * Layout Name
@@ -2734,6 +3718,21 @@ export interface PresLayout {
 	name: string
 	width: number
 	height: number
+}
+export interface HeaderFooterProps {
+	/** Show the date/time placeholder. */
+	date?: boolean
+	/** Show the header placeholder. */
+	header?: boolean
+	/** Show the footer placeholder. */
+	footer?: boolean
+	/** Show the slide-number placeholder. */
+	slideNumber?: boolean
+	/** Explicit aliases accepted by JSON-spec clients. */
+	showDate?: boolean
+	showHeader?: boolean
+	showFooter?: boolean
+	showSlideNumber?: boolean
 }
 export interface SlideNumberProps extends PositionProps, TextBaseProps {
 	/**
@@ -2746,9 +3745,16 @@ export interface SlideMasterProps {
 	 * Unique name for this master
 	 */
 	title: string
-	background?: BackgroundProps
+	background?: BackgroundProps | null
 	margin?: Margin
-	slideNumber?: SlideNumberProps
+	slideNumber?: SlideNumberProps | null
+	headerFooter?: HeaderFooterProps | null
+	/** Master-level p:clrMap. */
+	colorMap?: InheritanceColorMap | null
+	/** Master title/body/other text-style defaults. */
+	textStyles?: InheritanceTextStyles | null
+	/** Replace the named master/layout placeholder set; null or [] clears it. */
+	placeholders?: PresLayout['placeholders']
 	objects?: Array<| { chart: IChartOpts }
 		| { image: ImageProps }
 		| { line: ShapeProps }
@@ -2763,7 +3769,7 @@ export interface SlideMasterProps {
 				 */
 				text?: string
 			}
-		}>
+		}> | null
 
 	/**
 	 * @deprecated v3.3.0 - use `background`
@@ -2771,8 +3777,12 @@ export interface SlideMasterProps {
 	bkgd?: string | BackgroundProps
 }
 export interface ObjectOptions extends ImageProps, Model3DProps, PositionProps, ShapeProps, TableCellProps, TextPropsOptions {
+	/** @internal Closed Action Settings state lowered by BetterPPTX's semantic compiler. */
+	interactiveActions?: InteractiveActionSetProps | InteractiveActionEndpointProps | null
 	_placeholderIdx?: number
 	_placeholderType?: PLACEHOLDER_TYPE
+	_placeholderOrient?: 'horz' | 'vert'
+	_placeholderHasCustomPrompt?: boolean
 	/** Semantic label for raw passthrough objects, e.g. chartEx. */
 	_passthroughOriginalType?: string
 	/** Product-level kind for preserved raw objects, e.g. chart. */
@@ -2830,7 +3840,18 @@ export interface SlideBaseProps {
 	_relsMedia: ISlideRelMedia[] // needed as we use args:"PresSlide|SlideLayout" often
 	_nativePackageParts?: NativePackagePart[]
 	_slideNum: number
+	/** Semantic slide id retained by the BetterPPTX spec/runtime bridge. */
+	_betterpptxSemanticId?: string
 	_slideNumberProps?: SlideNumberProps
+	_headerFooter?: HeaderFooterProps
+	_showMasterSp?: boolean
+	_showMasterPhAnim?: boolean
+	/** Master carrier p:clrMap state. */
+	_colorMap?: InheritanceColorMap | null
+	/** Layout/slide p:clrMapOvr state. */
+	_colorMapOverride?: InheritanceColorMap | null
+	/** Master carrier p:txStyles state. */
+	_textStyles?: InheritanceTextStyles | null
 	_slideObjects?: ISlideObject[]
 
 	background?: BackgroundProps
@@ -2840,6 +3861,14 @@ export interface SlideBaseProps {
 	bkgd?: string | BackgroundProps
 }
 export interface SlideLayout extends SlideBaseProps {
+	/** @internal Semantic parent master name for the authored single-master contract. */
+	_betterpptxMasterName?: string | null
+	/** @internal Typed physical parent master for multi-master package assembly. */
+	_slideMaster?: PresSlide | null
+	/** @internal Marks a layout owned by the semantic authored-layout collection. */
+	_betterpptxOwnedLayout?: boolean
+	/** @internal Distinguishes authored layout/master carrier roles. */
+	_betterpptxCarrierKind?: 'layout' | 'master'
 	_slide?: {
 		_bkgdImgRid?: number
 		back: string
@@ -2861,11 +3890,20 @@ export interface PresSlide extends SlideBaseProps {
 
 	addChart: (type: CHART_NAME | IChartMulti[], data: IOptsChartData[], options?: IChartOpts) => PresSlide
 	addEquation: (options: EquationProps) => PresSlide
+	addCameo: (options: CameoProps) => PresSlide
+	addZoom: (options: ZoomProps) => PresSlide
+	addSectionZoom: (options: SectionZoomProps) => PresSlide
+	addSummaryZoom: (options?: SummaryZoomProps) => PresSlide
+	/** Accessor to the presentation's sections (used by Section/Summary Zoom to resolve sections). @private */
+	getSections?: () => SectionProps[]
 	addImage: (options: ImageProps) => PresSlide
 	addMedia: (options: MediaProps) => PresSlide
+	addRecordStudioCapture: (options: RecordStudioCaptureProps) => PresSlide
 	addModel3D: (options: Model3DProps) => PresSlide
 	addNotes: (notes: string) => PresSlide
 	addShape: (shapeName: SHAPE_NAME, options?: ShapeProps) => PresSlide
+	addConnector: (options?: ConnectorProps) => PresSlide
+	addGroup: (options: GroupProps) => PresSlide
 	addSmartArt: (options?: SmartArtProps) => PresSlide
 	addTable: (tableRows: TableRow[], options?: TableProps) => PresSlide
 	addText: (text: string | TextProps[], options?: TextPropsOptions) => PresSlide
@@ -2903,6 +3941,10 @@ export interface PresSlide extends SlideBaseProps {
 	 * @default false
 	 */
 	hidden?: boolean
+	/** Whether shapes inherited from the slide master are shown. */
+	showMasterShapes?: boolean
+	/** Whether placeholder animations inherited from the slide master are shown. */
+	showMasterPhAnim?: boolean
 	/**
 	 * Slide number options
 	 */
@@ -2939,8 +3981,10 @@ export interface PresentationProps {
 }
 // PRIVATE interface
 export interface IPresentationProps extends PresentationProps {
+	customShows?: CustomShowProps[]
 	sections: SectionProps[]
 	slideLayouts: SlideLayout[]
+	slideMasters: PresSlide[]
 	slides: PresSlide[]
 }
 
@@ -2980,6 +4024,8 @@ export interface TransitionProps {
 	type?: string
 	speed?: 'slow' | 'medium' | 'med' | 'fast'
 	duration?: number
+	/** Readable millisecond alias accepted by semantic authoring layers. */
+	durationMs?: number
 	direction?: 'horz' | 'vert' | 'up' | 'down' | 'left' | 'right' | 'u' | 'd' | 'l' | 'r' | 'lu' | 'ld' | 'ru' | 'rd' | 'in' | 'out'
 	throughBlack?: boolean
 	splitDirection?: 'horz' | 'vert' | 'in' | 'out'
@@ -3016,12 +4062,16 @@ export interface AnimationProps {
 	 * @default varies by animation type (entrance: 700, exit: 500, emphasis: 700)
 	 */
 	duration?: number
+	/** Public semantic alias for duration; normalized to the native millisecond carrier. */
+	durationMs?: number
 	
 	/**
 	 * Delay before animation starts (milliseconds)
 	 * @default 0
 	 */
 	delay?: number
+	/** Public semantic alias for delay; normalized to the native millisecond carrier. */
+	delayMs?: number
 	
 	/**
 	 * Animation trigger
@@ -3083,17 +4133,30 @@ export interface AnimationProps {
 	 * Motion path data (SVG path format)
 	 */
 	motionPathData?: string
+	/**
+	 * Coordinate space used by motionPathData/pathData.
+	 *
+	 * Public authoring uses slide space by default. Set to `powerpoint` only
+	 * when a caller intentionally supplies already-lowered native coordinates.
+	 */
+	motionPathCoordinateSpace?: 'slide' | 'powerpoint'
+	/** Motion-path interpolation. Linear preserves sampled trajectory timing; null restores smooth. */
+	motionEasing?: 'smooth' | 'linear' | null
 	
 	/**
 	 * Scale factor (for zoom, grow/shrink animations)
 	 */
-	scale?: number
+	scale?: number | null
+	/** Independent grow/shrink factor. 1 leaves this axis unchanged; null uses scale or the effect default. */
+	scaleX?: number | null
+	/** Independent grow/shrink factor. Scaling a text shape non-uniformly also stretches its glyphs. */
+	scaleY?: number | null
 	
 	/**
 	 * Rotation degrees (for spin, swivel animations)
 	 * @example 90, 180, 360, 720
 	 */
-	rotation?: number
+	rotation?: number | null
 	
 	/**
 	 * Rotation direction (for spin animations)

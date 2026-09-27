@@ -1,0 +1,312 @@
+{
+  "schemaVersion": "betterpptx-developer-public-teaching-gap-ledger.v1",
+  "isTemplate": false,
+  "truthState": "development-evidence-ledger",
+  "entries": [
+    {
+      "gapId": "ai-design-authority-engine-execution",
+      "state": "target-implemented",
+      "classification": "ai-judgment",
+      "originEvidence": [
+        {
+          "evidenceId": "public-help-authority-contract-v1",
+          "evidenceClass": "public-contract-test",
+          "sha256": "fe7d6a42f9b53fb419385af298db5cc7b411d6469a981dfd7c2f1b36e096062e"
+        }
+      ],
+      "generalizedLesson": "The AI owns story, medium, art direction, exact aesthetic selections, and visual acceptance; BetterPPTX executes semantic intent, measures constraints, and verifies package truth.",
+      "target": {
+        "artifactKind": "skill",
+        "publicArtifactId": "skill:betterpptx-author"
+      },
+      "forwardTest": {
+        "testId": "cold-author-design-authority-v1",
+        "state": "planned",
+        "resultEvidenceSha256": null
+      },
+      "releaseBinding": {
+        "manifestSha256": null,
+        "publicRevision": null
+      },
+      "sealedPromptMaterialPresent": false,
+      "privateDetailsPresent": false
+    },
+    {
+      "gapId": "atlas-casebook-evidence-honesty",
+      "state": "forward-test-pending",
+      "classification": "ai-judgment",
+      "originEvidence": [
+        {
+          "evidenceId": "public-casebook-honesty-v1",
+          "evidenceClass": "public-teaching-artifact",
+          "sha256": "84eac94f394a8930320f17f061775d13b47439df830acd98b65f6046b22bd6a5"
+        }
+      ],
+      "generalizedLesson": "Capability evidence must remain factual and unranked, while planned or withheld casebook material must never be presented as an accepted example.",
+      "target": {
+        "artifactKind": "casebook",
+        "publicArtifactId": "casebook:communication-problem-index"
+      },
+      "forwardTest": {
+        "testId": "cold-author-evidence-honesty-v1",
+        "state": "planned",
+        "resultEvidenceSha256": null
+      },
+      "releaseBinding": {
+        "manifestSha256": null,
+        "publicRevision": null
+      },
+      "sealedPromptMaterialPresent": false,
+      "privateDetailsPresent": false
+    },
+    {
+      "gapId": "first-save-preview-freeze",
+      "state": "forward-test-pending",
+      "classification": "product-execution",
+      "originEvidence": [
+        {
+          "evidenceId": "public-preview-save-freeze-v1",
+          "evidenceClass": "public-contract-test",
+          "sha256": "c757a0be8942ddd44098b58da5999abbf8d4a3e05faa38fc06ff5dc93ede30cc"
+        }
+      ],
+      "generalizedLesson": "First-time-right begins at the first public save: the AI may iterate before release, but the saved bytes must be the fully validated and completely previewed frozen candidate.",
+      "target": {
+        "artifactKind": "skill-reference",
+        "publicArtifactId": "skill-reference:review-release"
+      },
+      "forwardTest": {
+        "testId": "cold-author-first-save-freeze-v1",
+        "state": "planned",
+        "resultEvidenceSha256": null
+      },
+      "releaseBinding": {
+        "manifestSha256": null,
+        "publicRevision": null
+      },
+      "sealedPromptMaterialPresent": false,
+      "privateDetailsPresent": false
+    },
+    {
+      "gapId": "semantic-only-black-box-authoring",
+      "state": "target-implemented",
+      "classification": "product-execution",
+      "originEvidence": [
+        {
+          "evidenceId": "public-authoring-boundary-v1",
+          "evidenceClass": "public-contract-test",
+          "sha256": "95ee0c878683958d8b470e05c7c300d5a47ce6faaf2423966ad750f945aac8d9"
+        }
+      ],
+      "generalizedLesson": "A cold author composes through the semantic JSON-spec route with stable names, public selectors, and opaque handles; it does not use direct construction primitives or private product details.",
+      "target": {
+        "artifactKind": "public-schema",
+        "publicArtifactId": "public-schema:semantic-json-spec-only"
+      },
+      "forwardTest": {
+        "testId": "cold-author-semantic-boundary-v1",
+        "state": "planned",
+        "resultEvidenceSha256": null
+      },
+      "releaseBinding": {
+        "manifestSha256": null,
+        "publicRevision": null
+      },
+      "sealedPromptMaterialPresent": false,
+      "privateDetailsPresent": false
+    },
+    {
+      "gapId": "all-family-extended-parameter-contracts",
+      "state": "target-implemented",
+      "classification": "product-execution",
+      "originEvidence": [
+        {
+          "evidenceId": "public-shape-shadow-blur-five-point-v1",
+          "evidenceClass": "public-contract-test",
+          "sha256": "6b724c5c6aa6e8bb4c38241e9343cbf51ee8a46425d03277bce8f5cf7d94dfe2"
+        }
+      ],
+      "generalizedLesson": "Presets are only starting states: every applicable Ribbon or Format Pane control must be exposed as a typed continuous or discrete contract with unit, domain, default, serializer step, reset behavior, fresh-client discovery, mutation-free execution, and documented Office canonicalization.",
+      "target": {
+        "artifactKind": "skill-reference",
+        "publicArtifactId": "skill-reference:catalog-choice"
+      },
+      "forwardTest": {
+        "testId": "cold-author-extended-parameter-contracts-v1",
+        "state": "passed",
+        "resultEvidenceSha256": "6b724c5c6aa6e8bb4c38241e9343cbf51ee8a46425d03277bce8f5cf7d94dfe2"
+      },
+      "releaseBinding": {
+        "manifestSha256": null,
+        "publicRevision": null
+      },
+      "sealedPromptMaterialPresent": false,
+      "privateDetailsPresent": false
+    },
+    {
+      "gapId": "native-object-rotation-contract",
+      "state": "target-implemented",
+      "classification": "product-execution",
+      "originEvidence": [
+        {
+          "evidenceId": "public-object-rotation-proof-v1",
+          "evidenceClass": "public-contract-test",
+          "sha256": "e447e16cac30f8980d3eae429bf89ece8b6727ccdf718036bd67653a4a318767"
+        },
+        {
+          "evidenceId": "native-object-rotation-proof-v1",
+      "evidenceClass": "public-forward-test",
+          "sha256": "fac954aa9be2fcbc54ee1d672ba3a669e14062a83fee1ed82cbcd88172cf5566"
+        }
+      ],
+      "generalizedLesson": "Object rotation is a typed common transform, not a gallery preset: expose signed degrees, native serializer precision, default/null reset, carrier applicability, interaction boundaries, readback, and Office canonicalization through the same semantic JSON-spec lifecycle.",
+      "target": {
+        "artifactKind": "skill-reference",
+        "publicArtifactId": "skill-reference:native-object-transforms"
+      },
+      "forwardTest": {
+        "testId": "cold-author-object-rotation-v1",
+        "state": "passed",
+        "resultEvidenceSha256": "e447e16cac30f8980d3eae429bf89ece8b6727ccdf718036bd67653a4a318767"
+      },
+      "releaseBinding": {
+        "manifestSha256": null,
+        "publicRevision": null
+      },
+      "sealedPromptMaterialPresent": false,
+      "privateDetailsPresent": false
+    },
+  {
+    "gapId": "native-object-flip-contract",
+      "state": "target-implemented",
+      "classification": "product-execution",
+      "originEvidence": [
+        {
+          "evidenceId": "public-object-flip-proof-v1",
+          "evidenceClass": "public-contract-test",
+          "sha256": "f19de446df2c3764d49393215b6a64123019c940db9bc494304a7391deef1bb1"
+        },
+        {
+          "evidenceId": "native-object-flip-proof-v1",
+          "evidenceClass": "public-forward-test",
+          "sha256": "fc2eff9fbd9d724c7d82dccd6e38fcb469d24c7028c986af8690e919aeb47669"
+        }
+      ],
+      "generalizedLesson": "Horizontal and vertical object flips are typed common transforms, not visual presets: expose independent booleans, null reset, carrier applicability, native serialization, fresh-client discovery, mutation-free execution, semantic readback, and Office-safe composition with rotation.",
+      "target": {
+        "artifactKind": "skill-reference",
+        "publicArtifactId": "skill-reference:native-object-transforms"
+      },
+      "forwardTest": {
+        "testId": "cold-author-object-flip-v1",
+        "state": "passed",
+        "resultEvidenceSha256": "f19de446df2c3764d49393215b6a64123019c940db9bc494304a7391deef1bb1"
+      },
+      "releaseBinding": {
+        "manifestSha256": null,
+        "publicRevision": null
+      },
+      "sealedPromptMaterialPresent": false,
+    "privateDetailsPresent": false
+  },
+  {
+    "gapId": "native-image-framing-contract",
+    "state": "target-implemented",
+    "classification": "product-execution",
+    "originEvidence": [
+      {
+        "evidenceId": "public-image-framing-proof-v1",
+        "evidenceClass": "public-contract-test",
+        "sha256": "9766803d4ecaa4220d6c47dd80f3558250e4917be5395f98d9372b697e370d58"
+      },
+      {
+        "evidenceId": "native-image-framing-package-corpus-v1",
+        "evidenceClass": "public-forward-test",
+        "sha256": "a994572a8554ca1704b0602b66b31ffef115e68c8d6baa42d6b6e14cd6038700"
+      }
+    ],
+    "generalizedLesson": "Image fit and crop are typed semantic controls, not a fixed picture preset: expose contain/cover/crop, engine-owned target geometry, null reset, native srcRect/stretch serialization, public fresh-client discovery, deterministic package/accessibility proof, and explicit Office/render evidence.",
+    "target": {
+      "artifactKind": "skill-reference",
+      "publicArtifactId": "skill-reference:native-image-framing"
+    },
+    "forwardTest": {
+      "testId": "cold-author-image-framing-v1",
+      "state": "passed",
+      "resultEvidenceSha256": "9766803d4ecaa4220d6c47dd80f3558250e4917be5395f98d9372b697e370d58"
+    },
+    "releaseBinding": {
+      "manifestSha256": null,
+      "publicRevision": null
+    },
+    "sealedPromptMaterialPresent": false,
+    "privateDetailsPresent": false
+  },
+  {
+    "gapId": "native-image-adjustments-corrections-contract",
+    "state": "target-implemented",
+    "classification": "product-execution",
+    "originEvidence": [
+      {
+        "evidenceId": "public-image-adjustments-corrections-proof-v1",
+        "evidenceClass": "public-contract-test",
+        "sha256": "4833aaab71b17702d22f22c489cde16d6c987e427b5322417e4172936e9d1ca0"
+      },
+      {
+        "evidenceId": "native-image-adjustments-corrections-proof-v1",
+        "evidenceClass": "public-forward-test",
+        "sha256": "e8dd7e7abf76c0b9dd5db93d0fa100cead8a4e60d55189d0ae0b2fb962bd25f5"
+      }
+    ],
+    "generalizedLesson": "Picture corrections are a complete typed slider contract, not a preset: expose brightness, contrast, sharpness, saturation, temperature, and transparency with exact units, domains, defaults, steps, native precision, null reset, picture-only applicability, fresh-client discovery, sparse re-edit/readback, Office proof, and rejection of invalid values. Apply the same exhaustive treatment to every other Ribbon or Format Pane family.",
+    "target": {
+      "artifactKind": "skill-reference",
+      "publicArtifactId": "skill-reference:native-image-adjustments"
+    },
+    "forwardTest": {
+      "testId": "cold-author-image-adjustments-corrections-v1",
+        "state": "passed",
+      "resultEvidenceSha256": "4833aaab71b17702d22f22c489cde16d6c987e427b5322417e4172936e9d1ca0"
+    },
+    "releaseBinding": {
+      "manifestSha256": null,
+      "publicRevision": null
+    },
+    "sealedPromptMaterialPresent": false,
+    "privateDetailsPresent": false
+  },
+  {
+    "gapId": "native-image-color-artistic-contract",
+    "state": "target-implemented",
+    "classification": "product-execution",
+    "originEvidence": [
+      {
+        "evidenceId": "public-image-color-artistic-proof-v1",
+        "evidenceClass": "public-contract-test",
+        "sha256": "ebf4075254b5f12f3e9926d0a198d64ab1683f35f0797806874f117f457fe34c"
+      },
+      {
+        "evidenceId": "native-image-color-artistic-proof-v1",
+        "evidenceClass": "public-forward-test",
+        "sha256": "d0bc7c59c1a4ed88bc9de694fc383a48691f88ec63c2e5d21b87d4cf817ad965"
+      }
+    ],
+    "generalizedLesson": "Picture color mapping and Artistic Effects are exhaustive typed contracts, not presets: expose color mode, both endpoint colors, every tint/shade/saturation/opacity transform, all 23 effects, each persistent effect slider with exact range/default/unit/step, native serialization, reset, sparse re-edit/readback, Office proof, and public fresh-client discovery. Repeat this parameter-first audit for every Ribbon and Format Pane family.",
+    "target": {
+      "artifactKind": "skill-reference",
+      "publicArtifactId": "skill-reference:native-image-color-artistic"
+    },
+    "forwardTest": {
+      "testId": "cold-author-image-color-artistic-v1",
+      "state": "passed",
+      "resultEvidenceSha256": "ebf4075254b5f12f3e9926d0a198d64ab1683f35f0797806874f117f457fe34c"
+    },
+    "releaseBinding": {
+      "manifestSha256": null,
+      "publicRevision": null
+    },
+    "sealedPromptMaterialPresent": false,
+    "privateDetailsPresent": false
+  }
+]
+}

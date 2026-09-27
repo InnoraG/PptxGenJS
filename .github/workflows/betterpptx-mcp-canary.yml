@@ -1,0 +1,204 @@
+name: BetterPPTX MCP Cloud Run canary
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type DEPLOY to publish this main-branch revision to the private canary
+        required: true
+        type: choice
+        options:
+          - NO
+          - DEPLOY
+
+permissions:
+  contents: read
+
+concurrency:
+  group: betterpptx-mcp-cloud-run-canary
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify the selected source revision
+    if: github.repository == 'betterpptx/betterpptx-mcp' && github.ref == 'refs/heads/main' && inputs.confirmation == 'DEPLOY'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out the exact triggering revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: Install locked root dependencies
+        run: npm ci
+
+      - name: Install locked MCP runtime dependencies
+        run: npm ci --prefix betterpptx-mcp
+
+      - name: Refuse release with high or critical runtime dependency advisories
+        run: |
+          npm audit --omit=dev --audit-level=high
+          npm audit --prefix betterpptx-mcp --omit=dev --audit-level=high
+
+      - name: Verify release/schema version binding
+        run: npm run verify:release-version --prefix betterpptx-mcp
+
+      - name: Type-check the PowerPoint library
+        run: npx tsc --noEmit
+
+      - name: Run core and authoring regression tests
+        run: |
+          npm run test:unit
+          npm run test:authoring-augmentation --prefix betterpptx-mcp
+          node --test betterpptx-mcp/test/inline-image-dimensions-security.test.mjs
+          node --test betterpptx-mcp/test/public-artifact-download-sanitization.test.mjs
+          node --test betterpptx-mcp/test/production-non-rendering-save.test.mjs
+
+  deploy:
+    name: Build, publish and deploy the verified canary
+    needs: verify
+    if: github.repository == 'betterpptx/betterpptx-mcp' && github.ref == 'refs/heads/main' && inputs.confirmation == 'DEPLOY'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    environment:
+      name: betterpptx-canary
+    permissions:
+      contents: read
+      id-token: write
+    env:
+      GCP_PROJECT_ID: betterpptx-mcp-20260926
+      GCP_REGION: us-central1
+      GCP_ARTIFACT_REPOSITORY: betterpptx-canary
+      CLOUD_RUN_SERVICE: betterpptx-canary
+      GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+      GCP_DEPLOY_SERVICE_ACCOUNT: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+    steps:
+      - name: Check out the exact triggering revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Require the configured keyless deployment identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$GCP_WORKLOAD_IDENTITY_PROVIDER" || { echo "Missing repository/environment variable GCP_WORKLOAD_IDENTITY_PROVIDER" >&2; exit 1; }
+          test -n "$GCP_DEPLOY_SERVICE_ACCOUNT" || { echo "Missing repository/environment variable GCP_DEPLOY_SERVICE_ACCOUNT" >&2; exit 1; }
+
+      - name: Build the container before cloud credentials are created
+        env:
+          IMAGE_TAG: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          registry="${GCP_REGION}-docker.pkg.dev"
+          image="${registry}/${GCP_PROJECT_ID}/${GCP_ARTIFACT_REPOSITORY}/${CLOUD_RUN_SERVICE}"
+          tagged_image="${image}:${IMAGE_TAG}"
+          source_digest="$(git archive "$GITHUB_SHA" | sha256sum | cut -d ' ' -f1)"
+          docker build \
+            --build-arg BETTERPPTX_BUILD_SOURCE_DIGEST="$source_digest" \
+            --build-arg BETTERPPTX_SOURCE_REVISION="$GITHUB_SHA" \
+            --file deploy/docker/Dockerfile.mcp \
+            --tag "$tagged_image" .
+          echo "TAGGED_IMAGE=$tagged_image" >> "$GITHUB_ENV"
+          echo "SOURCE_DIGEST=$source_digest" >> "$GITHUB_ENV"
+
+      - name: Authenticate with GitHub OIDC and Google Workload Identity Federation
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Set up Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db # v3.0.1
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Confirm the existing canary is private and ready to update
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run services describe "$CLOUD_RUN_SERVICE" \
+            --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --format=json > "$RUNNER_TEMP/service-before.json"
+          gcloud run services get-iam-policy "$CLOUD_RUN_SERVICE" \
+            --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --format=json > "$RUNNER_TEMP/iam-before.json"
+          jq -e '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' \
+            "$RUNNER_TEMP/iam-before.json" >/dev/null || {
+              echo "Refusing deployment: the canary has a public invoker binding." >&2
+              exit 1
+            }
+
+      - name: Push and resolve the immutable source-revision image
+        id: image
+        shell: bash
+        run: |
+          set -euo pipefail
+          registry="${GCP_REGION}-docker.pkg.dev"
+          gcloud auth configure-docker "$registry" --quiet
+          docker push "$TAGGED_IMAGE"
+          image_ref="$(docker image inspect --format='{{index .RepoDigests 0}}' "$TAGGED_IMAGE")"
+          [[ "$image_ref" == *@sha256:* ]] || { echo "Registry did not return an immutable image digest." >&2; exit 1; }
+          echo "image_ref=$image_ref" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy only the verified image digest to the existing canary
+        env:
+          IMAGE_REF: ${{ steps.image.outputs.image_ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run deploy "$CLOUD_RUN_SERVICE" \
+            --project "$GCP_PROJECT_ID" \
+            --region "$GCP_REGION" \
+            --image "$IMAGE_REF" \
+            --no-allow-unauthenticated \
+            --quiet
+
+      - name: Verify the ready revision, exact image and private access policy
+        id: verify-deployment
+        env:
+          IMAGE_REF: ${{ steps.image.outputs.image_ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run services describe "$CLOUD_RUN_SERVICE" \
+            --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --format=json > "$RUNNER_TEMP/service-after.json"
+          gcloud run services get-iam-policy "$CLOUD_RUN_SERVICE" \
+            --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --format=json > "$RUNNER_TEMP/iam-after.json"
+          jq -e --arg image "$IMAGE_REF" '
+            .status.latestReadyRevisionName != null and
+            ([.status.conditions[]? | select(.type == "Ready" and .status == "True")] | length > 0) and
+            .spec.template.spec.containers[0].image == $image
+          ' "$RUNNER_TEMP/service-after.json" >/dev/null || {
+            echo "Cloud Run did not report the requested image as a ready revision." >&2
+            exit 1
+          }
+          jq -e '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' \
+            "$RUNNER_TEMP/iam-after.json" >/dev/null || {
+              echo "Deployment verification failed: the canary has a public invoker binding." >&2
+              exit 1
+            }
+          revision="$(jq -r '.status.latestReadyRevisionName' "$RUNNER_TEMP/service-after.json")"
+          echo "revision=$revision" >> "$GITHUB_OUTPUT"
+
+      - name: Record source and artifact provenance
+        env:
+          IMAGE_REF: ${{ steps.image.outputs.image_ref }}
+          READY_REVISION: ${{ steps.verify-deployment.outputs.revision }}
+        shell: bash
+        run: |
+          {
+            echo "### BetterPPTX private canary deployment"
+            echo "- Source commit: `${GITHUB_SHA}`"
+            echo "- Source tree SHA-256: `${SOURCE_DIGEST}`"
+            echo "- Image: `${IMAGE_REF}`"
+            echo "- Ready Cloud Run revision: `${READY_REVISION}`"
+            echo "- Target: private canary only; no production traffic was changed."
+            echo "- Verification: Cloud Run Ready condition, exact image reference, and no public invoker binding."
+          } >> "$GITHUB_STEP_SUMMARY"

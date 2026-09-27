@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "betterpptx.picture-format-five-point-proof-ledger.schema.v1",
+  "title": "BetterPPTX Picture Format isolated five-point proof ledger",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "protocol", "proofs"],
+  "properties": {
+    "schemaVersion": { "const": "betterpptx.picture-format-five-point-proof-ledger.v1" },
+    "protocol": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["checkpoints", "oracles"],
+      "properties": {
+        "checkpoints": {
+          "type": "array",
+          "items": { "enum": ["minimum", "default", "midpoint", "maximum", "off-preset"] },
+          "minItems": 5,
+          "maxItems": 5
+        },
+        "oracles": { "type": "array", "items": { "type": "string" }, "minItems": 1 }
+      }
+    },
+    "proofs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "controlId",
+          "status",
+          "verifiedAt",
+          "proofReport",
+          "proofReportSha256",
+          "generatedArtifact",
+          "generatedArtifactSha256",
+          "officeReferenceArtifact",
+          "officeReferenceArtifactSha256",
+          "roundtripArtifact",
+          "roundtripArtifactSha256",
+          "visualContactSheet",
+          "visualContactSheetSha256",
+          "checkpoints"
+        ],
+        "properties": {
+          "controlId": { "type": "string", "minLength": 1 },
+          "status": { "enum": ["verified", "pending", "regressed"] },
+          "verifiedAt": { "type": "string", "format": "date-time" },
+          "proofReport": { "type": "string", "minLength": 1 },
+          "proofReportSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "generatedArtifact": { "type": "string", "minLength": 1 },
+          "generatedArtifactSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "officeReferenceArtifact": { "type": "string", "minLength": 1 },
+          "officeReferenceArtifactSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "roundtripArtifact": { "type": "string", "minLength": 1 },
+          "roundtripArtifactSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "visualContactSheet": { "type": "string", "minLength": 1 },
+          "visualContactSheetSha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+          "checkpoints": {
+            "type": "array",
+            "items": { "enum": ["minimum", "default", "midpoint", "maximum", "off-preset"] },
+            "minItems": 5,
+            "maxItems": 5
+          }
+        }
+      }
+    }
+  }
+}

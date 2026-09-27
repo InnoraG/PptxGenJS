@@ -1,0 +1,18 @@
+# BetterPPTX public authoring environment
+
+AI entry point: AGENTS.md
+Canonical skill: skills/betterpptx/SKILL.md
+Connection and lifecycle: MCP.md
+Environment doctrine: docs/authoring-environment.md
+Unranked capability atlas: CAPABILITY_ATLAS.md
+Communication-problem casebook: CASEBOOK.md
+Teaching-gap governance: TEACHING_GAP_LEDGER.md
+Teaching release integrity: docs/teaching-release.md
+Cold-client forward tests: docs/forward-tests.md
+Security boundary: SECURITY.md
+Privacy boundary: PRIVACY.md
+
+Use BetterPPTX only through connected public betterpptx.* tools. Do not
+reimplement the product or request private implementation details. The AI owns
+creative authorship; the engine executes and measures. Preview and improve
+before release. Save the frozen accepted candidate exactly once.

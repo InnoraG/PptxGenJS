@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "betterpptx.g5-bundle-owner-decision.v1",
+  "status": "APPROVED",
+  "decidedAt": "2026-08-14T04:05:53Z",
+  "ownerDecisionText": "I approve the three exact G5 product bundles in G5-BUNDLE-OWNER-APPROVAL-PACKET-20260814.md at their listed hashes and stated distribution boundaries. I understand this closes only the hash-bound G5 bundle-approval gate and does not approve G1, G4, public enablement, authoring-v3, or raw/reusable-source resale.",
+  "approvalSource": "Explicit owner message in the Codex thread on 2026-08-14",
+  "explicitOwnerDecision": true,
+  "publicEnablementAllowed": false,
+  "decisionScope": "Three exact native-3D product bundles at the listed hashes and distribution boundaries only.",
+  "assets": [
+    {
+      "id": "ordinary-18-gesture-library",
+      "displayName": "curated 18-clip presenter deployment bundle",
+      "path": "betterpptx-mcp/assets/powerpoint-proven-mixamo-library.glb",
+      "sha256": "3363308deb44806bc6f6914ec88b09e32f4e04985355e1c32081d6a5a21765f3",
+      "bytes": 7545976,
+      "distributionBoundary": "Server-side skeletal-motion source used to construct project presenters; no standalone/raw library download or reusable-source resale.",
+      "decision": "APPROVED"
+    },
+    {
+      "id": "default-presenter-joe",
+      "displayName": "Joe default native-3D presenter bundle",
+      "path": "betterpptx-mcp/assets/default-presenter-joe.glb",
+      "sha256": "105594811c8b979af8cd4918e972961ae12fb7e22fa76e3e115542bb2b4cb151",
+      "bytes": 8899436,
+      "distributionBoundary": "Server-side product asset embedded only in generated presentation projects; no standalone/raw GLB download or reusable-source resale.",
+      "decision": "APPROVED"
+    },
+    {
+      "id": "default-presenter-louise",
+      "displayName": "Louise default native-3D presenter bundle",
+      "path": "betterpptx-mcp/assets/default-presenter-louise.glb",
+      "sha256": "de219e1f6ef01d9612a2464652a2d7a4bd089526b9691e1057cc68675c2789c4",
+      "bytes": 6487668,
+      "distributionBoundary": "Server-side product asset embedded only in generated presentation projects; no standalone/raw GLB download or reusable-source resale.",
+      "decision": "APPROVED"
+    }
+  ],
+  "scopeExclusions": [
+    "G1 sanitized PPTX candidates and all G1 work",
+    "G4 live deployment, rotation, rollback, and break-glass evidence",
+    "public product enablement or production promotion",
+    "raw FBX/BVH redistribution or standalone reusable GLB/library resale",
+    "the 60-entry planned kinetic catalog beyond already recorded approvals",
+    "the already approved 31-clip kinetic-clips.glb pool",
+    "the separate 18-slot authoring-v3 semantic interaction contract, currently 18/18 TO_SOURCE",
+    "remaining worker dependency, SBOM, transitive-PoC pinning, or legal-review work"
+  ],
+  "hashChangePolicy": "Any byte, hash, path, or distribution-boundary change invalidates this decision and requires a new owner decision."
+}

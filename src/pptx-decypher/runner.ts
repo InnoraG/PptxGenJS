@@ -41,11 +41,14 @@ export interface DecypherModelOptions extends DecypherOptions {
 	pptxPath?: string
 	pptxBase64?: string
 	sourceName?: string
+	engine?: DecypherEngine
 	limitSlides?: number
+	timeoutMs?: number
 }
 
 export interface DecypherModelResult {
 	success: boolean
+	engine: 'ultimate' | 'structured'
 	model?: PresentationModel
 	signature: string
 	stats: DecypherStats
@@ -260,6 +263,64 @@ async function runUltimateDecypher(options: DecypherGeneratorOptions, inputPath:
 	}
 }
 
+async function runStructuredModelDecypher(options: DecypherModelOptions, inputPath: string, sourceName: string): Promise<DecypherModelResult> {
+	const decypher = new PptxDecypher(options)
+	const result = await decypher.decypherToModel(inputPath, sourceName)
+	if (result.model && options.limitSlides && options.limitSlides > 0) {
+		result.model.slides = result.model.slides.slice(0, options.limitSlides)
+	}
+	return { ...result, engine: 'structured', runtimeAvailable: true }
+}
+
+async function runUltimateModelDecypher(options: DecypherModelOptions, inputPath: string): Promise<DecypherModelResult> {
+	const toolPath = findUltimateTool()
+	if (!toolPath) {
+		return {
+			success: false,
+			engine: 'ultimate',
+			signature: fs.existsSync(inputPath) ? hashBuffer(fs.readFileSync(inputPath)) : '',
+			stats: emptyStats(),
+			warnings: [],
+			errors: ['PPTX_ULTIMATE_DECYPHER_TOOL.mjs was not found in the current project or package root'],
+			runtimeAvailable: false,
+		}
+	}
+
+	const summaryPath = path.join(os.tmpdir(), `pptxgenjs-decypher-summary-${Date.now()}-${Math.random().toString(16).slice(2)}.json`)
+	const modelPath = path.join(os.tmpdir(), `pptxgenjs-decypher-model-${Date.now()}-${Math.random().toString(16).slice(2)}.json`)
+	const args = [toolPath, inputPath]
+	if (options.outputDir) args.push('--output', path.resolve(options.outputDir))
+	args.push('--no-regenerate', '--json-summary', summaryPath, '--json-model', modelPath)
+
+	const proc = await runProcess(process.execPath, args, process.cwd(), options.timeoutMs)
+	if (proc.exitCode !== 0 || !fs.existsSync(modelPath)) {
+		return {
+			success: false,
+			engine: 'ultimate',
+			signature: fs.existsSync(inputPath) ? hashBuffer(fs.readFileSync(inputPath)) : '',
+			stats: emptyStats(),
+			warnings: [],
+			errors: [`Ultimate decypher model export failed with exit code ${proc.exitCode}`, proc.stderr || proc.stdout].filter(Boolean),
+			runtimeAvailable: true,
+		}
+	}
+
+	const modelResult = readJsonFile(modelPath)
+	if (modelResult.model && options.limitSlides && options.limitSlides > 0) {
+		modelResult.model.slides = modelResult.model.slides.slice(0, options.limitSlides)
+	}
+	return {
+		success: modelResult.success === true,
+		engine: 'ultimate',
+		model: modelResult.model,
+		signature: modelResult.signature || '',
+		stats: modelResult.stats || emptyStats(),
+		warnings: modelResult.warnings || [],
+		errors: modelResult.errors || [],
+		runtimeAvailable: true,
+	}
+}
+
 export async function decypherToGenerator(input: string | DecypherGeneratorOptions): Promise<DecypherGeneratorResult> {
 	const options: DecypherGeneratorOptions = typeof input === 'string' ? { pptxPath: input } : input
 	const { inputPath } = materializeInput(options)
@@ -284,15 +345,23 @@ export async function decypherToGenerator(input: string | DecypherGeneratorOptio
 export async function decypherToModel(options: DecypherModelOptions): Promise<DecypherModelResult> {
 	try {
 		const { inputPath, sourceName } = materializeInput(options)
-		const decypher = new PptxDecypher(options)
-		const result = await decypher.decypherToModel(inputPath, sourceName)
-		if (result.model && options.limitSlides && options.limitSlides > 0) {
-			result.model.slides = result.model.slides.slice(0, options.limitSlides)
+		if (!fs.existsSync(inputPath)) {
+			return {
+				success: false,
+				engine: options.engine === 'structured' ? 'structured' : 'ultimate',
+				signature: '',
+				stats: emptyStats(),
+				warnings: [],
+				errors: [`File not found: ${inputPath}`],
+				runtimeAvailable: false,
+			}
 		}
-		return { ...result, runtimeAvailable: true }
+		if (options.engine === 'structured') return runStructuredModelDecypher(options, inputPath, sourceName)
+		return runUltimateModelDecypher(options, inputPath)
 	} catch (error) {
 		return {
 			success: false,
+			engine: options.engine === 'structured' ? 'structured' : 'ultimate',
 			signature: '',
 			stats: emptyStats(),
 			warnings: [],

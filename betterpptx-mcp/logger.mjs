@@ -8,12 +8,15 @@ import * as fs from 'node:fs'
 import * as path from 'node:path'
 import * as crypto from 'node:crypto'
 import { inspect } from 'node:util'
+import { isProductionBillingEnvironment } from './billing/security-policy.mjs'
+import { diagnosticRequestId, traceInternalOperation } from './diagnostic-trace.mjs'
 
 const TRUE_VALUES = new Set(['1', 'true', 'yes', 'on', 'debug', 'trace', 'full', 'all'])
 const FULL_VALUES = new Set(['trace', 'full', 'all'])
 const SECRET_KEY = /^(key|licenseKey|activationKey|apiKey|accessKey|privateKey|secret|token|password|passwd|authorization|cookie|set-cookie)$/i
-const SECRET_KEY_FRAGMENT = /authorization|cookie|set-cookie|token|secret|password|passwd|api[-_]?key|access[-_]?key|private[-_]?key|license[-_]?key|activation[-_]?key/i
-const PAYLOAD_KEY = /^(content|data|pptxData|pptxBase64|body|rawBody|audio|imageData|fileData|base64|script|text|notes|prompt|html|xml|rows|source)$/i
+const SECRET_KEY_FRAGMENT = /authorization|cookie|set-cookie|token|secret|password|passwd|api[-_]?key|access[-_]?key|private[-_]?key|license[-_]?key|activation[-_]?key|payment[-_]?(?:signature|payload|header)|signed[-_]?transaction|purchase[-_]?context|x[-_]?payment/i
+const DEVICE_TOKEN_KEY = /^(x-betterpptx-device|x-openai-subject|x-openai-session|dpop|deviceToken|installToken|rawToken)$/i
+const PAYLOAD_KEY = /^(content|data|pptxData|pptxBase64|body|rawBody|audio|imageData|fileData|file|htmlPackage|htmlZip|download_url|base64|script|text|notes|prompt|html|xml|rows|source)$/i
 const PATH_KEY = /^(path|filePath|sourcePath|templatePath|pptxPath|outputDir|workDir|downloadRoot|uploadDir|fileName|filename|saveToPath)$/i
 
 let state = null
@@ -32,11 +35,11 @@ export function isFullLogging() {
 }
 
 function includeSecrets() {
-	return process.env.BETTERPPTX_LOG_SECRETS === '1'
+	return process.env.BETTERPPTX_PUBLIC_BLACK_BOX !== '1' && !isProductionBillingEnvironment() && process.env.BETTERPPTX_LOG_SECRETS === '1'
 }
 
 function includePayloads() {
-	return process.env.BETTERPPTX_LOG_PAYLOADS === '1'
+	return !isProductionBillingEnvironment() && process.env.BETTERPPTX_LOG_PAYLOADS === '1'
 }
 
 function includePrivatePaths() {
@@ -45,6 +48,10 @@ function includePrivatePaths() {
 
 function maxChars() {
 	const raw = process.env.BETTERPPTX_LOG_MAX_CHARS
+	if (isProductionBillingEnvironment()) {
+		const requested = Number(raw)
+		return Number.isSafeInteger(requested) && requested >= 1024 ? Math.min(requested, 65536) : 65536
+	}
 	if (raw !== undefined && raw !== '') return Math.max(0, Number(raw) || 0)
 	return isFullLogging() ? 0 : 200000
 }
@@ -83,11 +90,13 @@ function serializeScalar(value) {
 }
 
 function redactUrlSecret(value) {
-	return String(value).replace(/\/s\/[^/]+\/mcp\b/g, '/s/[REDACTED]/mcp')
+	return String(value)
+		.replace(/\/s\/[^/]+\/mcp\b/g, '/s/[REDACTED]/mcp')
+		.replace(/([?&](?:token|topup_token|payment_token)=)[^&#\s]+/gi, '$1[REDACTED]')
 }
 
 function shouldRedactKey(key) {
-	return key !== 'secretsIncluded' && (SECRET_KEY.test(key) || SECRET_KEY_FRAGMENT.test(key))
+	return key !== 'secretsIncluded' && (SECRET_KEY.test(key) || SECRET_KEY_FRAGMENT.test(key) || DEVICE_TOKEN_KEY.test(key))
 }
 
 function hashPreview(value) {
@@ -111,6 +120,7 @@ function summarizePath(value) {
 }
 
 function redact(value, key = '', seen = new WeakSet()) {
+	if (key === 'dataBase64' || key === 'blob') return hashPreview(value)
 	if (!includeSecrets() && key && shouldRedactKey(key)) return '[REDACTED]'
 	if (value === null || value === undefined) return value
 	const t = typeof value
@@ -122,7 +132,7 @@ function redact(value, key = '', seen = new WeakSet()) {
 	if (!includeSecrets() && t === 'string') return redactUrlSecret(value)
 	if (t !== 'object') return serializeScalar(value)
 	if (Buffer.isBuffer(value)) {
-		return isFullLogging()
+		return isFullLogging() && includePayloads()
 			? { type: 'Buffer', bytes: value.length, base64: value.toString('base64') }
 			: { type: 'Buffer', bytes: value.length, sha256: crypto.createHash('sha256').update(value).digest('hex') }
 	}
@@ -165,14 +175,58 @@ function jsonLine(record) {
 	return `${line}\n`
 }
 
+function metrologyEnabled() {
+	return String(process.env.BETTERPPTX_METROLOGY || '') === '1'
+}
+
+function safePositiveNumber(value) {
+	const n = Number(value)
+	return Number.isFinite(n) && n >= 0 ? n : 0
+}
+
+function emitMetrologyToolMeasurement(trace, { durationMs = 0, result = null, error = null } = {}) {
+	if (!metrologyEnabled() || !trace) return
+	const cpu = trace.cpuStartedAt ? process.cpuUsage(trace.cpuStartedAt) : { user: 0, system: 0 }
+	const memory = process.memoryUsage()
+	const rssStart = safePositiveNumber(trace.rssStartedAt)
+	const rssEnd = safePositiveNumber(memory.rss)
+	const ok = error ? false : result?.ok !== false
+	const row = {
+		schemaVersion: 'betterpptx.metrology.v1',
+		metricType: 'betterpptx.resource_measurement',
+		source: 'tool-call-wrapper',
+		workload: String(process.env.BETTERPPTX_METROLOGY_WORKLOAD || ''),
+		service: String(process.env.K_SERVICE || process.env.BETTERPPTX_SERVICE || 'betterpptx-mcp'),
+		revision: String(process.env.K_REVISION || ''),
+		topology: String(process.env.BETTERPPTX_METROLOGY_TOPOLOGY || ''),
+		callId: trace.callId,
+		toolName: trace.name,
+		wallMs: safePositiveNumber(durationMs),
+		cpuUsec: safePositiveNumber(cpu.user) + safePositiveNumber(cpu.system),
+		userCpuUsec: safePositiveNumber(cpu.user),
+		systemCpuUsec: safePositiveNumber(cpu.system),
+		rssStartBytes: rssStart,
+		rssEndBytes: rssEnd,
+		rssDeltaBytes: rssStart ? rssEnd - rssStart : 0,
+		ok,
+		errorCode: error?.code || null,
+		includesChildProcesses: false,
+		meterSource: 'live-cloud-run',
+		timestamp: new Date().toISOString(),
+	}
+	process.stdout.write(`${JSON.stringify(row)}\n`)
+}
+
 export function logEvent(type, data = {}) {
 	const s = getState()
 	if (!s) return null
+	const requestId = diagnosticRequestId(null)
 	const record = {
 		ts: new Date().toISOString(),
 		seq: ++seq,
 		pid: process.pid,
 		type,
+		...(requestId ? { requestId } : {}),
 		data: redact(data),
 	}
 	try {
@@ -185,19 +239,32 @@ export function logEvent(type, data = {}) {
 
 export function logToolStart(name, args, meta = {}) {
 	const callId = createTraceId('tool')
+	const requestId = diagnosticRequestId(null)
+	traceInternalOperation({ requestId, callId, name, phase: 'start' })
 	logEvent('tool.call.start', { callId, name, args, meta })
-	return { callId, startedAt: process.hrtime.bigint(), name }
+	return {
+		callId,
+		requestId,
+		startedAt: process.hrtime.bigint(),
+		cpuStartedAt: process.cpuUsage(),
+		rssStartedAt: process.memoryUsage().rss,
+		name,
+	}
 }
 
 export function logToolEnd(trace, result) {
 	if (!trace) return
 	const durationMs = Number(process.hrtime.bigint() - trace.startedAt) / 1e6
+	emitMetrologyToolMeasurement(trace, { durationMs, result })
+	traceInternalOperation({ requestId: trace.requestId, callId: trace.callId, name: trace.name, phase: 'end', errorCode: result?.ok === false ? result?.error?.code : null, durationMs })
 	logEvent('tool.call.end', { callId: trace.callId, name: trace.name, durationMs, result })
 }
 
 export function logToolThrow(trace, error) {
 	if (!trace) return
 	const durationMs = Number(process.hrtime.bigint() - trace.startedAt) / 1e6
+	emitMetrologyToolMeasurement(trace, { durationMs, error })
+	traceInternalOperation({ requestId: trace.requestId, callId: trace.callId, name: trace.name, phase: 'throw', errorCode: error?.code || 'TOOL_THROW', durationMs })
 	logEvent('tool.call.throw', {
 		callId: trace.callId,
 		name: trace.name,

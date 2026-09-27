@@ -1,0 +1,38 @@
+{
+  "schema": "betterpptx.g1.powerpoint-playback-evidence.v1",
+  "measuredAt": "2026-08-15T16:12:05Z",
+  "application": "Microsoft PowerPoint COM 16.0",
+  "isolation": "aborted if any pre-existing PowerPoint process was present",
+  "files": [
+    {
+      "path": "betterpptx-mcp/outputs/g1-native-recordstudio-evolved-20260814/g1-evolved-native-recordstudio-review-20260814-notes-only.pptx",
+      "bytes": 23207270,
+      "sha256": "dbbecd52e780f0b3cdbb9cd80d93c21a719758df96c96eecd7305f2b27c510d0",
+      "status": "PASS",
+      "slides": 6,
+      "visiblePresenterMedia": true,
+      "singleNativePresenterVisual": true,
+      "presenterShape": {
+        "name": "Native Record Studio Presenter",
+        "mediaType": 3,
+        "autoShapeType": 9,
+        "leftPt": 791.4959716796875,
+        "topPt": 371.5199890136719,
+        "widthPt": 162.0,
+        "heightPt": 162.0,
+        "playOnEntry": -1
+      },
+      "firstSlideCount": 6,
+      "secondSlideCount": 6,
+      "runningState": 1,
+      "pausedState": 2,
+      "resumedState": 1,
+      "runningPosition": 1,
+      "pausedPosition": 1,
+      "resumedPosition": 1,
+      "replayState": 1,
+      "replayPosition": 1
+    }
+  ],
+  "pass": true
+}

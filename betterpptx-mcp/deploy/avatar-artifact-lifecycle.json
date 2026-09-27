@@ -1,0 +1,18 @@
+{
+  "rule": [
+    {
+      "action": { "type": "Delete" },
+      "condition": {
+        "age": 2,
+        "matchesPrefix": ["betterpptx-avatar-artifacts/tenants/"]
+      }
+    },
+    {
+      "action": { "type": "Delete" },
+      "condition": {
+        "age": 2,
+        "matchesPrefix": ["betterpptx-avatar-artifacts/worker-idempotency/"]
+      }
+    }
+  ]
+}

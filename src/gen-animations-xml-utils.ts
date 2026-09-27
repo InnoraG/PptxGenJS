@@ -11,6 +11,11 @@ import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 
 export type AnimationNodeType = 'clickEffect' | 'afterEffect' | 'withEffect'
 
+export type AnimationTimingOptions = {
+	repeatCount?: number | 'indefinite' | null
+	autoReverse?: boolean | null
+}
+
 /**
  * Parse XML string into a DOM Document
  */
@@ -175,4 +180,50 @@ export function hasAttribute(xmlString: string, attributeName: string): boolean 
 export function countParElements(xmlString: string): number {
 	const doc = parseXml(xmlString)
 	return doc.getElementsByTagName('par').length
+}
+
+/**
+ * Apply generic timing sliders to every outer animation node.
+ *
+ * PowerPoint stores repeatCount and autoReverse on the outer cTn that owns
+ * the preset.  Builders may emit more than one outer p:par for paragraph or
+ * multi-part effects, so the authored values are applied to each owner node.
+ * The operation is structural; nested behavior cTn nodes are intentionally
+ * left untouched because their autoRev values can be effect-internal.
+ */
+export function applyAnimationTimingOptionsStructural(
+	xmlString: string,
+	options: AnimationTimingOptions
+): string {
+	const hasRepeat = options.repeatCount !== undefined && options.repeatCount !== null
+	const hasAutoReverse = options.autoReverse !== undefined && options.autoReverse !== null
+	if (!hasRepeat && !hasAutoReverse) return xmlString
+
+	const doc = parseXml(xmlString)
+	const unprefixedParElements = doc.getElementsByTagName('par')
+	const parElements = unprefixedParElements.length > 0
+		? unprefixedParElements
+		: doc.getElementsByTagName('p:par')
+	for (let i = 0; i < parElements.length; i++) {
+		const parElement = parElements[i]
+		for (let j = 0; j < parElement.childNodes.length; j++) {
+			const child = parElement.childNodes[j]
+			if (child.nodeType !== 1 || (child.nodeName !== 'cTn' && child.nodeName !== 'p:cTn')) continue
+			const owner = child as Element
+			if (hasRepeat) {
+				const repeatValue = options.repeatCount === 'indefinite'
+					? 'indefinite'
+					: String(Math.round(Number(options.repeatCount) * 1000))
+				owner.setAttribute('repeatCount', repeatValue)
+			}
+			if (hasAutoReverse) {
+				// PowerPoint's canonical false/default form is omission. Removing
+				// an inherited owner value also makes a sparse false edit a reset.
+				if (options.autoReverse) owner.setAttribute('autoRev', '1')
+				else owner.removeAttribute('autoRev')
+			}
+			break
+		}
+	}
+	return serializeXml(doc)
 }

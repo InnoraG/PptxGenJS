@@ -1,0 +1,145 @@
+{
+  "schemaVersion": "betterpptx.deck-spec.v1",
+  "title": "Product Launch Readiness",
+  "audience": "Launch leadership team",
+  "objective": "Use a named template while snapping content to title, body, and footer regions.",
+  "layout": "LAYOUT_WIDE",
+  "authoringContract": {
+    "level": "deterministic",
+    "coordinateSystem": "inches",
+    "layerModel": "flat-object-array",
+    "objectIdentity": "stable-names-required",
+    "textPolicy": "Use shape only for geometry. Use textBox for standalone text and textShape for text inside a PowerPoint shape.",
+    "requires": ["slide.id", "content[].name", "slide.notes", "altText for visual proof", "validation before save"]
+  },
+  "styleIntent": {
+    "density": "operational",
+    "tone": "crisp",
+    "visualSystem": "template-aligned",
+    "avoid": ["freeform layout drift", "placeholder collisions", "unverified launch claims"]
+  },
+  "theme": {
+    "name": "Launch Template",
+    "palette": ["172554", "0284C7", "84CC16", "FACC15", "FAFAFA"],
+    "fontFace": "Aptos"
+  },
+  "sections": [
+    {
+      "id": "readiness",
+      "title": "Readiness",
+      "slideIds": ["launch-status", "launch-timeline"]
+    }
+  ],
+  "assets": [
+    {
+      "name": "launch-template",
+      "kind": "reference",
+      "handle": "asset_template_launch_2026",
+      "intent": "Template with protected logo, title placeholder, content placeholder, and footer.",
+      "altText": "Launch readiness template"
+    }
+  ],
+  "data": [
+    {
+      "name": "launch-milestones",
+      "dataSource": "launch-pmo-plan",
+      "provenance": "Launch PMO plan version 7",
+      "verified": true,
+      "rows": [
+        ["Milestone", "Owner", "Date", "Status"],
+        ["Beta exit", "Product", "2026-06-10", "On track"],
+        ["Pricing approval", "Finance", "2026-06-13", "At risk"],
+        ["Field enablement", "Sales", "2026-06-18", "On track"]
+      ]
+    }
+  ],
+  "validation": {
+    "previewBeforeSave": true,
+    "validateBeforeSave": true,
+    "minDesignScore": 82,
+    "requireAccessibility": true
+  },
+  "slides": [
+    {
+      "id": "launch-status",
+      "title": "Launch Status",
+      "role": "status",
+      "message": "Launch readiness is mostly on track with pricing approval as the visible risk.",
+      "layoutIntent": "metric-grid",
+      "content": [
+        {
+          "kind": "metric-grid",
+          "name": "readiness-metrics",
+          "items": [
+            {
+              "name": "product-readiness",
+              "label": "Product",
+              "value": "Green",
+              "trend": "stable",
+              "provenance": "Launch PMO plan version 7",
+              "verified": true
+            },
+            {
+              "name": "pricing-readiness",
+              "label": "Pricing",
+              "value": "Amber",
+              "trend": "watch",
+              "provenance": "Finance approval tracker",
+              "verified": true
+            },
+            {
+              "name": "field-readiness",
+              "label": "Field",
+              "value": "Green",
+              "trend": "improving",
+              "provenance": "Sales enablement dashboard",
+              "verified": true
+            }
+          ]
+        }
+      ],
+      "notes": "Snap to template regions and preserve protected logo/footer areas."
+    },
+    {
+      "id": "launch-timeline",
+      "title": "Launch Timeline",
+      "role": "timeline",
+      "message": "Three milestones determine go-live confidence.",
+      "layoutIntent": "timeline",
+      "content": [
+        {
+          "kind": "timeline",
+          "name": "milestone-timeline",
+          "dataRef": "launch-milestones",
+          "dataSource": "launch-pmo-plan",
+          "provenance": "Launch PMO plan version 7",
+          "verified": true,
+          "items": [
+            {
+              "name": "beta-exit",
+              "label": "Beta exit",
+              "value": "2026-06-10",
+              "provenance": "Launch PMO plan version 7",
+              "verified": true
+            },
+            {
+              "name": "pricing-approval",
+              "label": "Pricing approval",
+              "value": "2026-06-13",
+              "provenance": "Finance approval tracker",
+              "verified": true
+            },
+            {
+              "name": "field-enablement",
+              "label": "Field enablement",
+              "value": "2026-06-18",
+              "provenance": "Sales enablement dashboard",
+              "verified": true
+            }
+          ]
+        }
+      ],
+      "notes": "Warn if any text must shrink below the template minimum."
+    }
+  ]
+}

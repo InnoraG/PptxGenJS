@@ -1,6 +1,7 @@
 import * as crypto from 'node:crypto'
 
 import { recordBillingDryRunTelemetry } from '../telemetry.mjs'
+import { speechSecondsFromChars } from './evolving-model.mjs'
 import {
 	createBillingLedgerStore,
 	hashDeckId,
@@ -121,8 +122,62 @@ export function estimateHeavyCost(name, args = {}, result = {}, rateCard = curre
 		return applyMinimumCharge(h.openUploadedBase + bytesToMb(argByteEstimate(args, result)) * h.openUploadedPerMb, rateCard)
 	}
 	if (tool === 'betterpptx.narration.synthesize' || tool === 'betterpptx.deck.add_narration' || tool === 'betterpptx.slide.add_narration') {
-		const chars = Math.max(textLength(args.text), textLength(args.script), textLength(args.slides), textLength(args.items))
+		// A final spec carrying a validated preparation manifest reuses the exact
+		// measured audio. It must not be quoted or reserved as a second synthesis.
+		if (tool === 'betterpptx.slide.add_narration' && args.preparedNarration) return 0
+		if (tool === 'betterpptx.deck.add_narration' && Array.isArray(args.slides) && args.slides.length && args.slides.every(slide => slide?.preparedNarration)) return 0
+		// The synthesis endpoint always prepares audio; it does not implement a
+		// caller-controlled "reuse" exemption. Segmented scripts consume speech
+		// compute too, even when the top-level text field is empty.
+		const chars = Math.max(textLength(args.text), textLength(args.script), textLength(args.slides), textLength(args.items), textLength(args.segments), textLength(args.narration))
 		return applyMinimumCharge(h.narrationBase + (chars / 1000) * h.narrationPer1000Chars, rateCard)
+	}
+	if (tool === 'betterpptx.avatar.render_job' || tool === 'betterpptx.deck.add_avatar_narration' || tool === 'betterpptx.slide.add_avatar_narration') {
+		const durationSeconds = Math.max(
+			1,
+			Number(result.durationSeconds || result.audioDurationSeconds || result.video?.durationSeconds || 0) ||
+			(Number(result.durationMs || result.audio?.durationMs || result.video?.durationMs || 0) / 1000) ||
+			Number(args.durationSeconds || args.audioDurationSeconds || 0) ||
+			(Number(args.durationMs || args.audio?.durationMs || 0) / 1000) ||
+			// Duration predicted from script length via the LEARNED per-voice speech rate
+			// (evolving cost model; static 13 chars/second until observations exist).
+			speechSecondsFromChars(Math.max(textLength(args.text), textLength(args.script), textLength(args.slides), textLength(args.items)), args.voice || args.ttsVoice || ''),
+		)
+		const quality = String(args.avatarQuality || args.quality || '').toLowerCase()
+		const multiplier = quality === 'quality' || quality === 'high' ? Number(h.avatarQualityMultiplier || 1.5) : 1
+		return applyMinimumCharge((h.avatarBase + durationSeconds * h.avatarPerSecond) * multiplier, rateCard)
+	}
+	if (tool === 'betterpptx.assets.generate_rigged3d') {
+		if (result.cached === true) return 0
+		// SERVER/SERVICE cost only (TRELLIS.2 + UniRig content is MIT = free): the real cost is GPU-seconds
+		// on Modal L40S (generation + rigging + cold model-load), reported by the worker as result.gpuSeconds.
+		// 'standard' quality raises the whole charge by the quality multiplier (mirrors the avatar pattern).
+		const billing = result._billing && typeof result._billing === 'object' ? result._billing : {}
+		const gpuSeconds = Math.max(0, Number(result.gpuSeconds || billing.gpuSeconds || args.gpuSeconds || 0))
+		const providerCredits = Math.max(0, Number(result.providerCredits || billing.providerCredits || args.providerCredits || 0))
+		const quality = String(args.quality || result.meshResolution || '').toLowerCase()
+		const multiplier = quality === 'standard' ? Number(h.model3dGenQualityMultiplier || 1.2) : 1
+		// Baker (presenter clip-baker) CPU-second term — added AFTER the mesh-quality multiplier (CPU bake time
+		// is quality-independent) and priced at the CPU rate, NOT the GPU-fair one.
+		const bakeCpuSeconds = Math.max(0, Number(result.bakeSeconds || billing.bakeSeconds || args.bakeSeconds || 0))
+		const bakeCharge = bakeCpuSeconds * (h.model3dGenPerBakeCpuSecond ?? 0.02)
+		const providerCharge = providerCredits * (h.model3dGenPerProviderCredit ?? 1)
+		return applyMinimumCharge(((h.model3dGenBase ?? 5) + gpuSeconds * (h.model3dGenPerGpuSecond ?? 0.35)) * multiplier + bakeCharge + providerCharge, rateCard)
+	}
+	if (tool === 'betterpptx.assets.generate_image') {
+		if (result.cached === true) return 0
+		const imageCount = Math.max(1, Number(result.imageCount || result.images || args.imageCount || 1))
+		const gpuSeconds = Math.max(0, Number(result.gpuSeconds || result._billing?.gpuSeconds || args.gpuSeconds || 0))
+		return applyMinimumCharge(
+			(h.imageGenBase ?? 3) + imageCount * (h.imageGenPerImage ?? 2) + gpuSeconds * (h.imageGenPerGpuSecond ?? 0.35),
+			rateCard,
+		)
+	}
+	if (tool === 'betterpptx.assets.generate_model3d' || tool === 'betterpptx.sketchfab.import') {
+		// SERVER/SERVICE cost only: external model import (archive download + extract/convert).
+		// The 3D content itself is free-licensed and contributes nothing here.
+		const importMb = bytesToMb(Math.max(argByteEstimate(args, result), Number(result.sizeBytes || result.model3dImportBytes || result.asset?.sizeBytes || 0) || 0))
+		return applyMinimumCharge((h.model3dImportBase ?? 1.5) + importMb * (h.model3dImportPerMb ?? 0.6), rateCard)
 	}
 	if (tool === 'betterpptx.slide.add_model3d') {
 		return applyMinimumCharge(h.model3dBase + bytesToMb(argByteEstimate(args, result)) * h.model3dPerMb, rateCard)
@@ -220,6 +275,64 @@ export async function recordBillingDryRunOperation({ name, args = {}, context = 
 	return { recorded: true, fact }
 }
 
+export async function recordBillingDryRunAggregate({
+	name,
+	args = {},
+	context = {},
+	entry = null,
+	billingEntitlement = null,
+	store = null,
+	operationCount = 1,
+	estimatedCredits = 0,
+	rateCardVersion = currentRateCardVersion(),
+	billingCategory = 'aggregate',
+	billingMode = 'aggregate',
+	classifierReason = 'aggregate-dry-run',
+	byCategory = {},
+	metrics = {},
+} = {}) {
+	if (!isBillingDryRunEnabled()) return { recorded: false, reason: 'dry-run-disabled' }
+	const sessionHash = hashSessionId(sessionIdFor(context))
+	const rawDeckId = args.deckId || null
+	const deckHash = rawDeckId ? hashDeckId(rawDeckId) : null
+	const fact = {
+		operationId: hashOperationId(operationKey({ name, args, context })),
+		sessionHash,
+		deckHash,
+		customerHash: billingEntitlement?.billingCustomerHash || null,
+		toolName: String(name || 'unknown'),
+		state: 'dry_run',
+		billingMode,
+		billingCategory,
+		estimatedCredits: roundCredits(estimatedCredits),
+		rateCardVersion,
+		classifierReason,
+		argSummary: safeArgSummary(args),
+		operationCount: Math.max(1, Number(operationCount) || 1),
+		byCategory,
+		metrics,
+		createdAt: new Date().toISOString(),
+	}
+	const ledger = store || createBillingLedgerStore()
+	await ledger.recordSession(fact.sessionHash, {
+		source: 'billing-dry-run',
+		billingDryRun: true,
+		rateCardVersion: fact.rateCardVersion,
+		customerHash: fact.customerHash,
+	})
+	if (fact.deckHash) {
+		await ledger.recordDeck(fact.deckHash, {
+			source: 'billing-dry-run',
+			sessionHash: fact.sessionHash,
+			customerHash: fact.customerHash,
+			lastToolName: fact.toolName,
+		})
+	}
+	await ledger.recordOperation(fact.operationId, fact)
+	recordBillingDryRunTelemetry(fact)
+	return { recorded: true, fact }
+}
+
 export function publicBillingDryRunSummary(summary = {}) {
 	return {
 		mode: isBillingDryRunEnabled() ? 'dry_run' : 'disabled',
@@ -230,4 +343,3 @@ export function publicBillingDryRunSummary(summary = {}) {
 		lastOperationAt: summary.lastOperationAt || null,
 	}
 }
-

@@ -1,0 +1,399 @@
+{
+  "schemaVersion": "betterpptx.authoring-v3-motion-mvp-evidence.v1",
+  "status": "TECHNICAL_MVP_FROZEN_NOT_PUBLICLY_ENABLED",
+  "frozenAt": "2026-08-15T10:38:56.152Z",
+  "implementation": {
+    "commitSha": "5561ef70725cd96644441b7ff6829044244e63d9",
+    "treeSha": "6828967e8fd1222eeb5f95814964cf3a7fd0d515",
+    "branch": "codex/authoring-v3-full-motion-catalog-20260814",
+    "g5ApprovalAncestryCommit": "448bbaa42b99a1c58f46802cbc76d6275bc8e5b0",
+    "cleanAtFreeze": true
+  },
+  "productDoctrine": {
+    "selectionAuthority": "AI client",
+    "engineRole": "exact executor only",
+    "catalogIsNotCappedAt18": true,
+    "maximumMotionsPerPresenterBundle": 18,
+    "narrationIsMasterClock": true,
+    "noRanking": true,
+    "noSilentSubstitution": true
+  },
+  "catalog": {
+    "schemaVersion": "betterpptx.authoring-motion-catalog.v1",
+    "catalogVersion": "2026-08-15.1",
+    "internalEvidenceFingerprint": "motion-catalog-3db25cbb0abe7b9d3844323b",
+    "fingerprintIsPublic": false,
+    "inventory": {
+      "kineticPlanEntries": 60,
+      "kineticBakedEntries": 31,
+      "ordinaryGestureEntries": 18,
+      "interactionCandidateEntries": 18,
+      "total": 96,
+      "selectable": 48,
+      "notSelectable": 48,
+      "byFamily": {
+        "kinetic": 60,
+        "ordinary-gesture": 18,
+        "interaction": 18
+      },
+      "byProductState": {
+        "EXECUTABLE_GENERAL_MOTION": 48,
+        "PLANNED_NOT_SELECTABLE": 47,
+        "IMPLEMENTED_NOT_SELECTABLE": 1
+      }
+    },
+    "canonicalLedger": {
+      "path": "betterpptx-mcp/deploy/model3d-worker/canonical/authoring-motion-catalog.json",
+      "bytes": 109340,
+      "sha256": "40c890f744424c48d1d499630ffe37eaebcfa87be503112d679ed2a3ea6ff77f"
+    },
+    "canonicalSchema": {
+      "path": "betterpptx-mcp/deploy/model3d-worker/canonical/authoring-motion-catalog.schema.json",
+      "bytes": 4419,
+      "sha256": "36f7bfc5c560f7ac977627567c4f2fc377838d2231ac864c96d32fe517c5d101"
+    }
+  },
+  "proof": {
+    "atlas": {
+      "artifact": {
+        "path": "outputs/authoring-v3-motion-atlas/20260815T100819Z/authoring-v3-native-motion-atlas.pptx",
+        "bytes": 20705496,
+        "sha256": "efb6b2b5706cbbe75e51ffdbfad15744e8cac8c233a40afe5a9db70c0dc81b6d"
+      },
+      "report": {
+        "path": "outputs/authoring-v3-motion-atlas/20260815T100819Z/report.json",
+        "bytes": 147162,
+        "sha256": "de63e92ed2cec8a605d945d1718486e6f24d54a6991ebba5b9b556024290f68c"
+      },
+      "slides": 49,
+      "selectableMotions": 48,
+      "shards": [
+        18,
+        18,
+        12
+      ]
+    },
+    "coldAiPortfolio": {
+      "report": {
+        "path": "outputs/authoring-v3-cold-ai-motion-portfolio/20260815T100848Z/portfolio-report.json",
+        "bytes": 665618,
+        "sha256": "8204cf5ee4fdb20a28ae59d36052e5f0c413d5c74550d9c2eab392436d6a40f4"
+      },
+      "scenarios": [
+        {
+          "scenarioId": "01-executive-restraint",
+          "finalSelectedMotionIds": [
+            "motion.ordinary.talk",
+            "motion.ordinary.contrast"
+          ],
+          "bundleBudget": {
+            "used": 2,
+            "maximum": 18,
+            "remaining": 16
+          }
+        },
+        {
+          "scenarioId": "02-product-launch",
+          "finalSelectedMotionIds": [
+            "motion.kinetic.superhero-landing",
+            "motion.kinetic.magical-reveal",
+            "motion.kinetic.victory-jump"
+          ],
+          "bundleBudget": {
+            "used": 3,
+            "maximum": 18,
+            "remaining": 15
+          }
+        },
+        {
+          "scenarioId": "03-technical-process",
+          "finalSelectedMotionIds": [
+            "motion.kinetic.magical-reveal",
+            "motion.kinetic.sprint",
+            "motion.ordinary.emphasize"
+          ],
+          "bundleBudget": {
+            "used": 3,
+            "maximum": 18,
+            "remaining": 15
+          }
+        },
+        {
+          "scenarioId": "04-risk-recovery",
+          "finalSelectedMotionIds": [
+            "motion.ordinary.disagree",
+            "motion.kinetic.side-dodge",
+            "motion.ordinary.agree"
+          ],
+          "bundleBudget": {
+            "used": 3,
+            "maximum": 18,
+            "remaining": 15
+          }
+        },
+        {
+          "scenarioId": "05-data-kpi",
+          "finalSelectedMotionIds": [
+            "motion.ordinary.point",
+            "motion.ordinary.present",
+            "motion.ordinary.magnitude"
+          ],
+          "bundleBudget": {
+            "used": 3,
+            "maximum": 18,
+            "remaining": 15
+          }
+        },
+        {
+          "scenarioId": "06-contact-boundary",
+          "finalSelectedMotionIds": [
+            "motion.ordinary.point",
+            "motion.kinetic.scanning-lookup"
+          ],
+          "bundleBudget": {
+            "used": 2,
+            "maximum": 18,
+            "remaining": 16
+          }
+        },
+        {
+          "scenarioId": "07-budget-revision",
+          "finalSelectedMotionIds": [
+            "motion.kinetic.superhero-landing",
+            "motion.kinetic.forward-slide",
+            "motion.kinetic.active-idle",
+            "motion.kinetic.sprint",
+            "motion.kinetic.dive-roll",
+            "motion.kinetic.flying",
+            "motion.kinetic.floating-drift",
+            "motion.kinetic.heavy-jump",
+            "motion.kinetic.freefall",
+            "motion.kinetic.backflip",
+            "motion.kinetic.heavy-kick",
+            "motion.kinetic.ground-pound",
+            "motion.kinetic.heavy-push",
+            "motion.kinetic.victory-jump",
+            "motion.kinetic.skyward-launch",
+            "motion.kinetic.orbit-turn",
+            "motion.kinetic.gforce-lean",
+            "motion.kinetic.magical-reveal"
+          ],
+          "bundleBudget": {
+            "used": 18,
+            "maximum": 18,
+            "remaining": 0
+          }
+        }
+      ],
+      "artifacts": [
+        {
+          "path": "outputs/authoring-v3-cold-ai-motion-portfolio/20260815T100848Z/2_n4ZcgeMnUtE6BXXB_eitxr/03-technical-process.pptx",
+          "bytes": 6118536,
+          "sha256": "96474d40ac2f8f817bf4dc257011343b8294e29592654bc4b7a6ebfeb644f9a9"
+        },
+        {
+          "path": "outputs/authoring-v3-cold-ai-motion-portfolio/20260815T100848Z/83kpQAvBAdx6CEJ0tbyB1EnN/06-contact-boundary.pptx",
+          "bytes": 5575760,
+          "sha256": "dd13bc0aa62bff9432f50b46d70d6f214f418dd7593ca19a6f8101977833e8ff"
+        },
+        {
+          "path": "outputs/authoring-v3-cold-ai-motion-portfolio/20260815T100848Z/9BRPVipDM9FKFf9jJyl28ARZ/07-budget-revision.pptx",
+          "bytes": 6335193,
+          "sha256": "19223dac718e68b704a778ae64922c201bace79ee6d65aa574759bc5f4ef9876"
+        },
+        {
+          "path": "outputs/authoring-v3-cold-ai-motion-portfolio/20260815T100848Z/FSW9Lqjsn4wATKgirxkt225Q/05-data-kpi.pptx",
+          "bytes": 5891704,
+          "sha256": "b32be257d4b4de11a7f2970c40ccefb1af45b03511a22eae05999bb5f82086f3"
+        },
+        {
+          "path": "outputs/authoring-v3-cold-ai-motion-portfolio/20260815T100848Z/mg_G7YeIztYg2MNQMlDyL01S/01-executive-restraint.pptx",
+          "bytes": 5596553,
+          "sha256": "03bd5115002438e6941e77dc6ac74727e4420d872647c185755767bd955aea02"
+        },
+        {
+          "path": "outputs/authoring-v3-cold-ai-motion-portfolio/20260815T100848Z/NJABqLsmbKM-BCZ9yQID7y_D/02-product-launch.pptx",
+          "bytes": 5497404,
+          "sha256": "a7d03049a711a361a923344d4edc48c62dd0542971f711e70e56003aa979c6b2"
+        },
+        {
+          "path": "outputs/authoring-v3-cold-ai-motion-portfolio/20260815T100848Z/xJFRw-AHoPAfd3dI_qlTqXNv/04-risk-recovery.pptx",
+          "bytes": 5519380,
+          "sha256": "f3daa2e2daa43f31f126da36a214bba175d4129d55f58489dbf848e81246ae5e"
+        }
+      ]
+    },
+    "narrationMasterClock": {
+      "report": {
+        "path": "outputs/authoring-v3-motion-proof/narration-sync-20260815T103559Z/report.json",
+        "bytes": 49988,
+        "sha256": "d4104ffefe8e1d79b12bcc44fd03e87185bcd8c7de80e01d7ea04ba62e00167c"
+      },
+      "artifact": {
+        "path": "outputs/authoring-v3-motion-proof/narration-sync-20260815T103559Z/WT0d0Y9vsUvGHpokk-tS4cO-/authoring-v3-native-motion-cue-proof.pptx",
+        "bytes": 5578294,
+        "sha256": "83dd2f217f9045c9ca4999afdb2d46440ebc9481375da718c09ca79d7870c951"
+      }
+    },
+    "powerPoint": {
+      "version": {
+        "version": "16.0",
+        "build": "20228"
+      },
+      "report": {
+        "path": "outputs/authoring-v3-powerpoint-oracle/20260815T102446Z/powerpoint-oracle-report.json",
+        "bytes": 35569,
+        "sha256": "454bdd45de982cd9adec102fcd1861995b87521684da79ee4f07e13328621a28"
+      },
+      "packageEquivalence": {
+        "path": "outputs/authoring-v3-powerpoint-oracle/20260815T102446Z/playback-package-equivalence.json",
+        "bytes": 836,
+        "sha256": "595b5d5e8a9907e695f3bc67f1b2817f6915a825554151b5af91bf8760351de8"
+      },
+      "fullPlaybackAnalysis": {
+        "path": "outputs/authoring-v3-powerpoint-oracle/20260815T102446Z/inherited-motion-frame-analysis.json",
+        "bytes": 15742,
+        "sha256": "2c8db85aa27e659a2ab3e61da375fa266458f8a4549202255ea243bd6d830567"
+      },
+      "visiblyChanged": 48,
+      "video": {
+        "path": "outputs/authoring-v3-powerpoint-oracle/20260815T102446Z/authoring-v3-native-motion-playback-sample.mp4",
+        "bytes": 4009613,
+        "sha256": "68883eebc8786b0280e607889fcde6e51309223c5d22d8201b76884536500afd"
+      },
+      "videoSampleSlides": [
+        2,
+        19,
+        20,
+        37,
+        38,
+        49
+      ],
+      "repairFreePresentations": 8
+    }
+  },
+  "publicContractSources": [
+    {
+      "path": "betterpptx-mcp/tools.mjs",
+      "bytes": 257015,
+      "sha256": "7635fb607a746339372fdd9278315eef01373585770fc2e44673624da2dd2cc5"
+    },
+    {
+      "path": "betterpptx-mcp/blackbox.mjs",
+      "bytes": 40667,
+      "sha256": "923f2049596fd6dfd4eba035ae7fd2f45cea1a4e6dd035de3225c521f1f87873"
+    },
+    {
+      "path": "betterpptx-mcp/public-baseline-catalog.mjs",
+      "bytes": 14190,
+      "sha256": "57004abb7305f65d19b94b75f0dfc70524c359bb0c54d7e5e4de1ab2e5628eaf"
+    },
+    {
+      "path": "betterpptx-mcp/authoring-capability-registry.mjs",
+      "bytes": 19380,
+      "sha256": "235af7f9cd1392ee815929f4f30496fb1df6a267b2d61e9a0a3aec7910de3f77"
+    },
+    {
+      "path": "betterpptx-mcp/ir/deck-spec.v1.json",
+      "bytes": 37709,
+      "sha256": "69d97ec35dd6182c84ec8350073e1fb4cd94888357a916f69ca289fccd06cf81"
+    }
+  ],
+  "governance": {
+    "g5ProductManifest": {
+      "path": "betterpptx-mcp/docs/release-safety/G5-PRODUCT-ASSET-RELEASE-MANIFEST.json",
+      "bytes": 2484,
+      "sha256": "84c8c0da565ecb56a9bffc1c3a19d03a01382d9f395fe7127ccfca21b1795052"
+    },
+    "g5OwnerDecision": {
+      "path": "betterpptx-mcp/docs/release-safety/G5-BUNDLE-OWNER-DECISION-20260814.json",
+      "bytes": 3022,
+      "sha256": "b19ea6d7f47da890eae216f597394aab9bbd3559ae99cf1185beb17d99da4643"
+    },
+    "approvedProductAssetCount": 4,
+    "distributionBoundary": "Server-side use in generated presentation projects only; no standalone/raw asset download or reusable-source resale."
+  },
+  "gates": [
+    {
+      "command": "node betterpptx-mcp/verify-authoring-motion-catalog.mjs",
+      "status": "PASS",
+      "outputSha256": "2b52deea25b07efe9404fecd3a475ea9db3d23ee7ce2e8155a3a4edb6362542a",
+      "outputBytes": 1075
+    },
+    {
+      "command": "node betterpptx-mcp/verify-authoring-motion-bundle.mjs",
+      "status": "PASS",
+      "outputSha256": "f84b7d09e7c11f7c0d36828866c8636fba94700a9aff666826b117ab4044b056",
+      "outputBytes": 960
+    },
+    {
+      "command": "node betterpptx-mcp/verify-authoring-motion-spec-v1.mjs",
+      "status": "PASS",
+      "outputSha256": "e70df224d299da252fa1b1173d4b7ba3c15ceddde4f4994e4e2c947b8406288d",
+      "outputBytes": 1327
+    },
+    {
+      "command": "node betterpptx-mcp/verify-public-authoring-motion-v1.mjs",
+      "status": "PASS",
+      "outputSha256": "99e80819c8ac10e73e544c49574321955f137e8cb907e915e44f08556778ef1e",
+      "outputBytes": 747
+    },
+    {
+      "command": "node betterpptx-mcp/verify-public-semantic-authoring-v1.mjs",
+      "status": "PASS",
+      "outputSha256": "4987e68437f6eb549f247b300d6df7032130903148e7826898d463bbe130470f",
+      "outputBytes": 5469
+    },
+    {
+      "command": "node --test betterpptx-mcp/test/authoring-capability-registry.test.mjs",
+      "status": "PASS",
+      "outputSha256": "79de1e95693dbd88e8e79dff81429c791b1a54689983851c700cf428f3f40347",
+      "outputBytes": 409
+    },
+    {
+      "command": "node betterpptx-mcp/verify-authoring-motion-narration-sync.mjs",
+      "status": "PASS",
+      "outputSha256": "9b6a45e56fb5b81b3c9870dd16bd810861459412b8be5c0c73447bab0eb1d390",
+      "outputBytes": 3094
+    },
+    {
+      "command": "node betterpptx-mcp/verify-mvp-baseline-public-contract.mjs",
+      "status": "PASS",
+      "outputSha256": "bfd60aa9c9aa96ef34f1d5c9cc3af6efe7800e015983745450e0cb0f9ee34901",
+      "outputBytes": 1995
+    },
+    {
+      "command": "node betterpptx-mcp/verify-g5-product-asset-ledger.mjs --strict",
+      "status": "PASS",
+      "outputSha256": "0ab9ae904c1a866868aa854a3fbfc037e95c8864ea29fe60dfeb6f2154fd8bb5",
+      "outputBytes": 2028
+    },
+    {
+      "command": "npx tsc --noEmit",
+      "status": "PASS",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputBytes": 0
+    },
+    {
+      "command": "git diff --check",
+      "status": "PASS",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "outputBytes": 0
+    }
+  ],
+  "continuousCatalogTrain": {
+    "unbakedKineticRows": 29,
+    "dedicatedInteractionRowsToSource": 18,
+    "implementedPlaybackHeldRows": [
+      "motion.ordinary.enumerate"
+    ],
+    "futureRowsAreMonotonic": true
+  },
+  "explicitlyNotApprovedByThisFreeze": [
+    "G1 delivery candidates",
+    "G4 live deployment, rotation, rollback, or break-glass evidence",
+    "public enablement or production launch",
+    "raw or reusable-source resale",
+    "the 18 dedicated authoring-v3 interaction rows"
+  ]
+}

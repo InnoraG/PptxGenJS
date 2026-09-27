@@ -1,9 +1,7 @@
 import * as fs from 'fs'
 import * as http from 'http'
 import { URL } from 'url'
-
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
-
+import { NodeStreamableHTTPServerTransport } from "@modelcontextprotocol/node";
 import { createBetterPptxMcpMcpServer } from './index.js'
 import {
 	BETTERPPTX_MCP_BRAND,
@@ -74,7 +72,7 @@ function readBody(req: http.IncomingMessage, maxBytes = DEFAULT_MAX_BODY): Promi
 
 async function handleMcp(req: http.IncomingMessage, res: http.ServerResponse, options: SaasOptions, parsedBody?: unknown): Promise<void> {
 	const server = createBetterPptxMcpMcpServer({ ...options, exposeLocalPaths: false })
-	const transport = new StreamableHTTPServerTransport({ sessionIdGenerator: undefined })
+	const transport = new NodeStreamableHTTPServerTransport({ sessionIdGenerator: undefined })
 	await server.connect(transport)
 	await transport.handleRequest(req, res, parsedBody)
 }

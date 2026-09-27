@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "betterpptx.avatar-owner-closure-checklist.v1",
+  "status": "OWNER_ACTIONS_REQUIRED",
+  "publicEnablementAllowed": false,
+  "currentReadiness": {
+    "pass": 31,
+    "open": 3,
+    "blocked": 0,
+    "total": 34,
+    "releaseCorpus": "23/23",
+    "native3dSpecificAudit": {
+      "total": 13,
+      "localPass": 8,
+      "livePass": 0,
+      "ownerPass": 0,
+      "openOwner": 4,
+      "blockedOwner": 1,
+      "completionClaimAllowed": false,
+      "evidence": "research-demos/2026-07-18-meshy-avatar/visual-artifacts/release-gates/meshy-goal-completion-audit-20260718.json"
+    }
+  },
+  "operationalPrerequisites": {
+    "avatarWorkerQuotaAccounting": {
+      "status": "PASS_UNBOUNDED_METERED_DEPLOYED",
+      "activeRevision": "betterpptx-mcp-staging-00085-7nm",
+      "quotaMode": "unbounded-metered",
+      "estimatedGpuSecondsPerRequest": 120,
+      "engineeringEvidence": [
+        "betterpptx-mcp/outputs/avatar-worker-quota-report.json",
+        "betterpptx-mcp/outputs/avatar-worker-quota-integration-report.json",
+        "betterpptx-mcp/outputs/avatar-worker-quota-production-config-report.json",
+        "betterpptx-mcp/outputs/avatar-serving-image-contract-report.json",
+        "betterpptx-mcp/outputs/avatar-deployed-revision-report.json",
+        "betterpptx-mcp/outputs/avatar-worker-quota-deployed-revision-report.json"
+      ],
+      "ownerAction": "None for the current production policy; the active commercial revision is already verified with explicit unbounded-metered Firestore quota accounting. Change only through a new owner-approved deployment decision.",
+      "failClosedUntil": "quotaProvider=firestore and requireQuota=1 and (quotaMode=unbounded-metered or dailyGpuSeconds>0 and estimateGpuSeconds<=dailyGpuSeconds) and deployedRevisionVerified=true"
+    }
+  },
+  "closures": [
+    {
+      "id": "provider-billing-reconciliation",
+      "status": "OPEN",
+      "evidence": [
+        "betterpptx-mcp/outputs/avatar-provider-billing-reconciliation-report.json",
+        "betterpptx-mcp/outputs/avatar-modal-billing-snapshot-commercial-window-telcomgapp-20260726.json",
+        "betterpptx-mcp/outputs/avatar-modal-billing-snapshot-commercial-window-fluxworkerai-20260726.json",
+        "betterpptx-mcp/outputs/avatar-provider-billing-aggregate-policy-report.json",
+        "betterpptx-mcp/outputs/avatar-modal-billing-snapshot-reverify-telcomgapp-20260719.json",
+        "betterpptx-mcp/outputs/avatar-modal-billing-snapshot-reverify-fluxworkerai-20260719.json",
+        "betterpptx-mcp/docs/release-safety/AVATAR-PROVIDER-BILLING-RECONCILIATION-POLICY.md"
+      ],
+      "ownerChoices": [
+        "Review the current commercial App/hour exports for final revision betterpptx-mcp-staging-00085-7nm and approve the documented aggregate allocation policy.",
+        "Provide a native provider request-attributed export and retain it as private maintainer evidence."
+      ],
+      "failClosedUntil": "providerInvoiceReconciled=true and ownerApprovalRecorded=true"
+    },
+    {
+      "id": "lpmt-talking-head-identity-quality",
+      "status": "READY_FOR_OWNER_REVIEW",
+      "evidence": [
+        "betterpptx-mcp/outputs/avatar-identity-quality-review-packet.json",
+        "betterpptx-mcp/outputs/avatar-identity-review-readiness-report.json",
+        "betterpptx-mcp/outputs/visualizations/avatar-lpmt-identity-review.html"
+      ],
+      "reviewAuthority": "owner-one-time",
+      "requiredReviewerFields": ["ownerName", "ownerOrganization", "reviewedAt", "ownerConfirmation", "decision", "evidenceReference"],
+      "ownerAction": "The authorized project owner inspects the commercial LivePortrait/MuseTalk talking-head packet once and records PASS or FAIL. Native 3D likeness is out of scope and remains the separate Meshy → Mixamo gate. Automation must not infer this decision.",
+      "failClosedUntil": "reviewProtocol.decision=PASS"
+    },
+    {
+      "id": "native-meshy-mixamo-production-authoring",
+      "status": "OPEN",
+      "evidence": [
+        "research-demos/2026-07-18-meshy-avatar/visual-artifacts/release-gates/meshy-owner-decision-worksheet-20260718.json",
+        "betterpptx-mcp/outputs/presenter-meshy-ab-dryrun-report.json",
+        "research-demos/2026-07-18-meshy-avatar/visual-artifacts/release-gates/meshy-owner-preflight-20260718.json",
+        "research-demos/2026-07-18-meshy-avatar/visual-artifacts/release-gates/meshy-goal-completion-audit-20260718.json"
+      ],
+      "ownerAction": "Configure the owner-controlled Meshy credential, complete the Meshy/Mixamo terms-attribution worksheet, redeploy the serving template with production native-3D mode, and run the paid live A/B before enabling production native 3D.",
+      "failClosedUntil": "providerConfigured=true and ownerWorksheetComplete=true and mixamoAttributionReviewed=true and productionNative3dModeDeployed=true and liveABPassed=true"
+    },
+    {
+      "id": "mouth-restoration",
+      "status": "CLOSED_NOT_REQUIRED_FOR_BASELINE",
+      "evidence": ["betterpptx-mcp/docs/release-safety/AVATAR-RESALE-SAFE-PIPELINE-DECISION-2026-07-19.json", "betterpptx-mcp/outputs/avatar-resale-safe-pipeline-report.json"],
+      "ownerAction": "None for the frozen baseline. Any future enhancer is a new optional release and must pass a separate provenance and temporal identity review.",
+      "failClosedUntil": "restoration remains disabled unless separately reviewed"
+    }
+  ],
+  "safetyInvariant": "No public model-backed rendering or customer image processing is enabled while any required closure remains open."
+}

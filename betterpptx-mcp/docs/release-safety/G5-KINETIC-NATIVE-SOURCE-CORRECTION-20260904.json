@@ -1,0 +1,239 @@
+{
+  "schemaVersion": "betterpptx.g5-source-correction-authorization.v1",
+  "status": "APPROVED",
+  "recordedAt": "2026-09-04",
+  "authorizationKind": "task-authorized-native-axis-source-correction",
+  "authorizationBasis": "The owner explicitly requested that corrections discovered through the 96-motion showcase be implemented at engine/MCP level and continuously improved through use cases.",
+  "decisionScope": "These exact versioned skeletal-only source derivatives may be selected server-side to construct embedded project presenters after numerical and native playback proof.",
+  "semanticCatalogSelectionAllowed": true,
+  "rawAssetDistributionAllowed": false,
+  "ownerVisualAcceptanceRecorded": false,
+  "productionPromotionAuthorized": false,
+  "assets": [
+    {
+      "id": "kinetic-forward-slide-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-forward-slide-native-v1.glb",
+      "sha256": "5058b1184e4c101af7accc56c0a4ff09a3ceae1508b7f3122564b691981793ff",
+      "bytes": 85060,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-active-idle-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-active-idle-native-v1.glb",
+      "sha256": "85670af6d445e225b0f3cd4eaa09abc948a4aa234de6ad936debda3bd1075dc7",
+      "bytes": 360160,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-sprint-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-sprint-native-v1.glb",
+      "sha256": "7ccba76c4737c0640963f6a2e3c988bc0ae99a0501cc6015ce839c2224c1902a",
+      "bytes": 58920,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-dive-roll-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-dive-roll-native-v1.glb",
+      "sha256": "9c8903adadddec1a6b3855e9b994712439dac3f7c248f823e0e1f734388dcc48",
+      "bytes": 173160,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-flying-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-flying-native-v1.glb",
+      "sha256": "23bf1904e75c90bd6b557c17cf641596df0acca37736d1351dc7f2c143a3b4d3",
+      "bytes": 81156,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-floating-drift-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-floating-drift-native-v1.glb",
+      "sha256": "efd5dcd381b446813059fbd499528f988fd86418efd5d8cbef34f30424a0e799",
+      "bytes": 155808,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-heavy-jump-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-heavy-jump-native-v1.glb",
+      "sha256": "95f5bd46043b9feceba309a6e6bf9b9cf7fcd1fa82af91b9d366961e03c010ef",
+      "bytes": 75408,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-freefall-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-freefall-native-v1.glb",
+      "sha256": "3bf38cdece1adf4f93cc1a682da3dec05e3b03402c83b383753e0154e0d43d90",
+      "bytes": 63572,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-backflip-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-backflip-native-v1.glb",
+      "sha256": "219a08794b13b752332a02ff7e1e77020378f965bfd0b8571afa631e97713e40",
+      "bytes": 175952,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-heavy-kick-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-heavy-kick-native-v1.glb",
+      "sha256": "e608d3458e6be66fce542f724bbd2d71d8dc7c7eb5d08a74b72efc0721135d1a",
+      "bytes": 98672,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-ground-pound-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-ground-pound-native-v1.glb",
+      "sha256": "6b2809a591ccbfc3b9a21fe8523cae219d4874633eb237a91187699c422f4ecb",
+      "bytes": 292592,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-heavy-push-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-heavy-push-native-v1.glb",
+      "sha256": "75b7056b3a35d6e80ce8b6e4e29bffdcf6d81d4ded366b5a7ea5bde68dcd1642",
+      "bytes": 81752,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-victory-jump-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-victory-jump-native-v1.glb",
+      "sha256": "9c8ab4d86be51616991409f60fb9e0228e8fa6d1d7466e0cff9dceb1e3b6be58",
+      "bytes": 91784,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-skyward-launch-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-skyward-launch-native-v1.glb",
+      "sha256": "6c1eb2e1de9b4e292ca4a8bebbf278ba89400cf45ce5fdfa5a80d5c97181724b",
+      "bytes": 94464,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-orbit-turn-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-orbit-turn-native-v1.glb",
+      "sha256": "ded89ee0ddec23dae63dc08658fd7b7214692fbfb3e0564822a96d3b4652fedb",
+      "bytes": 95484,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-gforce-lean-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-gforce-lean-native-v1.glb",
+      "sha256": "31448df04f6112b07f256bf5e5f685f6abab10cf6d8cdc3cd52dc4dee799216c",
+      "bytes": 88956,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-magical-reveal-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-magical-reveal-native-v1.glb",
+      "sha256": "d0c37ad23e279a63d182388f55dfe6e34addc5d0ec9b97f042a4342731a9c2d3",
+      "bytes": 179096,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-rolling-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-rolling-native-v1.glb",
+      "sha256": "78b37be92ab8be50818535b413525e44533c4a9078f0e77d6811a7f304bb3a8c",
+      "bytes": 123520,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-elastic-stretch-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-elastic-stretch-native-v1.glb",
+      "sha256": "69a7dff808912ca226b414ff04c1e99f14ae26d34d1723ecf785569b80e6ea75",
+      "bytes": 327044,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-stage-stomp-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-stage-stomp-native-v1.glb",
+      "sha256": "58c154f68193f6e108e1d3283c1aafadfc4ebc930105bd62f2e93d0319f0ac11",
+      "bytes": 93600,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-shield-block-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-shield-block-native-v1.glb",
+      "sha256": "34999b42dc4d3c69e6e507adb781f2e215dd96f21f39bb5ccbd1f482164e1727",
+      "bytes": 61792,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-scroll-wheel-pull-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-scroll-wheel-pull-native-v1.glb",
+      "sha256": "199df3db0bc25305c59c1b496195567ac5b4b621dd388f44ef23ab7d3d916855",
+      "bytes": 512952,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-window-breaker-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-window-breaker-native-v1.glb",
+      "sha256": "ceec47856c0cfbdf81a6ee44df17cc5b7f87622c1c10be77be612402b6181c3d",
+      "bytes": 68844,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-bow-pull-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-bow-pull-native-v1.glb",
+      "sha256": "18516c48e888af534286a56b7d9b74996194cae996ba5bc9642a79662fcc5755",
+      "bytes": 67584,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-spin-kick-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-spin-kick-native-v1.glb",
+      "sha256": "9347d29b4e0ffa94cd0295de1bb1beda3d851e0627d3c69797f86e2d7b041b22",
+      "bytes": 163216,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-scanning-lookup-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-scanning-lookup-native-v1.glb",
+      "sha256": "352eb2448f6c83aa21296be1c1132b9930946407b7f6a91b038881731f7f178a",
+      "bytes": 133788,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-side-dodge-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-side-dodge-native-v1.glb",
+      "sha256": "12d2b23c16bba2bb2b9038a3da141b3d8a34713dfba062bf64d059f18ab90f46",
+      "bytes": 65788,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-uppercut-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-uppercut-native-v1.glb",
+      "sha256": "99725a32ce680fd65a5822b9dfe4a079467fee230477fdfa1dfce404b2a1569a",
+      "bytes": 79092,
+      "decision": "APPROVED"
+    },
+    {
+      "id": "kinetic-atlas-lift-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-atlas-lift-native-v1.glb",
+      "sha256": "2c43136ac266a5d8cbaa1a6a2d0d6f407a53d9965e853e712054fde2b274848e",
+      "bytes": 274180,
+      "decision": "APPROVED"
+    }
+  ],
+  "sourceLineage": {
+    "existingGovernedAssetId": "kinetic-clips-pool",
+    "existingLicenseRecord": "betterpptx-mcp/docs/release-safety/G5-ASSET-LICENSE-LEDGER.md",
+    "nativeAdapter": "betterpptx-mcp/assets/native-fbx-motion-source.mjs",
+    "nativeProofReports": [
+      "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\powerpoint-joe-bank1\\powerpoint-native-proof.json",
+      "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\powerpoint-joe-bank2\\powerpoint-native-proof.json",
+      "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\powerpoint-louise-bank1\\powerpoint-native-proof.json",
+      "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\powerpoint-louise-bank2\\powerpoint-native-proof.json",
+      "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\powerpoint-pete-bank1\\powerpoint-native-proof.json",
+      "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\powerpoint-pete-bank2\\powerpoint-native-proof.json"
+    ],
+    "report": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+    "oldFrozenAssetsAndDecisionsModified": false
+  },
+  "scopeExclusions": [
+    "raw or standalone motion-library download or resale",
+    "raw BVH/FBX redistribution",
+    "independent owner visual acceptance of a new generated artifact",
+    "public production promotion or deployment authorization"
+  ],
+  "hashChangePolicy": "Any byte, hash, path, or distribution-boundary change requires a new authorization record."
+}

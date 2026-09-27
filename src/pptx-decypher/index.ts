@@ -46,6 +46,7 @@ export type {
     BackgroundModel,
     TransitionModel,
     ShapeOptions,
+	PlaceholderBindingModel,
     ShadowModel,
     GlowModel,
     MediaAsset

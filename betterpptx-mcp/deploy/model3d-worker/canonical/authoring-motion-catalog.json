@@ -1,0 +1,4331 @@
+{
+  "schemaVersion": "betterpptx.authoring-motion-catalog.v1",
+  "catalogVersion": "2026-08-31.1",
+  "catalogFingerprint": "motion-catalog-65a65f126223c085cb52262f",
+  "bundleCeiling": 18,
+  "inventory": {
+    "kineticPlanEntries": 60,
+    "kineticBakedEntries": 60,
+    "ordinaryGestureEntries": 18,
+    "interactionCandidateEntries": 18,
+    "total": 96,
+    "selectable": 96,
+    "notSelectable": 0,
+    "byFamily": {
+      "kinetic": 60,
+      "ordinary-gesture": 18,
+      "interaction": 18
+    },
+    "byProductState": {
+      "EXECUTABLE_GENERAL_MOTION": 78,
+      "EXECUTABLE_INTERACTION_MOTION": 18
+    }
+  },
+  "provenance": {
+    "kineticPoolApproval": "APPROVED",
+    "kineticExtensionPoolApproval": "APPROVED",
+    "ordinaryPoolApproval": "APPROVED",
+    "interactionPoolApproval": "APPROVED",
+    "derivativeDistributionRule": "approved in-project source assets may construct per-project presenter bundles; raw source and standalone reusable library distribution remain forbidden"
+  },
+  "records": [
+    {
+      "motionId": "motion.kinetic.superhero-landing",
+      "family": "kinetic",
+      "slug": "superhero-landing",
+      "displayName": "Superhero Landing",
+      "description": "drops from top of screen; title impact",
+      "narrativeUses": [
+        "drops from top of screen; title impact"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "launch",
+        "impact"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 1,
+        "sourceSlug": "00_superhero_landing",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "governedSourceFallback": {
+          "behavior": {
+            "inPlace": false,
+            "rootMotion": "traveling",
+            "loopable": false,
+            "energy": "medium",
+            "tempo": "moderate"
+          },
+          "lifecycle": {
+            "sourceState": "SOURCE_IDENTIFIED",
+            "buildState": "BAKED",
+            "measurementState": "POWERPOINT_MEASURED",
+            "distributionState": "APPROVED_IN_PROJECT",
+            "productState": "EXECUTABLE_GENERAL_MOTION"
+          },
+          "selectable": true,
+          "hasSourceProvider": true,
+          "sourceProvider": "mixamo"
+        },
+        "resolvedSource": {
+          "id": "kinetic-landing-native-v1",
+          "sha256": "7b6b77cf73a34f300360da0fa880260dc46b7dff77f600cc64834e46fc275b9e",
+          "sourceSlug": "00_superhero_landing",
+          "sourceTake": "Falling To Landing",
+          "sourceProvider": "mixamo",
+          "retarget": {
+            "boneNamePolicy": "exact",
+            "channelPolicy": "root-motion",
+            "rootMotionAnchor": "end",
+            "rootMotionMaxHorizontalStatures": 0.5,
+            "rootMotionMaxStatures": 0.35,
+            "rotationRetargetSpace": "global"
+          }
+        }
+      }
+    },
+    {
+      "motionId": "motion.kinetic.forward-slide",
+      "family": "kinetic",
+      "slug": "forward-slide",
+      "displayName": "Forward Slide",
+      "description": "slides in from left wing, brakes at first bullet",
+      "narrativeUses": [
+        "slides in from left wing, brakes at first bullet"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "fast"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 2,
+        "sourceSlug": "01_forward_slide",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.active-idle",
+      "family": "kinetic",
+      "slug": "active-idle",
+      "displayName": "Active Idle",
+      "description": "dynamic ready stance while speaking",
+      "narrativeUses": [
+        "dynamic ready stance while speaking"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": true,
+        "energy": "low",
+        "tempo": "slow"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 3,
+        "sourceSlug": "02_active_idle",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.sprint",
+      "family": "kinetic",
+      "slug": "sprint",
+      "displayName": "Sprint",
+      "description": "Morph travels A→B; skim a timeline",
+      "narrativeUses": [
+        "Morph travels A→B; skim a timeline"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "fast"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 4,
+        "sourceSlug": "03_sprint",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.dive-roll",
+      "family": "kinetic",
+      "slug": "dive-roll",
+      "displayName": "Dive Roll",
+      "description": "roll under a descending banner",
+      "narrativeUses": [
+        "roll under a descending banner"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 5,
+        "sourceSlug": "04_dive_roll",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.flying",
+      "family": "kinetic",
+      "slug": "flying",
+      "displayName": "Flying",
+      "description": "glide along a custom motion path",
+      "narrativeUses": [
+        "glide along a custom motion path"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "launch"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": true,
+        "energy": "high",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 6,
+        "sourceSlug": "05_flying",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.floating-drift",
+      "family": "kinetic",
+      "slug": "floating-drift",
+      "displayName": "Floating Drift",
+      "description": "cloud / abstract / future concepts",
+      "narrativeUses": [
+        "cloud / abstract / future concepts"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "launch"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": true,
+        "energy": "low",
+        "tempo": "slow"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 7,
+        "sourceSlug": "06_floating_drift",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.heavy-jump",
+      "family": "kinetic",
+      "slug": "heavy-jump",
+      "displayName": "Heavy Jump",
+      "description": "crouch+launch off top of slide A",
+      "narrativeUses": [
+        "crouch+launch off top of slide A"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "launch",
+        "travel"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "fast"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 8,
+        "sourceSlug": "07_heavy_jump",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.apex-glide",
+      "family": "kinetic",
+      "slug": "apex-glide",
+      "displayName": "Apex Glide",
+      "description": "mid-air apex over a chart peak (slide B)",
+      "narrativeUses": [
+        "mid-air apex over a chart peak (slide B)"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 9,
+        "sourceSlug": "00_apex_glide",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.freefall",
+      "family": "kinetic",
+      "slug": "freefall",
+      "displayName": "Freefall",
+      "description": "descend into a deep-dive slide",
+      "narrativeUses": [
+        "descend into a deep-dive slide"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "launch",
+        "travel"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 10,
+        "sourceSlug": "08_freefall",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.backflip",
+      "family": "kinetic",
+      "slug": "backflip",
+      "displayName": "Backflip",
+      "description": "retreat from a threat/competitor logo",
+      "narrativeUses": [
+        "retreat from a threat/competitor logo"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 11,
+        "sourceSlug": "09_backflip",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.heavy-kick",
+      "family": "kinetic",
+      "slug": "heavy-kick",
+      "displayName": "Heavy Kick",
+      "description": "sync w/ native Fly-Out; boots text off",
+      "narrativeUses": [
+        "sync w/ native Fly-Out; boots text off"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "impact",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "fast"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 12,
+        "sourceSlug": "10_heavy_kick",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.ground-pound",
+      "family": "kinetic",
+      "slug": "ground-pound",
+      "displayName": "Ground Pound",
+      "description": "two-hand slam; shatter a chart",
+      "narrativeUses": [
+        "two-hand slam; shatter a chart"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "impact",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 13,
+        "sourceSlug": "11_ground_pound",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.heavy-push",
+      "family": "kinetic",
+      "slug": "heavy-push",
+      "displayName": "Heavy Push",
+      "description": "push a big text block into place",
+      "narrativeUses": [
+        "push a big text block into place"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "risk-recovery",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 14,
+        "sourceSlug": "12_heavy_push",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.rope-pull",
+      "family": "kinetic",
+      "slug": "rope-pull",
+      "displayName": "Rope Pull",
+      "description": "pull a data table in from the far edge",
+      "narrativeUses": [
+        "pull a data table in from the far edge"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 15,
+        "sourceSlug": "10_tug_pull",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "declaredAliasOf": "tug-pull",
+        "declaredAliasPlanIndex": 55
+      }
+    },
+    {
+      "motionId": "motion.kinetic.trip-recovery",
+      "family": "kinetic",
+      "slug": "trip-recovery",
+      "displayName": "Trip Recovery",
+      "description": "near-miss risk illustration",
+      "narrativeUses": [
+        "near-miss risk illustration"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "risk-recovery"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 16,
+        "sourceSlug": "14_trip_recovery",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.victory-jump",
+      "family": "kinetic",
+      "slug": "victory-jump",
+      "displayName": "Victory Jump",
+      "description": "milestone/KPI celebration, hold apex",
+      "narrativeUses": [
+        "milestone/KPI celebration, hold apex"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "launch",
+        "celebration",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "fast"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 17,
+        "sourceSlug": "13_victory_jump",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.skyward-launch",
+      "family": "kinetic",
+      "slug": "skyward-launch",
+      "displayName": "Skyward Launch",
+      "description": "blast up, clear slide for Q&A",
+      "narrativeUses": [
+        "blast up, clear slide for Q&A"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "launch",
+        "travel"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "fast"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 18,
+        "sourceSlug": "14_skyward_launch",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.orbit-turn",
+      "family": "kinetic",
+      "slug": "orbit-turn",
+      "displayName": "Orbit Turn",
+      "description": "Morph rotates model 180° tracking shot",
+      "narrativeUses": [
+        "Morph rotates model 180° tracking shot"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 19,
+        "sourceSlug": "15_orbit_turn",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.corkscrew-descent",
+      "family": "kinetic",
+      "slug": "corkscrew-descent",
+      "displayName": "Corkscrew Descent",
+      "description": "spiral dive to focus a micro-detail",
+      "narrativeUses": [
+        "spiral dive to focus a micro-detail"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 20,
+        "sourceSlug": "01_corkscrew_descent",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.gforce-lean",
+      "family": "kinetic",
+      "slug": "gforce-lean",
+      "displayName": "Gforce Lean",
+      "description": "lateral lean = speed/cornering feel",
+      "narrativeUses": [
+        "lateral lean = speed/cornering feel"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "low",
+        "tempo": "slow"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 21,
+        "sourceSlug": "16_gforce_lean",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.lunging-punch",
+      "family": "kinetic",
+      "slug": "lunging-punch",
+      "displayName": "Lunging Punch",
+      "description": "scale to 800% on B; punch through screen",
+      "narrativeUses": [
+        "scale to 800% on B; punch through screen"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "impact"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "fast"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 22,
+        "sourceSlug": "23_window_breaker",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "declaredAliasOf": "window-breaker",
+        "declaredAliasPlanIndex": 42
+      }
+    },
+    {
+      "motionId": "motion.kinetic.walk-away",
+      "family": "kinetic",
+      "slug": "walk-away",
+      "displayName": "Walk Away",
+      "description": "shrink+fade, vanish into a donut chart",
+      "narrativeUses": [
+        "shrink+fade, vanish into a donut chart"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 23,
+        "sourceSlug": "02_walk_away",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.strafe-cross",
+      "family": "kinetic",
+      "slug": "strafe-cross",
+      "displayName": "Strafe Cross",
+      "description": "giant foreground cross = cine wipe",
+      "narrativeUses": [
+        "giant foreground cross = cine wipe"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 24,
+        "sourceSlug": "28_side_dodge",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "declaredAliasOf": "side-dodge",
+        "declaredAliasPlanIndex": 52
+      }
+    },
+    {
+      "motionId": "motion.kinetic.shockwave-impact",
+      "family": "kinetic",
+      "slug": "shockwave-impact",
+      "displayName": "Shockwave Impact",
+      "description": "burst grouped vector shapes outward",
+      "narrativeUses": [
+        "burst grouped vector shapes outward"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "impact"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 25,
+        "sourceSlug": "03_shockwave_impact",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.magical-reveal",
+      "family": "kinetic",
+      "slug": "magical-reveal",
+      "displayName": "Magical Reveal",
+      "description": "arms deploy; vector triangles assemble",
+      "narrativeUses": [
+        "arms deploy; vector triangles assemble"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "reveal"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 26,
+        "sourceSlug": "17_magical_reveal",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.gather-clap",
+      "family": "kinetic",
+      "slug": "gather-clap",
+      "displayName": "Gather Clap",
+      "description": "reverse-explosion reassembly on clap",
+      "narrativeUses": [
+        "reverse-explosion reassembly on clap"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "celebration"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 27,
+        "sourceSlug": "05_snap_organize",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "declaredAliasOf": "snap-organize",
+        "declaredAliasPlanIndex": 40
+      }
+    },
+    {
+      "motionId": "motion.kinetic.heavy-stomp",
+      "family": "kinetic",
+      "slug": "heavy-stomp",
+      "displayName": "Heavy Stomp",
+      "description": "foot stomp triggers a native Zoom blast",
+      "narrativeUses": [
+        "foot stomp triggers a native Zoom blast"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "impact"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 28,
+        "sourceSlug": "20_stage_stomp",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "declaredAliasOf": "stage-stomp",
+        "declaredAliasPlanIndex": 35
+      }
+    },
+    {
+      "motionId": "motion.kinetic.rolling",
+      "family": "kinetic",
+      "slug": "rolling",
+      "displayName": "Rolling",
+      "description": "lateral Morph + native Spin emphasis",
+      "narrativeUses": [
+        "lateral Morph + native Spin emphasis"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 29,
+        "sourceSlug": "18_rolling",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.sword-slash",
+      "family": "kinetic",
+      "slug": "sword-slash",
+      "displayName": "Sword Slash",
+      "description": "slash fragments a text zone",
+      "narrativeUses": [
+        "slash fragments a text zone"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "impact",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 30,
+        "sourceSlug": "06_run_slash",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "declaredAliasOf": "run-slash",
+        "declaredAliasPlanIndex": 46
+      }
+    },
+    {
+      "motionId": "motion.kinetic.kinetic-swipe",
+      "family": "kinetic",
+      "slug": "kinetic-swipe",
+      "displayName": "Kinetic Swipe",
+      "description": "backhand swipe brings a slide in",
+      "narrativeUses": [
+        "backhand swipe brings a slide in"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 31,
+        "sourceSlug": "12_screen_wipe",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "declaredAliasOf": "screen-wipe",
+        "declaredAliasPlanIndex": 57
+      }
+    },
+    {
+      "motionId": "motion.kinetic.pinch-zoom",
+      "family": "kinetic",
+      "slug": "pinch-zoom",
+      "displayName": "Pinch Zoom",
+      "description": "arms spread; chart explodes to 400%",
+      "narrativeUses": [
+        "arms spread; chart explodes to 400%"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 32,
+        "sourceSlug": "11_push_away",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "declaredAliasOf": "push-away",
+        "declaredAliasPlanIndex": 56
+      }
+    },
+    {
+      "motionId": "motion.kinetic.gravity-pull",
+      "family": "kinetic",
+      "slug": "gravity-pull",
+      "displayName": "Gravity Pull",
+      "description": "pull down 3 lines of text from top",
+      "narrativeUses": [
+        "pull down 3 lines of text from top"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 33,
+        "sourceSlug": "22_scroll_wheel_pull",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "declaredAliasOf": "scroll-wheel-pull",
+        "declaredAliasPlanIndex": 41
+      }
+    },
+    {
+      "motionId": "motion.kinetic.elastic-stretch",
+      "family": "kinetic",
+      "slug": "elastic-stretch",
+      "displayName": "Elastic Stretch",
+      "description": "spread hands; timeline stretches wide",
+      "narrativeUses": [
+        "spread hands; timeline stretches wide"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "reveal",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 34,
+        "sourceSlug": "19_elastic_stretch",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.stage-stomp",
+      "family": "kinetic",
+      "slug": "stage-stomp",
+      "displayName": "Stage Stomp",
+      "description": "jump+heavy land; icons bounce up",
+      "narrativeUses": [
+        "jump+heavy land; icons bounce up"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "launch",
+        "impact"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 35,
+        "sourceSlug": "20_stage_stomp",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.backhand-swat",
+      "family": "kinetic",
+      "slug": "backhand-swat",
+      "displayName": "Backhand Swat",
+      "description": "swat a cost/logo off at 45°",
+      "narrativeUses": [
+        "swat a cost/logo off at 45°"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "impact"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 36,
+        "sourceSlug": "04_backhand_swat",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.shield-block",
+      "family": "kinetic",
+      "slug": "shield-block",
+      "displayName": "Shield Block",
+      "description": "incoming text stops at his barrier",
+      "narrativeUses": [
+        "incoming text stops at his barrier"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "reveal",
+        "risk-recovery",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 37,
+        "sourceSlug": "21_shield_block",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.presenter-walk",
+      "family": "kinetic",
+      "slug": "presenter-walk",
+      "displayName": "Presenter Walk",
+      "description": "walk across; icons part/oscillate",
+      "narrativeUses": [
+        "walk across; icons part/oscillate"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 38,
+        "sourceSlug": "07_walking",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "declaredAliasOf": "walking",
+        "declaredAliasPlanIndex": 48
+      }
+    },
+    {
+      "motionId": "motion.kinetic.slowmo-float",
+      "family": "kinetic",
+      "slug": "slowmo-float",
+      "displayName": "Slowmo Float",
+      "description": "slow float on a long 4s Morph",
+      "narrativeUses": [
+        "slow float on a long 4s Morph"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "launch"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "low",
+        "tempo": "slow"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 39,
+        "sourceSlug": "06_floating_drift",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "declaredAliasOf": "floating-drift",
+        "declaredAliasPlanIndex": 7
+      }
+    },
+    {
+      "motionId": "motion.kinetic.snap-organize",
+      "family": "kinetic",
+      "slug": "snap-organize",
+      "displayName": "Snap Organize",
+      "description": "clap snaps scattered data into a table",
+      "narrativeUses": [
+        "clap snaps scattered data into a table"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "reveal",
+        "celebration",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 40,
+        "sourceSlug": "05_snap_organize",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.scroll-wheel-pull",
+      "family": "kinetic",
+      "slug": "scroll-wheel-pull",
+      "displayName": "Scroll Wheel Pull",
+      "description": "hands-up pull scrolls a long list",
+      "narrativeUses": [
+        "hands-up pull scrolls a long list"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 41,
+        "sourceSlug": "22_scroll_wheel_pull",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.window-breaker",
+      "family": "kinetic",
+      "slug": "window-breaker",
+      "displayName": "Window Breaker",
+      "description": "elbow/punch shatters a bg rectangle",
+      "narrativeUses": [
+        "elbow/punch shatters a bg rectangle"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "impact"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 42,
+        "sourceSlug": "23_window_breaker",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.bow-pull",
+      "family": "kinetic",
+      "slug": "bow-pull",
+      "displayName": "Bow Pull",
+      "description": "pull a vector line, bend, launch element",
+      "narrativeUses": [
+        "pull a vector line, bend, launch element"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "launch"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 43,
+        "sourceSlug": "24_bow_pull",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.drop-to-landing",
+      "family": "kinetic",
+      "slug": "drop-to-landing",
+      "displayName": "Drop To Landing",
+      "description": "fast fall (0.6s); cards Zoom in on impact",
+      "narrativeUses": [
+        "fast fall (0.6s); cards Zoom in on impact"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "launch",
+        "impact"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 44,
+        "sourceSlug": "25_drop_to_landing",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "governedSourceFallback": {
+          "behavior": {
+            "inPlace": false,
+            "rootMotion": "traveling",
+            "loopable": false,
+            "energy": "medium",
+            "tempo": "moderate"
+          },
+          "lifecycle": {
+            "sourceState": "SOURCE_IDENTIFIED",
+            "buildState": "BAKED",
+            "measurementState": "POWERPOINT_MEASURED",
+            "distributionState": "APPROVED_IN_PROJECT",
+            "productState": "EXECUTABLE_GENERAL_MOTION"
+          },
+          "selectable": true,
+          "hasSourceProvider": true,
+          "sourceProvider": "mixamo"
+        },
+        "resolvedSource": {
+          "id": "kinetic-landing-native-v1",
+          "sha256": "7b6b77cf73a34f300360da0fa880260dc46b7dff77f600cc64834e46fc275b9e",
+          "sourceSlug": "00_superhero_landing",
+          "sourceTake": "Falling To Landing",
+          "sourceProvider": "mixamo",
+          "retarget": {
+            "boneNamePolicy": "exact",
+            "channelPolicy": "root-motion",
+            "rootMotionAnchor": "end",
+            "rootMotionMaxHorizontalStatures": 0.5,
+            "rootMotionMaxStatures": 0.35,
+            "rotationRetargetSpace": "global"
+          }
+        }
+      }
+    },
+    {
+      "motionId": "motion.kinetic.spin-kick",
+      "family": "kinetic",
+      "slug": "spin-kick",
+      "displayName": "Spin Kick",
+      "description": "pivot + native Spin = gyroscopic combo",
+      "narrativeUses": [
+        "pivot + native Spin = gyroscopic combo"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "impact"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "fast"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 45,
+        "sourceSlug": "26_spin_kick",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.run-slash",
+      "family": "kinetic",
+      "slug": "run-slash",
+      "displayName": "Run Slash",
+      "description": "run L→R, path wipes a text line",
+      "narrativeUses": [
+        "run L→R, path wipes a text line"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "impact",
+        "travel",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 46,
+        "sourceSlug": "06_run_slash",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.scanning-lookup",
+      "family": "kinetic",
+      "slug": "scanning-lookup",
+      "displayName": "Scanning Lookup",
+      "description": "look up; a HUD shape opens above",
+      "narrativeUses": [
+        "look up; a HUD shape opens above"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "reveal"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "low",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 47,
+        "sourceSlug": "27_scanning_lookup",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.walking",
+      "family": "kinetic",
+      "slug": "walking",
+      "displayName": "Walking",
+      "description": "selection-pane depth: behind B, front of A",
+      "narrativeUses": [
+        "selection-pane depth: behind B, front of A"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": true,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 48,
+        "sourceSlug": "07_walking",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.jump-shadow",
+      "family": "kinetic",
+      "slug": "jump-shadow",
+      "displayName": "Jump Shadow",
+      "description": "parallax shadow ellipse shrinks/grows",
+      "narrativeUses": [
+        "parallax shadow ellipse shrinks/grows"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "launch"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "fast"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 49,
+        "sourceSlug": "07_heavy_jump",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "declaredAliasOf": "heavy-jump",
+        "declaredAliasPlanIndex": 8
+      }
+    },
+    {
+      "motionId": "motion.kinetic.sprint-to-stop",
+      "family": "kinetic",
+      "slug": "sprint-to-stop",
+      "displayName": "Sprint To Stop",
+      "description": "hard sprint braking on a final goal",
+      "narrativeUses": [
+        "hard sprint braking on a final goal"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "fast"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 50,
+        "sourceSlug": "08_sprint_to_stop",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.knee-slide",
+      "family": "kinetic",
+      "slug": "knee-slide",
+      "displayName": "Knee Slide",
+      "description": "slide along a rising graph curve",
+      "narrativeUses": [
+        "slide along a rising graph curve"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "fast"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 51,
+        "sourceSlug": "09_knee_slide",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.side-dodge",
+      "family": "kinetic",
+      "slug": "side-dodge",
+      "displayName": "Side Dodge",
+      "description": "step aside to let the After panel in",
+      "narrativeUses": [
+        "step aside to let the After panel in"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "travel",
+        "risk-recovery"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "fast"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 52,
+        "sourceSlug": "28_side_dodge",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.ground-smash",
+      "family": "kinetic",
+      "slug": "ground-smash",
+      "displayName": "Ground Smash",
+      "description": "impact ground; Excel shakes (Grow/Shrink 102%)",
+      "narrativeUses": [
+        "impact ground; Excel shakes (Grow/Shrink 102%)"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "impact"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 53,
+        "sourceSlug": "11_ground_pound",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "declaredAliasOf": "ground-pound",
+        "declaredAliasPlanIndex": 13
+      }
+    },
+    {
+      "motionId": "motion.kinetic.uppercut",
+      "family": "kinetic",
+      "slug": "uppercut",
+      "displayName": "Uppercut",
+      "description": "jumped uppercut; launch a bar up",
+      "narrativeUses": [
+        "jumped uppercut; launch a bar up"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "launch",
+        "impact"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 54,
+        "sourceSlug": "29_uppercut",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.tug-pull",
+      "family": "kinetic",
+      "slug": "tug-pull",
+      "displayName": "Tug Pull",
+      "description": "heavy backward pull; extract a negative",
+      "narrativeUses": [
+        "heavy backward pull; extract a negative"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 55,
+        "sourceSlug": "10_tug_pull",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.push-away",
+      "family": "kinetic",
+      "slug": "push-away",
+      "displayName": "Push Away",
+      "description": "hands push space; model shrinks 70% to back",
+      "narrativeUses": [
+        "hands push space; model shrinks 70% to back"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 56,
+        "sourceSlug": "11_push_away",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.screen-wipe",
+      "family": "kinetic",
+      "slug": "screen-wipe",
+      "displayName": "Screen Wipe",
+      "description": "horizontal wipe reveals hidden text",
+      "narrativeUses": [
+        "horizontal wipe reveals hidden text"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "reveal",
+        "data-emphasis"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 57,
+        "sourceSlug": "12_screen_wipe",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.atlas-lift",
+      "family": "kinetic",
+      "slug": "atlas-lift",
+      "displayName": "Atlas Lift",
+      "description": "hold an overhead weight (Budget block)",
+      "narrativeUses": [
+        "hold an overhead weight (Budget block)"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "reveal",
+        "risk-recovery"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 58,
+        "sourceSlug": "30_atlas_lift",
+        "sourceLibrary": "kinetic",
+        "sourceProvider": "mixamo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.meditate-float",
+      "family": "kinetic",
+      "slug": "meditate-float",
+      "displayName": "Meditate Float",
+      "description": "floating cross-legged = strategy/cloud/security",
+      "narrativeUses": [
+        "floating cross-legged = strategy/cloud/security"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "launch"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": true,
+        "energy": "low",
+        "tempo": "slow"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 59,
+        "sourceSlug": "13_meditate_float",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan"
+      }
+    },
+    {
+      "motionId": "motion.kinetic.stumble-recovery",
+      "family": "kinetic",
+      "slug": "stumble-recovery",
+      "displayName": "Stumble Recovery",
+      "description": "lose balance, recover proud = risk mgmt intro",
+      "narrativeUses": [
+        "lose balance, recover proud = risk mgmt intro"
+      ],
+      "semanticTags": [
+        "kinetic",
+        "expressive",
+        "risk-recovery"
+      ],
+      "expressiveRoles": [
+        "kinetic-emphasis"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "familyIndex": 60,
+        "sourceSlug": "14_trip_recovery",
+        "sourceLibrary": "kinetic-extension",
+        "sourceProvider": "nvidia-kimodo",
+        "bakedPoolMember": true,
+        "sourcePlan": "kinetic-plan",
+        "declaredAliasOf": "trip-recovery",
+        "declaredAliasPlanIndex": 16
+      }
+    },
+    {
+      "motionId": "motion.ordinary.idle",
+      "family": "ordinary-gesture",
+      "slug": "idle",
+      "displayName": "Idle",
+      "description": "Calm resting presence while the presenter remains visible.",
+      "narrativeUses": [
+        "Calm resting presence while the presenter remains visible."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "idle"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": true,
+        "energy": "low",
+        "tempo": "slow"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "idle",
+        "sourceSlug": "00_idle",
+        "canonicalClipIndex": 0,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.talk",
+      "family": "ordinary-gesture",
+      "slug": "talk",
+      "displayName": "Talk",
+      "description": "Conversational speaking gesture for explanation and continuity.",
+      "narrativeUses": [
+        "Conversational speaking gesture for explanation and continuity."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "talk"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate",
+        "durationMs": 10267
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "talk",
+        "sourceSlug": "01_talk",
+        "canonicalClipIndex": 1,
+        "sourcePoolMember": true,
+        "governedSourceFallback": {
+          "behavior": {
+            "inPlace": true,
+            "rootMotion": "in-place",
+            "loopable": false,
+            "energy": "medium",
+            "tempo": "moderate"
+          },
+          "lifecycle": {
+            "sourceState": "SOURCE_IDENTIFIED",
+            "buildState": "BAKED",
+            "measurementState": "POWERPOINT_MEASURED",
+            "distributionState": "APPROVED_IN_PROJECT",
+            "productState": "EXECUTABLE_GENERAL_MOTION"
+          },
+          "selectable": true,
+          "hasSourceProvider": false
+        },
+        "resolvedSource": {
+          "id": "ordinary-talk-native-v1",
+          "sha256": "1029ba9997a6da3ed0f8ef933600ad67fc6aa6ff9540ecb94ac17b259a7ebd78",
+          "sourceSlug": "talk",
+          "sourceTake": "Talking",
+          "sourceProvider": "mixamo",
+          "retarget": {
+            "boneNamePolicy": "mixamo-suffix",
+            "channelPolicy": "root-motion",
+            "rootMotionAnchor": "start",
+            "rootMotionMaxHorizontalStatures": 0.5,
+            "rootMotionMaxStatures": 0.35,
+            "rootMotionSpace": "world",
+            "rotationRetargetSpace": "global"
+          },
+          "playbackStatus": "PASS",
+          "durationMs": 10267,
+          "playbackProofSha256": "922bd8b97d34c329949e473705efae1932d404c68689609441a3557122568d56"
+        },
+        "sourceProvider": "mixamo"
+      }
+    },
+    {
+      "motionId": "motion.ordinary.greet",
+      "family": "ordinary-gesture",
+      "slug": "greet",
+      "displayName": "Greet",
+      "description": "Warm opening or acknowledgement gesture.",
+      "narrativeUses": [
+        "Warm opening or acknowledgement gesture."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "greet"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "greet",
+        "sourceSlug": "02_greet",
+        "canonicalClipIndex": 2,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.point",
+      "family": "ordinary-gesture",
+      "slug": "point",
+      "displayName": "Point",
+      "description": "Directional emphasis toward a visual without claiming physical contact.",
+      "narrativeUses": [
+        "Directional emphasis toward a visual without claiming physical contact."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "point"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "point",
+        "sourceSlug": "03_point",
+        "canonicalClipIndex": 3,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.emphasize",
+      "family": "ordinary-gesture",
+      "slug": "emphasize",
+      "displayName": "Emphasize",
+      "description": "Focused beat that reinforces an important claim.",
+      "narrativeUses": [
+        "Focused beat that reinforces an important claim."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "emphasize"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "emphasize",
+        "sourceSlug": "04_emphasize",
+        "canonicalClipIndex": 4,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.magnitude",
+      "family": "ordinary-gesture",
+      "slug": "magnitude",
+      "displayName": "Magnitude",
+      "description": "Scale gesture for size, growth, or impact.",
+      "narrativeUses": [
+        "Scale gesture for size, growth, or impact."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "magnitude"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "magnitude",
+        "sourceSlug": "05_magnitude",
+        "canonicalClipIndex": 5,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.contrast",
+      "family": "ordinary-gesture",
+      "slug": "contrast",
+      "displayName": "Contrast",
+      "description": "Comparative gesture for alternatives or tension.",
+      "narrativeUses": [
+        "Comparative gesture for alternatives or tension."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "contrast"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "contrast",
+        "sourceSlug": "06_contrast",
+        "canonicalClipIndex": 6,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.enumerate",
+      "family": "ordinary-gesture",
+      "slug": "enumerate",
+      "displayName": "Enumerate",
+      "description": "Measured counting gesture for a finite sequence.",
+      "narrativeUses": [
+        "Measured counting gesture for a finite sequence."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "enumerate"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate",
+        "durationMs": 6633
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "enumerate",
+        "sourceSlug": "07_enumerate",
+        "canonicalClipIndex": 7,
+        "sourcePoolMember": true,
+        "playbackHold": {
+          "code": "POWERPOINT_VISUAL_MOTION_NOT_PROVEN",
+          "observedAt": "2026-08-15"
+        },
+        "governedSourceFallback": {
+          "behavior": {
+            "inPlace": true,
+            "rootMotion": "in-place",
+            "loopable": false,
+            "energy": "medium",
+            "tempo": "moderate"
+          },
+          "lifecycle": {
+            "sourceState": "SOURCE_IDENTIFIED",
+            "buildState": "BAKED",
+            "measurementState": "POWERPOINT_VISUAL_PROOF_FAILED",
+            "distributionState": "APPROVED_IN_PROJECT",
+            "productState": "IMPLEMENTED_NOT_SELECTABLE"
+          },
+          "selectable": false,
+          "hasSourceProvider": false
+        },
+        "resolvedSource": {
+          "id": "ordinary-enumerate-native-v1",
+          "sha256": "c0203ad97475c1b22c18e16f640c4d7c928e766a04693e2d4814f16d4d417242",
+          "sourceSlug": "enumerate",
+          "sourceTake": "Counting",
+          "sourceProvider": "mixamo",
+          "retarget": {
+            "boneNamePolicy": "mixamo-suffix",
+            "channelPolicy": "root-motion",
+            "rootMotionAnchor": "start",
+            "rootMotionMaxHorizontalStatures": 0.5,
+            "rootMotionMaxStatures": 0.35,
+            "rootMotionSpace": "world",
+            "rotationRetargetSpace": "global"
+          },
+          "playbackStatus": "PASS",
+          "durationMs": 6633,
+          "playbackProofSha256": "13060b6ae09e63bdf6ccd88ae74edb91002bd9c1d34af95da42d9470e503f859"
+        },
+        "sourceProvider": "mixamo",
+        "playbackHoldSupersededBy": {
+          "sourceId": "ordinary-enumerate-native-v1",
+          "sourceSha256": "c0203ad97475c1b22c18e16f640c4d7c928e766a04693e2d4814f16d4d417242",
+          "playbackProofSha256": "13060b6ae09e63bdf6ccd88ae74edb91002bd9c1d34af95da42d9470e503f859"
+        }
+      }
+    },
+    {
+      "motionId": "motion.ordinary.ask",
+      "family": "ordinary-gesture",
+      "slug": "ask",
+      "displayName": "Ask",
+      "description": "Questioning gesture that invites attention or reflection.",
+      "narrativeUses": [
+        "Questioning gesture that invites attention or reflection."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "ask"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "ask",
+        "sourceSlug": "08_ask",
+        "canonicalClipIndex": 8,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.present",
+      "family": "ordinary-gesture",
+      "slug": "present",
+      "displayName": "Present",
+      "description": "Open-handed presentation gesture for a proof visual.",
+      "narrativeUses": [
+        "Open-handed presentation gesture for a proof visual."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "present"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "present",
+        "sourceSlug": "09_present",
+        "canonicalClipIndex": 9,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.agree",
+      "family": "ordinary-gesture",
+      "slug": "agree",
+      "displayName": "Agree",
+      "description": "Affirming motion for confirmation or validated progress.",
+      "narrativeUses": [
+        "Affirming motion for confirmation or validated progress."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "agree"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "agree",
+        "sourceSlug": "10_agree",
+        "canonicalClipIndex": 10,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.bow",
+      "family": "ordinary-gesture",
+      "slug": "bow",
+      "displayName": "Bow",
+      "description": "Respectful acknowledgement or closing gesture.",
+      "narrativeUses": [
+        "Respectful acknowledgement or closing gesture."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "bow"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "bow",
+        "sourceSlug": "11_bow",
+        "canonicalClipIndex": 11,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.think",
+      "family": "ordinary-gesture",
+      "slug": "think",
+      "displayName": "Think",
+      "description": "Reflective pause for analysis or uncertainty.",
+      "narrativeUses": [
+        "Reflective pause for analysis or uncertainty."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "think"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "low",
+        "tempo": "slow"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "think",
+        "sourceSlug": "12_think",
+        "canonicalClipIndex": 12,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.disagree",
+      "family": "ordinary-gesture",
+      "slug": "disagree",
+      "displayName": "Disagree",
+      "description": "Measured negative response for risk, trade-off, or rejection.",
+      "narrativeUses": [
+        "Measured negative response for risk, trade-off, or rejection."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "disagree"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "disagree",
+        "sourceSlug": "13_disagree",
+        "canonicalClipIndex": 13,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.happy",
+      "family": "ordinary-gesture",
+      "slug": "happy",
+      "displayName": "Happy",
+      "description": "Positive celebratory beat for milestones.",
+      "narrativeUses": [
+        "Positive celebratory beat for milestones."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "happy"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "happy",
+        "sourceSlug": "14_happy",
+        "canonicalClipIndex": 14,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.surprise",
+      "family": "ordinary-gesture",
+      "slug": "surprise",
+      "displayName": "Surprise",
+      "description": "Reaction gesture for a notable reveal or change.",
+      "narrativeUses": [
+        "Reaction gesture for a notable reveal or change."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "surprise"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "surprise",
+        "sourceSlug": "15_surprise",
+        "canonicalClipIndex": 15,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.walk",
+      "family": "ordinary-gesture",
+      "slug": "walk",
+      "displayName": "Walk",
+      "description": "In-place travel rhythm for motion continuity.",
+      "narrativeUses": [
+        "In-place travel rhythm for motion continuity."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "walk"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "in-place-travel-cycle",
+        "loopable": true,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "walk",
+        "sourceSlug": "16_walk",
+        "canonicalClipIndex": 16,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.ordinary.clap",
+      "family": "ordinary-gesture",
+      "slug": "clap",
+      "displayName": "Clap",
+      "description": "Celebratory completion or team-recognition gesture.",
+      "narrativeUses": [
+        "Celebratory completion or team-recognition gesture."
+      ],
+      "semanticTags": [
+        "ordinary-gesture",
+        "clap"
+      ],
+      "expressiveRoles": [
+        "presenter-gesture"
+      ],
+      "interactionVerbs": [],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "energy": "high",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_GENERAL_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "canonicalIntent": "clap",
+        "sourceSlug": "17_clap",
+        "canonicalClipIndex": 17,
+        "sourcePoolMember": true
+      }
+    },
+    {
+      "motionId": "motion.interaction.reach-touch-low-left",
+      "family": "interaction",
+      "slug": "reach-touch-low-left",
+      "displayName": "Reach Touch Low Left",
+      "description": "Contact-precise reach toward a target at a declared height and side.",
+      "narrativeUses": [
+        "Semantic reach-touch interaction for touch, press."
+      ],
+      "semanticTags": [
+        "interaction",
+        "reach-touch",
+        "touch",
+        "press"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "touch",
+        "press"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": "left",
+        "heightBand": "low",
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 0,
+        "sourceSlug": "00_reach_touch_low_left",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": "mixamorig:LeftHand",
+        "plateauMs": 400
+      }
+    },
+    {
+      "motionId": "motion.interaction.reach-touch-low-right",
+      "family": "interaction",
+      "slug": "reach-touch-low-right",
+      "displayName": "Reach Touch Low Right",
+      "description": "Contact-precise reach toward a target at a declared height and side.",
+      "narrativeUses": [
+        "Semantic reach-touch interaction for touch, press, push."
+      ],
+      "semanticTags": [
+        "interaction",
+        "reach-touch",
+        "touch",
+        "press",
+        "push"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "touch",
+        "press",
+        "push"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": "right",
+        "heightBand": "low",
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 1,
+        "sourceSlug": "01_reach_touch_low_right",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": "mixamorig:RightHand",
+        "plateauMs": 400
+      }
+    },
+    {
+      "motionId": "motion.interaction.reach-touch-mid-left",
+      "family": "interaction",
+      "slug": "reach-touch-mid-left",
+      "displayName": "Reach Touch Mid Left",
+      "description": "Contact-precise reach toward a target at a declared height and side.",
+      "narrativeUses": [
+        "Semantic reach-touch interaction for touch, press."
+      ],
+      "semanticTags": [
+        "interaction",
+        "reach-touch",
+        "touch",
+        "press"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "touch",
+        "press"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": "left",
+        "heightBand": "mid",
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 2,
+        "sourceSlug": "02_reach_touch_mid_left",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": "mixamorig:LeftHand",
+        "plateauMs": 400
+      }
+    },
+    {
+      "motionId": "motion.interaction.reach-touch-mid-right",
+      "family": "interaction",
+      "slug": "reach-touch-mid-right",
+      "displayName": "Reach Touch Mid Right",
+      "description": "Contact-precise reach toward a target at a declared height and side.",
+      "narrativeUses": [
+        "Semantic reach-touch interaction for touch, press, push."
+      ],
+      "semanticTags": [
+        "interaction",
+        "reach-touch",
+        "touch",
+        "press",
+        "push"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "touch",
+        "press",
+        "push"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": "right",
+        "heightBand": "mid",
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 3,
+        "sourceSlug": "03_reach_touch_mid_right",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": "mixamorig:RightHand",
+        "plateauMs": 400
+      }
+    },
+    {
+      "motionId": "motion.interaction.reach-touch-high-left",
+      "family": "interaction",
+      "slug": "reach-touch-high-left",
+      "displayName": "Reach Touch High Left",
+      "description": "Contact-precise reach toward a target at a declared height and side.",
+      "narrativeUses": [
+        "Semantic reach-touch interaction for touch."
+      ],
+      "semanticTags": [
+        "interaction",
+        "reach-touch",
+        "touch"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "touch"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": "left",
+        "heightBand": "high",
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 4,
+        "sourceSlug": "04_reach_touch_high_left",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": "mixamorig:LeftHand",
+        "plateauMs": 400
+      }
+    },
+    {
+      "motionId": "motion.interaction.reach-touch-high-right",
+      "family": "interaction",
+      "slug": "reach-touch-high-right",
+      "displayName": "Reach Touch High Right",
+      "description": "Contact-precise reach toward a target at a declared height and side.",
+      "narrativeUses": [
+        "Semantic reach-touch interaction for touch, push."
+      ],
+      "semanticTags": [
+        "interaction",
+        "reach-touch",
+        "touch",
+        "push"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "touch",
+        "push"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": "right",
+        "heightBand": "high",
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 5,
+        "sourceSlug": "05_reach_touch_high_right",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": "mixamorig:RightHand",
+        "plateauMs": 400
+      }
+    },
+    {
+      "motionId": "motion.interaction.point-mid",
+      "family": "interaction",
+      "slug": "point-mid",
+      "displayName": "Point Mid",
+      "description": "Contact-aware pointing posture toward a target.",
+      "narrativeUses": [
+        "Semantic point interaction for point-at."
+      ],
+      "semanticTags": [
+        "interaction",
+        "point",
+        "point-at"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "point-at"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": "right",
+        "heightBand": "mid",
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 6,
+        "sourceSlug": "06_point_mid",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": "mixamorig:RightHand",
+        "plateauMs": 500
+      }
+    },
+    {
+      "motionId": "motion.interaction.point-high",
+      "family": "interaction",
+      "slug": "point-high",
+      "displayName": "Point High",
+      "description": "Contact-aware pointing posture toward a target.",
+      "narrativeUses": [
+        "Semantic point interaction for point-at."
+      ],
+      "semanticTags": [
+        "interaction",
+        "point",
+        "point-at"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "point-at"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": "right",
+        "heightBand": "high",
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 7,
+        "sourceSlug": "07_point_high",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": "mixamorig:RightHand",
+        "plateauMs": 500
+      }
+    },
+    {
+      "motionId": "motion.interaction.press-tap",
+      "family": "interaction",
+      "slug": "press-tap",
+      "displayName": "Press Tap",
+      "description": "Deliberate press/tap posture with a measured contact plateau.",
+      "narrativeUses": [
+        "Semantic press interaction for press."
+      ],
+      "semanticTags": [
+        "interaction",
+        "press",
+        "press"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "press"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": "right",
+        "heightBand": "mid",
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 8,
+        "sourceSlug": "08_press_tap",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": "mixamorig:RightHand",
+        "plateauMs": 400
+      }
+    },
+    {
+      "motionId": "motion.interaction.grab-carry-near",
+      "family": "interaction",
+      "slug": "grab-carry-near",
+      "displayName": "Grab Carry Near",
+      "description": "Grab, transport, and release motion with separate plateaus.",
+      "narrativeUses": [
+        "Semantic carry interaction for carry."
+      ],
+      "semanticTags": [
+        "interaction",
+        "carry",
+        "carry"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "carry"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": null,
+        "heightBand": null,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 9,
+        "sourceSlug": "09_grab_carry_near",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": "mixamorig:RightHand",
+        "plateauMs": 400
+      }
+    },
+    {
+      "motionId": "motion.interaction.grab-carry-far",
+      "family": "interaction",
+      "slug": "grab-carry-far",
+      "displayName": "Grab Carry Far",
+      "description": "Grab, transport, and release motion with separate plateaus.",
+      "narrativeUses": [
+        "Semantic carry interaction for carry."
+      ],
+      "semanticTags": [
+        "interaction",
+        "carry",
+        "carry"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "carry"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": null,
+        "heightBand": null,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 10,
+        "sourceSlug": "10_grab_carry_far",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": "mixamorig:RightHand",
+        "plateauMs": 400
+      }
+    },
+    {
+      "motionId": "motion.interaction.walk-loop",
+      "family": "interaction",
+      "slug": "walk-loop",
+      "displayName": "Walk Loop",
+      "description": "Travel or turn motion used for presenter movement.",
+      "narrativeUses": [
+        "Semantic travel interaction for walk."
+      ],
+      "semanticTags": [
+        "interaction",
+        "travel",
+        "walk"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "walk"
+      ],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": true,
+        "side": null,
+        "heightBand": null,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 11,
+        "sourceSlug": "11_walk_loop",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": null,
+        "plateauMs": null
+      }
+    },
+    {
+      "motionId": "motion.interaction.walk-turn",
+      "family": "interaction",
+      "slug": "walk-turn",
+      "displayName": "Walk Turn",
+      "description": "Travel or turn motion used for presenter movement.",
+      "narrativeUses": [
+        "Semantic travel interaction for turn."
+      ],
+      "semanticTags": [
+        "interaction",
+        "travel",
+        "turn"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "turn"
+      ],
+      "behavior": {
+        "inPlace": false,
+        "rootMotion": "traveling",
+        "loopable": false,
+        "side": null,
+        "heightBand": null,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 12,
+        "sourceSlug": "12_walk_turn",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": null,
+        "plateauMs": null
+      }
+    },
+    {
+      "motionId": "motion.interaction.breathing-idle",
+      "family": "interaction",
+      "slug": "breathing-idle",
+      "displayName": "Breathing Idle",
+      "description": "Loopable resting motion for a visible presenter.",
+      "narrativeUses": [
+        "Semantic idle interaction for idle."
+      ],
+      "semanticTags": [
+        "interaction",
+        "idle",
+        "idle"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "idle"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": true,
+        "side": null,
+        "heightBand": null,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 13,
+        "sourceSlug": "13_breathing_idle",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": null,
+        "plateauMs": null
+      }
+    },
+    {
+      "motionId": "motion.interaction.emphatic-beat",
+      "family": "interaction",
+      "slug": "emphatic-beat",
+      "displayName": "Emphatic Beat",
+      "description": "Expressive beat intended for emphasis or impulse semantics.",
+      "narrativeUses": [
+        "Semantic beat interaction for emphasize, push, knock-over."
+      ],
+      "semanticTags": [
+        "interaction",
+        "beat",
+        "emphasize",
+        "push",
+        "knock-over"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "emphasize",
+        "push",
+        "knock-over"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": null,
+        "heightBand": null,
+        "energy": "high",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 14,
+        "sourceSlug": "14_emphatic_beat",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": "mixamorig:RightHand",
+        "plateauMs": 300
+      }
+    },
+    {
+      "motionId": "motion.interaction.greet-bow",
+      "family": "interaction",
+      "slug": "greet-bow",
+      "displayName": "Greet Bow",
+      "description": "Greeting or bow posture.",
+      "narrativeUses": [
+        "Semantic greet interaction for greet, bow."
+      ],
+      "semanticTags": [
+        "interaction",
+        "greet",
+        "greet",
+        "bow"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "greet",
+        "bow"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": null,
+        "heightBand": null,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 15,
+        "sourceSlug": "15_greet_bow",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": null,
+        "plateauMs": 400
+      }
+    },
+    {
+      "motionId": "motion.interaction.agree-nod",
+      "family": "interaction",
+      "slug": "agree-nod",
+      "displayName": "Agree Nod",
+      "description": "Agreement or disagreement head motion.",
+      "narrativeUses": [
+        "Semantic nod interaction for agree."
+      ],
+      "semanticTags": [
+        "interaction",
+        "nod",
+        "agree"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "agree"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": null,
+        "heightBand": null,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 16,
+        "sourceSlug": "16_agree_nod",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": null,
+        "plateauMs": null
+      }
+    },
+    {
+      "motionId": "motion.interaction.disagree-shake",
+      "family": "interaction",
+      "slug": "disagree-shake",
+      "displayName": "Disagree Shake",
+      "description": "Agreement or disagreement head motion.",
+      "narrativeUses": [
+        "Semantic nod interaction for disagree."
+      ],
+      "semanticTags": [
+        "interaction",
+        "nod",
+        "disagree"
+      ],
+      "expressiveRoles": [
+        "contact-precise-interaction"
+      ],
+      "interactionVerbs": [
+        "disagree"
+      ],
+      "behavior": {
+        "inPlace": true,
+        "rootMotion": "in-place",
+        "loopable": false,
+        "side": null,
+        "heightBand": null,
+        "energy": "medium",
+        "tempo": "moderate"
+      },
+      "lifecycle": {
+        "sourceState": "SOURCE_IDENTIFIED",
+        "buildState": "BAKED",
+        "measurementState": "POWERPOINT_MEASURED",
+        "distributionState": "APPROVED_IN_PROJECT",
+        "productState": "EXECUTABLE_INTERACTION_MOTION"
+      },
+      "selectable": true,
+      "privateEvidence": {
+        "legacyAuthoringV3Slot": 17,
+        "sourceSlug": "17_disagree_shake",
+        "sourceLibrary": "interaction",
+        "sourceProvider": "nvidia-kimodo",
+        "sourcePoolMember": true,
+        "contactBone": null,
+        "plateauMs": null
+      }
+    }
+  ],
+  "verification": {
+    "ok": true,
+    "issues": []
+  },
+  "sourceResolutionFingerprint": "motion-sources-a8dc5c0393f7c785f5937e295584142f"
+}

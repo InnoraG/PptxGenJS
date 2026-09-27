@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "betterpptx.implementation-gap-manifest.schema.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedFrom", "policy", "summary", "waves", "workUnits", "nextWorkUnit"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": "betterpptx.implementation-gap-manifest.v1" },
+    "generatedFrom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["matrixPath", "matrixSha256", "catalogFingerprint", "overridesPath", "overridesSha256"],
+      "properties": {
+        "matrixPath": { "type": "string" },
+        "matrixSha256": { "$ref": "#/$defs/sha256" },
+        "catalogFingerprint": { "type": "string", "minLength": 1 },
+        "overridesPath": { "type": "string" },
+        "overridesSha256": { "$ref": "#/$defs/sha256" }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["unitOfWork", "selection", "implementationPromotion", "certificationSeparation", "expensiveProofCadence"],
+      "properties": {
+        "unitOfWork": { "type": "string" },
+        "selection": { "type": "string" },
+        "implementationPromotion": { "type": "string" },
+        "certificationSeparation": { "type": "string" },
+        "expensiveProofCadence": { "type": "string" }
+      }
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["catalogRows", "applicableNewAuthoringRows", "fullyImplementedRows", "partialRows", "missingRows", "remainingImplementationRows", "preserveImportedOnlyRows", "notLiveRows", "hostCommandRows", "byteTransformRows", "notApplicableRows", "workUnits", "gapInventoriesComplete", "readyOrImplementingUnits", "blockedUnits", "formalCertification"],
+      "properties": {
+        "catalogRows": { "type": "integer", "minimum": 1 },
+        "applicableNewAuthoringRows": { "type": "integer", "minimum": 0 },
+        "fullyImplementedRows": { "type": "integer", "minimum": 0 },
+        "partialRows": { "type": "integer", "minimum": 0 },
+        "missingRows": { "type": "integer", "minimum": 0 },
+        "remainingImplementationRows": { "type": "integer", "minimum": 0 },
+        "preserveImportedOnlyRows": { "type": "integer", "minimum": 0 },
+        "notLiveRows": { "type": "integer", "minimum": 0 },
+        "hostCommandRows": { "type": "integer", "minimum": 0 },
+        "byteTransformRows": { "type": "integer", "minimum": 0 },
+        "notApplicableRows": { "type": "integer", "minimum": 0 },
+        "workUnits": { "type": "integer", "minimum": 0 },
+        "gapInventoriesComplete": { "type": "integer", "minimum": 0 },
+        "readyOrImplementingUnits": { "type": "integer", "minimum": 0 },
+        "blockedUnits": { "type": "integer", "minimum": 0 },
+        "formalCertification": { "type": "string" }
+      }
+    },
+    "waves": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/wave" }
+    },
+    "workUnits": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/workUnit" }
+    },
+    "nextWorkUnit": {
+      "oneOf": [
+        { "type": "null" },
+        { "$ref": "#/$defs/workUnitPointer" }
+      ]
+    }
+  },
+  "$defs": {
+    "sha256": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "nullableStringArray": {
+      "oneOf": [
+        { "type": "null" },
+        { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      ]
+    },
+    "wave": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "order", "label", "workUnits", "remainingRows"],
+      "properties": {
+        "id": { "type": "string" },
+        "order": { "type": "integer", "minimum": 1 },
+        "label": { "type": "string" },
+        "workUnits": { "type": "integer", "minimum": 0 },
+        "remainingRows": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "workUnitPointer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "wave", "family", "fanOutRows", "executionStatus", "nextAction"],
+      "properties": {
+        "id": { "type": "string" },
+        "wave": { "type": "string" },
+        "family": { "type": "string" },
+        "fanOutRows": { "type": "integer", "minimum": 1 },
+        "executionStatus": { "type": "string" },
+        "nextAction": { "type": "string" }
+      }
+    },
+    "workUnit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "wave", "waveOrder", "priorityRank", "family", "sourceCapabilityStatus", "fanOutRows", "rowIds", "representativeLabels", "componentOwnership", "declaredOverrideFields", "gapInventoryStatus", "executionStatus", "missingFields", "missingContexts", "missingBehaviors", "missingCombinations", "ownerModules", "dependencies", "cheapChecks", "blockedReason", "nextAction", "completionRule"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "wave": { "type": "string", "minLength": 1 },
+        "waveOrder": { "type": "integer", "minimum": 1 },
+        "priorityRank": { "type": "integer", "minimum": 1 },
+        "family": { "type": "string", "minLength": 1 },
+        "sourceCapabilityStatus": { "enum": ["structured-partial", "preset-only-incomplete", "missing"] },
+        "fanOutRows": { "type": "integer", "minimum": 1 },
+        "rowIds": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true },
+        "representativeLabels": { "type": "array", "items": { "type": "string" }, "minItems": 1 },
+        "componentOwnership": { "type": "array", "items": { "type": "string" } },
+        "declaredOverrideFields": { "type": "array", "items": { "type": "string" } },
+        "gapInventoryStatus": { "enum": ["pending", "complete"] },
+        "executionStatus": { "enum": ["gap_inventory_required", "ready_to_implement", "implementing", "blocked_external"] },
+        "missingFields": { "$ref": "#/$defs/nullableStringArray" },
+        "missingContexts": { "$ref": "#/$defs/nullableStringArray" },
+        "missingBehaviors": { "$ref": "#/$defs/nullableStringArray" },
+        "missingCombinations": { "$ref": "#/$defs/nullableStringArray" },
+        "ownerModules": { "$ref": "#/$defs/nullableStringArray" },
+        "dependencies": { "$ref": "#/$defs/nullableStringArray" },
+        "cheapChecks": { "$ref": "#/$defs/nullableStringArray" },
+        "blockedReason": { "type": ["string", "null"] },
+        "nextAction": { "type": "string", "minLength": 1 },
+        "completionRule": { "type": "string", "minLength": 1 }
+      }
+    }
+  }
+}

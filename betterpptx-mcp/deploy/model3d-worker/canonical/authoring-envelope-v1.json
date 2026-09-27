@@ -1,0 +1,36 @@
+{
+  "envelopeVersion": "1",
+  "_comment": "ADMISSIBLE TARGET ENVELOPE (B1 gate). For each verb and window family, the reach region — relative to the presenter's SQUARE window (fractions of window height h, origin = window center) — in which a target's contact point MUST be solvable within tolerance by the v3 authoring library (no UNREACHABLE inside the envelope). A target OUTSIDE the envelope must yield an actionable nearest-feasible fix, never a silent clamp. The envelope is the DESIGN promise the 18 reach/point slots (3 heights x 2 sides) are built to keep; the gate (tools/render-oracle/envelope-gate.mjs) samples it against an actor's measured timelines and fails on any interior UNREACHABLE.",
+  "tolIn": 0.15,
+  "windowFamilies": [
+    { "id": "small",  "h": 3.5, "m": 1 },
+    { "id": "medium", "h": 5.0, "m": 1 },
+    { "id": "large",  "h": 6.5, "m": 1.3 }
+  ],
+  "verbs": {
+    "touch": {
+      "_note": "reachable band around the window: lateral +/-0.55h from window center, vertical from 0.15h (low) to -0.40h (high, up above center). Covered by the 6 reach-touch slots.",
+      "region": { "dxFrac": [-0.55, 0.55], "dyFrac": [-0.40, 0.15] },
+      "grid": { "dxSteps": 5, "dySteps": 4 }
+    },
+    "point-at": {
+      "_note": "point reaches farther (standoff 1in) but only mid/high: lateral +/-0.7h, vertical -0.40h..0.0h.",
+      "region": { "dxFrac": [-0.70, 0.70], "dyFrac": [-0.40, 0.0] },
+      "grid": { "dxSteps": 5, "dySteps": 3 }
+    },
+    "press": {
+      "_note": "single mid-right press pose: a tight region right-of-center at mid height.",
+      "region": { "dxFrac": [0.05, 0.45], "dyFrac": [-0.15, 0.15] },
+      "grid": { "dxSteps": 3, "dySteps": 3 }
+    },
+    "carry": {
+      "_note": "grab point reachable band (near/far slots); the drop point is authored, not gated here.",
+      "region": { "dxFrac": [-0.45, 0.45], "dyFrac": [-0.20, 0.15] },
+      "grid": { "dxSteps": 4, "dySteps": 3 }
+    }
+  },
+  "gate": {
+    "rule": "for each (verb, windowFamily, grid point inside region): solveBestEmpirical against the actor's timelines must return a placement with residualIn <= tolIn AND no UNREACHABLE verdict. PASS = 100% of interior grid points solve. A point that fails is reported with its dx/dy and the nearest solvable point (the actionable fix).",
+    "note": "the v1 action-clip actors (kinetic-joe) are EXPECTED to fail this — they have no reach-at-height poses; that failure baseline is the evidence motivating the v3 library. The gate goes green when the v3 clips are sourced, baked, and oracle-measured."
+  }
+}

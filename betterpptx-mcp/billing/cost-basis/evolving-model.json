@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "betterpptx.evolving-cost-model.v1",
+  "generatedAt": "2026-07-03T07:51:34.199Z",
+  "observationCount": 88,
+  "sourceFiles": [
+    "outputs\\metrology\\cost-observations.ndjson"
+  ],
+  "speech": {
+    "defaultCharsPerSecond": 15.17,
+    "staticFallbackCharsPerSecond": 13,
+    "speechObservationCount": 22,
+    "voices": {
+      "en_US-ljspeech-high": {
+        "n": 21,
+        "charsPerSecond": 14.91,
+        "synthWallMsPerChar": 472.1
+      },
+      "de_DE-thorsten-high": {
+        "n": 1,
+        "charsPerSecond": 18.09,
+        "synthWallMsPerChar": 256.33
+      }
+    }
+  },
+  "tools": {
+    "betterpptx.deck.generate_from_spec": {
+      "n": 50,
+      "errorRate": 0.12,
+      "wallMsP50": 10549.5,
+      "wallMsP95": 47741.9,
+      "ttsShare": 0.44
+    },
+    "betterpptx.deck.save": {
+      "n": 26,
+      "errorRate": 0.1923,
+      "wallMsP50": 358.2,
+      "wallMsP95": 1176.2,
+      "ttsShare": 0
+    },
+    "betterpptx.deck.export_spec": {
+      "n": 2,
+      "errorRate": 0,
+      "wallMsP50": 27.2,
+      "wallMsP95": 27.2,
+      "ttsShare": 0
+    },
+    "betterpptx.auth.status": {
+      "n": 5,
+      "errorRate": 0,
+      "wallMsP50": 20,
+      "wallMsP95": 22.2,
+      "ttsShare": 0
+    },
+    "betterpptx.deck.open_uploaded": {
+      "n": 5,
+      "errorRate": 0,
+      "wallMsP50": 1288.3,
+      "wallMsP95": 2345.7,
+      "ttsShare": 0
+    }
+  },
+  "billedSplit": {
+    "billed": 0,
+    "unbilled": 77,
+    "unlabeled": 11
+  }
+}

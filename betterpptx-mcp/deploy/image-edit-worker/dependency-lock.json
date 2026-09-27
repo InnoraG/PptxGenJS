@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "betterpptx.image-edit-worker-dependencies.v1",
+  "auditedAt": "2026-07-17",
+  "status": "private-container-built; exact-runtime-license-gate-green; single-reference-cold-warm-and-multi-reference-owned-synthetic-canaries-green; broader-corpus-and-production-approval-pending",
+  "productionUseBlockedUntil": [
+    "owner and legal approve the PPTX-only hosted-service license review including NVIDIA CUDA terms and notice obligations",
+    "broader frozen visual corpus passes accepted-image cost, peak VRAM, failure and endpoint-failover gates",
+    "input/output safety controls and retention telemetry pass the IMG6 gate"
+  ],
+  "model": {
+    "repository": "black-forest-labs/FLUX.2-klein-4B",
+    "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
+    "license": "Apache-2.0",
+    "licenseUrl": "https://huggingface.co/black-forest-labs/FLUX.2-klein-4B",
+    "capabilities": ["text-to-image", "single-reference-editing", "multi-reference-editing"],
+    "enabledHere": ["single-reference-editing", "multi-reference-editing"],
+    "trainingEnabled": false
+  },
+  "sourceRevisions": [
+    {
+      "name": "Diffusers",
+      "repository": "https://github.com/huggingface/diffusers",
+      "revision": "55ae46db619223625c2ab5debcbb5131f1094129",
+      "license": "Apache-2.0"
+    },
+    {
+      "name": "Official FLUX.2 reference inference",
+      "repository": "https://github.com/black-forest-labs/flux2",
+      "revision": "50fe5162777813d869182b139e83b10743caef15",
+      "license": "Apache-2.0",
+      "runtimeImported": false,
+      "purpose": "contract and license audit reference"
+    }
+  ],
+  "directRuntimeDependencies": [
+    { "name": "torch", "version": "2.8.0", "license": "BSD-3-Clause" },
+    { "name": "torchvision", "version": "0.23.0", "license": "BSD-3-Clause" },
+    { "name": "transformers", "version": "5.14.1", "license": "Apache-2.0" },
+    { "name": "accelerate", "version": "1.14.0", "license": "Apache-2.0" },
+    { "name": "huggingface_hub", "version": "1.23.0", "license": "Apache-2.0" },
+    { "name": "tokenizers", "version": "0.22.2", "license": "Apache-2.0" },
+    { "name": "safetensors", "version": "0.8.0", "license": "Apache-2.0" },
+    { "name": "sentencepiece", "version": "0.2.2", "license": "Apache-2.0" },
+    { "name": "protobuf", "version": "7.35.1", "license": "BSD-3-Clause" },
+    { "name": "pillow", "version": "12.3.0", "license": "HPND" },
+    { "name": "fastapi", "version": "0.139.2", "license": "MIT" }
+  ],
+  "managedRuntimeShadowPolicy": {
+    "allowedDuplicateNormalizedNames": ["certifi", "idna", "protobuf", "typingextensions"],
+    "reason": "Modal injects its own client-runtime distributions outside the worker pip layer. The attestation records both locations and must prove Python selects every direct worker pin.",
+    "failClosedOnAnyOtherDuplicate": true
+  },
+  "deployHostDependency": { "name": "modal", "version": "1.5.2", "license": "Apache-2.0" },
+  "commercialSafetyBoundary": {
+    "allowed": "self-hosted commercial image creation/editing and resale of presentation outputs",
+    "notAGuarantee": "Apache-2.0 does not clear third-party trademarks, publicity rights, privacy rights, or unlawful/deceptive content in a particular input or output.",
+    "forbiddenModels": ["FLUX.2-klein-9B", "FLUX.2-klein-9B-KV", "FLUX.2-dev", "FLUX.1-dev", "FLUX-pro"]
+  }
+}

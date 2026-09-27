@@ -1,0 +1,44 @@
+{
+  "schema": "betterpptx.g1.powerpoint-visual-evidence.v1",
+  "measuredAt": "2026-08-14T06:14:48.8665418Z",
+  "application": "Microsoft PowerPoint 16.0 native PNG export",
+  "isolation": "each export aborted if a pre-existing PowerPoint process was present",
+  "review": "Every exact candidate renders one visible native presenter poster in the approved ellipse window with centered cover crop and no same-box fallback picture.",
+  "liveOverlayQualification": "PowerPoint renders live video through an overlay that GDI bitmap capture also omitted for the known-good native Record Studio reference. Live playback is proven by the separate COM run/pause/resume/replay evidence; these PNGs prove geometry, crop, poster visibility, z-order, and slide composition.",
+  "files": [
+    {
+      "path": "betterpptx-mcp/outputs/g1-native-recordstudio-20260814/avatar-delivery-square-sanitized-native-recordstudio-20260814.pptx",
+      "bytes": 1954277,
+      "sha256": "a594e8435005a929b938fb10af80e2bef0cab86755be5ebbff9a16effa5a70da",
+      "render": "betterpptx-mcp/outputs/g1-native-recordstudio-20260814/visual/edit-export/Slide1.PNG",
+      "renderBytes": 239065,
+      "renderSha256": "e0bb20d1477046c5e5ee7ec20a639105c380703f0bac573545cfef9cb23e37dc",
+      "width": 1600,
+      "height": 900,
+      "status": "PASS"
+    },
+    {
+      "path": "betterpptx-mcp/outputs/g1-native-recordstudio-20260814/avatar-delivery-sanitized-native-recordstudio-20260814.pptx",
+      "bytes": 1937453,
+      "sha256": "fee690ffaae36ab0fbcbdefe2e0a56407d42cd8f937e45436e743f1792ab0d46",
+      "render": "betterpptx-mcp/outputs/g1-native-recordstudio-20260814/visual/standard/Slide1.PNG",
+      "renderBytes": 159065,
+      "renderSha256": "dd26fdef94aa205dff96f53171077c37bde84ecbc69daf9b6cc767f19a257eda",
+      "width": 1600,
+      "height": 900,
+      "status": "PASS"
+    },
+    {
+      "path": "betterpptx-mcp/outputs/g1-native-recordstudio-20260814/avatar-delivery-narration-sanitized-native-recordstudio-20260814.pptx",
+      "bytes": 1935774,
+      "sha256": "f1b3ac7d6c53558c75f05ff82d752fd3d792f57cabfbc221e8d587b120cf23d1",
+      "render": "betterpptx-mcp/outputs/g1-native-recordstudio-20260814/visual/narration/Slide1.PNG",
+      "renderBytes": 160534,
+      "renderSha256": "3f9844704e69567c88c1dd49b2ad905a617abbfa886e1ee970f57442248b5b01",
+      "width": 1600,
+      "height": 900,
+      "status": "PASS"
+    }
+  ],
+  "pass": true
+}

@@ -1,4 +1,11 @@
 import type { FeatureBudget } from './types.js'
+import { CHART_GALLERY, getChartGalleryStyleVariant } from '../chart-gallery.js'
+import { chartGalleryApplicabilityById } from './chart-gallery-applicability.js'
+import { CHART_TYPE_REGISTRY } from './chart-type-registry.js'
+import { chartGalleryUiEvidenceByType } from './chart-gallery-ui-evidence.js'
+import { CHART_TREATMENT_PRESETS, listChartTreatmentPresets } from './chart-treatment-catalog.js'
+
+export { CHART_TREATMENT_PRESETS, listChartTreatmentPresets }
 
 export type ChartPresetMode = 'native' | 'native-composite' | 'shape-built'
 
@@ -22,13 +29,332 @@ export interface ChartPreset {
 	rank: number
 }
 
+/**
+ * Exact Office Chart Design gallery state captured from PowerPoint COM/UI.
+ *
+ * These are deliberately separate from semantic chart presets: the semantic
+ * preset chooses the chart family and data story, while this catalog chooses
+ * the native Office style/color state to apply through `chartGalleryVariant`.
+ */
+export type ChartFamilyScope = 'legacy-and-chartex' | 'legacy-only' | 'chartex-only' | 'package-observed'
+
+export interface ChartStylePreset {
+	id: string
+	title: string
+	powerPointCategory: 'Chart Design'
+	powerPointPreset: string
+	authoringMode: 'native'
+	chartGalleryVariant: number
+	chartStyleId: number
+	chartStyleModernId?: number
+	legacyFallbackStyleId?: number
+	chartFamilyScope: ChartFamilyScope
+	/** Runtime chart families observed carrying this exact package preset. */
+	supportedChartTypes: string[]
+	/** Exact matrix specimen ids observed carrying the package resource. */
+	packageObservedChartParts: string[]
+	/** Raw XML tags observed carrying the package resource. */
+	packageObservedChartTags: string[]
+	/** Per-type Ribbon evidence; this is independent of package-resource applicability. */
+	ribbonEvidenceByChartType: Record<string, 'type-specific-capture-pending' | 'type-specific-ui-captured'>
+	/** Per-type Chart Colors and Quick Layout evidence are tracked separately. */
+	colorEvidenceByChartType: Record<string, 'type-specific-capture-pending' | 'type-specific-ui-captured'>
+	layoutEvidenceByChartType: Record<string, 'type-specific-capture-pending' | 'type-specific-ui-captured'>
+	/** Package/UI provenance; visible Ribbon tile counts are exposed by listChartGalleryUiPresets. */
+	evidenceStatus: 'package-captured' | 'ui-captured' | 'package-captured-ui-pending'
+	styleFamilyId: number
+	colorFamilyId: number
+	optionDefaults: { chartGalleryVariant: number }
+	tags: string[]
+	fidelityNote: string
+}
+
+/**
+ * A concrete, chart-type-specific Ribbon tile state captured from PowerPoint.
+ * This is intentionally separate from ChartStylePreset: a package style/color
+ * resource can be reused by many chart families, while a Ribbon gallery tile
+ * is an observed UI state with its own applicability and rendered provenance.
+ */
+export interface ChartGalleryTilePreset {
+	id: string
+	title: string
+	chartType: string
+	chartTypeCom: number
+	chartFamily: string | null
+	galleryKind: 'styles' | 'colors' | 'layouts'
+	tileIndex: number
+	row: number
+	column: number
+	nativeStyleId: number | null
+	nativeColorId: number | null
+	renderedHash: string
+	screenshot: string
+	packageSha256?: string | null
+	chartXmlSha256?: string | null
+	/** Exact chart part selected for this tile inside the provenance bundle. */
+	selectedChartXmlSha256?: string | null
+	chartXmlPath?: string | null
+	bundleSlide?: number | null
+	layoutId?: number | null
+	packageReplay?: 'bundle-com' | 'headless-com' | 'ui' | null
+	packagePath?: string | null
+	packageError?: string | null
+	serializationStatus: 'package-backed' | 'native-engine' | 'ui-only'
+	manifest: string
+	referencePptx: string
+	tags: string[]
+}
+
 export interface RecommendedChartPreset {
 	preset: ChartPreset
 	score: number
 	selectionReason: string[]
 }
 
-export const NATIVE_CHART_TYPES = ['area', 'bar', 'bar3D', 'bubble', 'bubble3D', 'doughnut', 'line', 'pie', 'radar', 'scatter', 'treemap', 'sunburst', 'histogram', 'pareto', 'boxWhisker', 'waterfall', 'funnel', 'regionMap']
+export const NATIVE_CHART_TYPES = ['area', 'bar', 'bar3D', 'bubble', 'bubble3D', 'doughnut', 'line', 'pie', 'radar', 'scatter', 'treemap', 'sunburst', 'histogram', 'pareto', 'boxWhisker', 'waterfall', 'funnel', 'regionMap', 'combo']
+
+function hasUiEvidenceForSemanticType(semanticType: string, galleryKind: 'styles' | 'colors' | 'layouts' = 'styles'): boolean {
+	return CHART_TYPE_REGISTRY.some(record => record.semanticType === semanticType && chartGalleryUiEvidenceByType(Number(record.comChartType), galleryKind).length > 0)
+}
+
+/**
+ * Resolve a gallery filter without collapsing canonical registry semantics
+ * such as area3D/line3D/pie3D into an unrelated base family.  The ordinary
+ * native option normalizer intentionally knows only executable serializer
+ * types; Ribbon evidence also has preserve/edit semantics and therefore must
+ * retain the registry's semantic type when filtering.
+ */
+function galleryChartTypeFilter(value: unknown): { provided: boolean, type: string | null } {
+	const raw = String(value ?? '').trim()
+	if (!raw) return { provided: false, type: null }
+	const normalized = normalizeNativeChartType(raw)
+	if (normalized) return { provided: true, type: normalized }
+	const record = CHART_TYPE_REGISTRY.find(item => item.semanticType.toLowerCase() === raw.toLowerCase())
+	return { provided: true, type: record?.semanticType || null }
+}
+
+/**
+ * All 49 style/color resource combinations present in the PowerPoint-authored
+ * chart COM matrix. The first 48 also have legacy ChartStyle read-back IDs;
+ * variant 49 is a ChartEx gallery resource without a legacy c:style ID.
+ */
+export const CHART_STYLE_PRESET_CATALOG: ReadonlyArray<ChartStylePreset> = Object.freeze(
+	Object.values(CHART_GALLERY.variants).map((variant): ChartStylePreset => {
+		const legacy = getChartGalleryStyleVariant(variant.galleryId)
+		const applicability = chartGalleryApplicabilityById(variant.galleryId)
+		const packageTypes = [...new Set([...(applicability?.style.semanticTypes || []), ...(applicability?.color.semanticTypes || [])])]
+		const packageTags = [...new Set([...(applicability?.style.chartTags || []), ...(applicability?.color.chartTags || [])])]
+		const packageParts = [...new Set([...(applicability?.style.chartParts || []), ...(applicability?.color.chartParts || [])])]
+		const observedChartEx = packageTags.some(tag => tag.startsWith('chartEx:'))
+		const observedLegacy = packageTags.some(tag => !tag.startsWith('chartEx:'))
+		const scope: ChartFamilyScope = observedLegacy && observedChartEx ? 'legacy-and-chartex' : observedLegacy ? 'legacy-only' : observedChartEx ? 'chartex-only' : legacy ? 'package-observed' : 'chartex-only'
+		const evidenceByType = Object.fromEntries(packageTypes.map(type => [type, hasUiEvidenceForSemanticType(type, 'styles') ? 'type-specific-ui-captured' as const : 'type-specific-capture-pending' as const]))
+		const colorEvidenceByType = Object.fromEntries(packageTypes.map(type => [type, hasUiEvidenceForSemanticType(type, 'colors') ? 'type-specific-ui-captured' as const : 'type-specific-capture-pending' as const]))
+		const layoutEvidenceByType = Object.fromEntries(packageTypes.map(type => [type, hasUiEvidenceForSemanticType(type, 'layouts') ? 'type-specific-ui-captured' as const : 'type-specific-capture-pending' as const]))
+		return {
+			id: `office-chart-style-${String(variant.galleryId).padStart(2, '0')}`,
+			title: `Office Chart Design style ${String(variant.galleryId).padStart(2, '0')}`,
+			powerPointCategory: 'Chart Design',
+			powerPointPreset: `Chart Design style ${variant.galleryId}`,
+			authoringMode: 'native',
+			chartGalleryVariant: variant.galleryId,
+			chartStyleId: variant.chartStyleId,
+			...(legacy?.modernStyleId ? { chartStyleModernId: legacy.modernStyleId } : {}),
+			...(legacy?.fallbackStyleId ? { legacyFallbackStyleId: legacy.fallbackStyleId } : {}),
+			chartFamilyScope: scope,
+			supportedChartTypes: packageTypes.length ? packageTypes : (legacy ? [...NATIVE_CHART_TYPES] : ['treemap', 'sunburst', 'histogram', 'pareto', 'boxWhisker', 'waterfall', 'funnel', 'regionMap']),
+			packageObservedChartParts: packageParts,
+			packageObservedChartTags: packageTags,
+			ribbonEvidenceByChartType: evidenceByType,
+			colorEvidenceByChartType: colorEvidenceByType,
+			layoutEvidenceByChartType: layoutEvidenceByType,
+			evidenceStatus: 'package-captured-ui-pending',
+			styleFamilyId: variant.styleCatalogId,
+			colorFamilyId: variant.colorCatalogId,
+			optionDefaults: { chartGalleryVariant: variant.galleryId },
+			tags: ['chart', 'office-gallery', 'chart-style', 'chart-color', ...(legacy ? [] : ['chartex-only']), `style-family-${variant.styleCatalogId}`, `color-family-${variant.colorCatalogId}`],
+			fidelityNote: 'PowerPoint gallery state captured and executable; select this governed style resource instead of rebuilding the appearance manually.',
+		}
+	})
+)
+
+export function chartStylePresetById(id: string): ChartStylePreset | undefined {
+	return CHART_STYLE_PRESET_CATALOG.find(preset => preset.id === id)
+}
+
+/** Resolve one exact chart-type-specific Ribbon tile by its opaque id. */
+export function chartGalleryTilePresetById(id: string, args: { chartType?: string, galleryKind?: 'styles' | 'colors' | 'layouts' } = {}): ChartGalleryTilePreset | undefined {
+	const chartTypeFilter = galleryChartTypeFilter(args.chartType)
+	if (chartTypeFilter.provided && !chartTypeFilter.type) return undefined
+	const requestedType = chartTypeFilter.type
+	const requestedKind = args.galleryKind
+	return listChartGalleryUiPresets({ limit: 2000, chartType: requestedType, galleryKind: requestedKind })
+		.find(tile => tile.id === id)
+}
+
+/**
+ * Public-safe tile metadata.  Package paths, local manifests, screenshots and
+ * XML hashes remain implementation/provenance details and never cross the
+ * product boundary.  The opaque id is sufficient for the authoring resolver.
+ */
+export function publicChartGalleryTilePreset(tile: ChartGalleryTilePreset): Record<string, unknown> {
+	return {
+		id: tile.id,
+		title: tile.title,
+		chartType: tile.chartType,
+		galleryKind: tile.galleryKind,
+		tileIndex: tile.tileIndex,
+		row: tile.row,
+		column: tile.column,
+		serializationStatus: tile.serializationStatus === 'package-backed' || tile.serializationStatus === 'native-engine' ? 'verified-executable' : 'unavailable',
+		fidelity: tile.serializationStatus === 'package-backed' ? 'package-verified' : tile.serializationStatus === 'native-engine' ? 'native-engine-verified' : 'not-executable',
+	}
+}
+
+export function publicChartStylePreset(preset: ChartStylePreset): Record<string, unknown> {
+	return {
+		id: preset.id,
+		title: preset.title,
+		powerPointCategory: preset.powerPointCategory,
+		authoringMode: preset.authoringMode,
+		chartFamilyScope: preset.chartFamilyScope,
+		supportedChartTypes: preset.supportedChartTypes,
+		ribbonEvidenceByChartType: preset.ribbonEvidenceByChartType,
+		colorEvidenceByChartType: preset.colorEvidenceByChartType,
+		layoutEvidenceByChartType: preset.layoutEvidenceByChartType,
+		evidenceStatus: preset.evidenceStatus,
+		styleFamilyId: preset.styleFamilyId,
+		colorFamilyId: preset.colorFamilyId,
+		fidelityNote: preset.fidelityNote,
+	}
+}
+
+export function listChartGalleryUiPresets(args: any = {}): ChartGalleryTilePreset[] {
+	const chartTypeFilter = galleryChartTypeFilter(args?.chartType)
+	if (chartTypeFilter.provided && !chartTypeFilter.type) return []
+	const requestedType = chartTypeFilter.type
+	const requestedKind = args?.galleryKind === 'colors' || args?.galleryKind === 'layouts' || args?.galleryKind === 'styles' ? args.galleryKind : undefined
+	// The public listing is an exhaustive catalog by default.  Callers that
+	// need a UI-sized recommendation can pass an explicit limit; silently
+	// truncating the default would make the engine appear to have fewer Ribbon
+	// states than the captured corpus actually contains.
+	const requestedLimit = args?.limit == null ? 2000 : Number(args.limit)
+	const limit = Math.max(1, Math.min(Number.isFinite(requestedLimit) ? requestedLimit : 2000, 2000))
+	const seen = new Set<string>()
+	const result: ChartGalleryTilePreset[] = []
+	for (const record of CHART_TYPE_REGISTRY) {
+		const semanticType = record.semanticType
+		if (requestedType && semanticType !== requestedType) continue
+		for (const galleryKind of (requestedKind ? [requestedKind] : ['styles', 'colors', 'layouts'] as const)) {
+			// Promoted UI captures and package-backed captures can describe the
+			// same tile hash. Prefer the package-backed record so the opaque id is
+			// executable through both direct-code and MCP generation.
+			const evidences = chartGalleryUiEvidenceByType(Number(record.comChartType), galleryKind)
+				.slice()
+				.sort((left, right) => Number(right.tiles.some(tile => tile.packageSha256 && tile.chartXmlSha256)) - Number(left.tiles.some(tile => tile.packageSha256 && tile.chartXmlSha256)))
+			for (const evidence of evidences) {
+				for (const tile of evidence.tiles) {
+					const key = `${semanticType}:${galleryKind}:${tile.sha256}`
+					if (seen.has(key)) continue
+					seen.add(key)
+					const tileIndex = evidence.tiles.indexOf(tile)
+					result.push({
+						id: `office-ribbon-${semanticType}-${galleryKind}-${tile.sha256.slice(0, 12)}`,
+						title: `${semanticType} · ${galleryKind} tile ${tileIndex + 1}`,
+						chartType: semanticType,
+						chartTypeCom: Number(record.comChartType),
+						chartFamily: record.family,
+						galleryKind,
+						tileIndex,
+						row: tile.row,
+						column: tile.column,
+						nativeStyleId: tile.chartStyleAfter,
+						nativeColorId: tile.chartColorAfter,
+						renderedHash: tile.sha256,
+					screenshot: tile.screenshot,
+					packageSha256: tile.packageSha256 ?? null,
+					chartXmlSha256: tile.chartXmlSha256 ?? null,
+					selectedChartXmlSha256: tile.selectedChartXmlSha256 ?? null,
+					chartXmlPath: tile.chartXmlPath ?? null,
+					bundleSlide: tile.bundleSlide == null ? null : Number(tile.bundleSlide),
+					layoutId: tile.layoutId == null ? null : Number(tile.layoutId),
+					packageReplay: tile.packageReplay ?? null,
+					packagePath: tile.packagePath ?? null,
+					packageError: tile.packageError ?? null,
+					// Color tiles with a native ChartColor read-back are executable
+					// through the engine's native-id catalog even when this particular
+					// applicability probe was intentionally screenshot-only. Layout
+					// tiles remain UI-only until their native layout payload is modeled.
+					serializationStatus: tile.packageSha256 && tile.chartXmlSha256
+						? 'package-backed'
+						: galleryKind === 'colors' && Number.isInteger(tile.chartColorAfter)
+							? 'native-engine'
+							: 'ui-only',
+						manifest: evidence.manifest,
+						referencePptx: evidence.referencePptx,
+						tags: ['chart', 'office-ribbon', galleryKind, semanticType],
+					})
+					if (result.length >= limit) return result
+				}
+			}
+		}
+	}
+	return result
+}
+
+export function listChartStylePresets(args: any = {}): ChartStylePreset[] {
+	const limit = Math.max(1, Math.min(Number(args?.limit || CHART_STYLE_PRESET_CATALOG.length), CHART_STYLE_PRESET_CATALOG.length))
+	const styleFamilyId = Number(args?.styleFamilyId)
+	const colorFamilyId = Number(args?.colorFamilyId)
+	const chartTypeFilter = galleryChartTypeFilter(args?.chartType)
+	if (chartTypeFilter.provided && !chartTypeFilter.type) return []
+	const chartType = chartTypeFilter.type
+	const requireRibbonEvidence = args?.requireRibbonEvidence === true
+	const requireGalleryKind = args?.requireGalleryKind === 'colors' || args?.requireGalleryKind === 'layouts' || args?.requireGalleryKind === 'styles' ? args.requireGalleryKind : undefined
+	const hasRequestedEvidence = (preset: ChartStylePreset, kind: 'styles' | 'colors' | 'layouts'): boolean => {
+		const map = kind === 'colors' ? preset.colorEvidenceByChartType : kind === 'layouts' ? preset.layoutEvidenceByChartType : preset.ribbonEvidenceByChartType
+		return Object.entries(map).some(([type, status]) => (!chartType || type === chartType) && status === 'type-specific-ui-captured')
+	}
+	return CHART_STYLE_PRESET_CATALOG
+		.filter(preset => !Number.isInteger(styleFamilyId) || preset.styleFamilyId === styleFamilyId)
+		.filter(preset => !Number.isInteger(colorFamilyId) || preset.colorFamilyId === colorFamilyId)
+		.filter(preset => !chartType || preset.supportedChartTypes.includes(chartType))
+		.filter(preset => !requireRibbonEvidence || hasRequestedEvidence(preset, 'styles'))
+		.filter(preset => !requireGalleryKind || hasRequestedEvidence(preset, requireGalleryKind))
+		.slice(0, limit)
+}
+
+export function chartStyleCoverageByType(chartType?: string): { chartType: string, matrixSpecimens: number, packageObservedPresets: number, typeSpecificRibbonCaptured: number, typeSpecificRibbonPending: number, typeSpecificUiTileEvidence: { styles: number, colors: number, layouts: number } }[] {
+	const types = chartType ? [normalizeNativeChartType(chartType) || chartType] : [...new Set(CHART_TYPE_REGISTRY.map(record => record.semanticType))]
+	return types.map(type => {
+		const presets = CHART_STYLE_PRESET_CATALOG.filter(preset => preset.supportedChartTypes.includes(type))
+		const evidenceTileCount = (galleryKind: 'styles' | 'colors' | 'layouts'): number => {
+			const hashes = new Set<string>()
+			for (const record of CHART_TYPE_REGISTRY.filter(record => record.semanticType === type)) {
+				for (const evidence of chartGalleryUiEvidenceByType(Number(record.comChartType), galleryKind)) {
+					for (const tile of evidence.tiles) hashes.add(tile.sha256)
+				}
+			}
+			return hashes.size
+		}
+		return {
+			chartType: type,
+			matrixSpecimens: CHART_TYPE_REGISTRY.filter(record => record.semanticType === type).length,
+			packageObservedPresets: presets.length,
+			typeSpecificRibbonCaptured: presets.filter(preset => preset.ribbonEvidenceByChartType[type] === 'type-specific-ui-captured').length,
+			// UI tile evidence is intentionally separate from package-preset mapping.
+			// Until a tile's native read-back/XML hash is linked to a package variant,
+			// the package preset remains pending even when its chart family has been
+			// photographed and read back in the Ribbon.
+			typeSpecificRibbonPending: presets.filter(preset => preset.ribbonEvidenceByChartType[type] !== 'type-specific-ui-captured').length,
+			typeSpecificUiTileEvidence: {
+				styles: evidenceTileCount('styles'),
+				colors: evidenceTileCount('colors'),
+				layouts: evidenceTileCount('layouts'),
+			},
+		}
+	})
+}
 
 export function normalizeNativeChartType(value: unknown): string | null {
 	const raw = String(value || '').trim()
@@ -39,6 +365,7 @@ export function normalizeNativeChartType(value: unknown): string | null {
 	if (lower === 'bubble3d') return 'bubble3D'
 	if (compact === 'boxwhisker' || compact === 'boxandwhisker') return 'boxWhisker'
 	if (compact === 'filledmap' || compact === 'map' || compact === 'regionmap') return 'regionMap'
+	if (compact === 'combo' || compact === 'combination') return 'combo'
 	return NATIVE_CHART_TYPES.includes(raw) ? raw : NATIVE_CHART_TYPES.find(type => type.toLowerCase() === lower) || null
 }
 
@@ -583,12 +910,14 @@ export function recommendChartPresets(query = '', budget: Partial<FeatureBudget>
 	const terms = queryTerms(combinedQuery)
 	const tagHints = [...inferredTags(combinedQuery), ...budgetTags(budget)]
 	const explicitPreset = args?.chartPresetId ? chartPresetById(String(args.chartPresetId)) : undefined
+	const explicitType = normalizeNativeChartType(args?.chartType)
 	const explicitCategory = normalizeText(args?.category)
 	const explicitMode = normalizeText(args?.authoringMode || args?.mode)
 	const dataShape = normalizeText(args?.dataShape)
 
 	return CHART_PRESET_CATALOG
 		.filter(preset => !explicitPreset || preset.id === explicitPreset.id)
+		.filter(preset => !explicitType || [preset.chartType, ...(preset.chartTypes || [])].map(type => normalizeNativeChartType(type)).includes(explicitType))
 		.filter(preset => !explicitCategory || normalizeText(preset.powerPointCategory) === explicitCategory || preset.tags.includes(explicitCategory))
 		.filter(preset => !explicitMode || preset.authoringMode === explicitMode)
 		.map(preset => {

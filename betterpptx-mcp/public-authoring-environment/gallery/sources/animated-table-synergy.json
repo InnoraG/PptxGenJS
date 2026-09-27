@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "betterpptx.deck-spec.v1",
+  "title": "Animated table lesson",
+  "authoringContract": {
+    "workflow": "ai-sovereign-v1",
+    "creativeAuthority": "ai",
+    "directorMode": "off",
+    "verificationMode": "complete",
+    "geometryAuthority": "ai",
+    "placementPolicy": "ai-authored-geometry-v1",
+    "coordinateSystem": "inches"
+  },
+  "styleIntent": {
+    "artDirection": "editorial",
+    "mode": "dark"
+  },
+  "validation": {
+    "validateBeforeSave": true,
+    "requireAccessibility": true
+  },
+  "slides": [
+    {
+      "id": "scorecard",
+      "title": "Decision scorecard",
+      "content": [
+        {
+          "kind": "animated-table",
+          "name": "decision-table",
+          "rect": {
+            "x": 1,
+            "y": 1.55,
+            "w": 11.3,
+            "h": 4.7
+          },
+          "header": [
+            "Option",
+            "Evidence",
+            "Score"
+          ],
+          "rows": [
+            [
+              "A",
+              "Stable",
+              "63"
+            ],
+            [
+              "B",
+              "Strong",
+              "81"
+            ],
+            [
+              "C",
+              "Emerging",
+              "72"
+            ]
+          ],
+          "appearance": {
+            "headerFill": "312E81",
+            "rowFill": "FFFFFF",
+            "alternateRowFill": "EEF2FF",
+            "textColor": "111827",
+            "borderColor": "C7D2FE"
+          },
+          "reveal": {
+            "by": "row",
+            "order": "forward",
+            "effect": "fade",
+            "trigger": "withPrevious",
+            "startMs": 250,
+            "staggerMs": 180,
+            "durationMs": 360
+          },
+          "summary": "Illustrative scorecard; option B has the highest synthetic score.",
+          "altText": "Illustrative decision scorecard: A 63, B 81, C 72."
+        }
+      ]
+    }
+  ]
+}

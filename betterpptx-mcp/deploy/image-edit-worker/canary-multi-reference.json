@@ -1,0 +1,28 @@
+{
+  "inputs": [
+    {
+      "path": "betterpptx-mcp/deploy/image-edit-worker/fixtures/synthetic-reference.png",
+      "sha256": "02e7e8323b417a1135e68779174c4a757fc224037640f5cb0d602d8fd47c1379"
+    },
+    {
+      "path": "betterpptx-mcp/deploy/image-edit-worker/fixtures/synthetic-style-reference.png",
+      "sha256": "1cf4dde4f71afa0599db5e7a78b54e594a7c417311aa6fd2687947ee0fff4c59"
+    }
+  ],
+  "metrics": {
+    "capability": "multi-reference",
+    "coldStart": true,
+    "contentType": "image/png",
+    "gpuSeconds": 14.967,
+    "gpuType": "L40S",
+    "height": 1024,
+    "model": "black-forest-labs/FLUX.2-klein-4B",
+    "modelRevision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
+    "seconds": 5.573,
+    "width": 1024
+  },
+  "outputPath": "betterpptx-mcp/deploy/image-edit-worker/canary-multi-reference.png",
+  "outputSha256": "1b1eccd41fc574b1995c3388922e291df4f6f795d1112a577c5bb048f43641c5",
+  "referenceKind": "owned-synthetic",
+  "schemaVersion": "betterpptx.image-edit-worker-multi-canary.v1"
+}

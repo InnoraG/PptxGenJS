@@ -1,0 +1,399 @@
+{
+  "worker": "betterpptx-semantic-judge",
+  "source": "pip dry-run metadata + PyPI JSON",
+  "generatedAt": "2026-07-17T11:47:52.7298518Z",
+  "status": "metadata-only; production blocked",
+  "packageCount": 49,
+  "missingDeclaredLicense": 22,
+  "packages": [
+    {
+      "name": "torch",
+      "version": "2.8.0",
+      "declaredLicense": "BSD-3-Clause",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "source": "https://pytorch.org/"
+    },
+    {
+      "name": "transformers",
+      "version": "5.14.1",
+      "declaredLicense": "Apache 2.0 License",
+      "licenseClassifiers": [],
+      "source": "https://github.com/huggingface/transformers"
+    },
+    {
+      "name": "huggingface_hub",
+      "version": "1.23.0",
+      "declaredLicense": "Apache-2.0",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "source": "https://github.com/huggingface/huggingface_hub"
+    },
+    {
+      "name": "tokenizers",
+      "version": "0.22.2",
+      "declaredLicense": "",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "source": null
+    },
+    {
+      "name": "accelerate",
+      "version": "1.14.0",
+      "declaredLicense": "Apache",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "source": "https://github.com/huggingface/accelerate"
+    },
+    {
+      "name": "safetensors",
+      "version": "0.8.0",
+      "declaredLicense": "",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "source": null
+    },
+    {
+      "name": "pillow",
+      "version": "12.3.0",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "qwen-vl-utils",
+      "version": "0.0.14",
+      "declaredLicense": "Apache-2.0",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "source": null
+    },
+    {
+      "name": "fastapi",
+      "version": "0.139.2",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "click",
+      "version": "8.4.2",
+      "declaredLicense": null,
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "hf-xet",
+      "version": "1.5.2",
+      "declaredLicense": "",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "source": null
+    },
+    {
+      "name": "httpx",
+      "version": "0.28.1",
+      "declaredLicense": "BSD-3-Clause",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "source": null
+    },
+    {
+      "name": "httpcore",
+      "version": "1.0.9",
+      "declaredLicense": "",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "source": null
+    },
+    {
+      "name": "annotated-doc",
+      "version": "0.0.4",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "filelock",
+      "version": "3.30.2",
+      "declaredLicense": "",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "source": null
+    },
+    {
+      "name": "fsspec",
+      "version": "2026.6.0",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "h11",
+      "version": "0.16.0",
+      "declaredLicense": "MIT",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "source": "https://github.com/python-hyper/h11"
+    },
+    {
+      "name": "numpy",
+      "version": "2.5.1",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "packaging",
+      "version": "26.2",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "pydantic",
+      "version": "2.13.4",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "pydantic_core",
+      "version": "2.46.4",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": "https://github.com/pydantic/pydantic"
+    },
+    {
+      "name": "annotated-types",
+      "version": "0.7.0",
+      "declaredLicense": "",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "source": null
+    },
+    {
+      "name": "PyYAML",
+      "version": "6.0.3",
+      "declaredLicense": "MIT",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "source": "https://pyyaml.org/"
+    },
+    {
+      "name": "regex",
+      "version": "2026.7.10",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "starlette",
+      "version": "1.3.1",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "anyio",
+      "version": "4.14.2",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "idna",
+      "version": "3.18",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "sympy",
+      "version": "1.14.0",
+      "declaredLicense": "BSD",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "source": "https://sympy.org"
+    },
+    {
+      "name": "mpmath",
+      "version": "1.3.0",
+      "declaredLicense": "BSD",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "source": "http://mpmath.org/"
+    },
+    {
+      "name": "tqdm",
+      "version": "4.68.4",
+      "declaredLicense": "MPL-2.0 AND MIT",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "typing_extensions",
+      "version": "4.16.0",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "typing-inspection",
+      "version": "0.4.2",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "av",
+      "version": "18.0.0",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "certifi",
+      "version": "2026.6.17",
+      "declaredLicense": "MPL-2.0",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)"
+      ],
+      "source": "https://github.com/certifi/python-certifi"
+    },
+    {
+      "name": "colorama",
+      "version": "0.4.6",
+      "declaredLicense": "",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "source": ""
+    },
+    {
+      "name": "Jinja2",
+      "version": "3.1.6",
+      "declaredLicense": "",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: BSD License"
+      ],
+      "source": null
+    },
+    {
+      "name": "MarkupSafe",
+      "version": "3.0.3",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "networkx",
+      "version": "3.6.1",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "psutil",
+      "version": "7.2.2",
+      "declaredLicense": "BSD-3-Clause",
+      "licenseClassifiers": [],
+      "source": "https://github.com/giampaolo/psutil"
+    },
+    {
+      "name": "requests",
+      "version": "2.34.2",
+      "declaredLicense": "Apache-2.0",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: Apache Software License"
+      ],
+      "source": null
+    },
+    {
+      "name": "charset-normalizer",
+      "version": "3.4.9",
+      "declaredLicense": "MIT",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "urllib3",
+      "version": "2.7.0",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "setuptools",
+      "version": "83.0.0",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "typer",
+      "version": "0.27.0",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "rich",
+      "version": "15.0.0",
+      "declaredLicense": "MIT",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "source": null
+    },
+    {
+      "name": "Pygments",
+      "version": "2.20.0",
+      "declaredLicense": "",
+      "licenseClassifiers": [],
+      "source": null
+    },
+    {
+      "name": "markdown-it-py",
+      "version": "4.2.0",
+      "declaredLicense": "",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "source": null
+    },
+    {
+      "name": "mdurl",
+      "version": "0.1.2",
+      "declaredLicense": "",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: MIT License"
+      ],
+      "source": ""
+    },
+    {
+      "name": "shellingham",
+      "version": "1.5.4",
+      "declaredLicense": "ISC License",
+      "licenseClassifiers": [
+        "License :: OSI Approved :: ISC License (ISCL)"
+      ],
+      "source": "https://github.com/sarugaku/shellingham"
+    }
+  ]
+}

@@ -1,0 +1,745 @@
+{
+  "schemaVersion": "betterpptx.kinetic-extension-library-proof.v1",
+  "status": "PASS",
+  "profile": {
+    "path": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\deploy\\model3d-worker\\kimodo\\kinetic-extension-profile.json",
+    "sha256": "33a601d8679abfd107f932a8b2de16bef94537c6950d7eb000fc01ae64edeb7e"
+  },
+  "sourceRun": {
+    "runId": "betterpptx-kinetic-extension-v2",
+    "candidatePath": "D:\\PptxGenJS_Claude\\outputs\\kimodo\\betterpptx-kinetic-extension-v2-selected\\betterpptx-kinetic-extension-v2\\kinetic-extension-kimodo-candidate.glb",
+    "bytes": 8808444,
+    "sha256": "f98e99c81322a973ed7217be82e7c0434283fe2914bf6269cc285da5438fb0ba",
+    "completeProfileRun": true,
+    "allKinematicGatesPassed": true
+  },
+  "output": {
+    "path": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-clips-extension.glb",
+    "bytes": 646700,
+    "sha256": "0b7a9b73c5fb5a805b195198540804140335b8912b778cc88454a8c3d93ea889",
+    "sourceOnly": true
+  },
+  "safeBoneEnvelope": [
+    "mixamorig:Head",
+    "mixamorig:Hips",
+    "mixamorig:LeftArm",
+    "mixamorig:LeftFoot",
+    "mixamorig:LeftForeArm",
+    "mixamorig:LeftHand",
+    "mixamorig:LeftLeg",
+    "mixamorig:LeftShoulder",
+    "mixamorig:LeftToeBase",
+    "mixamorig:LeftUpLeg",
+    "mixamorig:Neck",
+    "mixamorig:RightArm",
+    "mixamorig:RightFoot",
+    "mixamorig:RightForeArm",
+    "mixamorig:RightHand",
+    "mixamorig:RightLeg",
+    "mixamorig:RightShoulder",
+    "mixamorig:RightToeBase",
+    "mixamorig:RightUpLeg",
+    "mixamorig:Spine",
+    "mixamorig:Spine1",
+    "mixamorig:Spine2"
+  ],
+  "clipNames": [
+    "00_apex_glide",
+    "01_corkscrew_descent",
+    "02_walk_away",
+    "03_shockwave_impact",
+    "04_backhand_swat",
+    "05_snap_organize",
+    "06_run_slash",
+    "07_walking",
+    "08_sprint_to_stop",
+    "09_knee_slide",
+    "10_tug_pull",
+    "11_push_away",
+    "12_screen_wipe",
+    "13_meditate_float",
+    "14_trip_recovery"
+  ],
+  "aliases": {
+    "rope_pull": "tug_pull",
+    "stumble_recovery": "trip_recovery",
+    "lunging_punch": "window_breaker",
+    "strafe_cross": "side_dodge",
+    "gather_clap": "snap_organize",
+    "heavy_stomp": "stage_stomp",
+    "sword_slash": "run_slash",
+    "kinetic_swipe": "screen_wipe",
+    "pinch_zoom": "push_away",
+    "gravity_pull": "scroll_wheel_pull",
+    "presenter_walk": "walking",
+    "slowmo_float": "floating_drift",
+    "jump_shadow": "heavy_jump",
+    "ground_smash": "ground_pound"
+  },
+  "channelCounts": [
+    {
+      "rotation": 22
+    },
+    {
+      "rotation": 22
+    },
+    {
+      "rotation": 22
+    },
+    {
+      "rotation": 22
+    },
+    {
+      "rotation": 22
+    },
+    {
+      "rotation": 22
+    },
+    {
+      "rotation": 22
+    },
+    {
+      "rotation": 22
+    },
+    {
+      "rotation": 22
+    },
+    {
+      "rotation": 22
+    },
+    {
+      "rotation": 22
+    },
+    {
+      "rotation": 22
+    },
+    {
+      "rotation": 22
+    },
+    {
+      "rotation": 22
+    },
+    {
+      "rotation": 22
+    }
+  ],
+  "smoothing": [
+    {
+      "animation": "00_apex_glide",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 2.344150659928526,
+        "roughnessP95": 3.2517645012750576,
+        "reversalRateMedian": 0.05660377358490566,
+        "reversalRateP95": 0.24528301886792453,
+        "p95StepDegrees": 4.854365816624092,
+        "maxStepDegrees": 169.09268424100108
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.37973311798913767,
+        "roughnessP95": 0.8455660764525439,
+        "reversalRateMedian": 0,
+        "reversalRateP95": 0.009433962264150943,
+        "p95StepDegrees": 3.4052241178458234,
+        "maxStepDegrees": 14.000000000000155
+      }
+    },
+    {
+      "animation": "01_corkscrew_descent",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 2.201136648035379,
+        "roughnessP95": 3.358965182256815,
+        "reversalRateMedian": 0.05357142857142857,
+        "reversalRateP95": 0.125,
+        "p95StepDegrees": 11.496600951602083,
+        "maxStepDegrees": 176.63711627617008
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.516502215724127,
+        "roughnessP95": 0.7290262945178811,
+        "reversalRateMedian": 0,
+        "reversalRateP95": 0.017857142857142856,
+        "p95StepDegrees": 13.99999999999984,
+        "maxStepDegrees": 14.000000000000258
+      }
+    },
+    {
+      "animation": "02_walk_away",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 1.8609330262003347,
+        "roughnessP95": 2.935105223822334,
+        "reversalRateMedian": 0.16129032258064516,
+        "reversalRateP95": 0.4274193548387097,
+        "p95StepDegrees": 13.130056429213182,
+        "maxStepDegrees": 71.71419343262234
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.16096523058635465,
+        "roughnessP95": 0.26461048683552096,
+        "reversalRateMedian": 0.008064516129032258,
+        "reversalRateP95": 0.024193548387096774,
+        "p95StepDegrees": 5.589499765900766,
+        "maxStepDegrees": 14.000000000000155
+      }
+    },
+    {
+      "animation": "03_shockwave_impact",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 1.9195454926841737,
+        "roughnessP95": 2.9832286848448195,
+        "reversalRateMedian": 0.07446808510638298,
+        "reversalRateP95": 0.13829787234042554,
+        "p95StepDegrees": 31.428679888789908,
+        "maxStepDegrees": 174.9537274586239
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.05666155876955426,
+        "roughnessP95": 0.08068971563907522,
+        "reversalRateMedian": 0.010638297872340425,
+        "reversalRateP95": 0.02127659574468085,
+        "p95StepDegrees": 14.00000000000005,
+        "maxStepDegrees": 14.000000000000258
+      }
+    },
+    {
+      "animation": "04_backhand_swat",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 2.04483885044016,
+        "roughnessP95": 3.4130618196715816,
+        "reversalRateMedian": 0.07317073170731707,
+        "reversalRateP95": 0.23170731707317074,
+        "p95StepDegrees": 16.29328369171524,
+        "maxStepDegrees": 62.215384845523566
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.21773643946891916,
+        "roughnessP95": 0.6026167457278129,
+        "reversalRateMedian": 0,
+        "reversalRateP95": 0.024390243902439025,
+        "p95StepDegrees": 4.8395542880469,
+        "maxStepDegrees": 12.049869259252334
+      }
+    },
+    {
+      "animation": "05_snap_organize",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 1.8832185870795446,
+        "roughnessP95": 2.863583487290714,
+        "reversalRateMedian": 0.07446808510638298,
+        "reversalRateP95": 0.18085106382978725,
+        "p95StepDegrees": 8.702834854900956,
+        "maxStepDegrees": 62.411223903640455
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.39118267035883564,
+        "roughnessP95": 0.7304563203534855,
+        "reversalRateMedian": 0,
+        "reversalRateP95": 0.010638297872340425,
+        "p95StepDegrees": 4.313009479199858,
+        "maxStepDegrees": 14.000000000000155
+      }
+    },
+    {
+      "animation": "06_run_slash",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 0.9165809468020585,
+        "roughnessP95": 2.5803082086445066,
+        "reversalRateMedian": 0.1,
+        "reversalRateP95": 0.26,
+        "p95StepDegrees": 16.72665458216154,
+        "maxStepDegrees": 49.26397537532641
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.12792116009584686,
+        "roughnessP95": 0.37730121932795724,
+        "reversalRateMedian": 0.01,
+        "reversalRateP95": 0.02,
+        "p95StepDegrees": 7.680574084696158,
+        "maxStepDegrees": 14.000000000000155
+      }
+    },
+    {
+      "animation": "07_walking",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 2.0538246071236563,
+        "roughnessP95": 3.4418226266253096,
+        "reversalRateMedian": 0.1864406779661017,
+        "reversalRateP95": 0.4661016949152542,
+        "p95StepDegrees": 6.2853585840983195,
+        "maxStepDegrees": 173.8027959702291
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.4498325419762977,
+        "roughnessP95": 0.9146500820986897,
+        "reversalRateMedian": 0,
+        "reversalRateP95": 0.00847457627118644,
+        "p95StepDegrees": 13.999999999999945,
+        "maxStepDegrees": 14.000000000000155
+      }
+    },
+    {
+      "animation": "08_sprint_to_stop",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 2.1394624116573993,
+        "roughnessP95": 2.8888383436460927,
+        "reversalRateMedian": 0.1509433962264151,
+        "reversalRateP95": 0.330188679245283,
+        "p95StepDegrees": 32.37882387465167,
+        "maxStepDegrees": 174.06254192868553
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.2044194702054074,
+        "roughnessP95": 0.6667576141684547,
+        "reversalRateMedian": 0.009433962264150943,
+        "reversalRateP95": 0.03773584905660377,
+        "p95StepDegrees": 13.99999999999984,
+        "maxStepDegrees": 14.000000000000155
+      }
+    },
+    {
+      "animation": "09_knee_slide",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 2.244127767607959,
+        "roughnessP95": 2.8096634441634456,
+        "reversalRateMedian": 0.11320754716981132,
+        "reversalRateP95": 0.2641509433962264,
+        "p95StepDegrees": 56.85028276186593,
+        "maxStepDegrees": 179.36840387170247
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.08421212362160103,
+        "roughnessP95": 0.3041527875562976,
+        "reversalRateMedian": 0,
+        "reversalRateP95": 0.02830188679245283,
+        "p95StepDegrees": 13.999999999999945,
+        "maxStepDegrees": 14.000000000000258
+      }
+    },
+    {
+      "animation": "10_tug_pull",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 2.2141348733189634,
+        "roughnessP95": 3.4226841380392186,
+        "reversalRateMedian": 0.044642857142857144,
+        "reversalRateP95": 0.1875,
+        "p95StepDegrees": 3.583302907746208,
+        "maxStepDegrees": 166.65352942006393
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.36351382215065564,
+        "roughnessP95": 0.8119087110893513,
+        "reversalRateMedian": 0,
+        "reversalRateP95": 0.008928571428571428,
+        "p95StepDegrees": 2.1667831245943385,
+        "maxStepDegrees": 14.000000000000258
+      }
+    },
+    {
+      "animation": "11_push_away",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 2.202812272291142,
+        "roughnessP95": 3.134218772428844,
+        "reversalRateMedian": 0.04,
+        "reversalRateP95": 0.21,
+        "p95StepDegrees": 29.862119294651773,
+        "maxStepDegrees": 177.82437348622204
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.23642991369381827,
+        "roughnessP95": 0.6057142275533535,
+        "reversalRateMedian": 0,
+        "reversalRateP95": 0.01,
+        "p95StepDegrees": 13.999999999999945,
+        "maxStepDegrees": 14.000000000000258
+      }
+    },
+    {
+      "animation": "12_screen_wipe",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 1.9483486413073392,
+        "roughnessP95": 3.0024299687733405,
+        "reversalRateMedian": 0.09574468085106383,
+        "reversalRateP95": 0.30851063829787234,
+        "p95StepDegrees": 10.517108503531412,
+        "maxStepDegrees": 162.14556311040727
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.38754453523063387,
+        "roughnessP95": 0.9168185814558997,
+        "reversalRateMedian": 0,
+        "reversalRateP95": 0.010638297872340425,
+        "p95StepDegrees": 6.810329495456759,
+        "maxStepDegrees": 14.000000000000155
+      }
+    },
+    {
+      "animation": "13_meditate_float",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 1.717104396851764,
+        "roughnessP95": 3.3745269682791177,
+        "reversalRateMedian": 0.15441176470588236,
+        "reversalRateP95": 0.5441176470588235,
+        "p95StepDegrees": 0.2705443090632649,
+        "maxStepDegrees": 175.66990000129155
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.3037049343493374,
+        "roughnessP95": 0.8342492540472477,
+        "reversalRateMedian": 0.007352941176470588,
+        "reversalRateP95": 0.022058823529411766,
+        "p95StepDegrees": 13.99999999999984,
+        "maxStepDegrees": 14.000000000000258
+      }
+    },
+    {
+      "animation": "14_trip_recovery",
+      "passes": 8,
+      "maxStepDegrees": 14,
+      "preserveFirstKey": true,
+      "before": {
+        "tracks": 22,
+        "roughnessMedian": 1.628585459787479,
+        "roughnessP95": 3.3830877089395166,
+        "reversalRateMedian": 0.16101694915254236,
+        "reversalRateP95": 0.423728813559322,
+        "p95StepDegrees": 1.6352847328668891,
+        "maxStepDegrees": 175.58481276004605
+      },
+      "after": {
+        "tracks": 22,
+        "roughnessMedian": 0.33450291833373974,
+        "roughnessP95": 0.9752760988766113,
+        "reversalRateMedian": 0.00847457627118644,
+        "reversalRateP95": 0.025423728813559324,
+        "p95StepDegrees": 13.999999999999945,
+        "maxStepDegrees": 14.000000000000258
+      }
+    }
+  ],
+  "slots": [
+    {
+      "slot": 0,
+      "slug": "apex_glide",
+      "selectedCandidateId": "base-01",
+      "bvhSha256": "e434c42a46fc1a52c43baed5808edabbb6f397e0d72353283704f3b00de69ae3",
+      "score": 1,
+      "gates": {
+        "finiteMotion": true,
+        "inPlace": true,
+        "minimumScore": true
+      },
+      "durationMs": 3600,
+      "motionEnergy": 0.08388315647261121,
+      "rootDisplacementNormalized": 0.017578660819122554
+    },
+    {
+      "slot": 1,
+      "slug": "corkscrew_descent",
+      "selectedCandidateId": "base-00",
+      "bvhSha256": "e3226eb3857ffff12a31c964f808c8b689c0ab6585a6e1b934e4fdebb5302768",
+      "score": 1,
+      "gates": {
+        "finiteMotion": true,
+        "inPlace": true,
+        "minimumScore": true
+      },
+      "durationMs": 3800,
+      "motionEnergy": 0.13711803970390452,
+      "rootDisplacementNormalized": 0.021275483884638735
+    },
+    {
+      "slot": 2,
+      "slug": "walk_away",
+      "selectedCandidateId": "base-00",
+      "bvhSha256": "7c158ea69820ed190196149c2a9cea7fcf8354b17163b13e84bbe7d844fe17ba",
+      "score": 1,
+      "gates": {
+        "farTravel": true,
+        "finiteMotion": true,
+        "minimumScore": true
+      },
+      "durationMs": 4200,
+      "motionEnergy": 0.3343034551387252,
+      "rootDisplacementNormalized": 3.826573121952386
+    },
+    {
+      "slot": 3,
+      "slug": "shockwave_impact",
+      "selectedCandidateId": "refined-00",
+      "bvhSha256": "b36894254e6a955ea0cc0a68b1e9230e0187f975ad5d8bc84e3bb1ec70f913ba",
+      "score": 1,
+      "gates": {
+        "feetPlanted": true,
+        "finiteMotion": true,
+        "inPlace": true,
+        "minimumScore": true,
+        "restReturn": true
+      },
+      "durationMs": 3200,
+      "motionEnergy": 0.04449420080719864,
+      "rootDisplacementNormalized": 0
+    },
+    {
+      "slot": 4,
+      "slug": "backhand_swat",
+      "selectedCandidateId": "refined-00",
+      "bvhSha256": "0fb89f14f934e62b035f50cc3db7d07cd4a0f6a3d7abdaebae2956ad8a5a8fb7",
+      "score": 1,
+      "gates": {
+        "feetPlanted": true,
+        "finiteMotion": true,
+        "inPlace": true,
+        "minimumScore": true,
+        "restReturn": true
+      },
+      "durationMs": 2800,
+      "motionEnergy": 0.10222281174873996,
+      "rootDisplacementNormalized": 0
+    },
+    {
+      "slot": 5,
+      "slug": "snap_organize",
+      "selectedCandidateId": "refined-00",
+      "bvhSha256": "d36470fa0c80f3a7124e823da9046e368398da0a8a85cfe282ad2876b7cefb6d",
+      "score": 1,
+      "gates": {
+        "feetPlanted": true,
+        "finiteMotion": true,
+        "handContacts": true,
+        "inPlace": true,
+        "minimumScore": true,
+        "restReturn": true
+      },
+      "durationMs": 3200,
+      "motionEnergy": 0.0745020639731533,
+      "rootDisplacementNormalized": 0
+    },
+    {
+      "slot": 6,
+      "slug": "run_slash",
+      "selectedCandidateId": "base-00",
+      "bvhSha256": "136353ae42e370b1a673933b3b6cc384096498999bbaaeeee1ab45dcd7075199",
+      "score": 1,
+      "gates": {
+        "farTravel": true,
+        "finiteMotion": true,
+        "minimumScore": true
+      },
+      "durationMs": 3400,
+      "motionEnergy": 0.3120243899576673,
+      "rootDisplacementNormalized": 1.4795697694631345
+    },
+    {
+      "slot": 7,
+      "slug": "walking",
+      "selectedCandidateId": "refined-00",
+      "bvhSha256": "5e44824d632c621500868d34aa547e40ebff0068b1a99cf29980ec0b630ea4ca",
+      "score": 1,
+      "gates": {
+        "finiteMotion": true,
+        "inPlace": true,
+        "loopSeam": true,
+        "minimumScore": true
+      },
+      "durationMs": 4000,
+      "motionEnergy": 0.02068766914315121,
+      "rootDisplacementNormalized": 0
+    },
+    {
+      "slot": 8,
+      "slug": "sprint_to_stop",
+      "selectedCandidateId": "base-00",
+      "bvhSha256": "a60c5e660a1d2c3da90e5f57c90aaa58aaf7f25e77eeef3667e68dfac8006deb",
+      "score": 1,
+      "gates": {
+        "farTravel": true,
+        "finiteMotion": true,
+        "minimumScore": true
+      },
+      "durationMs": 3600,
+      "motionEnergy": 0.38141267788834754,
+      "rootDisplacementNormalized": 2.8808287980102936
+    },
+    {
+      "slot": 9,
+      "slug": "knee_slide",
+      "selectedCandidateId": "base-00",
+      "bvhSha256": "6b0e90f6a2b4113d905f06d4fc992e79a8e4d785ffc2f08f80968aecdc0f7d82",
+      "score": 1,
+      "gates": {
+        "farTravel": true,
+        "finiteMotion": true,
+        "minimumScore": true
+      },
+      "durationMs": 3600,
+      "motionEnergy": 0.24497068971940839,
+      "rootDisplacementNormalized": 3.5403264232697045
+    },
+    {
+      "slot": 10,
+      "slug": "tug_pull",
+      "selectedCandidateId": "base-01",
+      "bvhSha256": "88dd1ed95e20250a7701b8ebe06348f262e13896e243720141582de37e4b9d69",
+      "score": 1,
+      "gates": {
+        "finiteMotion": true,
+        "minimumScore": true,
+        "nearTravel": true
+      },
+      "durationMs": 3800,
+      "motionEnergy": 0.06208143363328021,
+      "rootDisplacementNormalized": 0.04311394829257832
+    },
+    {
+      "slot": 11,
+      "slug": "push_away",
+      "selectedCandidateId": "base-00",
+      "bvhSha256": "275c42d58bf083578774987e49ed9166088dcf9a0bee0a496714c8a701fe61bb",
+      "score": 1,
+      "gates": {
+        "finiteMotion": true,
+        "minimumScore": true,
+        "nearTravel": true
+      },
+      "durationMs": 3400,
+      "motionEnergy": 0.1399490030046185,
+      "rootDisplacementNormalized": 0.1707375437845824
+    },
+    {
+      "slot": 12,
+      "slug": "screen_wipe",
+      "selectedCandidateId": "refined-00",
+      "bvhSha256": "f6a854f25f45d17dead955e60263cb0f5c069cde2132517d1f15e53130a89b07",
+      "score": 1,
+      "gates": {
+        "feetPlanted": true,
+        "finiteMotion": true,
+        "inPlace": true,
+        "minimumScore": true,
+        "restReturn": true
+      },
+      "durationMs": 3200,
+      "motionEnergy": 0.03463676922800593,
+      "rootDisplacementNormalized": 0
+    },
+    {
+      "slot": 13,
+      "slug": "meditate_float",
+      "selectedCandidateId": "base-00",
+      "bvhSha256": "32abd456c9d4713906e8e04f10a67ba45e587a3974fc7b84387fbcb8f6c1967d",
+      "score": 1,
+      "gates": {
+        "finiteMotion": true,
+        "inPlace": true,
+        "loopSeam": true,
+        "lowEnergy": true,
+        "minimumScore": true
+      },
+      "durationMs": 4600,
+      "motionEnergy": 0.00654356057545374,
+      "rootDisplacementNormalized": 0.004183044773293487
+    },
+    {
+      "slot": 14,
+      "slug": "trip_recovery",
+      "selectedCandidateId": "refined-00",
+      "bvhSha256": "9c318de95e0f20e5a2511e4d7d678c0ab96f1296a541b119462c6d6570b525c8",
+      "score": 1,
+      "gates": {
+        "finiteMotion": true,
+        "minimumScore": true,
+        "restReturn": true
+      },
+      "durationMs": 4000,
+      "motionEnergy": 0.0040851540953434715,
+      "rootDisplacementNormalized": 0
+    }
+  ],
+  "pendingGates": [],
+  "powerpointEvidence": {
+    "status": "PASS",
+    "officeVersion": "16.0",
+    "officeBuild": "20326",
+    "repairDisabledDecksPassed": 6,
+    "nativeVideoSamplesPassed": 6,
+    "powerpointOracle": {
+      "path": "D:\\PptxGenJS_Claude\\outputs\\kimodo\\presenter-motion-47-proof\\powerpoint-oracle\\powerpoint-oracle-report.json",
+      "bytes": 35902,
+      "sha256": "0188a663b8d291389bfa875b7579decfd89b843aca244605c7471afdaadfae37"
+    },
+    "visualReview": {
+      "path": "D:\\PptxGenJS_Claude\\outputs\\kimodo\\presenter-motion-47-proof\\visual-review.json",
+      "bytes": 3285,
+      "sha256": "b5c2a154dd5b0d59afe4a32be6dabdb23d78492d84aee9b2683dd7e4910b602b"
+    }
+  }
+}

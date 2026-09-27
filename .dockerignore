@@ -1,5 +1,11 @@
 .git
+gha-creds-*.json
 node_modules
+**/node_modules
+**/.betterpptx-locked-assets
+**/.betterpptx-runtime
+**/.betterpptx-mcp-runtime
+**/.betterpptx-cache
 .betterpptx-mcp-runtime
 .betterpptx-mcp-cache
 decyphered
@@ -11,6 +17,8 @@ logs
 tmp
 tmp_*
 dist
+!dist/
+!dist/**
 dist-mcpb
 dist-claude-plugins
 demos
@@ -19,7 +27,56 @@ debug_*
 src/bld
 betterpptx-mcp/.tools
 betterpptx-mcp/deploy/production.env
+# LIVE SECRETS — never let the local credential store enter a docker build context/image (G4).
+betterpptx-mcp/config/credential-store.json*
 betterpptx-mcp/narration/voices/runtime
+# Developer-assistant state, test staging, validation artifacts, and user media
+# are workspace data, not runtime dependencies. In particular, do not bake
+# identity-bearing media into a generic service image.
+.codex/
+.codex-tmp/
+.claude/
+.clinerules/
+.cursor/
+.rovodev/
+.tmp*/
+**/.codex/
+**/.codex-tmp/**
+**/.claude/
+**/.clinerules/
+**/.cursor/
+**/.rovodev/
+**/.tmp*/
+validation-output/
+**/validation-output/**
+betterpptx-*-public-stage-*/
+**/*-public-stage-*/**
+betterpptx-mcp-jobs/
+**/betterpptx-mcp-jobs/**
+aimcpx-jobs/
+**/aimcpx-jobs/**
+betterpptx-connector/
+consentedHumanAsset/
+Meshy_AI_Casual_Denim_Look_biped/
+unattended_state.json
+# Exact service-local generated data paths. These contain user artifacts,
+# caches, provider tools, or prepared media and must remain outside the image.
+betterpptx-mcp/outputs/
+betterpptx-mcp/log-viewer/
+betterpptx-mcp/.tools/
+betterpptx-mcp/.betterpptx-cache/
+betterpptx-mcp/.betterpptx-locked-assets/
+betterpptx-mcp/.betterpptx-mcp-runtime/
+betterpptx-mcp/.betterpptx-runtime/
+betterpptx-mcp/narration/voices/runtime/
+# Runtime configuration and identity keys must be injected by the provider,
+# never copied from a maintainer checkout into a build context or layer.
+.env
+.env.*
+**/.env
+**/.env.*
+**/*service-account*.json
+**/*service_account*.json
 **/*.pptx
 *.log
 .idea

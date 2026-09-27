@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "betterpptx.avatar.identity-review-correction.v1",
+  "recordedAt": "2026-08-01",
+  "status": "STALE_APPROVAL_SUPERSEDED",
+  "finding": "The owner-approved review excerpt embedded the 2026-07-26 canaries, which are raw LP/MT outputs. Their headers contain X-Pipeline=liveportrait-musetalk-commercial and no X-Enhancement header.",
+  "correctedArtifact": {
+    "path": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\outputs\\visualizations\\avatar-lpmt-identity-review.html",
+    "sha256": "52E193C827CC0385C03C97EC1ABA2C28AFB07CF71A99B6F0B7B5BCAF534BB8CC",
+    "generator": "betterpptx-mcp/test/build-avatar-lpmt-identity-review.mjs",
+    "canaryDirectory": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\outputs\\commercial-promotion-20260727"
+  },
+  "currentCanaries": [
+    {
+      "accountId": "telcomgapp",
+      "path": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\outputs\\commercial-promotion-20260727\\telcomgapp-blink-canary.mp4",
+      "sha256": "C4E074048AA97FB17405524F048AAF1F6BB5D19B03CAD166E948907A7C44B3E6",
+      "pipelineHeader": "liveportrait-musetalk-commercial-restoreformer-pp",
+      "enhancementHeader": "restoreformer++",
+      "restoreformerSeconds": 50.89
+    },
+    {
+      "accountId": "fluxworkerai",
+      "path": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\outputs\\commercial-promotion-20260727\\fluxworkerai-blink-canary.mp4",
+      "sha256": "86FDA77F25D184108F0C4E4A3B7A466DB728F1D1681361873274D63779355086",
+      "pipelineHeader": "liveportrait-musetalk-commercial-restoreformer-pp",
+      "enhancementHeader": "restoreformer++",
+      "restoreformerSeconds": 39.73
+    }
+  ],
+  "ownerDecision": "OPEN_PENDING_REVIEW_OF_CORRECTED_ARTIFACT",
+  "publicEnablementAllowed": false,
+  "nextAction": "Owner must review the corrected packet; do not reuse the prior scoped approval as approval of the RestoreFormer++ canaries."
+}

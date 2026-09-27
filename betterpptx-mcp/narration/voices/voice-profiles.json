@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "source": "Maintained Piper gender profile data. Verified entries come from model cards or explicit speaker identifiers; curated entries are reviewable name/model mappings and are never treated as licensing evidence.",
+  "voiceFamilies": {
+    "ar_JO-kareem": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "bg_BG-dimitar": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "ca_ES-upc_ona": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "ca_ES-upc_pau": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "cs_CZ-jirka": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "cy_GB-gwryw_gogledd": { "gender": "male", "genderSource": "model-name", "genderConfidence": "verified" },
+    "de_DE-eva_k": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "de_DE-kerstin": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "de_DE-ramona": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "de_DE-thorsten": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "el_GR-rapunzelina": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "en_GB-cori": { "gender": "female", "genderSource": "model-card", "genderConfidence": "verified" },
+    "en_GB-northern_english_male": { "gender": "male", "genderSource": "model-card-title", "genderConfidence": "verified" },
+    "en_GB-southern_english_female": { "gender": "female", "genderSource": "model-card-title", "genderConfidence": "verified" },
+    "en_US-bryce": { "gender": "male", "genderSource": "model-card", "genderConfidence": "verified" },
+    "en_US-hfc_female": { "gender": "female", "genderSource": "model-name", "genderConfidence": "curated" },
+    "en_US-hfc_male": { "gender": "male", "genderSource": "model-name", "genderConfidence": "curated" },
+    "en_US-john": { "gender": "male", "genderSource": "model-card", "genderConfidence": "verified" },
+    "en_US-kristin": { "gender": "female", "genderSource": "model-card", "genderConfidence": "verified" },
+    "en_US-ljspeech": { "gender": "female", "genderSource": "model-card", "genderConfidence": "verified" },
+    "en_US-norman": { "gender": "male", "genderSource": "model-card", "genderConfidence": "verified" },
+    "es_AR-daniela": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "es_MX-ald": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "es_MX-claude": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "eu_ES-antton": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "eu_ES-maider": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "fa_IR-ganji": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "fa_IR-gyro": { "gender": "male", "genderSource": "model-card-lineage", "genderConfidence": "verified" },
+    "fa_IR-reza": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "fi_FI-harri": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "fr_FR-gilles": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "fr_FR-tom": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "hi_IN-pratham": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "hi_IN-priyamvada": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "hi_IN-rohan": { "gender": "male", "genderSource": "model-card-dataset", "genderConfidence": "verified" },
+    "hu_HU-anna": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "hu_HU-berta": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "hu_HU-imre": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "is_IS-bui": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "is_IS-salka": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "is_IS-steinn": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "is_IS-ugla": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "it_IT-paola": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "it_IT-riccardo": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "ka_GE-natia": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "lb_LU-marylux": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "lv_LV-aivars": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "ml_IN-arjun": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "ml_IN-meera": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "nl_BE-nathalie": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "nl_NL-alex": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "nl_NL-pim": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "nl_NL-ronnie": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "pl_PL-bass": { "gender": "male", "genderSource": "model-card", "genderConfidence": "verified" },
+    "pl_PL-gosia": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "pt_BR-cadu": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "pt_BR-edresson": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "pt_BR-faber": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "pt_BR-jeff": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "pt_PT-tugão": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "ro_RO-mihai": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "ru_RU-denis": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "ru_RU-dmitri": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "ru_RU-irina": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "ru_RU-ruslan": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "sk_SK-lili": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "sl_SI-artur": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "sq_AL-edon": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "te_IN-maya": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "te_IN-padmavathi": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "te_IN-venkatesh": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "uk_UA-lada": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "uk_UA-mykyta": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "uk_UA-oleksa": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "uk_UA-tetiana": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "ur_PK-fasih": { "gender": "male", "genderSource": "model-card", "genderConfidence": "verified" }
+  },
+  "voices": {
+    "cy_GB-bu_tts-medium": {
+      "gender": "mixed",
+      "genderSource": "speaker-id-map",
+      "genderConfidence": "verified",
+      "speakerProfiles": {
+        "0": { "name": "benyw-de-pro", "gender": "female", "genderSource": "speaker-id-map", "genderConfidence": "verified" },
+        "1": { "name": "benyw-gogledd-pro", "gender": "female", "genderSource": "speaker-id-map", "genderConfidence": "verified" },
+        "2": { "name": "gwryw-gogledd-pro", "gender": "male", "genderSource": "speaker-id-map", "genderConfidence": "verified" },
+        "3": { "name": "gwryw-gogledd-2", "gender": "male", "genderSource": "speaker-id-map", "genderConfidence": "verified" },
+        "4": { "name": "gwryw-de-1", "gender": "male", "genderSource": "speaker-id-map", "genderConfidence": "verified" },
+        "5": { "name": "gwryw-gogledd-1", "gender": "male", "genderSource": "speaker-id-map", "genderConfidence": "verified" },
+        "6": { "name": "benyw-gogledd-1", "gender": "female", "genderSource": "speaker-id-map", "genderConfidence": "verified" }
+      }
+    },
+    "es_ES-sharvard-medium": {
+      "gender": "mixed",
+      "genderSource": "speaker-id-map",
+      "genderConfidence": "verified",
+      "speakerProfiles": {
+        "0": { "name": "M", "gender": "male", "genderSource": "speaker-id-map", "genderConfidence": "verified" },
+        "1": { "name": "F", "gender": "female", "genderSource": "speaker-id-map", "genderConfidence": "verified" }
+      }
+    },
+    "fr_FR-upmc-medium": {
+      "gender": "mixed",
+      "genderSource": "speaker-name",
+      "genderConfidence": "curated",
+      "speakerProfiles": {
+        "0": { "name": "jessica", "gender": "female", "genderSource": "speaker-name", "genderConfidence": "curated" },
+        "1": { "name": "pierre", "gender": "male", "genderSource": "speaker-name", "genderConfidence": "curated" }
+      }
+    },
+    "kk_KZ-issai-high": {
+      "gender": "mixed",
+      "genderSource": "speaker-id-map",
+      "genderConfidence": "verified",
+      "speakerProfiles": {
+        "0": { "name": "ISSAI_KazakhTTS2_M2", "gender": "male", "genderSource": "speaker-id-map", "genderConfidence": "verified" },
+        "1": { "name": "ISSAI_KazakhTTS_M1_Iseke", "gender": "male", "genderSource": "speaker-id-map", "genderConfidence": "verified" },
+        "2": { "name": "ISSAI_KazakhTTS2_F3", "gender": "female", "genderSource": "speaker-id-map", "genderConfidence": "verified" },
+        "3": { "name": "ISSAI_KazakhTTS_F1_Raya", "gender": "female", "genderSource": "speaker-id-map", "genderConfidence": "verified" },
+        "4": { "name": "ISSAI_KazakhTTS2_F1", "gender": "female", "genderSource": "speaker-id-map", "genderConfidence": "verified" },
+        "5": { "name": "ISSAI_KazakhTTS2_F2", "gender": "female", "genderSource": "speaker-id-map", "genderConfidence": "verified" }
+      }
+    },
+    "ku_TR-berfin_renas-medium": {
+      "gender": "mixed",
+      "genderSource": "speaker-name",
+      "genderConfidence": "curated",
+      "speakerProfiles": {
+        "0": { "name": "Berfin", "gender": "female", "genderSource": "speaker-name", "genderConfidence": "curated" },
+        "1": { "name": "Renas", "gender": "male", "genderSource": "speaker-name", "genderConfidence": "curated" }
+      }
+    },
+    "uk_UA-ukrainian_tts-medium": {
+      "gender": "mixed",
+      "genderSource": "speaker-name",
+      "genderConfidence": "curated",
+      "speakerProfiles": {
+        "0": { "name": "lada", "gender": "female", "genderSource": "speaker-name", "genderConfidence": "curated" },
+        "1": { "name": "mykyta", "gender": "male", "genderSource": "speaker-name", "genderConfidence": "curated" },
+        "2": { "name": "tetiana", "gender": "female", "genderSource": "speaker-name", "genderConfidence": "curated" }
+      }
+    }
+  }
+}

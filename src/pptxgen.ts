@@ -70,6 +70,7 @@ import {
 	DEF_PRES_LAYOUT_NAME,
 	DEF_SLIDE_MARGIN_IN,
 	EMU,
+	IMG_PLAYBTN,
 	OutputType,
 	SCHEME_COLOR_NAMES,
 	SHAPE_TYPE,
@@ -79,12 +80,16 @@ import {
 } from './core-enums'
 import {
 	AddSlideProps,
+	CustomShowProps,
 	IPresentationProps,
 	NativePackagePart,
 	PresentationShowSettings,
 	PresLayout,
 	PresSlide,
+	PlaceholderProps,
+	PlaceholderVisualStyle,
 	SectionProps,
+	SummaryZoomProps,
 	SlideLayout,
 	SlideMasterProps,
 	SlideNumberProps,
@@ -97,7 +102,10 @@ import {
 import * as genCharts from './gen-charts'
 import * as genObj from './gen-objects'
 import * as genMedia from './gen-media'
+import { prepareInteractiveActionRelations } from './gen-actions'
 import * as genTable from './gen-tables'
+import { CHART_COLOR_PRESETS, CHART_STYLE_PRESETS } from './chart-presets'
+import { CHART_GALLERY } from './chart-gallery'
 import * as genXml from './gen-xml'
 import { applyModel3DAutoFit } from './gen-model3d-fit'
 import { ValidationEngine, ValidationOptions, ValidationResult, isRepairRiskIssue } from './validation-engine'
@@ -105,7 +113,47 @@ import { enableIterateEngine as _enableIterateEngine, disableIterateEngine as _d
 
 const VERSION = '4.0.1'
 
+function placeholderStyleOptions(style?: PlaceholderVisualStyle | null): Record<string, unknown> {
+	if (!style || typeof style !== 'object') return {}
+	return {
+		_betterpptxPlaceholderStyle: style,
+		...(style.preset ? { shape: style.preset } : {}),
+		...(style.fill ? { fill: style.fill } : {}),
+		...(style.line ? { line: style.line } : {}),
+		...(style.shadow ? { shadow: style.shadow } : {}),
+		...(style.styleRefs ? { _shapeStyleRefs: style.styleRefs } : {}),
+		...(style.fontFace ? { fontFace: style.fontFace } : {}),
+		...(typeof style.fontSize === 'number' ? { fontSize: style.fontSize } : {}),
+		...(style.color ? { color: style.color } : {}),
+		...(typeof style.bold === 'boolean' ? { bold: style.bold } : {}),
+		...(typeof style.italic === 'boolean' ? { italic: style.italic } : {}),
+		...(style.align ? { align: style.align } : {}),
+		...(style.valign ? { valign: style.valign } : {}),
+	}
+}
+
+function validateXmlMetadataText(value: string, field: string): string {
+	const text = String(value)
+	for (const char of text) {
+		const codePoint = char.codePointAt(0) as number
+		const valid = codePoint === 0x09 || codePoint === 0x0a || codePoint === 0x0d ||
+			(codePoint >= 0x20 && codePoint <= 0xd7ff) ||
+			(codePoint >= 0xe000 && codePoint <= 0xfffd) ||
+			(codePoint >= 0x10000 && codePoint <= 0x10ffff)
+		if (!valid) throw new Error(`${field} contains a character that is not valid in XML 1.0 metadata`)
+	}
+	return text
+}
+
 export default class PptxGenJS implements IPresentationProps {
+	// Engine bridge for governed shape-fill edits. Keeping this as a static
+	// member preserves the library's default-export bundle contract while
+	// allowing the MCP to reuse the serializer's native relationship logic.
+	static attachShapeFillImage = genObj.attachShapeFillImage
+	// Private engine bridge for restoring the exact native addMedia poster after
+	// an authored cover is reset. This is data-only and never enters public
+	// schemas or results.
+	static defaultMediaCoverDataUri = IMG_PLAYBTN
 	// Property getters/setters
 
 	/**
@@ -140,6 +188,9 @@ export default class PptxGenJS implements IPresentationProps {
 	 * PptxGenJS Library Version
 	 */
 	private readonly _version: string = VERSION
+	// Freeze package core timestamps for the lifetime of the presentation so
+	// repeated writes of an unchanged deck are byte-deterministic.
+	private readonly _coreTimestamp: string = new Date().toISOString().replace(/\.\d\d\dZ/, 'Z')
 	public get version(): string {
 		return this._version
 	}
@@ -149,7 +200,7 @@ export default class PptxGenJS implements IPresentationProps {
 	 */
 	private _author: string
 	public set author(value: string) {
-		this._author = value
+		this._author = validateXmlMetadataText(value, 'author')
 	}
 
 	public get author(): string {
@@ -161,7 +212,7 @@ export default class PptxGenJS implements IPresentationProps {
 	 */
 	private _company: string
 	public set company(value: string) {
-		this._company = value
+		this._company = validateXmlMetadataText(value, 'company')
 	}
 
 	public get company(): string {
@@ -174,7 +225,12 @@ export default class PptxGenJS implements IPresentationProps {
 	 */
 	private _revision: string
 	public set revision(value: string) {
-		this._revision = value
+		const normalized = String(value).trim()
+		const numeric = Number(normalized)
+		if (!normalized || !Number.isSafeInteger(numeric) || numeric < 0 || String(numeric) !== normalized) {
+			throw new Error('revision must be a non-negative whole number without separators or leading zeroes')
+		}
+		this._revision = normalized
 	}
 
 	public get revision(): string {
@@ -186,11 +242,24 @@ export default class PptxGenJS implements IPresentationProps {
 	 */
 	private _subject: string
 	public set subject(value: string) {
-		this._subject = value
+		this._subject = validateXmlMetadataText(value, 'subject')
 	}
 
 	public get subject(): string {
 		return this._subject
+	}
+
+	/**
+	 * Document keywords (docProps/core.xml cp:keywords) — round-trips uploaded decks' metadata.
+	 * @type {string}
+	 */
+	private _keywords: string
+	public set keywords(value: string) {
+		this._keywords = validateXmlMetadataText(value, 'keywords')
+	}
+
+	public get keywords(): string {
+		return this._keywords
 	}
 
 	/**
@@ -210,7 +279,7 @@ export default class PptxGenJS implements IPresentationProps {
 	 */
 	private _title: string
 	public set title(value: string) {
-		this._title = value
+		this._title = validateXmlMetadataText(value, 'title')
 	}
 
 	public get title(): string {
@@ -242,10 +311,26 @@ export default class PptxGenJS implements IPresentationProps {
 		return this._showSettings
 	}
 
+	/** Structured custom-show topology used by presentation.xml. */
+	private _customShows?: CustomShowProps[]
+	public set customShows(value: CustomShowProps[] | undefined) {
+		this._customShows = value
+	}
+
+	public get customShows(): CustomShowProps[] | undefined {
+		return this._customShows
+	}
+
 	/** master slide layout object */
-	private readonly _masterSlide: PresSlide
+	private _masterSlide: PresSlide
 	public get masterSlide(): PresSlide {
 		return this._masterSlide
+	}
+
+	/** Ordered physical slide-master carriers. `masterSlide` remains the first/default alias. */
+	private readonly _slideMasters: PresSlide[]
+	public get slideMasters(): PresSlide[] {
+		return this._slideMasters
 	}
 
 	/** this Presentation's Slide objects */
@@ -282,6 +367,24 @@ export default class PptxGenJS implements IPresentationProps {
 	private readonly _chartType = ChartType
 	public get ChartType(): typeof ChartType {
 		return this._chartType
+	}
+
+	/** Ready-to-use style defaults for every supported chart family. */
+	private readonly _chartStyles = CHART_STYLE_PRESETS
+	public get ChartStyles(): typeof CHART_STYLE_PRESETS {
+		return this._chartStyles
+	}
+
+	/** Public palettes used by the built-in chart style presets. */
+	private readonly _chartColors = CHART_COLOR_PRESETS
+	public get ChartColors(): typeof CHART_COLOR_PRESETS {
+		return this._chartColors
+	}
+
+	/** Complete Office gallery corpus: 49 style/color combinations, with raw ChartEx parts. */
+	private readonly _chartGallery = CHART_GALLERY
+	public get ChartGallery(): typeof CHART_GALLERY {
+		return this._chartGallery
 	}
 
 	private readonly _outputType = OutputType
@@ -383,11 +486,11 @@ export default class PptxGenJS implements IPresentationProps {
 		}
 
 		// Core
-		this._author = 'betterpptx-mcp'
-		this._company = 'betterpptx-mcp'
+		this._author = 'BetterPPTX'
+		this._company = 'BetterPPTX'
 		this._revision = '1' // Note: Must be a whole number
-		this._subject = 'betterpptx-mcp Presentation'
-		this._title = 'betterpptx-mcp Presentation'
+		this._subject = 'Presentation'
+		this._title = 'Presentation'
 		// PptxGenJS props
 		this._presLayout = {
 			name: this.LAYOUTS[DEF_PRES_LAYOUT].name,
@@ -415,13 +518,20 @@ export default class PptxGenJS implements IPresentationProps {
 		this._slides = []
 		this._sections = []
 		this._masterSlide = {
+			addCameo: null,
+			addZoom: null,
+			addSectionZoom: null,
+			addSummaryZoom: null,
 			addChart: null,
 			addEquation: null,
 			addImage: null,
 			addMedia: null,
+			addRecordStudioCapture: null,
 			addModel3D: null,
 			addNotes: null,
 			addShape: null,
+			addConnector: null,
+			addGroup: null,
 			addSmartArt: null,
 			addTable: null,
 			addText: null,
@@ -439,6 +549,8 @@ export default class PptxGenJS implements IPresentationProps {
 			_slideNumberProps: null,
 			_slideObjects: [],
 		}
+		this._slideMasters = [this._masterSlide]
+		this._slideLayouts[0]._slideMaster = this._masterSlide
 	}
 
 	/**
@@ -506,6 +618,47 @@ export default class PptxGenJS implements IPresentationProps {
 	}
 
 	/**
+	 * OPC garbage collection: remove binary payload parts under `ppt/media/` that NO relationship
+	 * in the package references. Conservative by design: only `ppt/media/*` parts are candidates,
+	 * and a part survives if ANY `.rels` file (generated OR raw-copied) resolves a non-External
+	 * Target to it — so passthrough-referenced media, covers, and shared (deduped) targets all stay.
+	 * @param {JSZip} zip - the fully assembled package
+	 * @return {Promise<number>} number of orphan parts removed
+	 */
+	private readonly gcOrphanMediaParts = async (zip: JSZip): Promise<number> => {
+		const names = Object.keys(zip.files).filter(n => !zip.files[n].dir)
+		const referenced = new Set<string>()
+		for (const relsName of names.filter(n => /(^|\/)_rels\/[^/]+\.rels$/.test(n))) {
+			const ownerDir = relsName.replace(/_rels\/[^/]+\.rels$/, '') // '<dir>/' (or '' at package root)
+			let relsXml = ''
+			try { relsXml = await zip.file(relsName)!.async('string') } catch { continue }
+			for (const rel of relsXml.matchAll(/<Relationship\b[^>]*>/g)) {
+				const tag = rel[0]
+				if (/TargetMode="External"/i.test(tag)) continue
+				const rawTarget = (tag.match(/Target="([^"]*)"/) || [])[1]
+				if (!rawTarget) continue
+				let target = rawTarget
+				try { target = decodeURIComponent(rawTarget) } catch { /* keep raw on malformed escapes */ }
+				const base = target.startsWith('/') ? target.substring(1) : ownerDir + target
+				const resolved: string[] = []
+				for (const seg of base.split('/')) {
+					if (!seg || seg === '.') continue
+					if (seg === '..') resolved.pop()
+					else resolved.push(seg)
+				}
+				referenced.add(resolved.join('/'))
+			}
+		}
+		let removed = 0
+		for (const name of names) {
+			if (!name.startsWith('ppt/media/') || referenced.has(name)) continue
+			zip.remove(name)
+			removed++
+		}
+		return removed
+	}
+
+	/**
 	 * Create and export the .pptx file
 	 * @param {string} exportName - output file type
 	 * @param {Blob} blobContent - Blob content
@@ -567,23 +720,37 @@ export default class PptxGenJS implements IPresentationProps {
 
 		// STEP 1: Read/Encode all Media before zip as base64 content, etc. is required
 		this.slides.forEach(slide => {
+			prepareInteractiveActionRelations(slide)
 			arrMediaPromises = arrMediaPromises.concat(genMedia.encodeSlideMediaRels(slide))
 		})
 		this.slideLayouts.forEach(layout => {
 			arrMediaPromises = arrMediaPromises.concat(genMedia.encodeSlideMediaRels(layout))
 		})
-		arrMediaPromises = arrMediaPromises.concat(genMedia.encodeSlideMediaRels(this.masterSlide))
+		this.slideMasters.forEach(master => {
+			arrMediaPromises = arrMediaPromises.concat(genMedia.encodeSlideMediaRels(master))
+		})
 
 		// STEP 2: Wait for Promises (if any) then generate the PPTX file
 		return await Promise.all(arrMediaPromises).then(async () => {
+			// Native Picture Format Artistic Effects need two coordinated payloads:
+			// PowerPoint's rendered preview in the ordinary image part and the editable
+			// original in an HD Photo relationship. Ordinary media must be loaded first.
+			await genMedia.encodeArtisticEffectMediaRels([
+				...this.slides,
+				...this.slideLayouts,
+				...this.slideMasters,
+			])
+
 			// A0: Auto-fit 3D models. Media encoding has loaded each GLB into `_relsMedia[].data`
 			// (base64); derive meterPerModelUnit/preTrans from geometry so PowerPoint frames any
 			// model correctly. Runs before XML generation; skips models with explicit `trans`.
 			applyModel3DAutoFit(this.slides)
 
-			// A: Add empty placeholder objects to slides that don't already have them
+			// A: Build serialization-only placeholder lists. Do not mutate the live
+			// slide model: export/readback must be idempotent.
+			const serializedSlideObjects = new Map<PresSlide, PresSlide['_slideObjects']>()
 			this.slides.forEach(slide => {
-				if (slide._slideLayout) genObj.addPlaceholdersToSlideLayouts(slide)
+				if (slide._slideLayout) serializedSlideObjects.set(slide, genObj.addPlaceholdersToSlideLayouts(slide))
 			})
 
 			// A2: Cross-slide media de-duplication.
@@ -626,12 +793,14 @@ export default class PptxGenJS implements IPresentationProps {
 			zip.folder('ppt/theme')
 			zip.folder('ppt/notesMasters').folder('_rels')
 			zip.folder('ppt/notesSlides').folder('_rels')
-			zip.file('[Content_Types].xml', genXml.makeXmlContTypes(this.slides, this.slideLayouts, this.masterSlide, packageParts, rawPresentationContentType)) // TODO: pass only `this` like below! 20200206
+			zip.file('[Content_Types].xml', genXml.makeXmlContTypes(this.slides, this.slideLayouts, this.slideMasters, packageParts, rawPresentationContentType)) // TODO: pass only `this` like below! 20200206
 			zip.file('_rels/.rels', genXml.makeXmlRootRels(rawRootExtraRels))
 			zip.file('docProps/app.xml', genXml.makeXmlApp(this.slides, this.company)) // TODO: pass only `this` like below! 20200206
-			zip.file('docProps/core.xml', genXml.makeXmlCore(this.title, this.subject, this.author, this.revision)) // TODO: pass only `this` like below! 20200206
-			zip.file('ppt/_rels/presentation.xml.rels', genXml.makeXmlPresentationRels(this.slides, rawSlideMasters, rawPresentationFonts, rawPresentationExtraRels))
-			zip.file('ppt/theme/theme1.xml', genXml.makeXmlTheme(this))
+			zip.file('docProps/core.xml', genXml.makeXmlCore(this.title, this.subject, this.author, this.revision, this.keywords, this._coreTimestamp)) // TODO: pass only `this` like below! 20200206
+			zip.file('ppt/_rels/presentation.xml.rels', genXml.makeXmlPresentationRels(this.slides, rawSlideMasters, rawPresentationFonts, rawPresentationExtraRels, this.slideMasters))
+			this.slideMasters.forEach((_master, idx) => {
+				zip.file(`ppt/theme/theme${idx + 1}.xml`, genXml.makeXmlTheme(this))
+			})
 			zip.file('ppt/presentation.xml', genXml.makeXmlPresentation(this))
 			zip.file('ppt/presProps.xml', genXml.makeXmlPresProps(this))
 			zip.file('ppt/tableStyles.xml', genXml.makeXmlTableStyles())
@@ -640,17 +809,27 @@ export default class PptxGenJS implements IPresentationProps {
 			// C: Create a Layout/Master/Rel/Slide file for each SlideLayout and Slide
 			this.slideLayouts.forEach((layout, idx) => {
 				zip.file(`ppt/slideLayouts/slideLayout${idx + 1}.xml`, genXml.makeXmlLayout(layout))
-				zip.file(`ppt/slideLayouts/_rels/slideLayout${idx + 1}.xml.rels`, genXml.makeXmlSlideLayoutRel(idx + 1, this.slideLayouts))
+				zip.file(`ppt/slideLayouts/_rels/slideLayout${idx + 1}.xml.rels`, genXml.makeXmlSlideLayoutRel(idx + 1, this.slideLayouts, this.slideMasters))
 			})
 			this.slides.forEach((slide, idx) => {
-				zip.file(`ppt/slides/slide${idx + 1}.xml`, genXml.makeXmlSlide(slide))
+				const slideForSerialization = serializedSlideObjects.has(slide)
+					? Object.assign(Object.create(Object.getPrototypeOf(slide)), slide, { _slideObjects: serializedSlideObjects.get(slide) }) as PresSlide
+					: slide
+				zip.file(`ppt/slides/slide${idx + 1}.xml`, genXml.makeXmlSlide(slideForSerialization))
 				zip.file(`ppt/slides/_rels/slide${idx + 1}.xml.rels`, genXml.makeXmlSlideRel(this.slides, this.slideLayouts, idx + 1))
 				// Create all slide notes related items. Notes of empty strings are created for slides which do not have notes specified, to keep track of _rels.
 				zip.file(`ppt/notesSlides/notesSlide${idx + 1}.xml`, genXml.makeXmlNotesSlide(slide))
 				zip.file(`ppt/notesSlides/_rels/notesSlide${idx + 1}.xml.rels`, genXml.makeXmlNotesSlideRel(idx + 1))
 			})
-			zip.file('ppt/slideMasters/slideMaster1.xml', genXml.makeXmlMaster(this.masterSlide, this.slideLayouts))
-			zip.file('ppt/slideMasters/_rels/slideMaster1.xml.rels', genXml.makeXmlMasterRel(this.masterSlide, this.slideLayouts))
+			this.slideMasters.forEach((master, idx) => {
+				const boundLayouts = this.slideLayouts.filter(layout => {
+					if (layout._slideMaster) return layout._slideMaster === master
+					if (layout._betterpptxMasterName) return layout._betterpptxMasterName === master._name
+					return idx === 0
+				})
+				zip.file(`ppt/slideMasters/slideMaster${idx + 1}.xml`, genXml.makeXmlMaster(master, boundLayouts, this.theme, this.slideLayouts))
+				zip.file(`ppt/slideMasters/_rels/slideMaster${idx + 1}.xml.rels`, genXml.makeXmlMasterRel(master, this.slideLayouts, this.slideMasters))
+			})
 			zip.file('ppt/notesMasters/notesMaster1.xml', genXml.makeXmlNotesMaster())
 			zip.file('ppt/notesMasters/_rels/notesMaster1.xml.rels', genXml.makeXmlNotesMasterRel())
 
@@ -668,10 +847,20 @@ export default class PptxGenJS implements IPresentationProps {
 			this.slides.forEach(slide => {
 				this.createChartMediaRels(slide, zip, arrChartPromises)
 			})
-			this.createChartMediaRels(this.masterSlide, zip, arrChartPromises)
+			this.slideMasters.forEach(master => this.createChartMediaRels(master, zip, arrChartPromises))
 
 			// E: Wait for Promises (if any) then generate the PPTX file
 			return await Promise.all(arrChartPromises).then(async () => {
+				// E2: OPC garbage collection — purge orphan media payloads (parts under ppt/media/
+				// that no relationship references). Orphans accumulate from import passthrough
+				// part-graph copies and from removed media objects (e.g. re-narration): dead weight
+				// PowerPoint tolerates but a clean package must not carry.
+				await this.gcOrphanMediaParts(zip)
+				// JSZip otherwise stamps every member at write time. Freeze member dates
+				// to the presentation's core timestamp so an unchanged deck produces the
+				// same package bytes across repeated writes and fail-closed retries.
+				const packageTimestamp = new Date(this._coreTimestamp)
+				Object.values(zip.files).forEach(file => { file.date = packageTimestamp })
 				if (props.outputType === 'STREAM') {
 					// A: stream file
 					return await zip.generateAsync({ type: 'nodebuffer', compression: props.compression ? 'DEFLATE' : 'STORE' })
@@ -708,7 +897,8 @@ export default class PptxGenJS implements IPresentationProps {
 	async write(props?: WriteProps | WRITE_OUTPUT_TYPE): Promise<string | ArrayBuffer | Blob | Buffer | Uint8Array> {
 		// VALIDATION: Automatically validate and auto-correct off-slide elements (unless disabled)
 		const noAutoCorrect = typeof props === 'object' && props?.noOffSlideAutoCorrect === true
-		this.validateBeforeExport(noAutoCorrect)
+		const preserveOffSlide = typeof props === 'object' && props?.preserveOffSlide === true
+		this.validateBeforeExport(noAutoCorrect, preserveOffSlide)
 
 		// DEPRECATED: @deprecated v3.5.0 - outputType - [[remove in v4.0.0]]
 		const propsOutpType = typeof props === 'object' && props?.outputType ? props.outputType : props ? (props as WRITE_OUTPUT_TYPE) : null
@@ -729,7 +919,8 @@ export default class PptxGenJS implements IPresentationProps {
 	async writeFile(props?: WriteFileProps | string): Promise<string> {
 		// VALIDATION: Automatically validate and auto-correct off-slide elements (unless disabled)
 		const noAutoCorrect = typeof props === 'object' && props?.noOffSlideAutoCorrect === true
-		this.validateBeforeExport(noAutoCorrect)
+		const preserveOffSlide = typeof props === 'object' && props?.preserveOffSlide === true
+		this.validateBeforeExport(noAutoCorrect, preserveOffSlide)
 
 		// STEP 1: Figure out where we are running
 		const isNode = typeof process !== 'undefined' && !!process.versions?.node && process.release?.name === 'node'
@@ -800,11 +991,13 @@ export default class PptxGenJS implements IPresentationProps {
 	 * 
 	 * By default, applies a global scale ratio to fit all elements within slide boundaries.
 	 * If noOffSlideAutoCorrect is true, throws an error instead.
+	 * If preserveOffSlide is true, keeps source geometry as-is after repair-risk validation.
 	 * 
 	 * @param noAutoCorrect - If true, throw error instead of auto-correcting
+	 * @param preserveOffSlide - If true, skip off-slide auto-correction
 	 * @private
 	 */
-	private validateBeforeExport(noAutoCorrect: boolean = false): void {
+	private validateBeforeExport(noAutoCorrect: boolean = false, preserveOffSlide: boolean = false): void {
 		const slideWidth = this._presLayout.width / 914400 // EMU to inches
 		const slideHeight = this._presLayout.height / 914400
 		const offSlideTolerance = 1000 / 914400 // Ignore sub-pixel EMU drift from imported decks.
@@ -873,6 +1066,8 @@ export default class PptxGenJS implements IPresentationProps {
 				'\nUse pptx.validate() for detailed report.'
 			)
 		}
+
+		if (preserveOffSlide) return
 
 		// AUTO-CORRECT: Calculate global scale ratio to fit all elements
 		let maxRightOverflow = 1 // ratio: how much beyond right edge (1 = no overflow)
@@ -959,7 +1154,7 @@ export default class PptxGenJS implements IPresentationProps {
 				`[PptxGenJS] Off-slide auto-correction applied:\n` +
 				correctionLog.map((msg) => `  • ${msg}`).join('\n') +
 				`\n  Slide boundaries: ${slideWidth.toFixed(3)}" x ${slideHeight.toFixed(3)}"` +
-				`\n  To disable auto-correction, use: writeFile({ noOffSlideAutoCorrect: true })`
+				`\n  To preserve off-slide geometry, use: writeFile({ preserveOffSlide: true })`
 			)
 		}
 	}
@@ -979,10 +1174,51 @@ export default class PptxGenJS implements IPresentationProps {
 			_type: 'user',
 			_slides: [],
 			title: section.title,
+			...(section._betterpptxSemanticId ? { _betterpptxSemanticId: section._betterpptxSemanticId } : {}),
 		}
 
 		if (section.order) this.sections.splice(section.order, 0, newSection)
 		else this._sections.push(newSection)
+	}
+
+	/**
+	 * Add a native Summary Zoom: appends a "Summary Section" + a generated summary slide holding one
+	 * clickable thumbnail per content section (grid layout). The deck must already have sections with
+	 * slides. @see plans/summary-zoom-ooxml-ground-truth.md
+	 * @param {SummaryZoomProps} options - summary zoom options (default: all content sections, in order)
+	 * @returns {PresSlide} the generated summary slide
+	 * @since v4.0.1
+	 * @example pptx.addSummaryZoom()
+	 */
+	addSummaryZoom(options?: SummaryZoomProps): PresSlide {
+		const opt = options || {}
+		const contentSectionCount = this._sections.filter(s => (s._slides || []).length > 0).length
+		if (contentSectionCount < 1) {
+			throw new Error('addSummaryZoom requires the deck to have sections with slides (use pptx.addSection + addSlide({ sectionTitle }))')
+		}
+		const summaryTitle = opt.summarySectionTitle || 'Summary Section'
+		// Append the Summary Section directly (mirrors the internal default-section idiom below).
+		this._sections.push({ title: summaryTitle, _type: 'user', _slides: [] })
+		// Use the public addSlide (addNewSlide overwrites sectionTitle) so the slide lands in the Summary Section.
+		const summarySlide = this.addSlide({ sectionTitle: summaryTitle })
+		// Summary Zoom is a navigational slide and therefore needs a native,
+		// discoverable title for PowerPoint's reading order and accessibility
+		// validators. Keep the title engine-owned and leave the thumbnail grid to
+		// addSummaryZoomDefinition.
+		const slideWInch = (this.presLayout?._sizeW || Math.round(13.333 * EMU)) / EMU
+		summarySlide.addText(summaryTitle, {
+			x: 0.6,
+			y: 0.32,
+			w: Math.max(1, slideWInch - 1.2),
+			h: 0.5,
+			fontSize: 24,
+			bold: true,
+			margin: 0,
+			fit: 'shrink',
+			objectName: 'summary-zoom-title',
+		})
+		summarySlide.addSummaryZoom(opt)
+		return summarySlide
 	}
 
 	/**
@@ -1010,6 +1246,7 @@ export default class PptxGenJS implements IPresentationProps {
 		const newSlide = new Slide({
 			addSlide: this.addNewSlide,
 			getSlide: this.getSlide,
+			getSections: () => this._sections,
 			presLayout: this.presLayout,
 			setSlideNum: this.setSlideNumber,
 			slideId: this.slides.length + 256,
@@ -1060,13 +1297,189 @@ export default class PptxGenJS implements IPresentationProps {
 		else if (typeof layout.height !== 'number') console.warn('defineLayout `height` should be a number (inches)')
 		else if (typeof layout.width !== 'number') console.warn('defineLayout `width` should be a number (inches)')
 
-		this.LAYOUTS[layout.name] = {
+		const registeredLayout: PresLayout = {
 			name: layout.name,
+			...(layout.type ? { type: layout.type } : {}),
+			...(layout.headerFooter !== undefined ? { headerFooter: layout.headerFooter } : {}),
+			...(layout.colorMapOverride !== undefined ? { colorMapOverride: layout.colorMapOverride } : {}),
 			_sizeW: Math.round(Number(layout.width) * EMU),
 			_sizeH: Math.round(Number(layout.height) * EMU),
 			width: Math.round(Number(layout.width) * EMU),
 			height: Math.round(Number(layout.height) * EMU),
 		}
+		this.LAYOUTS[layout.name] = registeredLayout
+		const hasObjectEdit = Object.prototype.hasOwnProperty.call(layout, 'objects')
+		const hasPlaceholderEdit = Object.prototype.hasOwnProperty.call(layout, 'placeholders')
+		const placeholderObjects = (Array.isArray(layout.placeholders) ? layout.placeholders : []).map(item => ({
+			placeholder: {
+				options: {
+					name: item.name,
+					type: (item.type || 'body') as PlaceholderProps['type'],
+					...(item.idx !== undefined ? { idx: item.idx } : {}),
+					...(item.size ? { sz: item.size } : {}),
+					...(item.orient ? { orient: item.orient } : {}),
+					...(item.hasCustomPrompt !== undefined ? { hasCustomPrompt: item.hasCustomPrompt } : {}),
+					...(item.x !== undefined ? { x: item.x } : {}),
+					...(item.y !== undefined ? { y: item.y } : {}),
+					...(item.w !== undefined ? { w: item.w } : {}),
+					...(item.h !== undefined ? { h: item.h } : {}),
+					...(item.margin !== undefined ? { margin: item.margin } : {}),
+					...placeholderStyleOptions(item.style),
+				},
+				...(typeof item.text === 'string' ? { text: item.text } : {}),
+			},
+		})) as NonNullable<SlideMasterProps['objects']>
+		const authoredObjects = [
+			...(Array.isArray(layout.objects) ? layout.objects : []),
+			...placeholderObjects,
+		] as NonNullable<SlideMasterProps['objects']>
+
+		// A custom layout used to be only a size registry entry.  That made
+		// layouts[].placeholders silently disappear and left slide.add unable to
+		// bind to a native slideLayout part.  Materialize every defined custom
+		// layout as a real, relationship-addressable SlideLayout.  The default
+		// layout remains the existing first entry; re-defining an existing native
+		// name updates its size without duplicating package parts.
+		const existingIndex = this.slideLayouts.findIndex(item => item._name === layout.name)
+		if (existingIndex >= 0) {
+			const existing = this.slideLayouts[existingIndex]
+			existing._presLayout = registeredLayout
+			if (Object.prototype.hasOwnProperty.call(layout, 'background')) existing.background = layout.background || null
+			if (Object.prototype.hasOwnProperty.call(layout, 'bkgd')) existing.bkgd = layout.bkgd || null
+			if (Object.prototype.hasOwnProperty.call(layout, 'margin')) existing._margin = layout.margin ?? DEF_SLIDE_MARGIN_IN
+			if (Object.prototype.hasOwnProperty.call(layout, 'slideNumber')) existing._slideNumberProps = layout.slideNumber || null
+			if (Object.prototype.hasOwnProperty.call(layout, 'headerFooter')) existing._headerFooter = layout.headerFooter || null
+			if (Object.prototype.hasOwnProperty.call(layout, 'colorMapOverride')) existing._colorMapOverride = layout.colorMapOverride || null
+			if (hasObjectEdit || hasPlaceholderEdit) {
+				const isPlaceholder = (item: any): boolean => item?._type === 'placeholder' || Boolean(item?.options?._placeholderType)
+				existing._slideObjects = existing._slideObjects.filter(item => (hasObjectEdit && hasPlaceholderEdit)
+					? false
+					: hasObjectEdit ? isPlaceholder(item) : !isPlaceholder(item))
+				if (hasObjectEdit) {
+					existing._rels = []
+					existing._relsChart = []
+					existing._relsMedia = []
+				}
+				if (authoredObjects.length) genObj.createSlideMaster({ title: layout.name, objects: authoredObjects }, existing)
+			}
+			return
+		}
+		const newLayout: SlideLayout = {
+			_margin: layout.margin || DEF_SLIDE_MARGIN_IN,
+			_name: layout.name,
+			_presLayout: registeredLayout,
+			_rels: [],
+			_relsChart: [],
+			_relsMedia: [],
+			_slide: null,
+			_slideNum: 1000 + this.slideLayouts.length + 1,
+			_slideNumberProps: layout.slideNumber || null,
+			_headerFooter: layout.headerFooter || null,
+			_colorMapOverride: layout.colorMapOverride || null,
+			_slideObjects: [],
+			_slideMaster: this.masterSlide,
+			background: layout.background || null,
+			bkgd: layout.bkgd || null,
+		}
+		if (authoredObjects.length) {
+			genObj.createSlideMaster({ title: layout.name, objects: authoredObjects }, newLayout)
+		}
+		const layoutBackground = layout.background || (typeof layout.bkgd === 'string' ? { color: layout.bkgd } : layout.bkgd)
+		if (layoutBackground) genObj.addBackgroundDefinition(layoutBackground, newLayout)
+		this.slideLayouts.push(newLayout)
+	}
+
+	/**
+	 * Create or replace a physical slide-master carrier.
+	 * Existing `defineSlideMaster()` semantics remain layout-oriented for compatibility.
+	 */
+	definePhysicalSlideMaster(props: SlideMasterProps): PresSlide {
+		const propsClone = JSON.parse(JSON.stringify(props)) as SlideMasterProps
+		if (!propsClone.title) throw new Error('definePhysicalSlideMaster() object argument requires a `title` value.')
+		const title = String(propsClone.title)
+		const hasObjectEdit = Object.prototype.hasOwnProperty.call(propsClone, 'objects')
+		const hasPlaceholderEdit = Object.prototype.hasOwnProperty.call(propsClone, 'placeholders')
+		const placeholderObjects = (Array.isArray(propsClone.placeholders) ? propsClone.placeholders : []).map(item => ({
+			placeholder: {
+				options: {
+					name: item.name,
+					type: (item.type || 'body') as PlaceholderProps['type'],
+					...(item.idx !== undefined ? { idx: item.idx } : {}),
+					...(item.size ? { sz: item.size } : {}),
+					...(item.orient ? { orient: item.orient } : {}),
+					...(item.hasCustomPrompt !== undefined ? { hasCustomPrompt: item.hasCustomPrompt } : {}),
+					...(item.x !== undefined ? { x: item.x } : {}),
+					...(item.y !== undefined ? { y: item.y } : {}),
+					...(item.w !== undefined ? { w: item.w } : {}),
+					...(item.h !== undefined ? { h: item.h } : {}),
+					...(item.margin !== undefined ? { margin: item.margin } : {}),
+					...placeholderStyleOptions(item.style),
+				},
+				...(typeof item.text === 'string' ? { text: item.text } : {}),
+			},
+		})) as NonNullable<SlideMasterProps['objects']>
+		const authoredObjects = [
+			...(Array.isArray(propsClone.objects) ? propsClone.objects : []),
+			...placeholderObjects,
+		] as NonNullable<SlideMasterProps['objects']>
+
+		let physical = this.slideMasters.find(master => master._name === title)
+		const defaultIsUnused = this.slideMasters.length === 1
+			&& !this.masterSlide._name
+			&& !(this.masterSlide._slideObjects || []).length
+			&& !(this.masterSlide._rels || []).length
+		if (!physical && defaultIsUnused) {
+			physical = this.masterSlide
+			physical._name = title
+		}
+		if (!physical) {
+			physical = {
+				...this.masterSlide,
+				_name: title,
+				_presLayout: this.presLayout,
+				_rels: [], _relsChart: [], _relsMedia: [], _slideObjects: [],
+				_slideLayout: null, _slideNum: null, _slideNumberProps: null,
+			}
+			this.slideMasters.push(physical)
+		}
+
+		if (Object.prototype.hasOwnProperty.call(propsClone, 'margin')) physical._margin = propsClone.margin ?? DEF_SLIDE_MARGIN_IN
+		if (Object.prototype.hasOwnProperty.call(propsClone, 'slideNumber')) physical._slideNumberProps = propsClone.slideNumber || null
+		if (Object.prototype.hasOwnProperty.call(propsClone, 'headerFooter')) physical._headerFooter = propsClone.headerFooter || null
+		if (Object.prototype.hasOwnProperty.call(propsClone, 'colorMap')) physical._colorMap = propsClone.colorMap || null
+		if (Object.prototype.hasOwnProperty.call(propsClone, 'textStyles')) physical._textStyles = propsClone.textStyles || null
+		if (Object.prototype.hasOwnProperty.call(propsClone, 'background')) physical.background = propsClone.background || null
+		if (Object.prototype.hasOwnProperty.call(propsClone, 'bkgd')) physical.bkgd = propsClone.bkgd || null
+		if (hasObjectEdit || hasPlaceholderEdit) {
+			const isPlaceholder = (item: any): boolean => item?._type === 'placeholder' || Boolean(item?.options?._placeholderType)
+			physical._slideObjects = (physical._slideObjects || []).filter(item => (hasObjectEdit && hasPlaceholderEdit)
+				? false
+				: hasObjectEdit ? isPlaceholder(item) : !isPlaceholder(item))
+			if (hasObjectEdit) {
+				physical._rels = []
+				physical._relsChart = []
+				physical._relsMedia = []
+			}
+			genObj.createSlideMaster({ ...propsClone, objects: authoredObjects }, physical)
+		}
+		const authoredBackground = propsClone.background || propsClone.bkgd
+		if (authoredBackground) genObj.addBackgroundDefinition(typeof authoredBackground === 'string' ? { color: authoredBackground } : authoredBackground, physical)
+		return physical
+	}
+
+	/** Reorder physical master carriers while keeping `masterSlide` as the first/default alias. */
+	reorderPhysicalSlideMasters(titles: string[]): void {
+		const order = new Map(titles.map((title, index) => [String(title), index]))
+		const originalIndex = new Map(this.slideMasters.map((master, index) => [master, index]))
+		this.slideMasters.sort((left, right) => {
+			const leftRank = order.get(String(left._name || ''))
+			const rightRank = order.get(String(right._name || ''))
+			if (leftRank !== undefined && rightRank !== undefined) return leftRank - rightRank
+			if (leftRank !== undefined) return -1
+			if (rightRank !== undefined) return 1
+			return (originalIndex.get(left) || 0) - (originalIndex.get(right) || 0)
+		})
+		if (this.slideMasters[0]) this._masterSlide = this.slideMasters[0]
 	}
 
 	/**
@@ -1077,6 +1490,60 @@ export default class PptxGenJS implements IPresentationProps {
 		// (ISSUE#406;PULL#1176) deep clone the props object to avoid mutating the original object
 		const propsClone = JSON.parse(JSON.stringify(props))
 		if (!propsClone.title) throw new Error('defineSlideMaster() object argument requires a `title` value. (https://gitbrent.github.io/PptxGenJS/docs/masters.html)')
+		const hasObjectEdit = Object.prototype.hasOwnProperty.call(propsClone, 'objects')
+		const hasPlaceholderEdit = Object.prototype.hasOwnProperty.call(propsClone, 'placeholders')
+		const placeholderObjects = (Array.isArray(propsClone.placeholders) ? propsClone.placeholders : []).map((item: NonNullable<PresLayout['placeholders']>[number]) => ({
+			placeholder: {
+				options: {
+					name: item.name,
+					type: (item.type || 'body') as PlaceholderProps['type'],
+					...(item.idx !== undefined ? { idx: item.idx } : {}),
+					...(item.size ? { sz: item.size } : {}),
+					...(item.orient ? { orient: item.orient } : {}),
+					...(item.hasCustomPrompt !== undefined ? { hasCustomPrompt: item.hasCustomPrompt } : {}),
+					...(item.x !== undefined ? { x: item.x } : {}),
+					...(item.y !== undefined ? { y: item.y } : {}),
+					...(item.w !== undefined ? { w: item.w } : {}),
+					...(item.h !== undefined ? { h: item.h } : {}),
+					...(item.margin !== undefined ? { margin: item.margin } : {}),
+					...placeholderStyleOptions(item.style),
+				},
+				...(typeof item.text === 'string' ? { text: item.text } : {}),
+			},
+		})) as NonNullable<SlideMasterProps['objects']>
+		const authoredObjects = [
+			...(Array.isArray(propsClone.objects) ? propsClone.objects : []),
+			...placeholderObjects,
+		] as NonNullable<SlideMasterProps['objects']>
+		const existing = this.slideLayouts.find(item => item._name === propsClone.title)
+		if (existing) {
+			// A named master/layout definition is an editable identity, not an append
+			// operation. Preserve the existing object reference used by any slides,
+			// while replacing only explicitly authored components.
+			if (Object.prototype.hasOwnProperty.call(propsClone, 'margin')) existing._margin = propsClone.margin ?? DEF_SLIDE_MARGIN_IN
+			if (Object.prototype.hasOwnProperty.call(propsClone, 'slideNumber')) existing._slideNumberProps = propsClone.slideNumber || null
+			if (Object.prototype.hasOwnProperty.call(propsClone, 'headerFooter')) existing._headerFooter = propsClone.headerFooter || null
+			if (Object.prototype.hasOwnProperty.call(propsClone, 'colorMap')) existing._colorMap = propsClone.colorMap || null
+			if (Object.prototype.hasOwnProperty.call(propsClone, 'textStyles')) existing._textStyles = propsClone.textStyles || null
+			if (Object.prototype.hasOwnProperty.call(propsClone, 'background')) existing.background = propsClone.background || null
+			if (Object.prototype.hasOwnProperty.call(propsClone, 'bkgd')) existing.bkgd = propsClone.bkgd || null
+			if (hasObjectEdit || hasPlaceholderEdit) {
+				const isPlaceholder = (item: any): boolean => item?._type === 'placeholder' || Boolean(item?.options?._placeholderType)
+				existing._slideObjects = existing._slideObjects.filter(item => (hasObjectEdit && hasPlaceholderEdit)
+					? false
+					: hasObjectEdit ? isPlaceholder(item) : !isPlaceholder(item))
+				if (hasObjectEdit) {
+					existing._rels = []
+					existing._relsChart = []
+					existing._relsMedia = []
+				}
+				genObj.createSlideMaster({ ...propsClone, objects: authoredObjects }, existing)
+			}
+			if (propsClone.background || propsClone.bkgd) genObj.addBackgroundDefinition(propsClone.background || propsClone.bkgd, existing)
+			if (existing._slideNumberProps && !this.masterSlide._slideNumberProps) this.masterSlide._slideNumberProps = existing._slideNumberProps
+			if (Object.prototype.hasOwnProperty.call(propsClone, 'headerFooter')) this.masterSlide._headerFooter = propsClone.headerFooter || null
+			return
+		}
 
 		const newLayout: SlideLayout = {
 			_margin: propsClone.margin || DEF_SLIDE_MARGIN_IN,
@@ -1088,13 +1555,17 @@ export default class PptxGenJS implements IPresentationProps {
 			_slide: null,
 			_slideNum: 1000 + this.slideLayouts.length + 1,
 			_slideNumberProps: propsClone.slideNumber || null,
+			_headerFooter: propsClone.headerFooter || null,
+			_colorMap: propsClone.colorMap || null,
+			_textStyles: propsClone.textStyles || null,
 			_slideObjects: [],
+			_slideMaster: this.masterSlide,
 			background: propsClone.background || null,
 			bkgd: propsClone.bkgd || null,
 		}
 
 		// STEP 1: Create the Slide Master/Layout
-		genObj.createSlideMaster(propsClone, newLayout)
+		genObj.createSlideMaster({ ...propsClone, objects: authoredObjects }, newLayout)
 
 		// STEP 2: Add it to layout defs
 		this.slideLayouts.push(newLayout)
@@ -1104,6 +1575,7 @@ export default class PptxGenJS implements IPresentationProps {
 
 		// STEP 4: Add slideNumber to master slide (if any)
 		if (newLayout._slideNumberProps && !this.masterSlide._slideNumberProps) this.masterSlide._slideNumberProps = newLayout._slideNumberProps
+		if (Object.prototype.hasOwnProperty.call(propsClone, 'headerFooter')) this.masterSlide._headerFooter = propsClone.headerFooter || null
 	}
 
 	// HTML-TO-SLIDES METHODS

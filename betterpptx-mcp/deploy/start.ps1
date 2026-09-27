@@ -21,15 +21,20 @@ pm2 status
 
 $base = Get-EnvVal "BETTERPPTX_PUBLIC_BASE"
 $secret = Get-EnvVal "BETTERPPTX_URL_SECRET"
-$path = if ($secret) { "/s/$secret/mcp" } else { "/mcp" }
+$auth = Get-EnvVal "BETTERPPTX_AUTH"
+$path = if ($auth -eq "none" -or -not $secret) { "/mcp" } else { "/s/$secret/mcp" }
 Write-Host ""
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host "  Connector URL (paste into claude.ai / chatgpt.com):"
 Write-Host "    $base$path" -ForegroundColor Cyan
 Write-Host "  Health: $base/health"
+Write-Host "  MCP probe: $base$path  (GET returns a live Streamable HTTP handshake; POST is the connector protocol)"
 Write-Host "==========================================================" -ForegroundColor Green
 Write-Host ""
 Write-Host "To survive REBOOT, run ONCE (elevated PowerShell):" -ForegroundColor Yellow
 Write-Host "    npm i -g @jessety/pm2-installer; pm2-installer install   # robust Windows service"
 Write-Host "  …or a per-user fallback (no admin):"
 Write-Host "    schtasks /create /tn betterpptx-mcp /sc onlogon /tr ""pm2 resurrect"" /f"
+if ((Get-EnvVal "TUNNEL") -eq "tailscale") {
+  Write-Host "  Public access is provided by the separately managed named BetterPPTX Tailscale identity."
+}

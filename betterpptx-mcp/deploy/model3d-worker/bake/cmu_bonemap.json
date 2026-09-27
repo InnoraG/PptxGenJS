@@ -1,0 +1,27 @@
+{
+  "_comment": "canonical mixamorig:* bone  ->  CMU BVH (cgspeed Motionbuilder-friendly) source bone. CMU's spine chain is Hips->LowerBack->Spine->Spine1->Neck->Neck1->Head, so our 3 spine joints map onto LowerBack/Spine/Spine1. TEMPLATE — recipe FIX-3: VERIFY against a real BVH's actual joint names once (retarget_bake asserts each canonical key resolves + fails loud on a stale map). Fingers/thumbs are intentionally unmapped (finger-free canonical).",
+  "map": {
+    "mixamorig:Hips": "Hips",
+    "mixamorig:Spine": "LowerBack",
+    "mixamorig:Spine1": "Spine",
+    "mixamorig:Spine2": "Spine1",
+    "mixamorig:Neck": "Neck",
+    "mixamorig:Head": "Head",
+    "mixamorig:LeftShoulder": "LeftShoulder",
+    "mixamorig:LeftArm": "LeftArm",
+    "mixamorig:LeftForeArm": "LeftForeArm",
+    "mixamorig:LeftHand": "LeftHand",
+    "mixamorig:RightShoulder": "RightShoulder",
+    "mixamorig:RightArm": "RightArm",
+    "mixamorig:RightForeArm": "RightForeArm",
+    "mixamorig:RightHand": "RightHand",
+    "mixamorig:LeftUpLeg": "LeftUpLeg",
+    "mixamorig:LeftLeg": "LeftLeg",
+    "mixamorig:LeftFoot": "LeftFoot",
+    "mixamorig:LeftToeBase": "LeftToeBase",
+    "mixamorig:RightUpLeg": "RightUpLeg",
+    "mixamorig:RightLeg": "RightLeg",
+    "mixamorig:RightFoot": "RightFoot",
+    "mixamorig:RightToeBase": "RightToeBase"
+  }
+}

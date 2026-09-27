@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "betterpptx.avatar-commercial-production-lane.v2",
+  "decision": "OWNER_APPROVED_RESTORE_FORMER_PLUS_PLUS_PRODUCTION",
+  "status": "SERVING_PROMOTED_IN_STAGING",
+  "productionLane": "LivePortrait -> MuseTalk -> RestoreFormer++ -> PowerPoint-native H.264/AAC MP4",
+  "enhancement": {
+    "component": "RestoreFormer++",
+    "mode": "face restoration only",
+    "backgroundUpsampler": false,
+    "sequentialRealEsrgan": false,
+    "gfpgan": false,
+    "codeFormer": false,
+    "commit": "59d250f45d6b11a3e620d62e6e067ca1288f93a9"
+  },
+  "ownerApproved": true,
+  "talkingHeadInputContract": {
+    "selfieRequiredPerGeneration": true,
+    "appearanceContinuity": "caller-supplies-the-same-image-file-in-each-new-generation-request",
+    "defaultPersona": false,
+    "noSelfieBehavior": "voice-only narration"
+  },
+  "implementation": {
+    "source": "betterpptx-mcp/deploy/avatar-worker/modal_avatar_commercial_eval.py",
+    "appName": "betterpptx-avatar-commercial-production",
+    "authenticatedMultipartEndpoint": true,
+    "metrologyHeaders": true,
+    "cloudRunService": "betterpptx-mcp-staging",
+    "cloudRunRegion": "us-central1",
+    "cloudRunRevision": "betterpptx-mcp-staging-00084-2fp",
+    "trafficPercent": 100,
+    "quotaMode": "unbounded-metered",
+    "estimatedGpuSecondsPerRequest": 120,
+    "modalProfiles": ["telcomgapp", "betterpptx-fluxworkerai"],
+    "promotionReport": "betterpptx-mcp/outputs/commercial-promotion-20260727/commercial-promotion-report.json"
+  },
+  "canaryVerification": {
+    "telcomgapp": "HTTP 200, valid MP4, X-Enhancement restoreformer++",
+    "fluxworkerai": "HTTP 200, valid MP4, X-Enhancement restoreformer++"
+  },
+  "rollbackProvider": "liveportrait-musetalk",
+  "noBiometricIdentitySystem": true
+}

@@ -1,0 +1,124 @@
+name: betterpptx-identity
+services:
+  postgres:
+    image: postgres:17.11-bookworm
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: keycloak
+      POSTGRES_USER: keycloak
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres-password
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+    secrets:
+      - postgres-password
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    networks:
+      - identity
+    healthcheck:
+      test: [CMD-SHELL, "pg_isready -U keycloak -d keycloak"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  keycloak:
+    build:
+      context: .
+    image: betterpptx-identity-keycloak:26.7.4
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8180:8080"
+    environment:
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: keycloak
+      KC_HOSTNAME: ${BETTERPPTX_PUBLIC_BASE:-https://betterpptx.tail070c3a.ts.net}/identity
+      KC_HOSTNAME_ADMIN: http://localhost:8180/identity
+      KC_HOSTNAME_STRICT: "true"
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "false"
+      KC_HTTP_ENABLED: "true"
+      KC_HTTP_RELATIVE_PATH: /identity
+      KC_HTTP_MANAGEMENT_RELATIVE_PATH: /
+      KC_HTTP_MANAGEMENT_SCHEME: http
+      KC_PROXY_HEADERS: xforwarded
+      # Trust is bounded by the host loopback publish + private Docker network.
+      # The main server MUST overwrite all forwarded headers (see the runbook).
+      KC_CACHE: local
+      KC_BOOTSTRAP_ADMIN_USERNAME: bootstrap-owner
+      KC_LOG_LEVEL: info
+    secrets:
+      - postgres-password
+      - bootstrap-admin-password
+    volumes:
+      - type: bind
+        source: ./.private/import
+        target: /opt/keycloak/data/import
+        read_only: true
+        bind:
+          create_host_path: false
+    networks:
+      - identity
+      # Outbound HTTPS is required to fetch ChatGPT's signing keys.
+      - identity-egress
+    healthcheck:
+      test:
+        - CMD
+        - /bin/bash
+        - -ec
+        - "exec 3<>/dev/tcp/127.0.0.1/9000; printf 'GET /health/ready HTTP/1.0\r\nHost: localhost\r\n\r\n' >&3; IFS= read -r status <&3; [[ \"$$status\" == *' 200 '* ]]"
+      interval: 15s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  # Explicitly started only for a same-account domain/passkey handoff. Mail is
+  # captured locally; no SMTP port or relay is exposed outside this network.
+  handoff-mailbox:
+    image: axllent/mailpit:v1.27.4
+    profiles: [handoff]
+    restart: "no"
+    ports:
+      - "127.0.0.1:8025:8025"
+    environment:
+      MP_MAX_MESSAGES: "2"
+    networks:
+      - identity
+      - handoff-loopback
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    logging:
+      driver: json-file
+      options:
+        max-size: 1m
+        max-file: "1"
+
+networks:
+  identity:
+    internal: true
+  identity-egress: {}
+  handoff-loopback: {}
+volumes:
+  postgres-data:
+secrets:
+  postgres-password:
+    file: ./.private/secrets/postgres-password
+  bootstrap-admin-password:
+    file: ./.private/secrets/bootstrap-admin-password

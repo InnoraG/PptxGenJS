@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "betterpptx.native-3d-owner-decision-worksheet.v1",
+  "scope": "native-3d-presenter-only",
+  "developmentMode": "premium",
+  "status": "OPEN_OWNER_ACTION",
+  "instructions": [
+    "Record decisions here only after the owner has reviewed the linked evidence.",
+    "Use status CLEARED only with an owner reference and evidenceRef; otherwise keep OPEN.",
+    "Never store credentials, raw images, image bytes, or personal data in this worksheet."
+  ],
+  "researchEvidence": {
+    "termsReview": "research-demos/2026-07-18-meshy-avatar/visual-artifacts/release-gates/meshy-mixamo-commercial-terms-review-20260719.json",
+    "interpretation": "Official Meshy/Adobe sources support commercial end-use under conditions, but the exact Meshy plan/order, input-consent scope, Mixamo end-use boundary, and live account evidence still require owner decisions."
+  },
+  "owner": {
+    "reviewer": "",
+    "reviewedAt": "",
+    "authorizationReference": ""
+  },
+  "decisions": [
+    { "id": "mesh-account-and-terms", "status": "OPEN", "evidenceRef": "", "notes": "" },
+    { "id": "image-consent-and-processing-scope", "status": "OPEN", "evidenceRef": "", "notes": "" },
+    { "id": "mixamo-distribution-rights", "status": "OPEN", "evidenceRef": "", "notes": "" },
+    { "id": "joe-louise-fallback-rights", "status": "OPEN", "evidenceRef": "", "notes": "" },
+    { "id": "owner-approved-input-set", "status": "OPEN", "evidenceRef": "", "notes": "" },
+    { "id": "one-paid-live-canary", "status": "OPEN", "evidenceRef": "", "notes": "" },
+    { "id": "live-profile-revisions-and-rollback", "status": "OPEN", "evidenceRef": "", "notes": "" }
+  ],
+  "liveCanary": {
+    "status": "OPEN",
+    "approved": false,
+    "inputCount": null,
+    "inputManifestSha256": "",
+    "profileDeploymentEvidenceRef": "",
+    "rollbackEvidenceRef": ""
+  }
+}

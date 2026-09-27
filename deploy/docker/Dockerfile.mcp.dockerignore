@@ -1,0 +1,83 @@
+# Dockerfile-specific allowlist for deploy/docker/Dockerfile.mcp.
+# Only the compiled library, MCP service, and optional source-build inputs are
+# sent to the container builder. Everything else in this large monorepo is
+# excluded by default.
+*
+!package.json
+!package-lock.json
+!PPTX_ULTIMATE_DECYPHER_TOOL.mjs
+!rollup.config.mjs
+!tsconfig.json
+!gulpfile.js
+!src/
+!src/**
+!types/
+!types/**
+!tools/
+!tools/embed-ui-truth-templates.mjs
+!dist/
+!dist/**
+!betterpptx-mcp/
+!betterpptx-mcp/**
+
+# Never send local secrets, generated user data, caches, or dependencies.
+**/.env
+**/.env.*
+**/production.env
+**/credential-store.json*
+**/gha-creds-*.json
+**/*service-account*.json
+**/*service_account*.json
+**/node_modules/
+**/node_modules/**
+betterpptx-mcp/outputs/
+betterpptx-mcp/outputs/**
+betterpptx-mcp/log-viewer/
+betterpptx-mcp/log-viewer/**
+betterpptx-mcp/.tools/
+betterpptx-mcp/.tools/**
+betterpptx-mcp/.betterpptx-cache/
+betterpptx-mcp/.betterpptx-cache/**
+betterpptx-mcp/.betterpptx-mcp-runtime/
+betterpptx-mcp/.betterpptx-mcp-runtime/**
+betterpptx-mcp/.betterpptx-runtime/
+betterpptx-mcp/.betterpptx-runtime/**
+betterpptx-mcp/.betterpptx-locked-assets/
+betterpptx-mcp/.betterpptx-locked-assets/**
+betterpptx-mcp/.codex-tmp/
+betterpptx-mcp/.codex-tmp/**
+betterpptx-mcp/narration/voices/runtime/
+betterpptx-mcp/narration/voices/runtime/**
+
+# Test and maintainer material is used by CI from the checkout, not shipped in
+# the production runtime image.
+betterpptx-mcp/test/
+betterpptx-mcp/test/**
+betterpptx-mcp/evidence/
+betterpptx-mcp/evidence/**
+betterpptx-mcp/evaluation/
+betterpptx-mcp/evaluation/**
+betterpptx-mcp/chatgpt-plugin/
+betterpptx-mcp/chatgpt-plugin/**
+betterpptx-mcp/**/*.zip
+betterpptx-mcp/**/*.pptx
+betterpptx-mcp/**/*.pptm
+betterpptx-mcp/**/*.ppsx
+betterpptx-mcp/**/*.env
+betterpptx-mcp/**/production.env.example
+betterpptx-mcp/**/.private/
+betterpptx-mcp/**/.private/**
+betterpptx-mcp/.betterpptx-locked-assets-native3d-preview-evidence/
+betterpptx-mcp/.betterpptx-locked-assets-native3d-preview-evidence/**
+betterpptx-mcp/deploy/image-edit-worker/
+betterpptx-mcp/deploy/image-edit-worker/**
+betterpptx-mcp/deploy/model3d-worker/mocap/
+betterpptx-mcp/deploy/model3d-worker/mocap/**
+betterpptx-mcp/**/mocap/
+betterpptx-mcp/**/mocap/**
+betterpptx-mcp/**/*.fbx
+betterpptx-mcp/**/*.bvh
+betterpptx-mcp/Gestures_Pack_Basic/
+betterpptx-mcp/Gestures_Pack_Basic/**
+betterpptx-mcp/**/nvdiffrast/
+betterpptx-mcp/**/nvdiffrast/**

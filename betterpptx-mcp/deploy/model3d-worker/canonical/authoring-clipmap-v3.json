@@ -1,0 +1,37 @@
+{
+  "authoringLibraryVersion": "3",
+  "_comment": "FROZEN authoring clip contract for the SYNERGY INTERACTION director (B1). Distinct from the gesture library (canonical-clipmap.json, presentation gestures) and the kinetic action pool (kinetic-clipmap.json). These 18 slots are designed for the interaction VERBS the solver lowers (touch/point-at/press/carry/push/knock-over): every working pose holds >=400ms (plateauMs) so the solver's freeze-time contact is stable, and every clip returns toward rest at end so PowerPoint's L7 blend-to-rest reads naturally. Slot ORDER is the FROZEN embed order (animId == slot index); it must stay <=18 (L6 ceiling). A clip is SHIPPABLE only once its source has a G5 distribution record and its baked bytes are oracle-measured (A1) into the actor's timeline manifest.",
+  "clipCeiling": 18,
+  "plateauMinMs": 400,
+  "restReturnRequired": true,
+  "slots": [
+    { "slot": 0, "slug": "reach_touch_low_left",  "role": "reach-touch", "heightBand": "low",  "side": "left",  "servesVerbs": ["touch", "press"], "contactBone": "mixamorig:LeftHand",  "plateauMs": 400, "source": { "provider": "mixamo", "candidates": ["Reaching Out", "Picking Up"], "status": "TO_SOURCE" } },
+    { "slot": 1, "slug": "reach_touch_low_right", "role": "reach-touch", "heightBand": "low",  "side": "right", "servesVerbs": ["touch", "press", "push"], "contactBone": "mixamorig:RightHand", "plateauMs": 400, "source": { "provider": "mixamo", "candidates": ["Reaching Out", "Picking Up"], "status": "TO_SOURCE" } },
+    { "slot": 2, "slug": "reach_touch_mid_left",  "role": "reach-touch", "heightBand": "mid",  "side": "left",  "servesVerbs": ["touch", "press"], "contactBone": "mixamorig:LeftHand",  "plateauMs": 400, "source": { "provider": "mixamo", "candidates": ["Reaching Out", "Reacting"], "status": "TO_SOURCE" } },
+    { "slot": 3, "slug": "reach_touch_mid_right", "role": "reach-touch", "heightBand": "mid",  "side": "right", "servesVerbs": ["touch", "press", "push"], "contactBone": "mixamorig:RightHand", "plateauMs": 400, "source": { "provider": "mixamo", "candidates": ["Reaching Out", "Reacting"], "status": "TO_SOURCE" } },
+    { "slot": 4, "slug": "reach_touch_high_left", "role": "reach-touch", "heightBand": "high", "side": "left",  "servesVerbs": ["touch"], "contactBone": "mixamorig:LeftHand",  "plateauMs": 400, "source": { "provider": "mixamo", "candidates": ["Reaching Up", "Reaching High"], "status": "TO_SOURCE" } },
+    { "slot": 5, "slug": "reach_touch_high_right","role": "reach-touch", "heightBand": "high", "side": "right", "servesVerbs": ["touch", "push"], "contactBone": "mixamorig:RightHand", "plateauMs": 400, "source": { "provider": "mixamo", "candidates": ["Reaching Up", "Reaching High"], "status": "TO_SOURCE" } },
+    { "slot": 6, "slug": "point_mid",            "role": "point",       "heightBand": "mid",  "side": "right", "servesVerbs": ["point-at"], "contactBone": "mixamorig:RightHand", "standoffIn": 1.0, "plateauMs": 500, "source": { "provider": "mixamo", "candidates": ["Pointing", "Pointing Gesture"], "status": "TO_SOURCE" } },
+    { "slot": 7, "slug": "point_high",           "role": "point",       "heightBand": "high", "side": "right", "servesVerbs": ["point-at"], "contactBone": "mixamorig:RightHand", "standoffIn": 1.0, "plateauMs": 500, "source": { "provider": "mixamo", "candidates": ["Pointing Up", "Pointing Forward"], "status": "TO_SOURCE" } },
+    { "slot": 8, "slug": "press_tap",            "role": "press",       "heightBand": "mid",  "side": "right", "servesVerbs": ["press"], "contactBone": "mixamorig:RightHand", "plateauMs": 400, "source": { "provider": "mixamo", "candidates": ["Button Pushing", "Pressing Button"], "status": "TO_SOURCE" } },
+    { "slot": 9, "slug": "grab_carry_near",      "role": "carry",       "servesVerbs": ["carry"], "contactBone": "mixamorig:RightHand", "grabPlateauMs": 400, "dropPlateauMs": 400, "travelBand": "near", "source": { "provider": "mixamo", "candidates": ["Picking Up Object", "Pick Fruit"], "status": "TO_SOURCE" } },
+    { "slot": 10, "slug": "grab_carry_far",      "role": "carry",       "servesVerbs": ["carry"], "contactBone": "mixamorig:RightHand", "grabPlateauMs": 400, "dropPlateauMs": 400, "travelBand": "far", "source": { "provider": "mixamo", "candidates": ["Lifting", "Carrying"], "status": "TO_SOURCE" } },
+    { "slot": 11, "slug": "walk_loop",           "role": "travel",      "servesVerbs": ["walk"], "loopable": true, "source": { "provider": "mixamo", "candidates": ["Walking", "Walking (in place)"], "status": "TO_SOURCE" } },
+    { "slot": 12, "slug": "walk_turn",           "role": "travel",      "servesVerbs": ["turn"], "source": { "provider": "mixamo", "candidates": ["Left Turn", "Walk Turn 180"], "status": "TO_SOURCE" } },
+    { "slot": 13, "slug": "breathing_idle",      "role": "idle",        "servesVerbs": ["idle"], "loopable": true, "source": { "provider": "mixamo", "candidates": ["Breathing Idle", "Idle"], "status": "TO_SOURCE" } },
+    { "slot": 14, "slug": "emphatic_beat",       "role": "beat",        "servesVerbs": ["emphasize", "push", "knock-over"], "contactBone": "mixamorig:RightHand", "plateauMs": 300, "note": "highest hand velocity clip — the impulse (push/knock-over) source", "source": { "provider": "mixamo", "candidates": ["Talking", "Emphasize"], "status": "TO_SOURCE" } },
+    { "slot": 15, "slug": "greet_bow",           "role": "greet",       "servesVerbs": ["greet", "bow"], "plateauMs": 400, "source": { "provider": "mixamo", "candidates": ["Waving", "Bow"], "status": "TO_SOURCE" } },
+    { "slot": 16, "slug": "agree_nod",           "role": "nod",         "servesVerbs": ["agree"], "source": { "provider": "mixamo", "candidates": ["Head Nod Yes", "Agreeing"], "status": "TO_SOURCE" } },
+    { "slot": 17, "slug": "disagree_shake",      "role": "nod",         "servesVerbs": ["disagree"], "source": { "provider": "mixamo", "candidates": ["Head Shake No", "Disagreeing"], "status": "TO_SOURCE" } }
+  ],
+  "semanticClips": {
+    "touch":      [0, 1, 2, 3, 4, 5],
+    "point-at":   [6, 7],
+    "press":      [8],
+    "carry":      [9, 10],
+    "push":       [14, 1, 3, 5],
+    "knock-over": [14, 1, 3, 5]
+  },
+  "_semanticClipsNote": "verb -> candidate slots for the synergy solver's semanticClips filter (T25: never scan ALL clips). Contact verbs pick the slot whose rendered contact frame lands nearest the target; impulse verbs pick the highest measured hand velocity (beat first).",
+  "g5": "every slot's source clip requires a G5-ASSET-LICENSE-LEDGER row (Mixamo commercial-in-project basis) before the baked bytes ship; status flips TO_SOURCE -> SOURCED -> BAKED -> ORACLE_MEASURED -> SHIPPABLE."
+}

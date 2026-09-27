@@ -22,9 +22,10 @@
  */
 
 import { getNextAnimationId } from '../gen-animations-ids'
+import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 import { AnimationBuildContext } from './types'
 import { getNodeTypeFromTrigger } from './utils'
-import { MODEL3D_ANIMATION_TEMPLATES, Model3DAnimationName } from './data3DAnimationTemplates'
+import { MODEL3D_ANIMATION_TEMPLATES, Model3DAnimationName, normalizeModel3DAnimationEffectName } from './data3DAnimationTemplates'
 import {
 	MODEL3D_JUMP_AND_TURN_OPTION_BEHAVIORS,
 	MODEL3D_SWING_OPTION_BEHAVIORS,
@@ -55,6 +56,7 @@ type Model3DAxis = 'x' | 'y' | 'z'
 type Model3DSpace = 'object' | 'view'
 type Model3DDirection = 'right' | 'left' | 'up' | 'down' | 'front' | 'back' | 'clockwise' | 'counterclockwise'
 type Model3DAmount = 'half' | 'full' | 'continuous' | 'once' | 'twice'
+type Model3DPresetName = Exclude<Model3DAnimationName, 'playScene'>
 
 interface Model3DVariant {
 	axis: 'x' | 'y' | 'z'
@@ -129,6 +131,36 @@ function readOption(animation: Record<string, unknown>, key: string): unknown {
 	return animation[key] ?? effectOptions?.[key]
 }
 
+/** The captured preset clock is the default; null is an explicit default reset. */
+function resolveModel3DPresetSimpleDuration(animation: Record<string, unknown>, name: Model3DPresetName): number {
+	const requested = animation.duration
+	if (requested === undefined || requested === null) return name === 'turntable' ? 2000 : 1000
+	if (typeof requested !== 'number' || !Number.isFinite(requested) || requested < 0) {
+		throw new Error('Native 3D preset duration must be a finite nonnegative number of milliseconds.')
+	}
+	return Math.round(requested)
+}
+
+/**
+ * Active span used once by the click-group scheduler. It shares the builder's
+ * simple duration and repeat resolver, including the one-ms visibility carriers.
+ * Embedded scene playback has its own clip/loop contract and is not a preset.
+ */
+export function resolveModel3DPresetActiveDuration(animation: Record<string, unknown>): number | undefined {
+	const rawEffect = animation.type === 'motion' && animation.motionPath ? animation.motionPath : animation.effect
+	const effect = normalizeModel3DAnimationEffectName(String(rawEffect || ''))
+	if (effect !== 'arrive' && effect !== 'turntable' && effect !== 'swing' && effect !== 'jumpandturn' && effect !== 'leave') return undefined
+	const name: Model3DPresetName = effect === 'jumpandturn' ? 'jumpAndTurn' : effect
+	const duration = resolveModel3DPresetSimpleDuration(animation, name)
+	const simpleSpan = name === 'arrive' || name === 'leave' ? Math.max(1, duration) : duration
+	const repeat = resolveRepeatCount(animation, name)
+	if (repeat === 'indefinite') return Infinity
+	const count = repeat === undefined ? 1 : Number(repeat) / 1000
+	const span = simpleSpan * count * (animation.autoReverse ? 2 : 1)
+	if (!Number.isFinite(span) || span < 0) throw new Error('Native 3D preset timing requires a finite nonnegative repeat count or indefinite.')
+	return span
+}
+
 function selectModel3DVariant(animation: Record<string, unknown>): Model3DVariant {
 	const directionValue = readOption(animation, 'modelDirection')
 		?? readOption(animation, 'effectDirection')
@@ -166,14 +198,14 @@ function buildNumericAnim(
 	values: string[],
 	additive: 'sum' | 'mult',
 	sign: 1 | -1 = 1,
-	options: { fillHold?: boolean; times?: string[] } = {}
+	options: { fillHold?: boolean; times?: string[]; duration?: number } = {}
 ): string {
 	const fill = options.fillHold === false ? '' : ' fill="hold"'
 	const times = options.times || ARRIVE_TIMES
-	return `<p:anim calcmode="lin" valueType="num"><p:cBhvr additive="${additive}"><p:cTn id="${id}" dur="1000"${fill}/><p:tgtEl><p:spTgt spid="${shapeId}"/></p:tgtEl><p:attrNameLst><p:attrName>${attrName}</p:attrName></p:attrNameLst></p:cBhvr>${buildTavList(times, values, sign)}</p:anim>`
+	return `<p:anim calcmode="lin" valueType="num"><p:cBhvr additive="${additive}"><p:cTn id="${id}" dur="${options.duration ?? 1000}"${fill}/><p:tgtEl><p:spTgt spid="${shapeId}"/></p:tgtEl><p:attrNameLst><p:attrName>${attrName}</p:attrName></p:attrNameLst></p:cBhvr>${buildTavList(times, values, sign)}</p:anim>`
 }
 
-function buildArriveBehaviors(ctx: AnimationBuildContext): { presetSubtype: number; behaviors: string } {
+function buildArriveBehaviors(ctx: AnimationBuildContext, duration: number): { presetSubtype: number; behaviors: string } {
 	const { shapeId, ids } = ctx
 	const animation = ctx.animation as unknown as Record<string, unknown>
 	const variant = selectModel3DVariant(animation)
@@ -186,15 +218,15 @@ function buildArriveBehaviors(ctx: AnimationBuildContext): { presetSubtype: numb
 	while (pool.length < 6) pool.push(getNextAnimationId())
 
 	let behaviors = `<p:set><p:cBhvr><p:cTn id="${pool[0]}" dur="1" fill="hold"><p:stCondLst><p:cond delay="0"/></p:stCondLst></p:cTn><p:tgtEl><p:spTgt spid="${shapeId}"/></p:tgtEl><p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst></p:cBhvr><p:to><p:strVal val="visible"/></p:to></p:set>`
-	behaviors += `<p:animEffect transition="in" filter="fade"><p:cBhvr><p:cTn id="${pool[1]}" dur="1000"/><p:tgtEl><p:spTgt spid="${shapeId}"/></p:tgtEl></p:cBhvr></p:animEffect>`
-	behaviors += buildNumericAnim(pool[2], shapeId, rotationAttr, rotationValues, 'sum', arriveSign)
-	behaviors += buildNumericAnim(pool[3], shapeId, '3d.object.scale.x', ARRIVE_SCALE_CURVE, 'mult')
-	behaviors += buildNumericAnim(pool[4], shapeId, '3d.object.scale.y', ARRIVE_SCALE_CURVE, 'mult')
-	behaviors += buildNumericAnim(pool[5], shapeId, '3d.object.scale.z', ARRIVE_SCALE_CURVE, 'mult')
+	behaviors += `<p:animEffect transition="in" filter="fade"><p:cBhvr><p:cTn id="${pool[1]}" dur="${duration}"/><p:tgtEl><p:spTgt spid="${shapeId}"/></p:tgtEl></p:cBhvr></p:animEffect>`
+	behaviors += buildNumericAnim(pool[2], shapeId, rotationAttr, rotationValues, 'sum', arriveSign, { duration })
+	behaviors += buildNumericAnim(pool[3], shapeId, '3d.object.scale.x', ARRIVE_SCALE_CURVE, 'mult', 1, { duration })
+	behaviors += buildNumericAnim(pool[4], shapeId, '3d.object.scale.y', ARRIVE_SCALE_CURVE, 'mult', 1, { duration })
+	behaviors += buildNumericAnim(pool[5], shapeId, '3d.object.scale.z', ARRIVE_SCALE_CURVE, 'mult', 1, { duration })
 	return { presetSubtype: variant.presetSubtype, behaviors }
 }
 
-function buildLeaveBehaviors(ctx: AnimationBuildContext): { presetSubtype: number; behaviors: string } {
+function buildLeaveBehaviors(ctx: AnimationBuildContext, duration: number): { presetSubtype: number; behaviors: string } {
 	const { shapeId, ids } = ctx
 	const animation = ctx.animation as unknown as Record<string, unknown>
 	const variant = selectModel3DVariant(animation)
@@ -204,12 +236,12 @@ function buildLeaveBehaviors(ctx: AnimationBuildContext): { presetSubtype: numbe
 	const pool = [ids.set, ids.animX, ids.animY, ids.effect].filter(v => typeof v === 'number') as number[]
 	while (pool.length < 6) pool.push(getNextAnimationId())
 
-	let behaviors = `<p:animEffect transition="out" filter="fade"><p:cBhvr><p:cTn id="${pool[0]}" dur="1000"/><p:tgtEl><p:spTgt spid="${shapeId}"/></p:tgtEl></p:cBhvr></p:animEffect>`
-	behaviors += buildNumericAnim(pool[1], shapeId, rotationAttr, LEAVE_ROTATION_CURVES[magnitude], 'sum', variant.motionSign, { fillHold: false })
-	behaviors += buildNumericAnim(pool[2], shapeId, '3d.object.scale.x', LEAVE_SCALE_CURVE, 'mult', 1, { fillHold: false })
-	behaviors += buildNumericAnim(pool[3], shapeId, '3d.object.scale.y', LEAVE_SCALE_CURVE, 'mult', 1, { fillHold: false })
-	behaviors += buildNumericAnim(pool[4], shapeId, '3d.object.scale.z', LEAVE_SCALE_CURVE, 'mult', 1, { fillHold: false })
-	behaviors += `<p:set><p:cBhvr><p:cTn id="${pool[5]}" dur="1" fill="hold"><p:stCondLst><p:cond delay="999"/></p:stCondLst></p:cTn><p:tgtEl><p:spTgt spid="${shapeId}"/></p:tgtEl><p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst></p:cBhvr><p:to><p:strVal val="hidden"/></p:to></p:set>`
+	let behaviors = `<p:animEffect transition="out" filter="fade"><p:cBhvr><p:cTn id="${pool[0]}" dur="${duration}"/><p:tgtEl><p:spTgt spid="${shapeId}"/></p:tgtEl></p:cBhvr></p:animEffect>`
+	behaviors += buildNumericAnim(pool[1], shapeId, rotationAttr, LEAVE_ROTATION_CURVES[magnitude], 'sum', variant.motionSign, { fillHold: false, duration })
+	behaviors += buildNumericAnim(pool[2], shapeId, '3d.object.scale.x', LEAVE_SCALE_CURVE, 'mult', 1, { fillHold: false, duration })
+	behaviors += buildNumericAnim(pool[3], shapeId, '3d.object.scale.y', LEAVE_SCALE_CURVE, 'mult', 1, { fillHold: false, duration })
+	behaviors += buildNumericAnim(pool[4], shapeId, '3d.object.scale.z', LEAVE_SCALE_CURVE, 'mult', 1, { fillHold: false, duration })
+	behaviors += `<p:set><p:cBhvr><p:cTn id="${pool[5]}" dur="1" fill="hold"><p:stCondLst><p:cond delay="${Math.max(0, duration - 1)}"/></p:stCondLst></p:cTn><p:tgtEl><p:spTgt spid="${shapeId}"/></p:tgtEl><p:attrNameLst><p:attrName>style.visibility</p:attrName></p:attrNameLst></p:cBhvr><p:to><p:strVal val="hidden"/></p:to></p:set>`
 	return { presetSubtype: variant.presetSubtype, behaviors }
 }
 
@@ -240,22 +272,37 @@ function buildTemplateVariantBehaviors(
 	variant: Model3DVariant,
 	behaviorsByIntensity: Record<Model3DOptionIntensity, Record<Model3DOptionSign, string>>,
 	idCount: number,
+	duration: number,
 	scaleFollowsView = false
 ): string {
 	const animation = ctx.animation as unknown as Record<string, unknown>
 	const intensity = normalizeIntensity(readOption(animation, 'intensity')) || 'moderate'
 	const sign: Model3DOptionSign = variant.motionSign === 1 ? 'positive' : 'negative'
 	const template = behaviorsByIntensity[intensity][sign]
-	return applyVariantSpaceAndAxis(fillTemplatePlaceholders(template, ctx, idCount), variant, scaleFollowsView)
+	const behaviors = applyVariantSpaceAndAxis(fillTemplatePlaceholders(template, ctx, idCount), variant, scaleFollowsView)
+	// Avoid parsing/reserializing the captured default payload. Only explicit
+	// non-default clocks change the behavior timing; normalized keyframes stay exact.
+	if (duration === 1000) return behaviors
+	const doc = new DOMParser().parseFromString(`<root xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">${behaviors}</root>`, 'application/xml')
+	const behaviorNodes = doc.getElementsByTagName('p:cBhvr')
+	for (let i = 0; i < behaviorNodes.length; i++) {
+		const timing = behaviorNodes[i].getElementsByTagName('p:cTn')[0]
+		if (!timing) throw new Error('Native 3D preset template has no behavior clock.')
+		timing.setAttribute('dur', String(duration))
+	}
+	// Remove only our known carrier after structural editing. The namespace is
+	// inherited from the slide; do not inject one on every behavior subtree.
+	const serialized = new XMLSerializer().serializeToString(doc)
+	return serialized.slice(serialized.indexOf('>') + 1, serialized.lastIndexOf('</root>'))
 }
 
-function buildTurntableBehaviors(ctx: AnimationBuildContext, variant: Model3DVariant): string {
+function buildTurntableBehaviors(ctx: AnimationBuildContext, variant: Model3DVariant, duration: number): string {
 	const animation = ctx.animation as unknown as Record<string, unknown>
 	const amount = normalizeAmount(readOption(animation, 'amount')) || 'full'
 	const by = amount === 'half' ? '10800000' : '21600000'
 	const rotationAttr = `3d.${variant.space}.rotation.${variant.axis}`
 	const id = typeof ctx.ids.set === 'number' ? ctx.ids.set : getNextAnimationId()
-	return `<p:animRot by="${signedValue(by, variant.motionSign)}"><p:cBhvr><p:cTn id="${id}" dur="2000" fill="hold"/><p:tgtEl><p:spTgt spid="${ctx.shapeId}"/></p:tgtEl><p:attrNameLst><p:attrName>${rotationAttr}</p:attrName></p:attrNameLst></p:cBhvr></p:animRot>`
+	return `<p:animRot by="${signedValue(by, variant.motionSign)}"><p:cBhvr><p:cTn id="${id}" dur="${duration}" fill="hold"/><p:tgtEl><p:spTgt spid="${ctx.shapeId}"/></p:tgtEl><p:attrNameLst><p:attrName>${rotationAttr}</p:attrName></p:attrNameLst></p:cBhvr></p:animRot>`
 }
 
 function explicitRepeatCount(value: unknown): string | undefined {
@@ -269,14 +316,46 @@ function explicitRepeatCount(value: unknown): string | undefined {
 	return undefined
 }
 
-function repeatCountAttribute(animation: Record<string, unknown>, name: Model3DAnimationName): string {
+function resolveRepeatCount(animation: Record<string, unknown>, name: Model3DAnimationName): string | undefined {
 	const explicit = explicitRepeatCount(readOption(animation, 'repeatCount'))
-	if (explicit) return ` repeatCount="${explicit}"`
+	if (explicit) return explicit
 
 	const amount = normalizeAmount(readOption(animation, 'amount'))
-	if ((name === 'turntable' || name === 'swing') && amount === 'continuous') return ' repeatCount="indefinite"'
-	if (name === 'swing' && amount === 'twice') return ' repeatCount="2000"'
-	return ''
+	// Embedded scene playback loops by default; the timing tree carries the repeat contract.
+	// an explicit loop:false or amount:"once" plays a single pass.
+	if (name === 'playScene') {
+		return (readOption(animation, 'loop') === false || amount === 'once') ? undefined : 'indefinite'
+	}
+	if ((name === 'turntable' || name === 'swing') && amount === 'continuous') return 'indefinite'
+	if (name === 'swing' && amount === 'twice') return '2000'
+	return undefined
+}
+
+function repeatCountAttribute(animation: Record<string, unknown>, name: Model3DAnimationName): string {
+	const repeat = resolveRepeatCount(animation, name)
+	return repeat === undefined ? '' : ` repeatCount="${repeat}"`
+}
+
+/**
+ * Play the model's selected embedded ("Scene") animation clip via the embedded1 channel.
+ * dur = the selected clip length in ms (falls back to the registry default). The timing
+ * tree's `embeddedN` channel both selects and plays the clip without the repair-unsafe
+ * model3d scene extension.
+ */
+function buildPlaySceneBehaviors(ctx: AnimationBuildContext): string {
+	const tpl = MODEL3D_ANIMATION_TEMPLATES.playScene
+	const anim = ctx.animation as unknown as Record<string, unknown>
+	const durRaw = Number(anim.duration)
+	const dur = Number.isFinite(durRaw) && durRaw > 0 ? Math.round(durRaw) : (ctx.config?.defaultDuration || 2000)
+	// The embedded clip is SELECTED by the animation's attrName channel `embedded{animId+1}` — PowerPoint's
+	// real, round-trip-safe selector. (The am3d:embedAnim ext is NOT emitted: it corrupts the deck with
+	// 0x80070570 even with a raster present — verified via COM. gen-model3d omits it; this channel is the
+	// selection.) animId is the 0-based glTF clip index carried on the animation (default 0 → embedded1).
+	const animIdRaw = Number(anim.animId)
+	const animId = Number.isFinite(animIdRaw) && animIdRaw >= 0 ? Math.round(animIdRaw) : 0
+	return fillTemplatePlaceholders(tpl.behaviors, ctx, tpl.idCount)
+		.split('{{DUR}}').join(String(dur))
+		.split('{{EMB}}').join(`embedded${animId + 1}`)
 }
 
 /**
@@ -295,23 +374,30 @@ function build3DModelAnimation(ctx: AnimationBuildContext, name: Model3DAnimatio
 	const repeat = repeatCountAttribute(animationOptions, name)
 
 	if (name === 'arrive') {
-		const variant = buildArriveBehaviors(ctx)
+		const variant = buildArriveBehaviors(ctx, resolveModel3DPresetSimpleDuration(animationOptions, name))
 		return `<p:par><p:cTn id="${ids.main}" presetID="${tpl.presetId}" presetClass="${tpl.presetClass}" presetSubtype="${variant.presetSubtype}"${repeat} fill="hold" nodeType="${nodeType}"><p:stCondLst><p:cond delay="${delay}"/></p:stCondLst><p:childTnLst>${variant.behaviors}</p:childTnLst></p:cTn></p:par>`
 	}
 
 	if (name === 'leave') {
-		const variant = buildLeaveBehaviors(ctx)
+		const variant = buildLeaveBehaviors(ctx, resolveModel3DPresetSimpleDuration(animationOptions, name))
 		return `<p:par><p:cTn id="${ids.main}" presetID="${tpl.presetId}" presetClass="${tpl.presetClass}" presetSubtype="${variant.presetSubtype}"${repeat} fill="hold" nodeType="${nodeType}"><p:stCondLst><p:cond delay="${delay}"/></p:stCondLst><p:childTnLst>${variant.behaviors}</p:childTnLst></p:cTn></p:par>`
 	}
 
+	if (name === 'playScene') {
+		// No direction/space variants — play the selected embedded clip on its embeddedN channel.
+		const behaviors = buildPlaySceneBehaviors(ctx)
+		return `<p:par><p:cTn id="${ids.main}" presetID="${tpl.presetId}" presetClass="${tpl.presetClass}" presetSubtype="${tpl.presetSubtype}"${repeat} fill="hold" nodeType="${nodeType}"><p:stCondLst><p:cond delay="${delay}"/></p:stCondLst><p:childTnLst>${behaviors}</p:childTnLst></p:cTn></p:par>`
+	}
+
 	const variant = selectModel3DVariant(animationOptions)
+	const duration = resolveModel3DPresetSimpleDuration(animationOptions, name)
 	let behaviors: string
 	if (name === 'turntable') {
-		behaviors = buildTurntableBehaviors(ctx, variant)
+		behaviors = buildTurntableBehaviors(ctx, variant, duration)
 	} else if (name === 'swing') {
-		behaviors = buildTemplateVariantBehaviors(ctx, variant, MODEL3D_SWING_OPTION_BEHAVIORS, tpl.idCount)
+		behaviors = buildTemplateVariantBehaviors(ctx, variant, MODEL3D_SWING_OPTION_BEHAVIORS, tpl.idCount, duration)
 	} else {
-		behaviors = buildTemplateVariantBehaviors(ctx, variant, MODEL3D_JUMP_AND_TURN_OPTION_BEHAVIORS, tpl.idCount, true)
+		behaviors = buildTemplateVariantBehaviors(ctx, variant, MODEL3D_JUMP_AND_TURN_OPTION_BEHAVIORS, tpl.idCount, duration, true)
 	}
 
 	return `<p:par><p:cTn id="${ids.main}" presetID="${tpl.presetId}" presetClass="${tpl.presetClass}" presetSubtype="${variant.presetSubtype}"${repeat} fill="hold" nodeType="${nodeType}"><p:stCondLst><p:cond delay="${delay}"/></p:stCondLst><p:childTnLst>${behaviors}</p:childTnLst></p:cTn></p:par>`
@@ -335,4 +421,8 @@ export function buildJumpAndTurnAnimation(ctx: AnimationBuildContext): string {
 
 export function buildLeaveAnimation(ctx: AnimationBuildContext): string {
 	return build3DModelAnimation(ctx, 'leave')
+}
+
+export function buildPlaySceneAnimation(ctx: AnimationBuildContext): string {
+	return build3DModelAnimation(ctx, 'playScene')
 }

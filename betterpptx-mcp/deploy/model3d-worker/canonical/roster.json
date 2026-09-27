@@ -1,0 +1,65 @@
+{
+  "rosterVersion": "1",
+  "_comment": "FROZEN presenter roster registry (B2). Each member re-bakes the SAME B1 v3 clip library (one library, many meshes) and carries its OWN hash-keyed oracle/license manifest — no character inherits another's calibration (roadmap B2 gate). Launch bar: >=4 members, >=2 female. A member is SHIPPABLE only when every stage in the onboarding pipeline is DONE and it passes the roster gate (own oracle held-out <=0.15in, F5a budgets, license row, perceptual rubric).",
+  "launchBar": { "minMembers": 4, "minFemale": 2 },
+  "_progress": "2026-07-14: 2 measured members (joe male, louise female — 1 female). Louise baked end-to-end locally (Blender 4.2.13, no CUDA): FBX→GLB→namespace/scale fix→transplant 18 clips→matte+slim 5.7MB→front poster→oracle held-out 0.0613in→durable register. Both automated-gate green; rubric + 2 more members pending.",
+  "members": [
+    {
+      "id": "joe",
+      "sex": "male",
+      "source": { "provider": "mixamo", "character": "Ch33 (Joe)", "license": "mixamo-commercial-in-project", "g5Row": "G5-ASSET-LICENSE-LEDGER.md#joe" },
+      "assets": {
+        "glb": "research-demos/2026-07-12-presenter-cofire/kinetic-joe-fixed.glb",
+        "glbSha256": "c7ba3481b6dab8cfcc1ccdee84b1c22eb9d6113873b92b4002ddf01b202985f7",
+        "glbBytes": 11279084,
+        "poster": "research-demos/2026-07-12-presenter-cofire/joe_front_alpha.png",
+        "posterSha256": "8e146c18452c2a8b7296bcc6ca3aeef239c891058663d329a49af2b531c65d94",
+        "posterBytes": 304333
+      },
+      "oracle": {
+        "dir": "outputs/render-oracle/c7ba3481b6da",
+        "heldOutMedianIn": 0.1471,
+        "profile": "windows-desktop 16.0.20131.20126",
+        "timelineClips": 17
+      },
+      "clipLibrary": "kinetic-v1-action-pool",
+      "_clipLibraryNote": "joe currently carries the v1 ACTION clip pool, NOT the B1 v3 interaction set — his interaction pose-semantics are unproven pending a v3 re-bake. He is a valid oracle/calibration/budget roster member; his INTERACTION shippability waits on B1 v3.",
+      "status": "MEASURED_GESTURE_READY",
+      "rubric": { "signedOff": false, "note": "PERCEPTUAL blind rubric pending (human)" },
+      "gate": { "automatedPass": true, "note": "roster-gate 2026-07-14: oracle/glb/poster/license all pass; only rubric open" },
+      "stages": { "source": "DONE", "fbxToGlb": "DONE", "transplant": "DONE", "normalizeMaterials": "DONE", "slim512": "DONE", "poster": "DONE", "contacts": "DONE", "oracle": "DONE", "durableRegister": "DONE_LOCAL_STORE" }
+    },
+    {
+      "id": "louise",
+      "sex": "female",
+      "source": { "provider": "mixamo", "character": "Ch07 (Louise, business suit)", "license": "mixamo-commercial-in-project", "g5Row": "G5-ASSET-LICENSE-LEDGER.md#louise" },
+      "assets": {
+        "glb": "research-demos/2026-07-14-louise-bake/louise-slim.glb",
+        "glbSha256": "9bdd9030b94c80581e503f2029bb4373f70f42696cfc6c62ce5fe87925d100ff",
+        "glbBytes": 5667052,
+        "poster": "research-demos/2026-07-14-louise-bake/louise_front_alpha.png",
+        "posterSha256": "35cac4746a649bf6c2a3f43e980b3916d912c629d6958212c096eb7cc39f1fd6",
+        "posterBytes": 238621
+      },
+      "oracle": {
+        "dir": "outputs/render-oracle/c1ee7c05aea3",
+        "heldOutMedianIn": 0.0613,
+        "profile": "windows-desktop 16.0.20131.20126",
+        "timelineClips": 18,
+        "calibration": { "kX": -0.0957, "kY": -0.2309 }
+      },
+      "clipLibrary": "kinetic-v1-action-pool",
+      "_clipLibraryNote": "same v1 action pool as joe (matched for comparability); interaction pose-semantics unproven pending B1 v3 re-bake. Baked LOCALLY on Blender 4.2.13 (fbx_to_glb_scaled: bake_space_transform + armature-apply + Y-up bake — fixes the Mixamo mixamorig8:/0.01-scale/skinned-space quirks; meshRestBBox skeleton-fallback added for the mismatched-mesh-space export).",
+      "status": "MEASURED_GESTURE_READY",
+      "rubric": { "signedOff": false, "note": "PERCEPTUAL blind rubric pending (human)" },
+      "gate": { "automatedPass": true, "note": "roster-gate 2026-07-14: oracle 0.0613in (tightest so far)/glb 5.7MB/poster/license all pass; only rubric open" },
+      "stages": { "source": "DONE", "fbxToGlb": "DONE", "namespaceFix": "DONE", "scaleFix": "DONE", "transplant": "DONE", "normalizeMaterials": "DONE", "slim512": "DONE", "poster": "DONE", "contacts": "DONE", "oracle": "DONE", "durableRegister": "DONE_LOCAL_STORE" }
+    }
+  ],
+  "candidates": [
+    { "id": "josh",   "sex": "male",   "sourceFbx": "research-demos/2026-07-10-presenter-roster/mixamo-josh.fbx",   "status": "TO_BAKE", "blocker": "same local Blender pipeline as louise" },
+    { "id": "remy",   "sex": "male",   "sourceFbx": "research-demos/2026-07-10-presenter-roster/mixamo-remy.fbx",   "status": "TO_BAKE", "blocker": "same local Blender pipeline as louise" }
+  ],
+  "compositionGap": "launch needs >=4 members, >=2 female. Now 2 members (joe male, LOUISE female). Need 1 more female + >=1 more member; josh/remy (male) candidates bake via the same local Blender pipeline that produced louise.",
+  "onboarding": "tools/roster/onboard-character.mjs --source <fbx|glb> --id <id> --sex <m|f> — runs the in-process/COM stages, flags Blender-gated stages (fbxToGlb, poster) as WORKER_REQUIRED where Blender is absent."
+}

@@ -21,6 +21,13 @@ const EMU_PER_METER = 36000000
 const RATIONAL_DENOMINATOR = 1000000
 const GLB_MAGIC = 0x46546c67 // "glTF" little-endian
 const GLB_CHUNK_JSON = 0x4e4f534a // "JSON" little-endian
+// Empirically measured PowerPoint projection law. A normalized one-metre model
+// fills one inch of the frame at this viewport value. Keep a small breathing
+// margin so captured native view rotations do not clip the object at the edge.
+const REST_FIT_VIEWPORT_PER_INCH = 1454545
+const VIEWPORT_BREATHING_MARGIN = 0.94
+const MIN_AUTO_VIEWPORT = 750000
+const MAX_AUTO_VIEWPORT = 10500000
 
 type Mat4 = number[] // row-major 4x4
 type Vec3 = [number, number, number]
@@ -28,6 +35,8 @@ type Vec3 = [number, number, number]
 export interface Model3DFitResult {
 	meterPerModelUnit: { n: number; d: number }
 	preTrans: { dx: number; dy: number; dz: number }
+	/** World-space extents used for content-aware viewport framing. */
+	extents?: { x: number; y: number; z: number; max: number }
 }
 
 function base64ToBytes(b64: string): Uint8Array | null {
@@ -207,7 +216,31 @@ export function computeFitFromGlbBytes(bytes: Uint8Array): Model3DFitResult | nu
 			dy: Math.round(-center[1] * mpu * EMU_PER_METER),
 			dz: Math.round(-center[2] * mpu * EMU_PER_METER),
 		},
+		extents: { x: ext[0], y: ext[1], z: ext[2], max: maxExtent },
 	}
+}
+
+/**
+ * Compute the PowerPoint viewport that fills a frame without cropping the
+ * normalized model. Width uses the larger horizontal/depth extent because the
+ * native gallery views rotate around the vertical axis; height uses the model's
+ * vertical extent. Explicit caller-authored viewports remain authoritative.
+ */
+export function computeModel3DAutoViewport(
+	frame: { w: number; h: number },
+	extents: { x: number; y: number; z: number; max: number }
+): number | null {
+	const frameW = Number(frame.w)
+	const frameH = Number(frame.h)
+	const maxExtent = Number(extents.max)
+	const modelW = Math.max(Number(extents.x), Number(extents.z), 0.000001)
+	const modelH = Math.max(Number(extents.y), 0.000001)
+	if (![frameW, frameH, maxExtent, modelW, modelH].every(Number.isFinite) || frameW <= 0 || frameH <= 0 || maxExtent <= 0) return null
+	const normalizedW = modelW / maxExtent
+	const normalizedH = modelH / maxExtent
+	const fitSpanInches = Math.min(frameW / normalizedW, frameH / normalizedH)
+	const viewport = Math.round(fitSpanInches * REST_FIT_VIEWPORT_PER_INCH * VIEWPORT_BREATHING_MARGIN)
+	return Math.max(MIN_AUTO_VIEWPORT, Math.min(MAX_AUTO_VIEWPORT, viewport))
 }
 
 /**
@@ -236,7 +269,18 @@ export function applyModel3DAutoFit(slides: PresSlide[]): void {
 			const fit = computeFitFromGlbBytes(bytes)
 			// Merge: derived framing fills the gaps; any caller-provided field (rot/scale/
 			// postTrans, or an explicit mpu/preTrans) takes precedence.
-			if (fit) options.trans = { ...fit, ...existing }
+			if (fit) {
+				const { extents, ...fitTransform } = fit
+				options.trans = { ...fitTransform, ...existing }
+				// The PowerPoint viewport is independent from the shape's rectangle. A
+				// fixed specimen viewport therefore makes even correctly normalized stock
+				// models appear tiny in a large semantic host. Fit every asset against both
+				// frame dimensions; do not special-case only wide geometry.
+				if (!Number.isFinite(options.objViewport) && extents) {
+					const viewport = computeModel3DAutoViewport({ w: Number(options.w), h: Number(options.h) }, extents)
+					if (viewport !== null) options.objViewport = viewport
+				}
+			}
 		}
 	}
 }

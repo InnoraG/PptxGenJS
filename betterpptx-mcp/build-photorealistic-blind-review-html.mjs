@@ -1,0 +1,21 @@
+// Rebuild the human-review surface from the frozen packet. The export schema is
+// explicit so labels can be checked against the exact packet before calibration.
+import crypto from 'node:crypto'
+import fs from 'node:fs'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const here = path.dirname(fileURLToPath(import.meta.url))
+const outputRoot = path.join(here, 'outputs')
+const packetPath = path.join(outputRoot, 'photorealistic-blind-review-packet.json')
+const packetBytes = fs.readFileSync(packetPath)
+const packet = JSON.parse(packetBytes.toString('utf8'))
+const packetDigest = crypto.createHash('sha256').update(packetBytes).digest('hex')
+const dimensions = ['messageFit', 'composition', 'worldFit', 'seriesCoherence']
+const esc = value => String(value).replace(/[&<>"']/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]))
+const cards = slot => (packet.records || []).map((record, index) => `<article class="card" data-id="${esc(record.id)}"><img src="photorealistic-blind-review/${esc(packet.assets?.[index]?.fileName || `visual-${String(index + 1).padStart(2, '0')}.png`)}" alt="Blinded owned-synthetic visual"><div class="score">${dimensions.map(d => `<label>${d}<input required type="number" min="1" max="5" step="1" name="${slot}:${esc(record.id)}:${d}"></label>`).join('')}</div></article>`).join('')
+const reviewerSection = slot => `<section class="reviewer"><h2>Reviewer ${slot}</h2><div class="grid">${cards(slot)}</div><p><button type="button" data-export="${slot}">Export reviewer ${slot} labels</button></p></section>`
+const html = `<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Photorealistic contextual blind review</title><style>body{font:14px system-ui;background:#0b111b;color:#f4f7fb;margin:24px}h1{margin:0 0 6px}.note{color:#a9b9ce;max-width:900px}.reviewer{border:1px solid #30445e;border-radius:12px;padding:16px;margin:18px 0;background:#121a27}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.card{background:#0d141f;border:1px solid #29384d;border-radius:8px;padding:8px}.card img{width:100%;aspect-ratio:5/3;object-fit:cover;display:block}.score{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:6px}.score label{font-size:11px;color:#b4c3d8}.score input{width:100%;box-sizing:border-box}button{background:#46d39a;color:#07130f;border:0;border-radius:6px;padding:8px 12px;font-weight:700;cursor:pointer}@media(max-width:900px){.grid{grid-template-columns:repeat(2,1fr)}}@media(max-width:600px){.grid{grid-template-columns:1fr}}</style><body data-customer-images="false" data-owned-synthetic-only="true"><h1>Photorealistic contextual blind review</h1><p class="note">Private research packet. Rate each blinded visual from 1–5 for message fit, composition, World fit and series coherence. Do not infer identity or sensitive traits. No labels are prefilled; each reviewer exports a local JSON file. The packet never calls external AI.</p>${reviewerSection(1)}${reviewerSection(2)}<script>const packetDigest='${packetDigest}';for(const button of document.querySelectorAll('[data-export]'))button.addEventListener('click',()=>{const reviewerSlot=Number(button.dataset.export);const labels=[...button.closest('.reviewer').querySelectorAll('.card')].map(card=>{const row={id:card.dataset.id};for(const d of ${JSON.stringify(dimensions)}){const input=[...card.querySelectorAll('input')].find(item=>item.name.startsWith(reviewerSlot+':')&&item.name.endsWith(':'+d));row[d]=Number(input?.value||0)}return row});const blob=new Blob([JSON.stringify({schemaVersion:'betterpptx.blind-review-labels.v1',reviewerSlot,packetDigest,labels},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='photorealistic-review-'+reviewerSlot+'.json';a.click();URL.revokeObjectURL(a.href)})</script></body></html>`
+const htmlPath = path.join(outputRoot, 'photorealistic-blind-review.html')
+fs.writeFileSync(htmlPath, html)
+console.log(JSON.stringify({ status: 'rebuilt', packetDigest, recordCount: packet.records?.length || 0, htmlPath, imagesUsePacketSubdirectory: true, exportSchema: 'betterpptx.blind-review-labels.v1' }))

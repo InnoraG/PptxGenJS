@@ -1,0 +1,34 @@
+# Continuous presenter performances
+
+Use `slides[].presenterPerformance` for multiple body actions by one presenter on the same slide. This is a generic contract for supported presenter identities and selected motion catalogs. It does not require source code, model editing, raw animation indexes, slide coordinates, or separate model instances for each action.
+
+Discover `authoringPrinciples.kineticPolicy.presenterPerformance` through `betterpptx.help.capabilities`, or the performance contract in `betterpptx.help.tool_recipe` with surface `animation`. Choose exact executable motion IDs from the presenter-motion catalog.
+
+Declare the identity through `presenter` or `presenters.cast`. A performance's `actor` is that stable actor ID. Author `actions` in playback order with a unique action `id`, exact `motionId`, `durationMs`, and optional integer `cycles`. Adjacent poses blend using `blendMs`. Actions run consecutively; their durations define the performance clock. `startMs` adds a blank lead-in; when no entrance is supplied, the presenter appears at that start time.
+
+For a silent performance, the action clock supplies the slide dwell. When narration is present, its timeline must accommodate the complete performance. All authored durations and timestamps use whole milliseconds. All transform, travel and exit times are relative to the performance start.
+
+An action can select part of its motion using `sourceStartMs` and `sourceEndMs`. These bounds use the original zero-based motion clock, including any initial hold; omitted bounds use zero and the original end. For example, an idle action with `sourceEndMs:2200` and `durationMs:2200` plays only its opening 2.2 seconds at the original pace. `cycles` repeats the selected segment within `durationMs`. Empty, reversed, fractional or out-of-range segments fail before mutation.
+
+Optional controls:
+
+- `entry`: `drop`, `fade`, or `appear`. The presenter stays absent before the entrance begins. A drop has `durationMs`, `fadeMs`, and optional height in body-height units. Choose a landing motion for the first action and align entry duration to its contact. The drop controls that action's grounded recovery; later actions can still jump.
+- `exit`: `fade` or `disappear`, with duration and optional `atMs`. By default it finishes with the last action.
+- `transforms`: ordered keys with `atMs`, yaw/pitch/roll in degrees, uniform `scale`, `depth`, `height`, and `easing`. Depth and height use standing-body-height units. Omitted values retain their previous value.
+- `frame`: an optional performance-local initial `{x,y,w,h}` in slide inches. Use it when the same logical presenter needs a different authored frame on each slide, including cast presenters. Otherwise supply a matching per-slide presenter frame or actor frame.
+- `travel`: ordered keys with `atMs` and an exact slide-inch `center:{x,y}`. `stage` (`left`, `center`, `right`) is an optional descriptive label, never a source of coordinates. An explicit 0-ms center must equal the initial frame center. Stage-only keys fail; omit `travel` for a stationary performance. Every traveled frame must remain on the slide.
+- `interactions`: `actionId`, `verb`, and the stable name of a same-slide content `target`. Supported verbs are touch, press, push, point-at and carry. The selected action supplies the gesture; the engine measures contact and aligns the actor with the target. Choose a semantically appropriate action. Each action can address one target; use consecutive actions for multiple targets.
+
+A carry also requires an explicit `hand` (`left` or `right`), `grabMs` and `dropMs`. These whole-millisecond bounds are relative to the selected action, not the performance or source clip: `0 <= grabMs < dropMs <= action.durationMs`. The named editable prop follows the composed hand and authored stage travel until drop, then stays at the release position. The target must have no other animation or interaction owner. Keep the complete hold after entrance and before exit, and inside the slide. Missing hand samples, unreachable placement and conflicting ownership fail explicitly. This is projected hand-following transport of an editable slide element, not a three-dimensional collision, grasp simulation or rigid-body physics system.
+
+For example, attach an independently named editable prop with `interactions:[{actionId:"transport",verb:"carry",target:"sample-container",hand:"right",grabMs:400,dropMs:2200}]` to a selected transport action lasting at least 2200 ms. The compiler preserves the measured trajectory timestamps with native linear motion segments; ordinary native motion paths remain smooth unless `motionEasing:"linear"` is explicitly authored.
+
+The compiler derives the selected-motion bundle from the actions when no explicit bundle is supplied. If a bundle is explicitly authored, it must include every action. Limits are 32 actions, 18 distinct motions per presenter, 120 seconds of performance and 128 transform keys. Unsupported combinations, unresolved targets and timing conflicts fail before mutation. Do not use a second presenter-motion or interaction plan for the same actor on the performance slide.
+
+The AI owns the performance's initial frame and each travel center. The compiler preserves that path for native model and shadow motion; an explicitly authored carry path must meet the selected hand and target at grab time or fail, rather than silently moving the presenter. A separate presenter `pixelFrame`, static pose, older kinetic clip directive, or reduced motion policy conflicts with performance ownership and is rejected.
+
+Dry-run first and inspect `authoringContracts.presenterPerformance`, the action clock, travel/contact readback and warnings. Commit through `betterpptx.deck.generate_from_spec` and validate under the deployment-selected verification policy. Under `release-powerpoint`, preview and visually verify the entrance, contacts, blend boundaries and exit in native PowerPoint playback. Under `production-non-rendering`, preserve the semantic performance and deterministic timing/package evidence without claiming individual PowerPoint playback. Preserve the semantic performance during edits; setting it to null removes it.
+
+Readback action, entrance, exit and contact cue times, including carry `grabMs` and `dropMs`, are absolute milliseconds from slide start. The `transforms` and `travel` arrays retain their authored times relative to the performance start; add `startMs` to compare them with the absolute cues. Export with `mode:"effectivePrecompile"` to replay or edit the semantic source, without derived fields. The default `current` export reconstructs native objects and retains the authored performance under `spec.semanticRoundtrip.slides.performances`.
+
+Treat every example as a fixture of this interface. Never specialize product behavior for an example's actor, motion order, object names, timings, or design.

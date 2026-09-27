@@ -1,0 +1,104 @@
+{
+  "realm": "betterpptx",
+  "displayName": "BetterPPTX",
+  "enabled": true,
+  "sslRequired": "external",
+  "registrationAllowed": true,
+  "registrationEmailAsUsername": false,
+  "resetPasswordAllowed": false,
+  "rememberMe": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "permanentLockout": false,
+  "failureFactor": 5,
+  "waitIncrementSeconds": 60,
+  "maxFailureWaitSeconds": 900,
+  "accessTokenLifespan": 300,
+  "accessCodeLifespan": 60,
+  "ssoSessionIdleTimeout": 604800,
+  "ssoSessionMaxLifespan": 2592000,
+  "revokeRefreshToken": true,
+  "refreshTokenMaxReuse": 0,
+  "defaultSignatureAlgorithm": "RS256",
+  "passwordPolicy": "length(14)",
+  "browserFlow": "betterpptx-passkey-only",
+  "registrationFlow": "registration",
+  "authenticationFlows": [
+    {
+      "alias": "betterpptx-passkey-only",
+      "description": "Required discoverable passkey with user verification; no cookie or password fallback",
+      "providerId": "basic-flow",
+      "topLevel": true,
+      "builtIn": false,
+      "authenticationExecutions": [
+        {
+          "authenticator": "webauthn-authenticator-passwordless",
+          "authenticatorFlow": false,
+          "requirement": "REQUIRED",
+          "priority": 10,
+          "userSetupAllowed": false
+        }
+      ]
+    }
+  ],
+  "requiredActions": [
+    {
+      "alias": "webauthn-register-passwordless",
+      "name": "Register a BetterPPTX passkey",
+      "providerId": "webauthn-register-passwordless",
+      "enabled": true,
+      "defaultAction": true,
+      "priority": 10,
+      "config": {}
+    }
+  ],
+  "actionTokenGeneratedByAdminLifespan": 300,
+  "webAuthnPolicyRpEntityName": "BetterPPTX",
+  "webAuthnPolicyRpId": "betterpptx.tail070c3a.ts.net",
+  "webAuthnPolicySignatureAlgorithms": ["ES256", "RS256"],
+  "webAuthnPolicyUserVerificationRequirement": "required",
+  "webAuthnPolicyPasswordlessRpEntityName": "BetterPPTX",
+  "webAuthnPolicyPasswordlessRpId": "betterpptx.tail070c3a.ts.net",
+  "webAuthnPolicyPasswordlessSignatureAlgorithms": ["ES256", "RS256"],
+  "webAuthnPolicyPasswordlessUserVerificationRequirement": "required",
+  "webAuthnPolicyPasswordlessRequireResidentKey": "Yes",
+  "clientScopes": [
+    {
+      "name": "betterpptx",
+      "description": "Access BetterPPTX presentations",
+      "protocol": "openid-connect",
+      "attributes": {
+        "include.in.token.scope": "true",
+        "display.on.consent.screen": "true",
+        "consent.screen.text": "Access BetterPPTX presentations"
+      },
+      "protocolMappers": [
+        {
+          "name": "betterpptx-resource-audience",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-audience-mapper",
+          "consentRequired": false,
+          "config": {
+            "included.custom.audience": "https://betterpptx.tail070c3a.ts.net",
+            "access.token.claim": "true",
+            "id.token.claim": "false",
+            "introspection.token.claim": "true"
+          }
+        },
+        {
+          "name": "betterpptx-subject",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-sub-mapper",
+          "consentRequired": false,
+          "config": {
+            "access.token.claim": "true",
+            "introspection.token.claim": "true"
+          }
+        }
+      ]
+    }
+  ],
+  "clients": []
+}

@@ -6,9 +6,15 @@ export interface OptionRegistryIssue {
 	code: string
 	field: string
 	received: unknown
+	/** Authored value retained for normalization/readback evidence. */
+	requested?: unknown
 	message: string
 	suggestion: string
 	canonical?: string | number
+	/** Canonical value after a documented, lossless normalization. */
+	normalized?: string | number
+	/** Value used by serialization after normalization. */
+	effective?: string | number
 	allowed?: Array<string | number>
 }
 
@@ -77,7 +83,20 @@ export const WORDART_TRANSFORMS: WordArtTransform[] = [
 	'textStop',
 ]
 
+export const WORDART_ADJUSTMENT_TRANSFORMS: WordArtTransform[] = [
+	'textPlain', 'textArchUp', 'textArchDown', 'textCircle', 'textButton',
+	'textCurveUp', 'textCurveDown', 'textCanUp', 'textCanDown',
+	'textInflate', 'textDeflate', 'textInflateBottom', 'textDeflateBottom',
+	'textInflateTop', 'textDeflateTop', 'textDeflateInflate',
+	'textDeflateInflateDeflate', 'textFadeRight', 'textFadeLeft',
+	'textFadeUp', 'textFadeDown', 'textSlantUp', 'textSlantDown',
+	'textCascadeUp', 'textCascadeDown', 'textChevron', 'textChevronInverted',
+	'textRingInside', 'textRingOutside', 'textTriangle', 'textTriangleInverted',
+	'textStop',
+]
+
 const WORDART_TRANSFORM_SET = new Set<string>(WORDART_TRANSFORMS)
+const WORDART_ADJUSTMENT_TRANSFORM_SET = new Set<string>(WORDART_ADJUSTMENT_TRANSFORMS)
 const GRADIENT_DIRECTION_SET = new Set<string>(GRADIENT_DIRECTIONS)
 
 export function optionRegistryError(issue: OptionRegistryIssue): Error & { code: string; details: { status: string; issue: OptionRegistryIssue } } {
@@ -115,6 +134,40 @@ export function normalizeWordArtTransform(transform: unknown): WordArtTransform 
 		suggestion: 'Use a supported DrawingML preset. Use textWave4 instead of textDoubleWave2, and textChevronInverted instead of textChevronDown.',
 		allowed: WORDART_TRANSFORMS,
 	})
+}
+
+export function normalizeWordArtAdjustments(transform: WordArtTransform, adjustments: unknown): number[] {
+	if (adjustments == null) return []
+	if (!Array.isArray(adjustments) || adjustments.length > 1) {
+		throw optionRegistryError({
+			code: 'INVALID_WORDART_ADJUSTMENTS',
+			field: 'options.wordArt.adjustments',
+			received: adjustments,
+			message: 'WordArt adjustments must contain zero or one native guide value.',
+			suggestion: 'Use [] to reset the guide, or one integer from 0 through 100000 on a guide-capable transform.',
+		})
+	}
+	const normalized = adjustments.map(value => Number(value))
+	if (normalized.some(value => !Number.isInteger(value) || value < 0 || value > 100000)) {
+		throw optionRegistryError({
+			code: 'INVALID_WORDART_ADJUSTMENT_VALUE',
+			field: 'options.wordArt.adjustments[0]',
+			received: adjustments[0],
+			message: 'The WordArt guide must be an integer from 0 through 100000.',
+			suggestion: 'Use the native 1/100000 shape-dimension guide domain.',
+		})
+	}
+	if (normalized.length && !WORDART_ADJUSTMENT_TRANSFORM_SET.has(transform)) {
+		throw optionRegistryError({
+			code: 'WORDART_ADJUSTMENT_NOT_APPLICABLE',
+			field: 'options.wordArt.adjustments',
+			received: adjustments,
+			message: `WordArt transform "${transform}" does not expose a persisted native adjustment guide.`,
+			suggestion: 'Author this transform as a discrete selector without adjustments.',
+			allowed: WORDART_ADJUSTMENT_TRANSFORMS,
+		})
+	}
+	return normalized
 }
 
 export function normalizeScene3DRotationDegrees(degreesValue: unknown, field: string): number {
@@ -206,7 +259,10 @@ export function validateText3DRotationOption(value: unknown, field: string): Opt
 			code: 'TEXT3D_ROTATION_NORMALIZED',
 			field,
 			received: numeric,
+			requested: numeric,
 			canonical: normalized,
+			normalized,
+			effective: normalized,
 			message: `${field} (${numeric}) will be serialized as ${normalized} degrees for PowerPoint-safe 3D camera XML.`,
 			suggestion: `Use ${normalized} for ${field.split('.').pop()} to avoid relying on serializer normalization.`,
 		}

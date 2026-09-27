@@ -2,13 +2,12 @@ import assert from 'node:assert/strict'
 
 process.env.BETTERPPTX_MISSION_CONTROL = '1'
 process.env.BETTERPPTX_MC_SECRET_BACKEND = 'env'
-process.env.BETTERPPTX_DODO_ENVIRONMENT = 'test'
 process.env.BETTERPPTX_MISSION_CONTROL_ADMIN_TOKEN = 'route-owner-admin-token-for-mc2-verifier'
-process.env.BETTERPPTX_MC_SECRET_DODO_TEST_API_KEY = 'route_dodo_test_key_for_mc2_verifier'
-process.env.BETTERPPTX_MC_SECRET_DODO_WEBHOOK_SECRET = `whsec_${Buffer.from('route_mc2_webhook_secret').toString('base64url')}`
-process.env.BETTERPPTX_MC_SECRET_DODO_WEBHOOK_CUSTOM_TOKEN = 'route-custom-webhook-token-for-mc2'
+process.env.BETTERPPTX_MC_SECRET_PAYRAM_API_KEY = 'route_payram_api_key_for_mc2_verifier'
+process.env.BETTERPPTX_MC_SECRET_PAYRAM_WEBHOOK_CUSTOM_TOKEN = 'route-payram-webhook-token-for-mc2'
 process.env.BETTERPPTX_MC_SECRET_MISSION_CONTROL_ADMIN_TOKEN = 'route-owner-admin-token-for-mc2-verifier'
 
+const { MISSION_CONTROL_SECRET_DEFINITIONS } = await import('./mission-control-secrets.mjs')
 const { startBetterPptxHttp } = await import('./server-http.mjs')
 
 const server = await startBetterPptxHttp({
@@ -43,18 +42,18 @@ try {
 	const list = await jsonFetch('/ops/mission-control/secrets')
 	assert.equal(list.response.status, 200)
 	assert.equal(list.data.mode, 'MC2_OWNER_SECRET_CONTROLS')
-	assert.equal(list.data.secrets.length, 4)
-	assert(!list.text.includes(process.env.BETTERPPTX_MC_SECRET_DODO_TEST_API_KEY), 'Secret list leaked a raw API key.')
+	assert.equal(list.data.secrets.length, MISSION_CONTROL_SECRET_DEFINITIONS.length)
+	assert(!list.text.includes(process.env.BETTERPPTX_MC_SECRET_PAYRAM_API_KEY), 'Secret list leaked a raw API key.')
 
-	const denied = await jsonFetch('/ops/mission-control/secrets/dodo_webhook_custom_token/reveal', {
+	const denied = await jsonFetch('/ops/mission-control/secrets/payram_webhook_custom_token/reveal', {
 		method: 'POST',
-		body: JSON.stringify({ confirm: 'REVEAL dodo_webhook_custom_token' }),
+		body: JSON.stringify({ confirm: 'REVEAL payram_webhook_custom_token' }),
 	})
 	assert.equal(denied.response.status, 403)
 	assert.equal(denied.data.error.code, 'MC_ADMIN_REQUIRED')
 
 	const adminHeaders = { 'x-betterpptx-mission-control-admin-token': process.env.BETTERPPTX_MISSION_CONTROL_ADMIN_TOKEN }
-	const badConfirm = await jsonFetch('/ops/mission-control/secrets/dodo_webhook_custom_token/reveal', {
+	const badConfirm = await jsonFetch('/ops/mission-control/secrets/payram_webhook_custom_token/reveal', {
 		method: 'POST',
 		headers: adminHeaders,
 		body: JSON.stringify({ confirm: 'WRONG' }),
@@ -62,23 +61,23 @@ try {
 	assert.equal(badConfirm.response.status, 400)
 	assert.equal(badConfirm.data.error.code, 'MC_SECRET_CONFIRMATION_REQUIRED')
 
-	const reveal = await jsonFetch('/ops/mission-control/secrets/dodo_webhook_custom_token/reveal', {
+	const reveal = await jsonFetch('/ops/mission-control/secrets/payram_webhook_custom_token/reveal', {
 		method: 'POST',
 		headers: adminHeaders,
-		body: JSON.stringify({ confirm: 'REVEAL dodo_webhook_custom_token' }),
+		body: JSON.stringify({ confirm: 'REVEAL payram_webhook_custom_token' }),
 	})
 	assert.equal(reveal.response.status, 200)
-	assert.equal(reveal.data.value, process.env.BETTERPPTX_MC_SECRET_DODO_WEBHOOK_CUSTOM_TOKEN)
+	assert.equal(reveal.data.value, process.env.BETTERPPTX_MC_SECRET_PAYRAM_WEBHOOK_CUSTOM_TOKEN)
 
-	const update = await jsonFetch('/ops/mission-control/secrets/dodo_webhook_custom_token/update', {
+	const update = await jsonFetch('/ops/mission-control/secrets/payram_webhook_custom_token/update', {
 		method: 'POST',
 		headers: adminHeaders,
-		body: JSON.stringify({ value: 'route-updated-custom-token-for-mc2', confirm: 'UPDATE dodo_webhook_custom_token' }),
+		body: JSON.stringify({ value: 'route-updated-payram-token-for-mc2', confirm: 'UPDATE payram_webhook_custom_token' }),
 	})
 	assert.equal(update.response.status, 200)
-	assert(!JSON.stringify(update.data).includes('route-updated-custom-token-for-mc2'), 'Update route returned raw secret value.')
+	assert(!JSON.stringify(update.data).includes('route-updated-payram-token-for-mc2'), 'Update route returned raw secret value.')
 
-	const test = await jsonFetch('/ops/mission-control/secrets/dodo_webhook_custom_token/test', {
+	const test = await jsonFetch('/ops/mission-control/secrets/payram_webhook_custom_token/test', {
 		method: 'POST',
 		headers: adminHeaders,
 		body: JSON.stringify({}),

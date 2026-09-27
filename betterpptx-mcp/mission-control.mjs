@@ -3,6 +3,8 @@ import { timingSafeEqual } from 'node:crypto'
 import { BETTERPPTX_BRAND, BETTERPPTX_PRODUCT } from './branding.mjs'
 import { isPublicBlackBoxMode } from './blackbox.mjs'
 import { getTelemetrySnapshot } from './telemetry.mjs'
+import { paymentSurfaceReadiness } from './billing/payment-surfaces.mjs'
+import { buildPaymentLaunchEvidence } from './billing/payment-launch-evidence.mjs'
 
 const ENABLED_VALUES = new Set(['1', 'true', 'yes', 'on'])
 
@@ -156,28 +158,42 @@ function editStateReadiness() {
 	}
 }
 
-function buildGates({ telemetry }) {
+function buildGates({ telemetry, paymentLaunchEvidence }) {
 	const blackBox = isPublicBlackBoxMode()
 	const genericFetchBlocked = process.env.BETTERPPTX_ENABLE_GENERIC_HTTP_FETCH !== '1'
 	const sharedStoresRequired = process.env.BETTERPPTX_REQUIRE_SHARED_STORES === '1'
 	const gcsArtifacts = process.env.BETTERPPTX_ARTIFACT_STORE === 'gcs'
 	const firestoreEntitlements = process.env.BETTERPPTX_ENTITLEMENT_STORE === 'firestore'
 	const firestoreBilling = process.env.BETTERPPTX_BILLING_LEDGER_STORE === 'firestore'
-	const dodoTest = process.env.BETTERPPTX_DODO_ENVIRONMENT === 'test'
+		const billingProvider = String(process.env.BETTERPPTX_BILLING_PROVIDER || '').trim().toLowerCase()
+	const billingProviderReady = billingProvider === 'crypto_credits' || billingProvider === 'payram'
 	const ownerSecretControls = Boolean(String(process.env.BETTERPPTX_MISSION_CONTROL_ADMIN_TOKEN || '').trim())
 	const editState = editStateReadiness()
+	const paymentSurfaces = paymentSurfaceReadiness({ includeRequirements: true })
 	return [
 		{ id: 'private-staging', name: 'Private staging access', status: 'ok', detail: 'Protected before the app by the private operator access layer.' },
 		{ id: 'black-box', name: 'Public black-box contract', status: blackBox ? 'ok' : 'warn', detail: blackBox ? 'Public responses stay product-facing.' : 'Black-box mode is not enabled on this runtime.' },
 		{ id: 'safe-fetch', name: 'Fetch policy', status: genericFetchBlocked ? 'ok' : 'warn', detail: genericFetchBlocked ? 'Generic fetch is blocked; media/image fetch uses safe URL validation.' : 'Generic HTTP fetch is enabled.' },
 		{ id: 'shared-artifacts', name: 'Shared artifact delivery', status: sharedStoresRequired && gcsArtifacts ? 'ok' : 'warn', detail: sharedStoresRequired && gcsArtifacts ? 'Shared artifact store required and active.' : 'Shared artifact enforcement is incomplete.' },
 		{ id: 'entitlements', name: 'Shared entitlements', status: sharedStoresRequired && firestoreEntitlements ? 'ok' : 'warn', detail: sharedStoresRequired && firestoreEntitlements ? 'Entitlement state uses shared storage.' : 'Entitlement state is not fully shared.' },
-		{ id: 'billing-ledger', name: 'Billing ledger', status: firestoreBilling && dodoTest ? 'ok' : 'warn', detail: firestoreBilling && dodoTest ? 'Dodo test-mode ledger is backed by shared storage.' : 'Billing ledger/provider state needs review.' },
+		{ id: 'billing-ledger', name: 'Billing ledger', status: firestoreBilling && billingProviderReady ? 'ok' : 'warn', detail: firestoreBilling && billingProviderReady ? `${billingProvider} billing is backed by shared storage.` : 'Billing ledger/provider state needs review.' },
 		{ id: 'owner-secret-controls', name: 'Owner secret controls', status: ownerSecretControls ? 'ok' : 'warn', detail: ownerSecretControls ? 'MC2 reveal, update, rotate, and test controls are installed behind owner admin auth.' : 'MC2 routes are installed, but the owner admin token is not configured.' },
 		{ id: 'telemetry', name: 'Privacy-safe telemetry', status: 'ok', detail: `${telemetry.toolCalls} tool calls, ${telemetry.downloads} downloads, no raw deck payloads exposed here.` },
 		{ id: 'cross-instance-state', name: 'Cross-instance edit state', status: editState.status, detail: editState.detail },
+		{ id: 'payment-web', name: 'Browser payment surface', status: paymentSurfaces.readiness.webReady ? 'ok' : 'warn', detail: paymentSurfaces.readiness.webReady ? 'Browser wallet, gasless EIP-3009, and direct-transfer recovery are configured.' : `Browser payment is missing: ${paymentSurfaces.readiness.missing.join(', ')}` },
+		{ id: 'payment-app', name: 'App payment surface', status: paymentSurfaces.readiness.appReady ? 'ok' : 'warn', detail: paymentSurfaces.readiness.appReady ? 'Anonymous connector installs can recover through the identity-bound payment page.' : 'App payment recovery is not fully configured.' },
+		{ id: 'payment-agentic', name: 'Agentic payment surface', status: paymentSurfaces.readiness.agenticReady ? 'ok' : 'warn', detail: paymentSurfaces.readiness.agenticReady ? `x402 v2 and native MCP purchase tools are enabled with ${paymentSurfaces.surfaces.agentic.settlement}.` : 'Agentic payment is not fully configured.' },
+		{ id: 'payment-operator-gas', name: 'Operator gas dependency', status: paymentSurfaces.surfaces.agentic.operatorGasFundingRequired ? 'warn' : 'ok', detail: paymentSurfaces.surfaces.agentic.operatorGasFundingRequired ? 'Self-settlement requires the owner-operated relayer to retain Base ETH.' : 'The configured facilitator sponsors settlement gas; no BetterPPTX gas wallet funding is required.' },
+		{ id: 'payment-launch', name: 'Universal payment launch', status: paymentSurfaces.readiness.launchReady ? 'ok' : 'warn', detail: paymentSurfaces.readiness.launchReady ? 'Web, app, and agentic payment gates are all satisfied.' : 'Universal payment launch still has unresolved requirements.' },
+		...(paymentLaunchEvidence?.items || []).map(item => ({
+			id: `payment-proof-${item.id}`,
+			name: item.name,
+			status: item.status,
+			detail: item.detail,
+		})),
+		{ id: 'payment-public-enable-evidence', name: 'Payment public-enable evidence', status: paymentLaunchEvidence?.publicEnableReady ? 'ok' : 'warn', detail: paymentLaunchEvidence?.publicEnableReady ? 'PayRam, OCI, backup, alarms, forwarder custody, and forwarder proof evidence are all recorded.' : 'One or more payment public-enable proof gates are missing.' },
 		{ id: 'public-domain', name: 'Public endpoint and domain', status: 'deferred', detail: 'Wait for deployed staging stress approval before domain/public rollout.' },
-		{ id: 'live-billing', name: 'Live billing switch', status: 'deferred', detail: 'Keep live Dodo product/pricing switch behind owner approval after test-mode validation.' },
+		{ id: 'live-billing', name: 'Live billing switch', status: 'deferred', detail: 'Keep live credit pricing behind cost-matrix completion and owner multiplier approval.' },
 	]
 }
 
@@ -217,9 +233,14 @@ export function buildMissionControlSnapshot({ sessions, visibleTools = [], authM
 	const downloadErrors = stableNumber(telemetry.downloadErrors)
 	const uptimeSeconds = Math.max(0, Math.round((Date.now() - Date.parse(telemetry.startedAt)) / 1000))
 	const billing = telemetry.billing || {}
+	const scannerLastSuccessMs = Date.parse(billing.scannerLastSuccessAt || '')
+	const scannerLagSeconds = Number.isFinite(scannerLastSuccessMs)
+		? Math.max(0, Math.round((Date.now() - scannerLastSuccessMs) / 1000))
+		: null
 	const mcTokenConfigured = Boolean(String(process.env.BETTERPPTX_MISSION_CONTROL_TOKEN || '').trim())
 	const mcAdminTokenConfigured = Boolean(String(process.env.BETTERPPTX_MISSION_CONTROL_ADMIN_TOKEN || '').trim())
 	const editState = editStateReadiness()
+	const paymentLaunchEvidence = buildPaymentLaunchEvidence()
 	return {
 		ok: true,
 		mode: 'MC2_OWNER_SECRET_CONTROLS',
@@ -255,12 +276,23 @@ export function buildMissionControlSnapshot({ sessions, visibleTools = [], authM
 			authActivationFailures: stableNumber(telemetry.auth?.activationFailures),
 			dryRunBillingOps: stableNumber(billing.operations),
 			dryRunEstimatedCredits: stableNumber(billing.estimatedCredits),
+			creditedVolumeCredits: stableNumber(billing.creditedVolumeCredits),
+			reservationFailures: stableNumber(billing.reservationFailures),
+			overrunCredits: stableNumber(billing.overrunCredits),
+			quoteCapReleaseCredits: stableNumber(billing.quoteCapReleaseCredits),
+			unmatchedPayments: stableNumber(billing.unmatchedPayments),
+			scannerRuns: stableNumber(billing.scannerRuns),
+			scannerFailures: stableNumber(billing.scannerFailures),
+			scannerLagSeconds,
+			scannerLastSuccessAt: billing.scannerLastSuccessAt || null,
+			scannerLastFailureAt: billing.scannerLastFailureAt || null,
 		},
 		breakdowns: {
 			topTools: topToolStats(telemetry.byTool),
 			errorCodes: objectEntries(telemetry.byErrorCode),
 			artifactBytes: objectEntries(telemetry.artifactBytes),
 			billingByCategory: objectEntries(billing.byCategory),
+			creditsBySource: objectEntries(billing.creditsBySource),
 		},
 		security: {
 			blackBoxMode: valueStatus(isPublicBlackBoxMode(), isPublicBlackBoxMode() ? 'enabled' : 'disabled'),
@@ -270,7 +302,8 @@ export function buildMissionControlSnapshot({ sessions, visibleTools = [], authM
 			secretOwnerControls: valueStatus(mcAdminTokenConfigured, mcAdminTokenConfigured ? 'owner-admin actions enabled' : 'routes installed; owner admin token missing'),
 			editState: valueStatus(editState.status === 'ok', editState.detail),
 		},
-		gates: buildGates({ telemetry }),
+		paymentLaunchEvidence,
+		gates: buildGates({ telemetry, paymentLaunchEvidence }),
 		decisions: buildDecisions(),
 	}
 }
@@ -320,6 +353,8 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 6px;
     <section class="wide"><h2>Top Tools</h2><div id="topTools"></div></section>
     <section class="wide"><h2>Security</h2><div id="security"></div></section>
     <section class="full"><h2>Owner Secrets</h2><div class="secretbar"><input id="adminToken" type="password" autocomplete="off" placeholder="Owner admin token"><button id="reloadSecrets" type="button">Reload</button></div><div id="ownerSecrets"></div></section>
+    <section class="full"><h2>Billing Operations</h2><div id="billingOps"></div></section>
+    <section class="full"><h2>Payment Health</h2><div id="paymentHealth"></div></section>
     <section class="wide"><h2>Error Codes</h2><div id="errors"></div></section>
     <section class="wide"><h2>Artifact Sizes</h2><div id="sizes"></div></section>
   </div>
@@ -347,6 +382,15 @@ function render(data){
  document.getElementById('errors').innerHTML=table(data.breakdowns.errorCodes,[{label:'Code',value:r=>r.name},{label:'Count',value:r=>r.count}]);
  document.getElementById('sizes').innerHTML=table(data.breakdowns.artifactBytes,[{label:'Bucket',value:r=>r.name},{label:'Count',value:r=>r.count}]);
  document.getElementById('security').innerHTML=Object.entries(data.security).map(([k,v])=>'<div class="secrow"><div class="status '+cls(v.status)+'">'+k+'</div><div>'+v.text+'</div></div>').join('');
+ document.getElementById('billingOps').innerHTML=table([
+  {name:'Scanner lag',value:data.metrics.scannerLagSeconds===null?'no successful scan':(data.metrics.scannerLagSeconds+' seconds')},
+  {name:'Scanner failures',value:data.metrics.scannerFailures},
+  {name:'Unmatched payments',value:data.metrics.unmatchedPayments},
+  {name:'Credited volume',value:data.metrics.creditedVolumeCredits+' credits'},
+  {name:'Reservation failures',value:data.metrics.reservationFailures},
+  {name:'Estimate overruns',value:data.metrics.overrunCredits+' credits'},
+  {name:'Quote-cap releases',value:data.metrics.quoteCapReleaseCredits+' credits'}
+ ],[{label:'Metric',value:r=>r.name},{label:'Current runtime',value:r=>r.value}]);
 }
 function renderSecrets(data){
  const box=document.getElementById('ownerSecrets');
@@ -367,6 +411,25 @@ function renderSecrets(data){
   return '<div class="secretrow"><div><div class="status '+cls(s.status)+'">'+esc(s.status).toUpperCase()+'</div><div class="secretmeta">'+esc(s.kind)+'</div></div><div><b>'+esc(s.displayName)+'</b><br><span class="secretmeta">'+source+' · '+version+' · '+rotated+' · '+esc(s.fingerprint||'no fingerprint')+'</span>'+error+'</div><div class="secret-actions">'+buttons+'</div><div class="secret-output" data-output="'+esc(s.id)+'"></div></div>';
  }).join('');
 }
+function healthRow(status,name,detail){
+ return '<div class="secrow"><div class="status '+cls(status)+'">'+esc(name)+'</div><div>'+esc(detail)+'</div></div>';
+}
+function renderPaymentHealth(data){
+ const box=document.getElementById('paymentHealth');
+ if(!data){box.innerHTML='<div class="empty">No payment health data.</div>';return;}
+ const relayer=data.relayer||{}, lease=data.lease||{}, payram=data.payram||{}, forwarder=data.forwarder||{}, sweeper=data.forwarderSweeper||{}, last=sweeper.lastSweep||{};
+ const rows=[
+  healthRow(data.paymentsReady?'ok':'warn','Payments',data.paymentsReady?'operational':'not ready'),
+  healthRow(relayer.ready?'ok':'warn','x402 relayer',relayer.error?('error '+relayer.error):(relayer.configured?((relayer.addressRedacted||'configured')+' · '+(relayer.balanceEth||'0')+' ETH · '+(relayer.estimatedSettlementsRemaining??'unknown')+' settlements remaining'):'not configured')),
+  healthRow(lease.shared?'ok':'warn','Relayer lease',(lease.provider||'unknown')+' · '+(lease.state||lease.error||'unknown')),
+  healthRow(payram.ready?'ok':(payram.enabled?'warn':'info'),'PayRam',payram.enabled?(payram.ready?'ready':('missing '+((payram.missing||[]).join(', ')||payram.error||'configuration'))):'disabled'),
+  healthRow('info','PayRam hot wallet gas','off-runtime by design; use deploy/gcp/show-betterpptx-gas-wallet-status.ps1 for owner-only address and Base ETH balance checks'),
+  healthRow(forwarder.configured?'ok':(forwarder.enabled?'warn':'info'),'Raw-send forwarder',forwarder.enabled?(forwarder.configured?'configured':('missing '+((forwarder.missing||[]).join(', ')||forwarder.error||'configuration'))):'disabled'),
+  healthRow(sweeper.ready?'ok':(sweeper.enabled?'warn':'info'),'Forwarder sweeper',sweeper.enabled?(sweeper.error?('error '+sweeper.error):((sweeper.addressRedacted||'configured')+' · '+(sweeper.balanceEth||'0')+' ETH · low='+Boolean(sweeper.lowBalance)+' · batches left '+(sweeper.estimatedSweepBatchesRemaining??'unknown'))):'disabled'),
+  healthRow(last.lastFailed?'warn':'info','Last forwarder sweep','runs '+(last.runs||0)+' · last ok '+(last.lastSuccessAt||'never')+' · batches '+(last.lastBatches||0)+' · submitted '+(last.lastSubmitted||0)+' · failed '+(last.lastFailed||0)+' · queued '+(last.lastTokenUsdcQueued||'0')+' USDC · stalled estimate '+(last.stalledFloatUsdcEstimate||'0')+' USDC')
+ ];
+ box.innerHTML=rows.join('');
+}
 function secretHeaders(){
  const token=document.getElementById('adminToken').value||'';
  const headers={'Content-Type':'application/json'};
@@ -384,7 +447,12 @@ async function loadSecrets(){
  if(!r.ok)throw new Error('Owner secrets failed: '+r.status);
  renderSecrets(await r.json());
 }
-async function refresh(){const r=await fetch('/ops/mission-control/data',{cache:'no-store'});if(!r.ok)throw new Error('Mission Control data failed: '+r.status);render(await r.json());await loadSecrets().catch(e=>{document.getElementById('ownerSecrets').innerHTML='<div class="bad">'+esc(e.message)+'</div>'})}
+async function loadPaymentHealth(){
+ const r=await fetch('/ops/mission-control/payment-health',{cache:'no-store'});
+ if(!r.ok)throw new Error('Payment health failed: '+r.status);
+ renderPaymentHealth(await r.json());
+}
+async function refresh(){const r=await fetch('/ops/mission-control/data',{cache:'no-store'});if(!r.ok)throw new Error('Mission Control data failed: '+r.status);render(await r.json());await loadSecrets().catch(e=>{document.getElementById('ownerSecrets').innerHTML='<div class="bad">'+esc(e.message)+'</div>'});await loadPaymentHealth().catch(e=>{document.getElementById('paymentHealth').innerHTML='<div class="bad">'+esc(e.message)+'</div>'})}
 document.getElementById('refresh').addEventListener('click',refresh);
 document.getElementById('reloadSecrets').addEventListener('click',()=>loadSecrets().catch(e=>{document.getElementById('ownerSecrets').innerHTML='<div class="bad">'+esc(e.message)+'</div>'}));
 document.getElementById('ownerSecrets').addEventListener('click',async e=>{

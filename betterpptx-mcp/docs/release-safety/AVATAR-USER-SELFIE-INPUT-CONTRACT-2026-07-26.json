@@ -1,0 +1,24 @@
+{
+  "schemaVersion": "betterpptx.avatar.user-selfie-input-contract.v1",
+  "scope": "PowerPoint-native narration talking head",
+  "talkingHead": {
+    "selfieRequiredPerGeneration": true,
+    "inputKind": "user-uploaded-image-file",
+    "appearanceContinuity": "caller-supplies-the-same-image-file-in-each-new-generation-request",
+    "avatarState": "no-persistent-avatar-or-persona",
+    "defaultPersona": false,
+    "missingSelfieBehavior": "voice-only narration",
+    "silentSubstitution": false
+  },
+  "separation": {
+    "bodyMultiviewInputs": "Meshy -> Mixamo native 3D branch",
+    "bodyViewFallbackToTalkingHead": false,
+    "originalPixelsRemainAuthoritative": true,
+    "faceProcessing": "crop/pad/resize only before LP/MT"
+  },
+  "reviewFixture": {
+    "isCustomerIdentity": false,
+    "isDefaultPersona": false,
+    "purpose": "engineering input-quality and animation validation"
+  }
+}

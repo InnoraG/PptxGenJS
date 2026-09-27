@@ -1,0 +1,58 @@
+{
+  "schema": "betterpptx.g1.powerpoint-playback-evidence.v1",
+  "measuredAt": "2026-08-03T18:15:24Z",
+  "application": "Microsoft PowerPoint COM",
+  "probe": "verify-recordstudio-playback-com.ps1",
+  "visiblePresenterFrame": "COM exposed exactly one playable video shape per artifact at the accepted 162pt window; lifecycle evidence is not being used as a proxy for visible media.",
+  "files": [
+    {
+      "path": "betterpptx-mcp/outputs/g1-regenerated-20260803/avatar-delivery-square-sanitized-mcp-regenerated-20260803.pptx",
+      "status": "PASS",
+      "visiblePresenterMedia": true,
+      "presenterShape": { "mediaType": 3, "leftPt": 791.4959716796875, "topPt": 371.5199890136719, "widthPt": 162, "heightPt": 162, "playOnEntry": -1 },
+      "firstSlideCount": 1,
+      "secondSlideCount": 1,
+      "runningState": 1,
+      "pausedState": 2,
+      "resumedState": 1,
+      "runningPosition": 1,
+      "pausedPosition": 1,
+      "resumedPosition": 1,
+      "replayState": 1,
+      "replayPosition": 1
+    },
+    {
+      "path": "betterpptx-mcp/outputs/g1-regenerated-20260803/avatar-delivery-sanitized-mcp-regenerated-20260803.pptx",
+      "status": "PASS",
+      "visiblePresenterMedia": true,
+      "presenterShape": { "mediaType": 3, "leftPt": 791.4959716796875, "topPt": 371.5199890136719, "widthPt": 162, "heightPt": 162, "playOnEntry": -1 },
+      "firstSlideCount": 1,
+      "secondSlideCount": 1,
+      "runningState": 1,
+      "pausedState": 2,
+      "resumedState": 1,
+      "runningPosition": 1,
+      "pausedPosition": 1,
+      "resumedPosition": 1,
+      "replayState": 1,
+      "replayPosition": 1
+    },
+    {
+      "path": "betterpptx-mcp/outputs/g1-regenerated-20260803/avatar-delivery-narration-sanitized-mcp-regenerated-20260803.pptx",
+      "status": "PASS",
+      "visiblePresenterMedia": true,
+      "presenterShape": { "mediaType": 3, "leftPt": 791.4959716796875, "topPt": 371.5199890136719, "widthPt": 162, "heightPt": 162, "playOnEntry": -1 },
+      "firstSlideCount": 1,
+      "secondSlideCount": 1,
+      "runningState": 1,
+      "pausedState": 2,
+      "resumedState": 1,
+      "runningPosition": 1,
+      "pausedPosition": 1,
+      "resumedPosition": 1,
+      "replayState": 1,
+      "replayPosition": 1
+    }
+  ],
+  "pass": true
+}

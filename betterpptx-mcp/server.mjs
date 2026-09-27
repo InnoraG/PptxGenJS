@@ -1,124 +1,39 @@
+import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
+import { Server } from "@modelcontextprotocol/server";
+
 // betterpptx MCP server (stdio transport)
-
-import { Server } from '@modelcontextprotocol/sdk/server/index.js'
-import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
-import {
-	CallToolRequestSchema,
-	ListToolsRequestSchema,
-	ListResourcesRequestSchema,
-} from '@modelcontextprotocol/sdk/types.js'
-
-import { TOOLS } from './tools.mjs'
-import { callBetterPptxTool } from './engine.mjs'
+import { TOOLS, canonicalToolName, normalizeToolNameProfile, rewriteToolNamesForProfile } from './tools.mjs'
+import { publicServerVersion, publicRuntimeManifest } from './public-manifest.mjs'
+import { createMcpToolDispatcher } from './engine.mjs'
 import { BETTERPPTX_PRODUCT, BETTERPPTX_SERVER_NAME } from './branding.mjs'
 import { createTraceId, getLoggerInfo, logEvent } from './logger.mjs'
+import { diagnosticRequestId, traceToolList, traceToolCall } from './diagnostic-trace.mjs'
 import { isPublicBlackBoxMode, publicToolList } from './blackbox.mjs'
+import { MONETIZED_MCP_PROTOCOL_TOOLS } from './billing/monetized-mcp-adapter.mjs'
+import { resolveStdioSessionId } from './auth/stdio-session-identity.mjs'
+import { withSavedPresentationResourceLink } from './delivery/public-file-result.mjs'
+
+export { resolveStdioSessionId }
 
 const SERVER_INFO = {
 	name: BETTERPPTX_SERVER_NAME,
-	version: process.env.BETTERPPTX_PUBLIC_VERSION || 'current',
+	version: publicServerVersion(),
 }
 
-const INSTRUCTIONS = [
-	`${BETTERPPTX_PRODUCT} is a self-contained PPTX generation and editing engine.`,
-	'Use its tools directly for presentation creation, editing, inspection,',
-	'validation, media, charts, tables, SmartArt-style diagrams, animations, transitions, WordArt, Text3D,',
-	'GLB 3D models, motion paths, and raw OOXML passthrough.',
-	'No external PPTX authoring library is required by the AI client.',
-	'',
-	'Typical flow:',
-	'  1) betterpptx.deck.new           -> get deckId',
-	'  2) betterpptx.slide.add          -> append slide (background, transition)',
-	'  3) betterpptx.slide.add_text /add_shape /add_smartart /add_chart /add_image /add_model3d /add_table',
-	'     ... each takes (deckId, slideIndex, ...). Use the full options object;',
-	'     fills can be gradient ({ type:"gradient", gradientStops:[...] }); text',
-	'     can carry wordArt:{ transform:"textArchUp" } and text3D:{ bevel,extrusion,material,lightRig,rotationX,rotationY }.',
-	'     Call betterpptx.table.recommend before add_table when the table style is not specified; it returns PowerPoint',
-	'     Table Design flags plus adapted cell styling recipes.',
-	'     For picture SmartArt layouts, provide an image on every node; the endpoint rejects blank picture placeholders.',
-	'  4) Use gradients, transitions, and animations as normal deck defaults. Ask the AI client/user for visual and motion',
-	'     preferences when they are missing, or choose polished safe defaults.',
-	'  5) betterpptx.deck.validate      -> sanity check before save',
-	'  6) betterpptx.deck.save          -> write .pptx to disk',
-	'',
-	'Call betterpptx.help.capabilities for a feature catalog and betterpptx.status to verify runtime freshness.',
-	'',
-	'Editing principle: anything structurally generated should be mutable. For existing decks, call',
-	'betterpptx.deck.open_existing, then deck.editability_report and slide.inspect_shapes before mutation.',
-	'Read each object editHandle/stableSelectors/editability.tier/tools/operations/recreateWith before choosing a route.',
-	'Editing should improve the deck the user already has. Reuse existing text boxes, images, charts, shapes,',
-	'and layout relationships first; change color, contrast, typography, spacing, z-order, animation, transition,',
-	'and readable text before adding new objects. Do not add banners, badges, 3D, WordArt, Text3D, SmartArt,',
-	'or decorative panels merely to prove feature coverage.',
-	'Prefer narrow tools over broad deck-wide edits: slide.update for one slide, slide.set_transition for one transition,',
-	'slide.update_shape / update_table / update_chart / update_smartart / update_equation / update_media for semantic',
-	'object edits, and slide.delete_shapes / reorder_shape for object lifecycle and z-order. Passthrough objects are',
-	'wrapper-editable or preserve-only unless a tool reports promotable; explain the promotion/recreate path instead',
-	'of silently failing or patching risky raw XML.',
+export const INSTRUCTIONS = [
+	`${BETTERPPTX_PRODUCT} creates native-editable PowerPoint from AI-authored JSON specifications.`,
+	'Start with betterpptx.help.capabilities using the user brief; then open relevant betterpptx.authoring.catalog controls or lessons. Follow the returned, schema-valid next calls.',
+	'The AI owns story, exact geometry, style, motion, and creative acceptance; Director is optional. Do not make every available effect mandatory.',
+	'Use betterpptx.deck.generate_from_spec for dry-run, authorized commit, then deterministic validation and save. Inspect existing decks before specifying edits.',
+	'When BetterPPTX is requested, only its public tools and current schemas define the artifact; a host slide skill or local generator does not.',
+	'Preserve native carriers; never silently downgrade. Paid work and identity media require explicit authorization. Production save does not require hosted PowerPoint rendering.',
 ].join('\n')
 
-const PUBLIC_INSTRUCTIONS = [
-	`${BETTERPPTX_PRODUCT} creates, edits, narrates, animates, validates, and exports polished PowerPoint (.pptx) presentations.`,
-	'Use the available tools to help the user finish a real presentation, then return the saved .pptx download link.',
-	'Refer to generated assets by returned download links or opaque handles. Do not expose private implementation details',
-	'or private assets.',
-	'',
-	'First calls:',
-	'  1) betterpptx.auth.status to learn the current free/premium/credit state.',
-	'  2) betterpptx.help.capabilities with the user intent when you need the recommended call sequence.',
-	'',
-	'Free/premium behavior:',
-	'  - slides 1 and 2 can use premium preview features.',
-	'  - the premium-feature gate starts at slide 3.',
-	'  - slide 2 should use organized Morph-by-object when it is useful for the story.',
-	'  - if a tool returns REQUIRES_UPGRADE, do not silently skip the requested feature.',
-	'    Explain the gate, keep the valid work so far, offer activation through',
-	'    betterpptx.auth.activate_key, and offer the best free-tier fallback.',
-	'',
-	'Uploaded/existing decks:',
-	'  - use betterpptx.deck.open_uploaded with PPTX bytes from the AI client.',
-	'  - inspect available objects with public-safe tools before editing.',
-	'  - preserve useful layout relationships and reuse existing text boxes, images, charts, shapes,',
-	'    and slide structure before adding objects.',
-	'  - improve readability through contrast, concise wording, hierarchy, typography, spacing,',
-	'    color, and image treatment.',
-	'  - do not add banners, badges, 3D, WordArt, Text3D, SmartArt, charts, or decorative panels',
-	'    merely to prove feature coverage.',
-	'',
-	'TREAT EVERY DECK AS A PRODUCT EXPERIENCE, NOT A PLUMBING TEST. Unless the user explicitly asks for a minimal repro,',
-	'never ship blank slides with a single text box or generic "slide 1/2/3" filler. Aim for a credible, designed demo.',
-	'',
-	'Workflow:',
-	'  1) Story first — fix the audience, promise, proof, and payoff, and ONE spoken message per slide, before building.',
-	'  2) For new decks, betterpptx.deck.new, then betterpptx.slide.add per slide with a deliberate background.',
-	'     For existing/uploaded decks, open the deck, list/inspect shapes, and preserve the deck structure unless the',
-	'     user asked for a redesign.',
-	'  3) Design the slide system with slide.add_text / add_shape / add_smartart / add_chart / add_table / add_image /',
-	'     add_model3d / add_freeform:',
-	'       - a deliberate palette (neutral surfaces + two or more accents); gradients and shadows as baseline styling,',
-	'         not premium extras; clear type hierarchy; whitespace; supporting panels, dividers, charts, and icons only',
-	'         when they serve the content.',
-	'       - when editing an existing deck, prefer update_shape/update_chart/update_table/update_media and animation',
-	'         of existing objects over adding new decorative elements.',
-	'       - give every object that will animate a stable name.',
-	'       - when using picture-based diagram layouts, supply real image/data URL/image URL content for every node; if images',
-	'         are unavailable, ask for them or choose a non-picture SmartArt layout.',
-	'       - when using tables, call betterpptx.table.recommend and apply the chosen preset optionDefaults plus',
-	'         header/body/banded/total/first-column/last-column cell recipes instead of shipping plain grids.',
-	'       - use rich media only when it strengthens the story.',
-	'  4) Motion + narration — transitions and animations are part of normal authoring: apply slide.animate_shapes and',
-	'     deck.set_transitions_all, then slide.add_narration so each cue reveals the exact object the voice discusses;',
-	'     keep captions/lower-thirds integrated and non-overlapping.',
-	'  5) Validate before saving — betterpptx.deck.validate (package), betterpptx.deck.validate_design (use',
-	'     profile "narrated-showcase" when offered), and betterpptx.deck.validate_narration; fix flatness, overlaps,',
-	'     and caption collisions before delivery.',
-	'  6) betterpptx.deck.save — then hand the user the returned downloadUrl so they can download the finished .pptx.',
-	'',
-	'Call betterpptx.help.capabilities for compact workflow guidance and betterpptx.deck.summary to review a deck.',
-	'For public chat uploads, call betterpptx.deck.open_uploaded with PPTX bytes, then slide.list_shapes to get',
-	'objectName/index selectors before editing. Generated or structurally imported objects should be edited with',
-	'their narrow semantic tools. If a requested deep edit is unavailable, explain the recreate path rather than',
-	'patching unsupported presentation markup.',
+export const PUBLIC_INSTRUCTIONS = [
+	INSTRUCTIONS,
+	'Use verified account sign-in for private resources. Check billing/allowance before paid work: eligible accounts include three downloadable decks per rolling 30 days; identity media has separate consent and allowance gates.',
+	'Client-generated or user-supplied images may be uploaded; generic server image generation is retired. Keep valid drafts on recoverable errors.',
+	'Use opaque handles and authorized download links only. Never reveal private assets or internals, and never claim individual visual/playback inspection from renderer-free production checks.',
 ].join('\n')
 
 function sdkToolFromDef(def) {
@@ -133,14 +48,66 @@ function sdkToolFromDef(def) {
 	// categorise read-only vs mutating tools.
 	if (def.outputSchema) tool.outputSchema = def.outputSchema
 	if (def.annotations) tool.annotations = def.annotations
+	if (def._meta) tool._meta = def._meta
+	if (def.securitySchemes) tool.securitySchemes = def.securitySchemes
 	return tool
 }
 
-function asResultContent(payload, isError = false) {
+function asResultContent(payload, isError = false, compactText = false) {
 	return {
-		content: [{ type: 'text', text: JSON.stringify(payload, null, 2) }],
+		content: [{ type: 'text', text: compactText ? JSON.stringify(payload) : JSON.stringify(payload, null, 2) }],
 		structuredContent: payload,
 		isError,
+	}
+}
+
+function asArtifactReadResultContent(payload) {
+	if (payload?.ok !== true || !payload.data?.dataBase64) return asResultContent(payload, false, true)
+	const { dataBase64, ...metadata } = payload.data
+	if (metadata.mode === 'resource') return {
+		structuredContent: { ok: true, data: metadata },
+		content: [
+			{ type: 'text', text: JSON.stringify({ ok: true, data: metadata }) },
+			{ type: 'resource', resource: {
+				uri: `betterpptx://saved/${encodeURIComponent(metadata.operationId)}/${encodeURIComponent(metadata.fileName)}`,
+				mimeType: metadata.mimeType,
+				blob: dataBase64,
+			} },
+		],
+		isError: false,
+	}
+	return {
+		structuredContent: { ok: true, data: metadata },
+		content: [{ type: 'text', text: JSON.stringify({ ok: true, data: { ...metadata, dataBase64 } }) }],
+		isError: false,
+	}
+}
+
+function asProtocolResultContent(result, compactText = false) {
+	const payload = result?.ok === true
+		? result.data
+		: {
+			code: String(result?.error?.code || 'PURCHASE_FAILED'),
+			message: String(result?.error?.message || 'The purchase request failed.'),
+			retryable: Boolean(result?.error?.retry_safe || result?.error?.recoverable),
+		}
+	return {
+		content: [{ type: 'text', text: compactText ? JSON.stringify(payload) : JSON.stringify(payload, null, 2) }],
+		isError: result?.ok !== true,
+	}
+}
+
+function asExactStructuredResultContent(result, compactText = false) {
+	const payload = result?.ok === true
+		? result.data
+		: {
+			code: String(result?.error?.code || 'TOOL_ERROR'),
+			message: String(result?.error?.message || 'The request failed.'),
+		}
+	return {
+		content: [{ type: 'text', text: compactText ? JSON.stringify(payload) : JSON.stringify(payload, null, 2) }],
+		structuredContent: payload,
+		isError: result?.ok !== true,
 	}
 }
 
@@ -159,41 +126,87 @@ async function withStdoutRedirected(fn) {
 
 export function createBetterPptxMcpServer(context = {}) {
 	const blackBox = context.blackBox ?? isPublicBlackBoxMode()
+	const toolNameProfile = normalizeToolNameProfile(context.toolNameProfile)
 	const logContext = {
 		sessionId: context.sessionId || null,
 		clientInfo: context.clientInfo || null,
 		blackBox,
+		toolNameProfile,
 	}
+	const toolDispatcher = createMcpToolDispatcher({
+		sessionId: context.sessionId || 'stdio-default',
+		clientInfo: context.clientInfo || null,
+		blackBox,
+		installHash: context.installHash || null,
+		resourceIdentityHash: context.resourceIdentityHash || null,
+		quotaIdentityHash: context.quotaIdentityHash || null,
+		authenticated: context.authenticated === true,
+		authenticationBasis: context.authenticationBasis || null,
+		installState: context.installState || null,
+	})
 	const server = new Server(SERVER_INFO, {
-		capabilities: { tools: { listChanged: false }, resources: { subscribe: false, listChanged: false } },
-		instructions: blackBox ? PUBLIC_INSTRUCTIONS : INSTRUCTIONS,
+		capabilities: { tools: { listChanged: true }, resources: { subscribe: false, listChanged: false } },
+		instructions: rewriteToolNamesForProfile(blackBox ? PUBLIC_INSTRUCTIONS : INSTRUCTIONS, toolNameProfile),
 	})
 
-	server.setRequestHandler(ListToolsRequestSchema, async () => {
+	server.setRequestHandler('tools/list', async () => {
 		const requestId = createTraceId('mcp')
-		const sourceTools = blackBox ? publicToolList(TOOLS) : TOOLS
+		// publicToolList enforces the json-spec-only surface in every mode (it filters
+		// primitives whenever black-box OR jsonSpecOnlyMode is active, which is the
+		// default), so maintainer stdio sessions never see primitive authoring tools either.
+		const sourceTools = publicToolList(TOOLS, { toolNameProfile })
 		const tools = sourceTools.map(sdkToolFromDef)
+		traceToolList({ requestId: diagnosticRequestId(requestId), transport: 'mcp-sdk', tools, manifest: publicRuntimeManifest({ toolNameProfile }), profile: toolNameProfile })
 		logEvent('mcp.request.tools_list', { ...logContext, requestId })
 		logEvent('mcp.response.tools_list', { ...logContext, requestId, toolCount: tools.length, tools })
 		return { tools }
 	})
 
-	server.setRequestHandler(CallToolRequestSchema, async req => {
+	server.setRequestHandler('tools/call', async req => {
 		const requestId = createTraceId('mcp')
 		const name = req.params.name
 		const args = req.params.arguments || {}
-		logEvent('mcp.request.tools_call', { ...logContext, requestId, name, args })
-		const result = await withStdoutRedirected(() => callBetterPptxTool(name, args, {
-			sessionId: context.sessionId || 'stdio-default',
-			clientInfo: context.clientInfo || null,
-			blackBox,
-		}))
-		const response = asResultContent(result, !result.ok)
-		logEvent('mcp.response.tools_call', { ...logContext, requestId, name, response })
-		return response
+		const callStartedAt = Date.now()
+		try {
+			logEvent('mcp.request.tools_call', { ...logContext, requestId, name, args })
+			const result = await withStdoutRedirected(() => toolDispatcher.call(name, args))
+			const visibleResult = rewriteToolNamesForProfile(result, toolNameProfile) || {
+				ok: false,
+				error: { code: 'TOOL_ERROR', message: 'The presentation tool returned no result.', retryable: true },
+			}
+			if (visibleResult?.ok === false && visibleResult.error && typeof visibleResult.error === 'object') {
+				visibleResult.error.requestId ||= requestId
+			}
+			// Application {ok:false} envelopes must not set MCP isError. ChatGPT treats
+			// isError as a connector failure and can hide the whole tool namespace.
+			const canonicalName = canonicalToolName(name)
+			const response = canonicalName === 'betterpptx.auth.get_profile'
+				? asExactStructuredResultContent(visibleResult, blackBox)
+				: canonicalName === 'betterpptx.operation.read_file'
+				? asArtifactReadResultContent(visibleResult)
+				: MONETIZED_MCP_PROTOCOL_TOOLS.has(canonicalName)
+				? asProtocolResultContent(visibleResult, blackBox)
+				: asResultContent(visibleResult, false, blackBox)
+			logEvent('mcp.response.tools_call', { ...logContext, requestId, name, response })
+			traceToolCall({ requestId: diagnosticRequestId(requestId), transport: 'mcp-sdk', name, outcome: visibleResult?.ok === false ? 'rejected' : 'ok', errorCode: visibleResult?.ok === false ? visibleResult?.error?.code : null, durationMs: Date.now() - callStartedAt })
+			return withSavedPresentationResourceLink(response, visibleResult)
+		} catch (err) {
+			const payload = {
+				ok: false,
+				error: {
+					code: 'TOOL_ERROR',
+					message: 'The presentation tool call failed.',
+					requestId,
+					retryable: true,
+				},
+			}
+			logEvent('mcp.response.tools_call', { ...logContext, requestId, name, failed: true, error: String(err?.message || err) })
+			traceToolCall({ requestId: diagnosticRequestId(requestId), transport: 'mcp-sdk', name, outcome: 'failed', errorCode: 'TOOL_ERROR', durationMs: Date.now() - callStartedAt })
+			return asResultContent(payload, false, blackBox)
+		}
 	})
 
-	server.setRequestHandler(ListResourcesRequestSchema, async () => {
+	server.setRequestHandler('resources/list', async () => {
 		const requestId = createTraceId('mcp')
 		const response = { resources: [] }
 		logEvent('mcp.request.resources_list', { ...logContext, requestId })
@@ -205,16 +218,43 @@ export function createBetterPptxMcpServer(context = {}) {
 }
 
 export async function runBetterPptxMcpStdio() {
-	const server = createBetterPptxMcpServer()
-	const transport = new StdioServerTransport()
+	// Safe-by-default, mirroring the HTTP entry: an stdio connector must not expose
+	// maintainer internals (local paths, pids, git, full primitive surface) to an
+	// untrusted client. Default to public black-box unless the operator explicitly
+	// opts into local-maintainer mode.
+	if (process.env.BETTERPPTX_PUBLIC_BLACK_BOX === undefined && process.env.BETTERPPTX_BLACK_BOX === undefined) {
+		process.env.BETTERPPTX_PUBLIC_BLACK_BOX = process.env.BETTERPPTX_LOCAL_MAINTAINER === '1' ? '0' : '1'
+	}
+	// A stdio process is itself the server-issued resource boundary.  The
+	// launcher may provide a trusted per-process identity for deterministic
+	// development runs; otherwise create one here.  Never fall back to the
+	// deliberately unbound stdio-default identity for resource-bearing calls.
+	const server = createBetterPptxMcpServer({ sessionId: resolveStdioSessionId() })
+	// Uploaded PPTX bytes travel through one newline-delimited JSON-RPC request.
+	// The base64 envelope is ~4/3 the binary size, so the SDK's default 10 MiB
+	// line buffer closed the session before deck.open_uploaded could validate a
+	// perfectly legal upload under the engine's 25 MiB binary limit. Keep the
+	// transport ceiling derived from that public upload ceiling and leave a
+	// bounded headroom margin for the JSON-RPC envelope.
+	const configuredUploadBytes = Number(process.env.BETTERPPTX_MAX_UPLOAD_BYTES)
+	const maxUploadBytes = Number.isFinite(configuredUploadBytes) && configuredUploadBytes > 0
+		? configuredUploadBytes
+		: 25 * 1024 * 1024
+	const transportMaxBufferBytes = Math.max(
+		40 * 1024 * 1024,
+		Math.ceil(maxUploadBytes * 4 / 3) + 1024 * 1024,
+	)
+	const transport = new StdioServerTransport(undefined, undefined, { maxBufferSize: transportMaxBufferBytes })
 	await server.connect(transport)
-	process.stderr.write(`[betterpptx] MCP server ready (stdio, ${TOOLS.length} tools).\n`)
+	const advertisedToolCount = publicToolList(TOOLS).length
+	process.stderr.write(`[betterpptx] MCP server ready (stdio, ${advertisedToolCount} tools).\n`)
 	const logger = getLoggerInfo()
 	if (logger.enabled) process.stderr.write(`[betterpptx] traffic log: ${logger.file}\n`)
-	logEvent('server.stdio.ready', { toolCount: TOOLS.length, logger })
+	logEvent('server.stdio.ready', { toolCount: advertisedToolCount, logger })
 }
 
-if (import.meta.url === `file://${process.argv[1].replace(/\\/g, '/')}` || process.argv[1].endsWith('server.mjs')) {
+const mainArg = process.argv[1] || ''
+if (mainArg && (import.meta.url === `file://${mainArg.replace(/\\/g, '/')}` || mainArg.endsWith('server.mjs'))) {
 	runBetterPptxMcpStdio().catch(err => {
 		process.stderr.write(`[betterpptx] fatal: ${err && err.stack || err}\n`)
 		process.exit(1)

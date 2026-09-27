@@ -1,0 +1,20 @@
+{
+  "canonicalSkeletonVersion": "2",
+  "clipNames": [
+    "00_look_away",
+    "01_dismissing",
+    "02_weight_shift",
+    "03_sarcastic_nod",
+    "04_shake_no",
+    "05_nod_yes",
+    "06_cocky",
+    "07_annoyed_shake",
+    "08_hard_nod",
+    "09_angry",
+    "10_happy_hand",
+    "11_acknowledging",
+    "12_lengthy_nod",
+    "13_thoughtful_shake",
+    "14_relieved_sigh"
+  ]
+}

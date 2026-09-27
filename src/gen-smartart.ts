@@ -2,15 +2,27 @@
  * PptxGenJS: Native PowerPoint SmartArt generation
  */
 
-import { ISlideObject, NativePackagePart, NativeSmartArtInfo, SmartArtNode, SmartArtProps } from './core-interfaces'
+import { ISlideObject, NativePackagePart, NativeSmartArtInfo, SmartArtNode, SmartArtNodeSemanticRole, SmartArtProps } from './core-interfaces'
 import { encodeXmlEntities, getUuid } from './gen-utils'
+import { genXmlCNvPr } from './gen-accessibility'
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 import {
 	SMARTART_COLOR_STYLE_DEFINITIONS,
-	SMARTART_LAYOUT_DEFINITIONS,
+	SMARTART_LAYOUT_DEFINITIONS as SMARTART_FROZEN_LAYOUT_DEFINITIONS,
 	SMARTART_QUICK_STYLE_DEFINITIONS,
 	SmartArtCatalogEntry,
 } from './smartart-reference'
+import { SMARTART_CURRENT_OFFICE_LAYOUT_DEFINITIONS } from './smartart-current-office-reference'
+
+// Keep the historical frozen corpus immutable while extending the executable
+// engine catalog with the additional layouts exposed by the current Office
+// build.  Re-indexing is deliberate: callers receive one deterministic
+// catalog, and duplicate IDs can never shadow an earlier reference-backed row.
+export const SMARTART_LAYOUT_DEFINITIONS: SmartArtCatalogEntry[] = [
+	...SMARTART_FROZEN_LAYOUT_DEFINITIONS,
+	...SMARTART_CURRENT_OFFICE_LAYOUT_DEFINITIONS,
+].filter((entry, index, rows) => rows.findIndex(candidate => candidate.id === entry.id) === index)
+	.map((entry, index) => ({ ...entry, index: index + 1 }))
 
 export const SMARTART_REL_TYPES = {
 	data: 'http://schemas.openxmlformats.org/officeDocument/2006/relationships/diagramData',
@@ -69,6 +81,8 @@ type EquationXmlContext = {
 
 type NativeNode = {
 	text: string
+	role?: SmartArtNodeSemanticRole
+	textColor?: string
 	imageSource?: string
 	image?: NativeSmartArtImage
 	layoutPresIds?: Record<string, string>
@@ -113,6 +127,13 @@ type PictureLayoutModel = {
 	entries: PictureLayoutEntry[]
 }
 
+type SiblingTransitionNumbering = {
+	enabled: boolean
+	minDigits: number
+}
+
+const SIBLING_TRANSITION_NUMBERING_CACHE = new Map<string, SiblingTransitionNumbering>()
+
 function guid(): string {
 	return `{${getUuid('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx').toUpperCase()}}`
 }
@@ -125,25 +146,29 @@ function catalogKey(value: unknown): string {
 	return out
 }
 
-function findCatalogEntry(entries: SmartArtCatalogEntry[], requested: unknown, fallbackId: string): SmartArtCatalogEntry {
+function findCatalogEntry(entries: SmartArtCatalogEntry[], requested: unknown, fallbackId: string, allowFallback = false): SmartArtCatalogEntry {
 	const fallback = entries.find(entry => entry.id === fallbackId) || entries[0]
 	if (!requested) return fallback
 	const raw = String(requested)
 	const key = catalogKey(raw)
-	return entries.find(entry =>
+	const match = entries.find(entry =>
 		entry.id === raw ||
 		catalogKey(entry.id) === key ||
 		catalogKey(entry.name) === key ||
 		catalogKey(entry.category) === key
-	) || fallback
+	)
+	if (match) return match
+	if (allowFallback) return fallback
+	throw new Error(`SMARTART_PRESET_NOT_FOUND: native SmartArt preset "${raw}" is not in the PowerPoint catalog. Use betterpptx.smartart.catalog or set presetFallback:"default" explicitly.`)
 }
 
 function resolveLayout(opt: SmartArtProps): SmartArtCatalogEntry {
 	const requested = opt.layoutId || opt.layoutName || opt.layout || BASIC_BLOCK_LIST_LAYOUT_ID
 	const key = catalogKey(requested)
 	const defaultByCategory = DEFAULT_LAYOUT_BY_CATEGORY[key]
-	if (defaultByCategory) return findCatalogEntry(SMARTART_LAYOUT_DEFINITIONS, defaultByCategory, BASIC_BLOCK_LIST_LAYOUT_ID)
-	const direct = findCatalogEntry(SMARTART_LAYOUT_DEFINITIONS, requested, BASIC_BLOCK_LIST_LAYOUT_ID)
+	const allowFallback = opt.presetFallback === 'default'
+	if (defaultByCategory) return findCatalogEntry(SMARTART_LAYOUT_DEFINITIONS, defaultByCategory, BASIC_BLOCK_LIST_LAYOUT_ID, allowFallback)
+	const direct = findCatalogEntry(SMARTART_LAYOUT_DEFINITIONS, requested, BASIC_BLOCK_LIST_LAYOUT_ID, allowFallback)
 	if (direct.id === BASIC_BLOCK_LIST_LAYOUT_ID && requested && !['basicblocklist', 'basicblock', 'blocklist', 'list', 'default'].includes(key) && key !== catalogKey(BASIC_BLOCK_LIST_LAYOUT_ID)) {
 		const categoryMatch = SMARTART_LAYOUT_DEFINITIONS.find(entry => catalogKey(entry.category) === key)
 		if (categoryMatch) return categoryMatch
@@ -154,19 +179,21 @@ function resolveLayout(opt: SmartArtProps): SmartArtCatalogEntry {
 function resolveQuickStyle(opt: SmartArtProps): SmartArtCatalogEntry {
 	const requested = opt.quickStyleId || opt.quickStyleName
 	const key = catalogKey(requested || '')
+	const allowFallback = opt.presetFallback === 'default'
 	if (!requested || ['best', 'default', 'premium', 'polished', '3d'].includes(key)) {
 		return findCatalogEntry(SMARTART_QUICK_STYLE_DEFINITIONS, DEFAULT_NATIVE_QUICK_STYLE_ID, DEFAULT_NATIVE_QUICK_STYLE_ID)
 	}
-	return findCatalogEntry(SMARTART_QUICK_STYLE_DEFINITIONS, requested, DEFAULT_NATIVE_QUICK_STYLE_ID)
+	return findCatalogEntry(SMARTART_QUICK_STYLE_DEFINITIONS, requested, DEFAULT_NATIVE_QUICK_STYLE_ID, allowFallback)
 }
 
 function resolveColorStyle(opt: SmartArtProps): SmartArtCatalogEntry {
 	const requested = opt.colorStyleId || opt.colorStyleName
 	const key = catalogKey(requested || '')
+	const allowFallback = opt.presetFallback === 'default'
 	if (!requested || ['best', 'default', 'premium', 'colorful'].includes(key)) {
 		return findCatalogEntry(SMARTART_COLOR_STYLE_DEFINITIONS, DEFAULT_NATIVE_COLOR_STYLE_ID, DEFAULT_NATIVE_COLOR_STYLE_ID)
 	}
-	return findCatalogEntry(SMARTART_COLOR_STYLE_DEFINITIONS, requested, DEFAULT_NATIVE_COLOR_STYLE_ID)
+	return findCatalogEntry(SMARTART_COLOR_STYLE_DEFINITIONS, requested, DEFAULT_NATIVE_COLOR_STYLE_ID, allowFallback)
 }
 
 function resolveNativeSmartArt(opt: SmartArtProps): ResolvedNativeSmartArt {
@@ -204,6 +231,8 @@ function normalizeNativeNodes(opt: SmartArtProps): NativeNode[] {
 		if (!text) return
 		const item: NativeNode = {
 			text,
+			role: typeof node !== 'string' && node.role ? node.role : undefined,
+			textColor: typeof node !== 'string' && node.color ? String(node.color) : undefined,
 			imageSource: nodeImageSource(node),
 			modelId: guid(),
 			parentId,
@@ -216,8 +245,14 @@ function normalizeNativeNodes(opt: SmartArtProps): NativeNode[] {
 			presSibId: guid(),
 		}
 		out.push(item)
+		// Office title/description layouts represent the description as the
+		// first descendant of the title node. Preserve the public subtitle
+		// field in that native data-model shape instead of silently discarding it.
+		const subtitle = typeof node !== 'string' && typeof node.subtitle === 'string' ? node.subtitle.trim() : ''
+		if (subtitle) addNode(subtitle, item.modelId, level + 1, 0)
 		if (typeof node !== 'string' && node.children && node.children.length > 0) {
-			node.children.forEach((child, index) => addNode(child, item.modelId, level + 1, index))
+			const childOffset = subtitle ? 1 : 0
+			node.children.forEach((child, index) => addNode(child, item.modelId, level + 1, index + childOffset))
 		}
 	}
 	source.forEach((node, index) => addNode(node, null, 0, index))
@@ -282,6 +317,40 @@ function isPictureLayout(resolved: ResolvedNativeSmartArt): boolean {
 	return catalogKey(`${resolved.layout.category} ${resolved.layout.name} ${resolved.layout.id}`).includes('picture')
 }
 
+function isHierarchyLayout(resolved: ResolvedNativeSmartArt): boolean {
+	return catalogKey(`${resolved.layout.category} ${resolved.layout.name} ${resolved.layout.id}`).includes('hierarchy') ||
+		catalogKey(`${resolved.layout.category} ${resolved.layout.name} ${resolved.layout.id}`).includes('orgchart')
+}
+
+function nodeSemanticRole(node: string | SmartArtNode): string | undefined {
+	if (typeof node === 'string') return undefined
+	const role = typeof node.role === 'string' ? node.role.trim().toLowerCase() : ''
+	return role || undefined
+}
+
+function validateNativeNodeRoles(opt: SmartArtProps, resolved: ResolvedNativeSmartArt): void {
+	const nodes = opt.nodes || []
+	if (nodes.length === 0) return
+	const hierarchy = isHierarchyLayout(resolved)
+	const picture = isPictureLayout(resolved)
+	const allowedHierarchyRoles = new Set(['root', 'manager', 'member', 'peer', 'node', 'assistant'])
+	const hierarchyRoles = new Set(['root', 'manager', 'member', 'peer', 'assistant'])
+	const walk = (node: string | SmartArtNode, path: string): void => {
+		const role = nodeSemanticRole(node)
+		if (role && hierarchy && !allowedHierarchyRoles.has(role)) {
+			throw new Error(`SMARTART_ROLE_NOT_APPLICABLE: role "${role}" is not supported by native hierarchy layout "${resolved.layout.name}" at ${path}. Use root, manager, member, peer, node, or assistant.`)
+		}
+		if (role && !hierarchy && hierarchyRoles.has(role)) {
+			throw new Error(`SMARTART_ROLE_NOT_APPLICABLE: hierarchy role "${role}" requires a native hierarchy/org-chart layout, not "${resolved.layout.name}".`)
+		}
+		if (role === 'image' && !picture) {
+			throw new Error(`SMARTART_ROLE_NOT_APPLICABLE: image role requires a picture SmartArt layout, not "${resolved.layout.name}".`)
+		}
+		if (typeof node !== 'string' && Array.isArray(node.children)) node.children.forEach((child, index) => walk(child, `${path}.children[${index}]`))
+	}
+	nodes.forEach((node, index) => walk(node, `nodes[${index}]`))
+}
+
 function isPictureCaptionListLayout(resolved: ResolvedNativeSmartArt): boolean {
 	return catalogKey(resolved.layout.id).includes('layoutplist1') || catalogKey(resolved.layout.name) === 'picturecaptionlist'
 }
@@ -305,6 +374,47 @@ function directChild(el: Element, name: string): Element | null {
 
 function directChildren(el: Element, name: string): Element[] {
 	return elementChildren(el).filter(child => localName(child) === name)
+}
+
+function positiveIntegerText(value: unknown): string | null {
+	const text = typeof value === 'string' ? value.trim() : ''
+	if (!text) return null
+	for (const char of text) {
+		if (char < '0' || char > '9') return null
+	}
+	const numeric = Number(text)
+	return Number.isInteger(numeric) && numeric > 0 ? text : null
+}
+
+/**
+ * Read the numbering contract from the native Office layout sample. Some
+ * layouts render their visible number from a sibling-transition data point
+ * rather than from the content node. The sample also tells us whether the
+ * gallery uses 1 or 01.
+ */
+function siblingTransitionNumbering(layout: SmartArtCatalogEntry): SiblingTransitionNumbering {
+	const cached = SIBLING_TRANSITION_NUMBERING_CACHE.get(layout.id)
+	if (cached) return cached
+	let result: SiblingTransitionNumbering = { enabled: false, minDigits: 1 }
+	try {
+		const doc = new DOMParser().parseFromString(layout.xml, 'application/xml')
+		const all = doc.getElementsByTagName('*')
+		const labels: string[] = []
+		for (let index = 0; index < all.length; index++) {
+			const point = all.item(index) as Element | null
+			if (!point || localName(point) !== 'pt' || point.getAttribute('type') !== 'sibTrans') continue
+			const placeholder = positiveIntegerText(directChild(point, 'prSet')?.getAttribute('phldrT'))
+			const text = positiveIntegerText(directChild(point, 't')?.textContent)
+			const label = placeholder || text
+			if (label) labels.push(label)
+		}
+		if (labels.length > 0) result = { enabled: true, minDigits: labels[0].length }
+	} catch {
+		// Invalid catalog XML is handled by the existing preset/package checks;
+		// a non-numbered fallback keeps ordinary SmartArt serialization safe.
+	}
+	SIBLING_TRANSITION_NUMBERING_CACHE.set(layout.id, result)
+	return result
 }
 
 function hasDirectChild(el: Element, name: string): boolean {
@@ -474,11 +584,27 @@ function emptyTextBody(): string {
 	return '<dgm:spPr/><dgm:t><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="en-US"/></a:p></dgm:t>'
 }
 
-function dataTextBody(text: string, imageRelId?: string): string {
+function fontFaceRunXml(fontFace?: string): string {
+	const face = typeof fontFace === 'string' ? fontFace.trim() : ''
+	return face ? `<a:latin typeface="${encodeXmlEntities(face)}"/>` : ''
+}
+
+function dataTextBody(text: string, imageRelId?: string, color?: string, fontFace?: string): string {
 	const spPr = imageRelId
 		? `<dgm:spPr><a:blipFill><a:blip r:embed="${imageRelId}"/><a:stretch><a:fillRect/></a:stretch></a:blipFill></dgm:spPr>`
 		: '<dgm:spPr/>'
-	return `${spPr}<dgm:t><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr lang="en-US"/><a:t>${encodeXmlEntities(text)}</a:t></a:r></a:p></dgm:t>`
+	const normalizedColor = color ? String(color).replace(/^#/, '') : ''
+	const colorXml = /^[0-9A-Fa-f]{6}$/.test(normalizedColor)
+		? `<a:solidFill><a:srgbClr val="${normalizedColor.toUpperCase()}"/></a:solidFill>`
+		: ''
+	return `${spPr}<dgm:t><a:bodyPr/><a:lstStyle/><a:p><a:r><a:rPr lang="en-US">${fontFaceRunXml(fontFace)}${colorXml}</a:rPr><a:t>${encodeXmlEntities(text)}</a:t></a:r></a:p></dgm:t>`
+}
+
+function nativeNodeTextColor(opt: SmartArtProps, node: NativeNode, index: number): string | undefined {
+	const indexedColor = Array.isArray(opt.textColors) && opt.textColors.length > 0
+		? opt.textColors[index % opt.textColors.length]
+		: undefined
+	return node.textColor || indexedColor || opt.color
 }
 
 function dataPictureBody(imageRelId: string): string {
@@ -486,12 +612,16 @@ function dataPictureBody(imageRelId: string): string {
 		'<dgm:t><a:bodyPr/><a:lstStyle/><a:p><a:endParaRPr lang="en-US"/></a:p></dgm:t>'
 }
 
-function drawingTextBody(text: string, fontSize?: number): string {
+function drawingTextBody(text: string, fontSize?: number, color?: string, fontFace?: string): string {
 	const sz = Math.round((fontSize || 24) * 100)
+	const normalizedColor = color ? String(color).replace(/^#/, '') : ''
+	const colorXml = /^[0-9A-Fa-f]{6}$/.test(normalizedColor)
+		? `<a:solidFill><a:srgbClr val="${normalizedColor.toUpperCase()}"/></a:solidFill>`
+		: ''
 	return '<dsp:txBody>' +
 		'<a:bodyPr spcFirstLastPara="0" vert="horz" wrap="square" lIns="152400" tIns="152400" rIns="152400" bIns="152400" numCol="1" spcCol="1270" anchor="ctr" anchorCtr="0"><a:noAutofit/></a:bodyPr>' +
 		'<a:lstStyle/><a:p><a:pPr marL="0" lvl="0" indent="0" algn="ctr" defTabSz="1778000"><a:lnSpc><a:spcPct val="90000"/></a:lnSpc><a:spcBef><a:spcPct val="0"/></a:spcBef><a:spcAft><a:spcPct val="35000"/></a:spcAft><a:buNone/></a:pPr>' +
-		`<a:r><a:rPr lang="en-US" sz="${sz}" kern="1200"/><a:t>${encodeXmlEntities(text)}</a:t></a:r></a:p>` +
+		`<a:r><a:rPr lang="en-US" sz="${sz}" kern="1200">${fontFaceRunXml(fontFace)}${colorXml}</a:rPr><a:t>${encodeXmlEntities(text)}</a:t></a:r></a:p>` +
 		'</dsp:txBody>'
 }
 
@@ -504,12 +634,26 @@ function buildDataModelXml(opt: SmartArtProps, resolved: ResolvedNativeSmartArt,
 	const presRootId = guid()
 	const pictureLayout = isPictureLayout(resolved)
 	const pictureCaptionList = isPictureCaptionListLayout(resolved)
+	const numbering = siblingTransitionNumbering(resolved.layout)
 	ensurePictureLayoutIds(nodes, pictureModel || null)
 	let ptXml = `<dgm:pt modelId="${docId}" type="doc"><dgm:prSet loTypeId="${encodeXmlEntities(resolved.layout.id)}" loCatId="${encodeXmlEntities(resolved.layout.category)}" qsTypeId="${encodeXmlEntities(resolved.quickStyle.id)}" qsCatId="${encodeXmlEntities(resolved.quickStyle.category)}" csTypeId="${encodeXmlEntities(resolved.colorStyle.id)}" csCatId="${encodeXmlEntities(resolved.colorStyle.category)}" phldr="1"/>${emptyTextBody()}</dgm:pt>`
-	nodes.forEach(node => {
-		ptXml += `<dgm:pt modelId="${node.modelId}"><dgm:prSet phldrT="[Text]"/>${dataTextBody(node.text, node.image?.relId)}</dgm:pt>`
+	nodes.forEach((node, index) => {
+		// Keep the semantic text node independent from the image node. Passing
+		// the image relationship here makes PowerPoint paint the same picture
+		// into the caption shape as well as the picture shape.
+		const textColor = nativeNodeTextColor(opt, node, index)
+		const semanticText = dataTextBody(node.text, undefined, textColor, opt.fontFace)
+		const semanticType = node.role === 'assistant' ? ' type="asst"' : ''
+		const siblingLabel = numbering.enabled && node.level === 0
+			? String(node.siblingIndex + 1).padStart(numbering.minDigits, '0')
+			: null
+		const siblingProperties = siblingLabel ? `<dgm:prSet phldrT="${encodeXmlEntities(siblingLabel)}"/>` : '<dgm:prSet/>'
+		// Numbered SmartArt layouts render the sibling-transition point as the
+		// visible number. Give it the same authored/World ink as its semantic node.
+		const siblingText = siblingLabel ? dataTextBody(siblingLabel, undefined, textColor, opt.fontFace) : emptyTextBody()
+		ptXml += `<dgm:pt modelId="${node.modelId}"${semanticType}><dgm:prSet phldrT="[Text]"/>${semanticText}</dgm:pt>`
 		ptXml += `<dgm:pt modelId="${node.parTransId}" type="parTrans" cxnId="${node.cxnId}"><dgm:prSet/>${emptyTextBody()}</dgm:pt>`
-		ptXml += `<dgm:pt modelId="${node.sibTransId}" type="sibTrans" cxnId="${node.cxnId}"><dgm:prSet/>${emptyTextBody()}</dgm:pt>`
+		ptXml += `<dgm:pt modelId="${node.sibTransId}" type="sibTrans" cxnId="${node.cxnId}">${siblingProperties}${siblingText}</dgm:pt>`
 	})
 	const rootPresName = pictureCaptionList ? 'Name0' : (pictureModel?.rootName || 'diagram')
 	ptXml += `<dgm:pt modelId="${presRootId}" type="pres"><dgm:prSet presAssocID="${docId}" presName="${encodeXmlEntities(rootPresName)}" presStyleCnt="0"><dgm:presLayoutVars><dgm:dir${opt.rightToLeft ? ' val="rev"' : ''}/><dgm:resizeHandles val="exact"/></dgm:presLayoutVars></dgm:prSet><dgm:spPr/></dgm:pt>`
@@ -548,8 +692,11 @@ function buildDataModelXml(opt: SmartArtProps, resolved: ResolvedNativeSmartArt,
 		cxnXml += `<dgm:cxn modelId="${node.cxnId}" srcId="${node.parentId || docId}" destId="${node.modelId}" srcOrd="${node.siblingIndex}" destOrd="0" parTransId="${node.parTransId}" sibTransId="${node.sibTransId}"/>`
 		if (pictureCaptionList && node.image && node.compPresId && node.imagePresId) {
 			const ordBase = index * 2
-			cxnXml += `<dgm:cxn modelId="${guid()}" type="presOf" srcId="${node.modelId}" destId="${node.compPresId}" srcOrd="0" destOrd="0" presId="${encodeXmlEntities(resolved.layout.id)}"/>`
-			cxnXml += `<dgm:cxn modelId="${guid()}" type="presOf" srcId="${node.modelId}" destId="${node.imagePresId}" srcOrd="0" destOrd="0" presId="${encodeXmlEntities(resolved.layout.id)}"/>`
+			// Match Office's native Picture Caption List presentation graph:
+			// the semantic node owns the text rectangle, while the image rectangle
+			// is reached through the composite presentation node. Direct semantic
+			// links to the composite/image nodes cause Office to paint a duplicate
+			// native caption or image during SmartArt recalculation.
 			cxnXml += `<dgm:cxn modelId="${guid()}" type="presOf" srcId="${node.modelId}" destId="${node.presId}" srcOrd="0" destOrd="0" presId="${encodeXmlEntities(resolved.layout.id)}"/>`
 			cxnXml += `<dgm:cxn modelId="${guid()}" type="presOf" srcId="${node.sibTransId}" destId="${node.presSibId}" srcOrd="0" destOrd="0" presId="${encodeXmlEntities(resolved.layout.id)}"/>`
 			cxnXml += `<dgm:cxn modelId="${guid()}" type="presParOf" srcId="${presRootId}" destId="${node.compPresId}" srcOrd="${ordBase}" destOrd="0" presId="${encodeXmlEntities(resolved.layout.id)}"/>`
@@ -619,6 +766,7 @@ function buildDrawingXml(opt: SmartArtProps, resolved: ResolvedNativeSmartArt, n
 	const style = '<dsp:style><a:lnRef idx="2"><a:scrgbClr r="0" g="0" b="0"/></a:lnRef><a:fillRef idx="1"><a:scrgbClr r="0" g="0" b="0"/></a:fillRef><a:effectRef idx="0"><a:scrgbClr r="0" g="0" b="0"/></a:effectRef><a:fontRef idx="minor"><a:schemeClr val="lt1"/></a:fontRef></dsp:style>'
 	let shapeXml = ''
 	nodes.forEach((node, index) => {
+		const textColor = nativeNodeTextColor(opt, node, index)
 		const col = opt.rightToLeft ? (cols - 1) - (index % cols) : index % cols
 		const row = Math.floor(index / cols)
 		const x = Math.floor(col * (boxW + gapX))
@@ -641,7 +789,7 @@ function buildDrawingXml(opt: SmartArtProps, resolved: ResolvedNativeSmartArt, n
 				'<dsp:nvSpPr><dsp:cNvPr id="0" name=""/><dsp:cNvSpPr/></dsp:nvSpPr>' +
 				`<dsp:spPr><a:xfrm><a:off x="${x}" y="${textY}"/><a:ext cx="${boxW}" cy="${textH}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom>${fill}${line}<a:effectLst/></dsp:spPr>` +
 				style +
-				drawingTextBody(node.text, opt.fontSize) +
+				drawingTextBody(node.text, opt.fontSize, textColor, opt.fontFace) +
 				`<dsp:txXfrm><a:off x="${x}" y="${textY}"/><a:ext cx="${boxW}" cy="${textH}"/></dsp:txXfrm>` +
 				'</dsp:sp>'
 			return
@@ -666,7 +814,7 @@ function buildDrawingXml(opt: SmartArtProps, resolved: ResolvedNativeSmartArt, n
 					'<dsp:nvSpPr><dsp:cNvPr id="0" name=""/><dsp:cNvSpPr/></dsp:nvSpPr>' +
 					`<dsp:spPr><a:xfrm><a:off x="${x}" y="${textY}"/><a:ext cx="${boxW}" cy="${textH}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom>${fill}${line}<a:effectLst/></dsp:spPr>` +
 					style +
-					drawingTextBody(node.text, opt.fontSize) +
+					drawingTextBody(node.text, opt.fontSize, textColor, opt.fontFace) +
 					`<dsp:txXfrm><a:off x="${x}" y="${textY}"/><a:ext cx="${boxW}" cy="${textH}"/></dsp:txXfrm>` +
 					'</dsp:sp>'
 			}
@@ -676,7 +824,7 @@ function buildDrawingXml(opt: SmartArtProps, resolved: ResolvedNativeSmartArt, n
 			'<dsp:nvSpPr><dsp:cNvPr id="0" name=""/><dsp:cNvSpPr/></dsp:nvSpPr>' +
 			`<dsp:spPr><a:xfrm><a:off x="${x}" y="${y}"/><a:ext cx="${boxW}" cy="${boxH}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom>${fillXml}${line}<a:effectLst/></dsp:spPr>` +
 			style +
-			drawingTextBody(node.text, opt.fontSize) +
+			drawingTextBody(node.text, opt.fontSize, textColor, opt.fontFace) +
 			`<dsp:txXfrm><a:off x="${x}" y="${y}"/><a:ext cx="${boxW}" cy="${boxH}"/></dsp:txXfrm>` +
 			'</dsp:sp>'
 	})
@@ -709,6 +857,7 @@ function retargetSmartArtDataDrawingRelId(rawDataXml: string, drawingRid: string
 
 export function createNativeSmartArt(opt: SmartArtProps, ids: NativeSmartArtIds): { info: NativeSmartArtInfo; parts: NativePackagePart[] } {
 	const resolved = resolveNativeSmartArt(opt)
+	validateNativeNodeRoles(opt, resolved)
 	const nodes = normalizeNativeNodes(opt)
 	const labels = nodes.map(node => node.text)
 	if (nodes.length === 0) throw new Error('Native SmartArt requires at least one node.')
@@ -734,6 +883,36 @@ export function createNativeSmartArt(opt: SmartArtProps, ids: NativeSmartArtIds)
 		quickStyleId: resolved.quickStyle.id,
 		colorStyleId: resolved.colorStyle.id,
 		nodes: labels,
+		authoredNodes: opt.nodes ? JSON.parse(JSON.stringify(opt.nodes)) : undefined,
+		authoredOptions: JSON.parse(JSON.stringify({
+			layout: opt.layout,
+			layoutId: opt.layoutId,
+			layoutName: opt.layoutName,
+			quickStyleId: opt.quickStyleId,
+			quickStyleName: opt.quickStyleName,
+			colorStyleId: opt.colorStyleId,
+			colorStyleName: opt.colorStyleName,
+			presetFallback: opt.presetFallback,
+			rightToLeft: opt.rightToLeft,
+			fontFace: opt.fontFace,
+			fontSize: opt.fontSize,
+			color: opt.color,
+			textColors: opt.textColors,
+			palette: opt.palette,
+			title: opt.title,
+			altText: opt.altText,
+			fill: opt.fill,
+			line: opt.line,
+			shadow: opt.shadow,
+		})),
+		rightToLeft: opt.rightToLeft,
+		fontFace: opt.fontFace,
+		fontSize: opt.fontSize,
+		color: opt.color,
+		textColors: opt.textColors ? [...opt.textColors] : undefined,
+		palette: opt.palette ? [...opt.palette] : undefined,
+		title: opt.title,
+		altText: opt.altText,
 		partPaths,
 	}
 	const rawDataXml = rawSmartArtXml(opt, '_rawDataXml')
@@ -764,7 +943,7 @@ export function genXmlNativeSmartArt(slideItemObj: ISlideObject, ctx: EquationXm
 	const name = slideItemObj.options?.objectName || 'Native SmartArt'
 	return '<p:graphicFrame>' +
 		'<p:nvGraphicFramePr>' +
-		`<p:cNvPr id="${ctx.shapeId}" name="${encodeXmlEntities(name)}"/>` +
+		genXmlCNvPr({ id: ctx.shapeId, name, options: slideItemObj.options }) +
 		'<p:cNvGraphicFramePr/><p:nvPr/>' +
 		'</p:nvGraphicFramePr>' +
 		`<p:xfrm${ctx.locationAttr}><a:off x="${ctx.x}" y="${ctx.y}"/><a:ext cx="${ctx.cx}" cy="${ctx.cy}"/></p:xfrm>` +

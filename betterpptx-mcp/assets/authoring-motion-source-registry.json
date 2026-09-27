@@ -1,0 +1,1423 @@
+{
+  "schemaVersion": "betterpptx.authoring-motion-source-registry.v1",
+  "revision": "2026-09-04.mixamo-only-v1",
+  "runtimePolicy": {
+    "mode": "mixamo-only",
+    "activeSourceProviders": [
+      "mixamo"
+    ],
+    "quarantinedSourceProviders": [
+      "nvidia-kimodo"
+    ],
+    "reason": "Temporarily withhold the own-provider animation path until an independent native playback proof closes the remaining rigging and contact risks."
+  },
+  "distributionBoundary": "Server-side motion sources may only construct embedded project presenters. No raw-source or reusable-library download or resale.",
+  "sources": [
+    {
+      "id": "kinetic-landing-native-v1",
+      "file": "kinetic-landing-native-v1.glb",
+      "bytes": 149908,
+      "sha256": "7b6b77cf73a34f300360da0fa880260dc46b7dff77f600cc64834e46fc275b9e",
+      "sourceProvider": "mixamo",
+      "sourceTake": "Falling To Landing",
+      "sourceSlug": "00_superhero_landing",
+      "motionIds": [
+        "motion.kinetic.drop-to-landing",
+        "motion.kinetic.superhero-landing"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "rootMotionAnchor": "end",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "drop_to_landing",
+          "superhero_landing"
+        ],
+        "reason": "Both maintained source-policy entries designate Falling To Landing. Direct native axes preserve the approved shoulder, leg, and toe articulation through one generic retarget; the older intermediate motion pool does not.",
+        "validation": {
+          "sameStaticRig": true,
+          "maximumReferenceRotationErrorDegrees": 0.00000382,
+          "referenceSourceVersion": "presenter-motion-51-candidate-v5-native-root-bounded"
+        }
+      }
+    },
+    {
+      "id": "ordinary-talk-native-v1",
+      "file": "ordinary-talk-native-v1.glb",
+      "bytes": 868736,
+      "sha256": "1029ba9997a6da3ed0f8ef933600ad67fc6aa6ff9540ecb94ac17b259a7ebd78",
+      "sourceProvider": "mixamo",
+      "sourceTake": "Talking",
+      "sourceSlug": "talk",
+      "motionIds": [
+        "motion.ordinary.talk"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "ordinary-talk-native-v1-playback-proof.json",
+        "sha256": "e14589c853ea544facd8490a78a9b470b1af0f55177a53c2f059aaca32ffbe0a"
+      },
+      "provenance": {
+        "kind": "owner-supplied-native-motion-replacement",
+        "sourceFilename": "Talking.fbx",
+        "originalSourceSha256": "3df90719aac821c11b2f7590136e80f47ed6130d37260f1dcee3c9b8471c1bf9",
+        "supersedes": "prior generated Talk take",
+        "preserved": "Original 30-fps zero-based clock, all skeletal rotations including fingers, and stature-scaled world-space hip displacement. No new scale, smoothing or pose insertion."
+      }
+    },
+    {
+      "id": "ordinary-enumerate-native-v1",
+      "file": "ordinary-enumerate-native-v1.glb",
+      "bytes": 584884,
+      "sha256": "c0203ad97475c1b22c18e16f640c4d7c928e766a04693e2d4814f16d4d417242",
+      "sourceProvider": "mixamo",
+      "sourceTake": "Counting",
+      "sourceSlug": "enumerate",
+      "motionIds": [
+        "motion.ordinary.enumerate"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "ordinary-enumerate-native-v1-playback-proof.json",
+        "sha256": "3355b0d4d80c6b5385665ba940294958c231469dfe9ad0c00d104795be7b7655"
+      },
+      "provenance": {
+        "kind": "owner-supplied-native-motion-replacement",
+        "sourceFilename": "Counting.fbx",
+        "originalSourceSha256": "8b0975f8e4f98c7eeee84551e8a976a43186def4eebf5c36b38f8e163ebbeff0",
+        "supersedes": "old Ask/Shrug alias and the earlier held generated Enumerate take",
+        "preserved": "Original 30-fps zero-based clock, all skeletal rotations including fingers, and stature-scaled world-space hip displacement. The source forward lean and knee bend are retained."
+      }
+    },
+    {
+      "id": "kinetic-forward-slide-native-v1",
+      "file": "kinetic-forward-slide-native-v1.glb",
+      "bytes": 85060,
+      "sha256": "5058b1184e4c101af7accc56c0a4ff09a3ceae1508b7f3122564b691981793ff",
+      "sourceProvider": "mixamo",
+      "sourceTake": "forward_slide",
+      "sourceSlug": "forward_slide",
+      "motionIds": [
+        "motion.kinetic.forward-slide"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "vertical",
+        "rootMotionMaxStatures": 0.46,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-forward-slide-native-v1-playback-proof.json",
+        "sha256": "490e737a688eb8cd84d672c67ca033f9b4ea1d9f594e9fec350086d93282d90f"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "forward_slide"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "7e1b1c9e5fd29a9ffbec5216cf6592be41599eb87c9a08251a21dbb695ec93de",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-forward-slide-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-active-idle-native-v1",
+      "file": "kinetic-active-idle-native-v1.glb",
+      "bytes": 360160,
+      "sha256": "85670af6d445e225b0f3cd4eaa09abc948a4aa234de6ad936debda3bd1075dc7",
+      "sourceProvider": "mixamo",
+      "sourceTake": "Breathing Idle",
+      "sourceSlug": "active_idle",
+      "motionIds": [
+        "motion.kinetic.active-idle"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "vertical",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-active-idle-native-v1-playback-proof.json",
+        "sha256": "c4dbdb9ba610d5d9e2c6170a89e4ea8a0bd0635dd7996f38f4f6952a9db9872d"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "active_idle"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "f905e98a1a622daa13a984f9da2b746f8d82c547f1b19c8ced86b7bfbfd2d40e",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-active-idle-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-sprint-native-v1",
+      "file": "kinetic-sprint-native-v1.glb",
+      "bytes": 58920,
+      "sha256": "7ccba76c4737c0640963f6a2e3c988bc0ae99a0501cc6015ce839c2224c1902a",
+      "sourceProvider": "mixamo",
+      "sourceTake": "sprint",
+      "sourceSlug": "sprint",
+      "motionIds": [
+        "motion.kinetic.sprint"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "vertical",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-sprint-native-v1-playback-proof.json",
+        "sha256": "348525902fc410ee94fc843b30961dbcd99e6924de3e3f0a4c43ca463594e96e"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "sprint"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "f307a4837d18533297749733bf15a56f307761b258ec2c53d3e90fecf4fcf76d",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-sprint-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-dive-roll-native-v1",
+      "file": "kinetic-dive-roll-native-v1.glb",
+      "bytes": 173160,
+      "sha256": "9c8903adadddec1a6b3855e9b994712439dac3f7c248f823e0e1f734388dcc48",
+      "sourceProvider": "mixamo",
+      "sourceTake": "dive_roll",
+      "sourceSlug": "dive_roll",
+      "motionIds": [
+        "motion.kinetic.dive-roll"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 2.356,
+        "rootMotionMaxHorizontalStatures": 2.449
+      },
+      "playbackProof": {
+        "file": "kinetic-dive-roll-native-v1-playback-proof.json",
+        "sha256": "831002b96f31c9a3810e33be19100974039426685e4a350789dcf898ba956ffa"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "dive_roll"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "8ea226d1004d59fa2fdf39c59978434726ad2b1877c9919d0bcf7a457e937114",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-dive-roll-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-flying-native-v1",
+      "file": "kinetic-flying-native-v1.glb",
+      "bytes": 81156,
+      "sha256": "23bf1904e75c90bd6b557c17cf641596df0acca37736d1351dc7f2c143a3b4d3",
+      "sourceProvider": "mixamo",
+      "sourceTake": "flying",
+      "sourceSlug": "flying",
+      "motionIds": [
+        "motion.kinetic.flying"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "vertical",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-flying-native-v1-playback-proof.json",
+        "sha256": "11a7a9ee83ee35d301663fea5ac982a56d06c6a3fbc59c5bc673ad5ec75c1980"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "flying"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "2c564ef4fbec8469d1ca60fad169a58256571ee41fffaac623fce75dc65f2b95",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-flying-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-floating-drift-native-v1",
+      "file": "kinetic-floating-drift-native-v1.glb",
+      "bytes": 155808,
+      "sha256": "efd5dcd381b446813059fbd499528f988fd86418efd5d8cbef34f30424a0e799",
+      "sourceProvider": "mixamo",
+      "sourceTake": "floating_drift",
+      "sourceSlug": "floating_drift",
+      "motionIds": [
+        "motion.kinetic.floating-drift",
+        "motion.kinetic.slowmo-float"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "vertical",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-floating-drift-native-v1-playback-proof.json",
+        "sha256": "cbdccca48b034859c27864048ee0d92705a06bd8bec698571b4bf2329bb9c6a8"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "floating_drift"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "1211ca02659a8c05a96ca9f2ef5a35ce33ccc95b309f19a83ed37d9d6bf68a3b",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-floating-drift-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-heavy-jump-native-v1",
+      "file": "kinetic-heavy-jump-native-v1.glb",
+      "bytes": 75408,
+      "sha256": "95f5bd46043b9feceba309a6e6bf9b9cf7fcd1fa82af91b9d366961e03c010ef",
+      "sourceProvider": "mixamo",
+      "sourceTake": "heavy_jump",
+      "sourceSlug": "heavy_jump",
+      "motionIds": [
+        "motion.kinetic.heavy-jump",
+        "motion.kinetic.jump-shadow"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 1.602,
+        "rootMotionMaxHorizontalStatures": 1.606
+      },
+      "playbackProof": {
+        "file": "kinetic-heavy-jump-native-v1-playback-proof.json",
+        "sha256": "8ab8e7825b7c8a49207817f6ff411e2e0c9804423c28028882c7ba798ed7ec09"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "heavy_jump"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "3d15cf8fee067a8e051c62536cead9b70d35df75c3147b24dd2e56d577046f0d",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-heavy-jump-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-freefall-native-v1",
+      "file": "kinetic-freefall-native-v1.glb",
+      "bytes": 63572,
+      "sha256": "3bf38cdece1adf4f93cc1a682da3dec05e3b03402c83b383753e0154e0d43d90",
+      "sourceProvider": "mixamo",
+      "sourceTake": "freefall",
+      "sourceSlug": "freefall",
+      "motionIds": [
+        "motion.kinetic.freefall"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "vertical",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-freefall-native-v1-playback-proof.json",
+        "sha256": "56faab3043b693da33d9572257a04b13dbda6e459dcff517f187d5c3a5dc89e1"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "freefall"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "f2bdcb28459924ad0f48b0518bed2704a5e2a562bf43ed792eeb921bd9f95db0",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-freefall-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-backflip-native-v1",
+      "file": "kinetic-backflip-native-v1.glb",
+      "bytes": 175952,
+      "sha256": "219a08794b13b752332a02ff7e1e77020378f965bfd0b8571afa631e97713e40",
+      "sourceProvider": "mixamo",
+      "sourceTake": "backflip",
+      "sourceSlug": "backflip",
+      "motionIds": [
+        "motion.kinetic.backflip"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 0.524,
+        "rootMotionMaxHorizontalStatures": 0.504
+      },
+      "playbackProof": {
+        "file": "kinetic-backflip-native-v1-playback-proof.json",
+        "sha256": "da7422371ca10008e94425e80e1b3a26c8931bf83b029e968c8504b2cab16202"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "backflip"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "565b1d0715a274de19b23fd2a1d95dbaac1d9fdebad6f9954bf1c07b0c05bb19",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-backflip-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-heavy-kick-native-v1",
+      "file": "kinetic-heavy-kick-native-v1.glb",
+      "bytes": 98672,
+      "sha256": "e608d3458e6be66fce542f724bbd2d71d8dc7c7eb5d08a74b72efc0721135d1a",
+      "sourceProvider": "mixamo",
+      "sourceTake": "Mma Kick",
+      "sourceSlug": "heavy_kick",
+      "motionIds": [
+        "motion.kinetic.heavy-kick"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-heavy-kick-native-v1-playback-proof.json",
+        "sha256": "fd2593dc9de6f76d3069584f02d80c356a0ecf4c1a9c8dceabcbef53883d5b14"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "heavy_kick"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "da2beecdc605eb11dd122ece3385ea87a887dfefe8c507a6286e7a7e0e8eea39",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-heavy-kick-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-ground-pound-native-v1",
+      "file": "kinetic-ground-pound-native-v1.glb",
+      "bytes": 292592,
+      "sha256": "6b2809a591ccbfc3b9a21fe8523cae219d4874633eb237a91187699c422f4ecb",
+      "sourceProvider": "mixamo",
+      "sourceTake": "ground_pound",
+      "sourceSlug": "ground_pound",
+      "motionIds": [
+        "motion.kinetic.ground-pound",
+        "motion.kinetic.ground-smash"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 1.423,
+        "rootMotionMaxHorizontalStatures": 1.455
+      },
+      "playbackProof": {
+        "file": "kinetic-ground-pound-native-v1-playback-proof.json",
+        "sha256": "4595793fbfe6cf6a0fe7c75da639c0de11c24d2e3c818b11935d0df1e0ff5e32"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "ground_pound"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "860106067aef3e2fcf8ad57a5220336750e3bee4217106760cbdc2ba715a6691",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-ground-pound-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-heavy-push-native-v1",
+      "file": "kinetic-heavy-push-native-v1.glb",
+      "bytes": 81752,
+      "sha256": "75b7056b3a35d6e80ce8b6e4e29bffdcf6d81d4ded366b5a7ea5bde68dcd1642",
+      "sourceProvider": "mixamo",
+      "sourceTake": "heavy_push",
+      "sourceSlug": "heavy_push",
+      "motionIds": [
+        "motion.kinetic.heavy-push"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 0.675,
+        "rootMotionMaxHorizontalStatures": 0.68
+      },
+      "playbackProof": {
+        "file": "kinetic-heavy-push-native-v1-playback-proof.json",
+        "sha256": "738d240b55ce7f40998bcffa5b85e105ed610c11d797746f6c289d41eae356e5"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "heavy_push"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "1f9a1c9d3d4c2fce2003a246b0ae793c0f368feb9ea7f562564e50016f74d65d",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-heavy-push-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-victory-jump-native-v1",
+      "file": "kinetic-victory-jump-native-v1.glb",
+      "bytes": 91784,
+      "sha256": "9c8ab4d86be51616991409f60fb9e0228e8fa6d1d7466e0cff9dceb1e3b6be58",
+      "sourceProvider": "mixamo",
+      "sourceTake": "victory_jump",
+      "sourceSlug": "victory_jump",
+      "motionIds": [
+        "motion.kinetic.victory-jump"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-victory-jump-native-v1-playback-proof.json",
+        "sha256": "042c7af46b86bd4ee2c744375e7f73892feb88fb3d934900ad67ae9ba92bf40b"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "victory_jump"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "f1b9dc53d8806cf39bc4eda5a8bf24a039e3e97fd27e449439aa8559ecb0ae71",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-victory-jump-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-skyward-launch-native-v1",
+      "file": "kinetic-skyward-launch-native-v1.glb",
+      "bytes": 94464,
+      "sha256": "6c1eb2e1de9b4e292ca4a8bebbf278ba89400cf45ce5fdfa5a80d5c97181724b",
+      "sourceProvider": "mixamo",
+      "sourceTake": "skyward_launch",
+      "sourceSlug": "skyward_launch",
+      "motionIds": [
+        "motion.kinetic.skyward-launch"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 0.399,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-skyward-launch-native-v1-playback-proof.json",
+        "sha256": "125f69cd0d38542ec293a7653b87b8d1cd379e3fdda879b1c87d8a466cdc8ac7"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "skyward_launch"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "515bb2f70a4823dc1784609202a4212629edb3dd90fc571b7c78a7bdb171353c",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-skyward-launch-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-orbit-turn-native-v1",
+      "file": "kinetic-orbit-turn-native-v1.glb",
+      "bytes": 95484,
+      "sha256": "ded89ee0ddec23dae63dc08658fd7b7214692fbfb3e0564822a96d3b4652fedb",
+      "sourceProvider": "mixamo",
+      "sourceTake": "orbit_turn",
+      "sourceSlug": "orbit_turn",
+      "motionIds": [
+        "motion.kinetic.orbit-turn"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "vertical",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-orbit-turn-native-v1-playback-proof.json",
+        "sha256": "4bc8db03882f7d6c5d0e43b42298cac21e5fec5b8431d187598feb6bd66db743"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "orbit_turn"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "d7d54c5f7f1c54dc4be18baf2e1c4da4529b4ace94b3b40b1c249c36c5da6ae1",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-orbit-turn-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-gforce-lean-native-v1",
+      "file": "kinetic-gforce-lean-native-v1.glb",
+      "bytes": 88956,
+      "sha256": "31448df04f6112b07f256bf5e5f685f6abab10cf6d8cdc3cd52dc4dee799216c",
+      "sourceProvider": "mixamo",
+      "sourceTake": "gforce_lean",
+      "sourceSlug": "gforce_lean",
+      "motionIds": [
+        "motion.kinetic.gforce-lean"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "vertical",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-gforce-lean-native-v1-playback-proof.json",
+        "sha256": "1ca61b8a808fc97cd6134f9e476f3905d60766effb6f1a312db6ebd7f3562036"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "gforce_lean"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "ef8df7d9dc5ded576f51758753cb4ea0c4f6fcb911f6f830cbad968f8d29779d",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-gforce-lean-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-magical-reveal-native-v1",
+      "file": "kinetic-magical-reveal-native-v1.glb",
+      "bytes": 179096,
+      "sha256": "d0c37ad23e279a63d182388f55dfe6e34addc5d0ec9b97f042a4342731a9c2d3",
+      "sourceProvider": "mixamo",
+      "sourceTake": "magical_reveal",
+      "sourceSlug": "magical_reveal",
+      "motionIds": [
+        "motion.kinetic.magical-reveal"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 0.534,
+        "rootMotionMaxHorizontalStatures": 0.542
+      },
+      "playbackProof": {
+        "file": "kinetic-magical-reveal-native-v1-playback-proof.json",
+        "sha256": "bb9b2c9613cc57b89e2189adf5afb55e1a371853e511e9221a6d5e2ae6469a38"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "magical_reveal"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "d5203a01484daf3150a584f98b0e767cfad97b24dd5da312fb20a8ee49b4a30a",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-magical-reveal-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-rolling-native-v1",
+      "file": "kinetic-rolling-native-v1.glb",
+      "bytes": 123520,
+      "sha256": "78b37be92ab8be50818535b413525e44533c4a9078f0e77d6811a7f304bb3a8c",
+      "sourceProvider": "mixamo",
+      "sourceTake": "rolling",
+      "sourceSlug": "rolling",
+      "motionIds": [
+        "motion.kinetic.rolling"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "vertical",
+        "rootMotionMaxStatures": 0.443,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-rolling-native-v1-playback-proof.json",
+        "sha256": "9eb0ab16c5ff4c6f7c0c7a9d781a57ce8ad5546194ddd648c891bdad494bf1d8"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "rolling"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "b6595cc1193fba435c67caa74d646d273f5906d1e5cac09cd71451650a1ac100",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-rolling-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-elastic-stretch-native-v1",
+      "file": "kinetic-elastic-stretch-native-v1.glb",
+      "bytes": 327044,
+      "sha256": "69a7dff808912ca226b414ff04c1e99f14ae26d34d1723ecf785569b80e6ea75",
+      "sourceProvider": "mixamo",
+      "sourceTake": "elastic_stretch",
+      "sourceSlug": "elastic_stretch",
+      "motionIds": [
+        "motion.kinetic.elastic-stretch"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "vertical",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-elastic-stretch-native-v1-playback-proof.json",
+        "sha256": "275719838b1f41a70b749a82fa5c3f75bafd8141df53585480ffa5ecd3c62e33"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "elastic_stretch"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "b66862348610d795887046427c9810eb0f59993060e3ab0612e24b9ff05cb785",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-elastic-stretch-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-stage-stomp-native-v1",
+      "file": "kinetic-stage-stomp-native-v1.glb",
+      "bytes": 93600,
+      "sha256": "58c154f68193f6e108e1d3283c1aafadfc4ebc930105bd62f2e93d0319f0ac11",
+      "sourceProvider": "mixamo",
+      "sourceTake": "stage_stomp",
+      "sourceSlug": "stage_stomp",
+      "motionIds": [
+        "motion.kinetic.heavy-stomp",
+        "motion.kinetic.stage-stomp"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 0.379,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-stage-stomp-native-v1-playback-proof.json",
+        "sha256": "6665536c21461a4ab19b7ccbd708f419697db92941f80e870dc62dfadc9c1180"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "stage_stomp"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "830b935c92342720fb6672bfe19b35503c725b309442d1feb3de30f996180c60",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-stage-stomp-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-shield-block-native-v1",
+      "file": "kinetic-shield-block-native-v1.glb",
+      "bytes": 61792,
+      "sha256": "34999b42dc4d3c69e6e507adb781f2e215dd96f21f39bb5ccbd1f482164e1727",
+      "sourceProvider": "mixamo",
+      "sourceTake": "shield_block",
+      "sourceSlug": "shield_block",
+      "motionIds": [
+        "motion.kinetic.shield-block"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "vertical",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-shield-block-native-v1-playback-proof.json",
+        "sha256": "6c7e9fb342051bcbccebe5aba255ee5fbf637d419499c29419e051290b801bd4"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "shield_block"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "af06046897eadf2ca200751fd110f0e811d10c089b70a4d3cafde410b7bd968c",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-shield-block-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-scroll-wheel-pull-native-v1",
+      "file": "kinetic-scroll-wheel-pull-native-v1.glb",
+      "bytes": 512952,
+      "sha256": "199df3db0bc25305c59c1b496195567ac5b4b621dd388f44ef23ab7d3d916855",
+      "sourceProvider": "mixamo",
+      "sourceTake": "scroll_wheel_pull",
+      "sourceSlug": "scroll_wheel_pull",
+      "motionIds": [
+        "motion.kinetic.gravity-pull",
+        "motion.kinetic.scroll-wheel-pull"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-scroll-wheel-pull-native-v1-playback-proof.json",
+        "sha256": "0a76f52cea1f3f0ed62731887f8f630d502aeccd7db1b6ab29ab16c00ecd74e5"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "scroll_wheel_pull"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "552222228cdbc8b747803caa47ba14d3521435f33123940150bc4c6cee05df72",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-scroll-wheel-pull-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-window-breaker-native-v1",
+      "file": "kinetic-window-breaker-native-v1.glb",
+      "bytes": 68844,
+      "sha256": "ceec47856c0cfbdf81a6ee44df17cc5b7f87622c1c10be77be612402b6181c3d",
+      "sourceProvider": "mixamo",
+      "sourceTake": "window_breaker",
+      "sourceSlug": "window_breaker",
+      "motionIds": [
+        "motion.kinetic.lunging-punch",
+        "motion.kinetic.window-breaker"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 0.467,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-window-breaker-native-v1-playback-proof.json",
+        "sha256": "8b3550d4da2afe67c1c7cc921ae5aeb55737c83b5ad18adc39a91ed3d9f73a15"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "window_breaker"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "a467038a71812e9528ddc9eb7752654cdc55d64684236e4134960bb7c84c70c4",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-window-breaker-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-bow-pull-native-v1",
+      "file": "kinetic-bow-pull-native-v1.glb",
+      "bytes": 67584,
+      "sha256": "18516c48e888af534286a56b7d9b74996194cae996ba5bc9642a79662fcc5755",
+      "sourceProvider": "mixamo",
+      "sourceTake": "bow_pull",
+      "sourceSlug": "bow_pull",
+      "motionIds": [
+        "motion.kinetic.bow-pull"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-bow-pull-native-v1-playback-proof.json",
+        "sha256": "3e8ab2571614c539eda4d9e0758a8aed53642d12b0ee62dd5236fa48ee77edec"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "bow_pull"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "5a2a0d0a4e5c5abc038a1b32ad4b7e1dc5291b5415e39f33687aac8870839dfb",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-bow-pull-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-spin-kick-native-v1",
+      "file": "kinetic-spin-kick-native-v1.glb",
+      "bytes": 163216,
+      "sha256": "9347d29b4e0ffa94cd0295de1bb1beda3d851e0627d3c69797f86e2d7b041b22",
+      "sourceProvider": "mixamo",
+      "sourceTake": "spin_kick",
+      "sourceSlug": "spin_kick",
+      "motionIds": [
+        "motion.kinetic.spin-kick"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 1.914,
+        "rootMotionMaxHorizontalStatures": 1.959
+      },
+      "playbackProof": {
+        "file": "kinetic-spin-kick-native-v1-playback-proof.json",
+        "sha256": "d406e5c879ce2022174bc8f9453c400679221a815d110b4a3c8df0f750f3a2f8"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "spin_kick"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "cc6f90750a33307229f8cd503d968b5b9f0d2790fde58f6181f90ff6a4c74fa3",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-spin-kick-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-scanning-lookup-native-v1",
+      "file": "kinetic-scanning-lookup-native-v1.glb",
+      "bytes": 133788,
+      "sha256": "352eb2448f6c83aa21296be1c1132b9930946407b7f6a91b038881731f7f178a",
+      "sourceProvider": "mixamo",
+      "sourceTake": "scanning_lookup",
+      "sourceSlug": "scanning_lookup",
+      "motionIds": [
+        "motion.kinetic.scanning-lookup"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "vertical",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-scanning-lookup-native-v1-playback-proof.json",
+        "sha256": "28a32340f79ce3d30cb4e2a027cf47415522fe79184d68dc21f998010075e634"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "scanning_lookup"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "57d0b7ce09c84d403fce92d539d0142fbfddf9c14dac836ef0571b84ed974ac4",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-scanning-lookup-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-side-dodge-native-v1",
+      "file": "kinetic-side-dodge-native-v1.glb",
+      "bytes": 65788,
+      "sha256": "12d2b23c16bba2bb2b9038a3da141b3d8a34713dfba062bf64d059f18ab90f46",
+      "sourceProvider": "mixamo",
+      "sourceTake": "side_dodge",
+      "sourceSlug": "side_dodge",
+      "motionIds": [
+        "motion.kinetic.strafe-cross",
+        "motion.kinetic.side-dodge"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "vertical",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-side-dodge-native-v1-playback-proof.json",
+        "sha256": "693415cab9ea0cf22822dd82eb6c3b521d334fb3a17fc1fa8845aac8f989fc21"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "side_dodge"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "a58bb9cf8798121e5ce64fea6eae3933e23d4c3bcb314f7714ff5e461d5eb90c",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-side-dodge-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-uppercut-native-v1",
+      "file": "kinetic-uppercut-native-v1.glb",
+      "bytes": 79092,
+      "sha256": "99725a32ce680fd65a5822b9dfe4a079467fee230477fdfa1dfce404b2a1569a",
+      "sourceProvider": "mixamo",
+      "sourceTake": "uppercut",
+      "sourceSlug": "uppercut",
+      "motionIds": [
+        "motion.kinetic.uppercut"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "all",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-uppercut-native-v1-playback-proof.json",
+        "sha256": "b702a216f0a08448c3ddd86d44bf6e6e3f46990c05f23471f8914292f912b8d3"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "uppercut"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "6cb67311c5bae0dff23a99e04d49aa2d110e8e02a4f15195ec917d50736824cb",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-uppercut-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "kinetic-atlas-lift-native-v1",
+      "file": "kinetic-atlas-lift-native-v1.glb",
+      "bytes": 274180,
+      "sha256": "2c43136ac266a5d8cbaa1a6a2d0d6f407a53d9965e853e712054fde2b274848e",
+      "sourceProvider": "mixamo",
+      "sourceTake": "atlas_lift",
+      "sourceSlug": "atlas_lift",
+      "motionIds": [
+        "motion.kinetic.atlas-lift"
+      ],
+      "retarget": {
+        "rotationRetargetSpace": "global",
+        "channelPolicy": "root-motion",
+        "boneNamePolicy": "mixamo-suffix",
+        "rootMotionSpace": "world",
+        "rootMotionAnchor": "start",
+        "rootMotionAxes": "vertical",
+        "rootMotionMaxStatures": 0.35,
+        "rootMotionMaxHorizontalStatures": 0.5
+      },
+      "playbackProof": {
+        "file": "kinetic-atlas-lift-native-v1-playback-proof.json",
+        "sha256": "92df19dfe75cf3c20c1d553b4569aab8568dadffcbf92fa2003978280a5cb71b"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "kinetic-clips-pool",
+        "sourcePolicy": "deploy/model3d-worker/bake/kinetic-clips-map.json",
+        "sourcePolicyKeys": [
+          "atlas_lift"
+        ],
+        "reason": "Preserve the original FBX local basis and exact source clock before generic target-rig retargeting. The prior intermediate bake could alter physical pose on differently oriented bones.",
+        "sourceFbxSha256": "ba0e7d1edad38379f682474ddd65f133f082e1d7b7cb98d99ceef27d3f32f038",
+        "sourceAnimationName": "mixamo.com",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\kinetic-native-v1\\proof-bank-report-v2.json",
+        "sourcePoseProof": "PASS",
+        "nativeProof": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\kinetic-atlas-lift-native-v1-playback-proof.json",
+        "proofBindingCorrectionArtifact": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\docs\\release-safety\\G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json"
+      }
+    },
+    {
+      "id": "interaction-greet-bow-native-v1",
+      "file": "interaction-greet-bow-native-v1.glb",
+      "bytes": 445152,
+      "sha256": "f480562c7cc5165f1d71f8f3ec49e30f65534e93855f0248b6425ef85bd3d83c",
+      "sourceProvider": "nvidia-kimodo",
+      "sourceTake": "15_greet_bow",
+      "sourceSlug": "15_greet_bow",
+      "motionIds": [
+        "motion.interaction.greet-bow"
+      ],
+      "retarget": {
+        "boneNamePolicy": "exact",
+        "channelPolicy": "rotation-only",
+        "rotationReference": "first-frame",
+        "rotationRetargetSpace": "world-delta"
+      },
+      "playbackProof": {
+        "file": "interaction-greet-bow-native-v1-playback-proof.json",
+        "sha256": "16ada68b9fa2d81e2d8020b0129bb92862b2b0557befefb9ccc7210cc3a78d9a"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "authoring-interaction-clips-v3-proven",
+        "originalBvhSha256": "882818e6524313676825810ed88c08b4c1bfb78e38e6f812212f76bc584b8c61",
+        "nativeAdapter": "assets/native-bvh-motion-source.mjs",
+        "sourcePoseProof": "PASS",
+        "sourceSampleEndpointMs": 4166.666666666667,
+        "legacyDurationMs": 4200,
+        "reason": "Replace the basis-changing canonical BVH bake with original world-axis motion and an explicit world-delta retarget policy. Source bytes and full sampled pose/clock are retained; the legacy extra frame is not appended.",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v1\\staging-report.json",
+        "nativeProofReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v1\\powerpoint-proof\\powerpoint-native-proof.json",
+        "visualReview": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v1\\native-visual-review.json",
+        "policyCorrectionArtifact": "betterpptx-mcp/docs/release-safety/G5-INTERACTION-NATIVE-FIRST-FRAME-CORRECTION-20260904.json",
+        "policyCorrectionKind": "first-frame-source-reference"
+      }
+    },
+    {
+      "id": "interaction-agree-nod-native-v1",
+      "file": "interaction-agree-nod-native-v1.glb",
+      "bytes": 327016,
+      "sha256": "6b1e64bdf040c209b222efdf50db5f9cd76f624b0358edfc4e349ca345efc1b0",
+      "sourceProvider": "nvidia-kimodo",
+      "sourceTake": "16_agree_nod",
+      "sourceSlug": "16_agree_nod",
+      "motionIds": [
+        "motion.interaction.agree-nod"
+      ],
+      "retarget": {
+        "boneNamePolicy": "exact",
+        "channelPolicy": "rotation-only",
+        "rotationReference": "first-frame",
+        "rotationRetargetSpace": "world-delta"
+      },
+      "playbackProof": {
+        "file": "interaction-agree-nod-native-v1-playback-proof.json",
+        "sha256": "9a178ada2a17e956e8be27a462b114bf82f830591b47978d545d273678dddede"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "authoring-interaction-clips-v3-proven",
+        "originalBvhSha256": "3615ef6621ec9591d5835f23c5b14d74a9a8c65e166a0759ca654f614f599b38",
+        "nativeAdapter": "assets/native-bvh-motion-source.mjs",
+        "sourcePoseProof": "PASS",
+        "sourceSampleEndpointMs": 2766.6666666666665,
+        "legacyDurationMs": 2800,
+        "reason": "Replace the basis-changing canonical BVH bake with original world-axis motion and an explicit world-delta retarget policy. Source bytes and full sampled pose/clock are retained; the legacy extra frame is not appended.",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v1\\staging-report.json",
+        "nativeProofReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v1\\powerpoint-proof\\powerpoint-native-proof.json",
+        "visualReview": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v1\\native-visual-review.json",
+        "policyCorrectionArtifact": "betterpptx-mcp/docs/release-safety/G5-INTERACTION-NATIVE-FIRST-FRAME-CORRECTION-20260904.json",
+        "policyCorrectionKind": "first-frame-source-reference"
+      }
+    },
+    {
+      "id": "interaction-disagree-shake-native-v1",
+      "file": "interaction-disagree-shake-native-v1.glb",
+      "bytes": 327056,
+      "sha256": "dd070db73d075cfd66666b6c3076f3afe54ff5ce927629c9a835f4f0cb7bcfb4",
+      "sourceProvider": "nvidia-kimodo",
+      "sourceTake": "17_disagree_shake",
+      "sourceSlug": "17_disagree_shake",
+      "motionIds": [
+        "motion.interaction.disagree-shake"
+      ],
+      "retarget": {
+        "boneNamePolicy": "exact",
+        "channelPolicy": "rotation-only",
+        "rotationReference": "first-frame",
+        "rotationRetargetSpace": "world-delta"
+      },
+      "playbackProof": {
+        "file": "interaction-disagree-shake-native-v1-playback-proof.json",
+        "sha256": "f7f8f76f82420d4b505b88197012822348a28a47e6397491455312cccf4f1d94"
+      },
+      "provenance": {
+        "kind": "native-axis-source-correction",
+        "supersedesSourceAsset": "authoring-interaction-clips-v3-proven",
+        "originalBvhSha256": "fdaae18a4663e7ec1c6480b07e7a8743dd5f702ff8631b2284b52878e8b0cde7",
+        "nativeAdapter": "assets/native-bvh-motion-source.mjs",
+        "sourcePoseProof": "PASS",
+        "sourceSampleEndpointMs": 2766.6666666666665,
+        "legacyDurationMs": 2800,
+        "reason": "Replace the basis-changing canonical BVH bake with original world-axis motion and an explicit world-delta retarget policy. Source bytes and full sampled pose/clock are retained; the legacy extra frame is not appended.",
+        "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v1\\staging-report.json",
+        "nativeProofReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v1\\powerpoint-proof\\powerpoint-native-proof.json",
+        "visualReview": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v1\\native-visual-review.json",
+        "policyCorrectionArtifact": "betterpptx-mcp/docs/release-safety/G5-INTERACTION-NATIVE-FIRST-FRAME-CORRECTION-20260904.json",
+        "policyCorrectionKind": "first-frame-source-reference"
+      }
+    }
+  ]
+}

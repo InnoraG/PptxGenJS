@@ -192,25 +192,18 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 	let tableCalcW = tablePropW
 
 	function calcSlideTabH(): void {
-		let emuStartY = 0
-		if (tableRowSlides.length === 0) emuStartY = tablePropY || inch2Emu(arrInchMargins[0])
-		if (tableRowSlides.length > 0) emuStartY = inch2Emu(tableProps.autoPageSlideStartY || tableProps.newSlideStartY || arrInchMargins[0])
-		emuSlideTabH = (tablePropH || presLayout.height) - emuStartY - inch2Emu(arrInchMargins[2])
+		const startYInches = tableRowSlides.length === 0
+			? (tablePropY ? tablePropY / EMU : arrInchMargins[0])
+			: (tableProps.autoPageSlideStartY || tableProps.newSlideStartY || arrInchMargins[0])
+		// `h` is the table's authored height, not an absolute slide-bottom
+		// coordinate.  When it is present it already defines the usable
+		// pagination height; subtracting the table's y position here produces
+		// negative space for tables placed below a title and splits the header
+		// row into empty continuation fragments.  Without an authored height,
+		// use the remaining slide area from the page start to the bottom margin.
+		emuSlideTabH = tablePropH || Math.max(0, presLayout.height - inch2Emu(startYInches + arrInchMargins[2]))
 		// console.log(`| startY .......................................... = ${(emuStartY / EMU).toFixed(1)}`)
 		// console.log(`| emuSlideTabH .................................... = ${(emuSlideTabH / EMU).toFixed(1)}`)
-		if (tableRowSlides.length > 1) {
-			// D: RULE: Use margins for starting point after the initial Slide, not `opt.y` (ISSUE #43, ISSUE #47, ISSUE #48)
-			if (typeof tableProps.autoPageSlideStartY === 'number') {
-				emuSlideTabH = (tablePropH || presLayout.height) - inch2Emu(tableProps.autoPageSlideStartY + arrInchMargins[2])
-			} else if (typeof tableProps.newSlideStartY === 'number') {
-				// @deprecated v3.3.0
-				emuSlideTabH = (tablePropH || presLayout.height) - inch2Emu(tableProps.newSlideStartY + arrInchMargins[2])
-			} else if (tablePropY) {
-				emuSlideTabH = (tablePropH || presLayout.height) - inch2Emu((tablePropY / EMU < arrInchMargins[0] ? tablePropY / EMU : arrInchMargins[0]) + arrInchMargins[2])
-				// Use whichever is greater: area between margins or the table H provided (dont shrink usable area - the whole point of over-riding Y on paging is to *increase* usable space)
-				if (emuSlideTabH < tablePropH) emuSlideTabH = tablePropH
-			}
-		}
 	}
 
 	if (tableProps.verbose) {
@@ -430,7 +423,7 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 				if (currTableRow.length > 0 && currTableRow.map(cell => cell.text.length).reduce((p, n) => p + n) > 0) newTableRowSlide.rows.push(currTableRow)
 
 				// B: add current slide to Slides array
-				tableRowSlides.push(newTableRowSlide)
+				if (newTableRowSlide.rows.length > 0) tableRowSlides.push(newTableRowSlide)
 
 				// C: reset working/curr slide to hold rows as they're created
 				const newRows: TableRow[] = []
@@ -454,7 +447,19 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 						const newHeadRow: TableRow = []
 						let maxLineHeight = 0
 						row.forEach(cell => {
-							newHeadRow.push(cell)
+							// Header cells are reused on every continuation slide.  The table
+							// materializer normalizes cell text in place, so retaining the
+							// original object here lets one page's line consumption erase or
+							// partially rewrite the next page's header.  Copy the semantic
+							// cell and its authored runs before handing it to addTable.
+							const repeatedCell: TableCell = {
+								...cell,
+								text: Array.isArray(cell.text)
+									? cell.text.map(run => run && typeof run === 'object' ? { ...run, ...(run.options ? { options: { ...run.options } } : {}) } : run)
+									: cell.text,
+								options: cell.options ? { ...cell.options } : cell.options,
+							}
+							newHeadRow.push(repeatedCell)
 							if (cell._lineHeight > maxLineHeight) maxLineHeight = cell._lineHeight
 						})
 						newTableRowSlide.rows.push(newHeadRow)
@@ -500,7 +505,7 @@ export function getSlidesForTableRows(tableRows: TableCell[][] = [], tableProps:
 	})
 
 	// STEP 7: Flush buffer / add final slide
-	tableRowSlides.push(newTableRowSlide)
+	if (newTableRowSlide.rows.length > 0) tableRowSlides.push(newTableRowSlide)
 
 	if (tableProps.verbose) {
 		console.log('\n|================================================|')

@@ -7,6 +7,13 @@ import {
 	AddSlideProps,
 	AnimationProps,
 	BackgroundProps,
+	CameoProps,
+	ConnectorProps,
+	GroupProps,
+	ZoomProps,
+	SectionZoomProps,
+	SummaryZoomProps,
+	SectionProps,
 	HexColor,
 	IChartMulti,
 	IChartOpts,
@@ -19,6 +26,7 @@ import {
 	EquationProps,
 	ImageProps,
 	MediaProps,
+	RecordStudioCaptureProps,
 	Model3DProps,
 	ObjectOptions,
 	PresLayout,
@@ -37,6 +45,7 @@ import {
 import * as genObj from './gen-objects'
 import { countParagraphs } from './gen-objects'
 import { addAnimation as addAnimationInternal } from './gen-animations'
+import { assertNativeDescendantAnimationInspectable, nativeGroupIdentityPlan } from './gen-group-animation-targets'
 import { ValidationEngine, ValidationOptions, ValidationResult } from './validation-engine'
 
 export default class Slide {
@@ -50,6 +59,8 @@ export default class Slide {
 
 	public addSlide: (options?: AddSlideProps) => PresSlide
 	public getSlide: (slideNum: number) => PresSlide
+	/** Accessor to the presentation's sections (used by Section Zoom). @since v4.0.1 */
+	public getSections: () => SectionProps[]
 	public _name: string
 	public _presLayout: PresLayout
 	public _rels: ISlideRel[]
@@ -66,6 +77,7 @@ export default class Slide {
 	constructor(params: {
 		addSlide: (options?: AddSlideProps) => PresSlide
 		getSlide: (slideNum: number) => PresSlide
+		getSections?: () => SectionProps[]
 		presLayout: PresLayout
 		setSlideNum: (value: SlideNumberProps) => void
 		slideId: number
@@ -75,6 +87,7 @@ export default class Slide {
 	}) {
 		this.addSlide = params.addSlide
 		this.getSlide = params.getSlide
+		this.getSections = params.getSections || (() => [])
 		this._name = `Slide ${params.slideNumber}`
 		this._presLayout = params.presLayout
 		this._rId = params.slideRId
@@ -124,7 +137,7 @@ export default class Slide {
 	public set background(props: BackgroundProps) {
 		this._background = props
 		// Add background (image data/path must be captured before `exportPresentation()` is called)
-		if (props) genObj.addBackgroundDefinition(props, this)
+		genObj.addBackgroundDefinition(props, this)
 	}
 
 	public get background(): BackgroundProps {
@@ -199,7 +212,10 @@ export default class Slide {
 	private _registerShape(shape: ISlideObject): void {
 		const name = shape.options?.objectName
 		if (name) {
-			if (this._shapesByName.has(name)) {
+			// Auto-paged tables are registered by the inner page add and then seen
+			// once more when the outer addTable call returns. Re-registering the
+			// same object is idempotent; warn only when a different shape collides.
+			if (this._shapesByName.has(name) && this._shapesByName.get(name) !== shape) {
 				console.warn(`Slide ${this._slideNum}: Shape name "${name}" already exists. Overwriting reference.`)
 			}
 			this._shapesByName.set(name, shape)
@@ -289,6 +305,63 @@ export default class Slide {
 	}
 
 	/**
+	 * Add a Cameo (live camera feed) to Slide
+	 * @param {CameoProps} options - cameo options
+	 * @return {Slide} this Slide
+	 * @since v4.0.1
+	 */
+	addCameo(options: CameoProps): Slide {
+		genObj.addCameoDefinition(this, options)
+		// Register shape if it has a name
+		const lastShape = this._slideObjects[this._slideObjects.length - 1]
+		if (lastShape) this._registerShape(lastShape)
+		return this
+	}
+
+	/**
+	 * Add a Slide Zoom (zoom navigation) to Slide
+	 * @param {ZoomProps} options - zoom options (requires targetSlide, a 1-based slide index)
+	 * @return {Slide} this Slide
+	 * @since v4.0.1
+	 */
+	addZoom(options: ZoomProps): Slide {
+		genObj.addZoomDefinition(this, options)
+		// Register shape if it has a name
+		const lastShape = this._slideObjects[this._slideObjects.length - 1]
+		if (lastShape) this._registerShape(lastShape)
+		return this
+	}
+
+	/**
+	 * Add a Section Zoom (zoom navigation to a section) to Slide
+	 * @param {SectionZoomProps} options - section zoom options (requires targetSection: title or 1-based index)
+	 * @return {Slide} this Slide
+	 * @since v4.0.1
+	 */
+	addSectionZoom(options: SectionZoomProps): Slide {
+		genObj.addSectionZoomDefinition(this, options)
+		// Register shape if it has a name
+		const lastShape = this._slideObjects[this._slideObjects.length - 1]
+		if (lastShape) this._registerShape(lastShape)
+		return this
+	}
+
+	/**
+	 * Add a Summary Zoom graphic to this (summary) slide. Prefer `pptx.addSummaryZoom(...)`, which
+	 * also creates the summary slide and section. @see plans/summary-zoom-ooxml-ground-truth.md
+	 * @param {SummaryZoomProps} options - summary zoom options
+	 * @return {Slide} this Slide
+	 * @since v4.0.1
+	 */
+	addSummaryZoom(options?: SummaryZoomProps): Slide {
+		genObj.addSummaryZoomDefinition(this, options || ({} as SummaryZoomProps))
+		// Register shape if it has a name
+		const lastShape = this._slideObjects[this._slideObjects.length - 1]
+		if (lastShape) this._registerShape(lastShape)
+		return this
+	}
+
+	/**
 	 * Add image to Slide
 	 * @param {ImageProps} options - image options
 	 * @return {Slide} this Slide
@@ -353,6 +426,33 @@ export default class Slide {
 		// let shapeNameDecode = typeof shapeName === 'object' && shapeName['name'] ? shapeName['name'] : shapeName
 		genObj.addShapeDefinition(this, shapeName, options)
 		// Register shape if it has a name
+		const lastShape = this._slideObjects[this._slideObjects.length - 1]
+		if (lastShape) this._registerShape(lastShape)
+		return this
+	}
+
+	/** Add a native, endpoint-aware PowerPoint connector. */
+	addConnector(options: ConnectorProps = {}): Slide {
+		genObj.addConnectorDefinition(this, options)
+		const lastShape = this._slideObjects[this._slideObjects.length - 1]
+		if (lastShape) this._registerShape(lastShape)
+		return this
+	}
+
+	/**
+	 * Add the recorded-video object for a native PowerPoint Record Studio
+	 * session. Ordinary audio/video should continue to use addMedia().
+	 */
+	addRecordStudioCapture(options: RecordStudioCaptureProps): Slide {
+		genObj.addRecordStudioCaptureDefinition(this, options)
+		const lastShape = this._slideObjects[this._slideObjects.length - 1]
+		if (lastShape) this._registerShape(lastShape)
+		return this
+	}
+
+	/** Add a native editable PowerPoint group with engine-laid-out child primitives. */
+	addGroup(options: GroupProps): Slide {
+		genObj.addGroupDefinition(this, options)
 		const lastShape = this._slideObjects[this._slideObjects.length - 1]
 		if (lastShape) this._registerShape(lastShape)
 		return this
@@ -511,19 +611,54 @@ export default class Slide {
 				} as any)
 			}
 		}
-		const addConnector = (index: number, x1: number, y1: number, x2: number, y2: number, arrow = true) => {
-			const lineX = Math.min(x1, x2)
-			const lineY = Math.min(y1, y2)
-			const lineW = Math.max(0.01, Math.abs(x2 - x1))
-			const lineH = Math.max(0.01, Math.abs(y2 - y1))
+		const addConnector = (index: number, x1: number, y1: number, x2: number, y2: number, arrow = true, direction?: { x: number, y: number }) => {
+			const minLineDimension = 0.001
+			const hostRight = x + w
+			const hostBottom = y + h
+			const clampCoordinate = (value: number, min: number, max: number, fallback: number) =>
+				Math.min(max, Math.max(min, Number.isFinite(value) ? value : fallback))
+			const startX = clampCoordinate(x1, x, hostRight, x)
+			const startY = clampCoordinate(y1, y, hostBottom, y)
+			const endX = clampCoordinate(x2, x, hostRight, startX)
+			const endY = clampCoordinate(y2, y, hostBottom, startY)
+			const deltaX = endX - startX
+			const deltaY = endY - startY
+			const horizontalDirection = Math.abs(deltaX) >= minLineDimension ? deltaX : (direction?.x || 0)
+			const verticalDirection = Math.abs(deltaY) >= minLineDimension ? deltaY : (direction?.y || 0)
+			const lineW = Math.max(minLineDimension, Math.abs(deltaX))
+			const lineH = Math.max(minLineDimension, Math.abs(deltaY))
+			const lineX = Math.abs(deltaX) >= minLineDimension
+				? Math.min(startX, endX, hostRight - lineW)
+				: clampCoordinate(startX + (horizontalDirection < 0 ? -lineW : 0), x, hostRight - lineW, x)
+			const lineY = Math.abs(deltaY) >= minLineDimension
+				? Math.min(startY, endY, hostBottom - lineH)
+				: clampCoordinate(startY + (verticalDirection < 0 ? -lineH : 0), y, hostBottom - lineH, y)
 			this.addShape('line' as SHAPE_NAME, {
 				x: lineX,
 				y: lineY,
 				w: lineW,
 				h: lineH,
+				flipH: horizontalDirection < 0,
+				flipV: verticalDirection < 0,
 				line: { color: '94A3B8', transparency: 20, width: 1.1, ...(options.line || {}), endArrowType: arrow ? 'triangle' : 'none' },
 				objectName: `${objectName}-connector-${index + 1}`,
 			})
+		}
+		const ellipseBoundaryPoint = (
+			fromX: number,
+			fromY: number,
+			fromW: number,
+			fromH: number,
+			toX: number,
+			toY: number,
+		) => {
+			const deltaX = toX - fromX
+			const deltaY = toY - fromY
+			const radiusX = Math.max(0.001, fromW / 2)
+			const radiusY = Math.max(0.001, fromH / 2)
+			const denominator = Math.sqrt((deltaX * deltaX) / (radiusX * radiusX) + (deltaY * deltaY) / (radiusY * radiusY))
+			if (!Number.isFinite(denominator) || denominator <= 1) return { x: fromX, y: fromY }
+			return { x: fromX + deltaX / denominator, y: fromY + deltaY / denominator }
 		}
 
 		if (layout === 'picture' || layout === 'team') {
@@ -581,8 +716,9 @@ export default class Slide {
 			const midY = workY + workH * 0.5
 			addConnector(0, x, midY, x + w, midY, false)
 			const gap = w / Math.max(nodes.length, 1)
-			const nodeW = Math.min(1.45, gap * 0.8)
-			const nodeH = Math.min(0.58, workH * 0.34)
+			const nodeW = Math.min(2.2, gap * 0.8)
+			const verticalCapacity = Math.max(0.1, workH / 2 - 0.22)
+			const nodeH = Math.min(0.9, workH * 0.34, verticalCapacity)
 			nodes.forEach((node, index) => {
 				const cx = x + gap * index + gap / 2
 				const ny = index % 2 === 0 ? midY - nodeH - 0.22 : midY + 0.22
@@ -628,16 +764,26 @@ export default class Slide {
 			const rx = Math.max(0.1, (w - nodeW) / 2)
 			const ry = Math.max(0.1, (workH - nodeH) / 2)
 			const start = layout === 'relationship' && nodes.length > 1 ? 1 : 0
-			if (layout === 'relationship') addNode(nodes[0], 0, cx - nodeW / 2, cy - nodeH / 2, nodeW, nodeH, 'ellipse' as SHAPE_NAME)
+			const positionedNodes: Array<{ node: SmartArtNode, index: number, x: number, y: number }> = []
 			for (let i = start; i < nodes.length; i++) {
 				const ordinal = i - start
 				const count = Math.max(1, nodes.length - start)
 				const angle = (-90 + (360 / count) * ordinal) * Math.PI / 180
 				const nx = cx + Math.cos(angle) * rx - nodeW / 2
 				const ny = cy + Math.sin(angle) * ry - nodeH / 2
-				if (layout === 'relationship') addConnector(i, cx, cy, nx + nodeW / 2, ny + nodeH / 2, false)
-				addNode(nodes[i], i, nx, ny, nodeW, nodeH, 'ellipse' as SHAPE_NAME)
+				positionedNodes.push({ node: nodes[i], index: i, x: nx, y: ny })
 			}
+			if (layout === 'relationship') {
+				positionedNodes.forEach(positioned => {
+					const peerX = positioned.x + nodeW / 2
+					const peerY = positioned.y + nodeH / 2
+					const rootEdge = ellipseBoundaryPoint(cx, cy, nodeW, nodeH, peerX, peerY)
+					const peerEdge = ellipseBoundaryPoint(peerX, peerY, nodeW, nodeH, cx, cy)
+					addConnector(positioned.index, rootEdge.x, rootEdge.y, peerEdge.x, peerEdge.y, false, { x: peerX - cx, y: peerY - cy })
+				})
+				addNode(nodes[0], 0, cx - nodeW / 2, cy - nodeH / 2, nodeW, nodeH, 'ellipse' as SHAPE_NAME)
+			}
+			positionedNodes.forEach(positioned => addNode(positioned.node, positioned.index, positioned.x, positioned.y, nodeW, nodeH, 'ellipse' as SHAPE_NAME))
 		} else if (layout === 'pyramid') {
 			const gap = 0.08
 			const nodeH = (workH - gap * (nodes.length - 1)) / nodes.length
@@ -691,7 +837,14 @@ export default class Slide {
 	 * @return {Slide} this Slide
 	 */
 	addText(text: string | TextProps[], options?: TextPropsOptions): Slide {
-		const textParam = typeof text === 'string' || typeof text === 'number' ? [{ text, options }] : text
+		// A hyperlink on the addText options targets the whole text box and is
+		// serialized on p:cNvPr. Do not reuse that same options object as the
+		// synthetic run, or the link is duplicated on a:rPr. Authors who need a
+		// run hyperlink use the rich-text array form explicitly.
+		const runOptions = options && Object.prototype.hasOwnProperty.call(options, 'hyperlink')
+			? Object.fromEntries(Object.entries(options).filter(([key]) => key !== 'hyperlink')) as TextPropsOptions
+			: options
+		const textParam = typeof text === 'string' || typeof text === 'number' ? [{ text, options: runOptions }] : text
 		genObj.addTextDefinition(this, textParam, options, false)
 		// Register shape if it has a name
 		const lastShape = this._slideObjects[this._slideObjects.length - 1]
@@ -753,10 +906,14 @@ export default class Slide {
 		// If target is a string, try to resolve it as a shape name
 		// This allows both: addAnimation(shapeObject, ...) and addAnimation('shapeName', ...)
 		let resolvedTarget: ISlideObject | undefined
+		const descendants = nativeGroupIdentityPlan(this).targets
 		
 		if (typeof target === 'string') {
 			// User passed a shape name - look it up automatically
-			resolvedTarget = this.getShapeByName(target)
+			const matches = this._slideObjects.filter(object => object.options?.objectName === target)
+			matches.push(...descendants.filter(entry => entry.name === target).map(entry => entry.target))
+			if (matches.length > 1) throw new Error(`Animation target name "${target}" is ambiguous; give each explicitly targeted object a unique name.`)
+			resolvedTarget = matches[0]
 			if (!resolvedTarget) {
 				console.error(`addAnimation: Shape with name "${target}" not found on this slide.`)
 				console.error(`Available shape names: ${this.getShapeNames().join(', ') || '(none)'}`)
@@ -770,7 +927,12 @@ export default class Slide {
 		
 		// Find the shape's index to get its SPID
 		const shapeIndex = this._slideObjects.indexOf(resolvedTarget)
-		if (shapeIndex === -1) {
+		const descendant = descendants.find(entry => entry.target === resolvedTarget)
+		if (descendant) {
+			assertNativeDescendantAnimationInspectable(this)
+			if (animation.spid !== undefined) throw new Error('A named descendant animation cannot override its native shape identity.')
+		}
+		if (shapeIndex === -1 && !descendant) {
 			// Better error message with helpful suggestions
 			console.error('addAnimation: Target shape not found on this slide.')
 			console.error('Possible causes:')
@@ -789,7 +951,11 @@ export default class Slide {
 		// 3. Non-passthrough shape with explicit spid option
 		// 4. Sequential ID based on position (fallback)
 		let shapeId: number
-		if (animation.spid !== undefined) {
+		if (descendant) {
+			// This is provisional. Serialization resolves the same object identity
+			// again after every later object/group addition.
+			shapeId = descendant.shapeId
+		} else if (animation.spid !== undefined) {
 			shapeId = animation.spid
 		} else if (resolvedTarget.options?.spid !== undefined) {
 			// Shape has an explicit spid (e.g. from decypher tool preserving original PPTX spids)

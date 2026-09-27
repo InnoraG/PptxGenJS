@@ -1,0 +1,82 @@
+services:
+  betterpptx-mcp:
+    build:
+      context: ../..
+      dockerfile: betterpptx-mcp/deploy/Dockerfile
+    environment:
+      BETTERPPTX_HOST: ${BETTERPPTX_HOST:-0.0.0.0}
+      BETTERPPTX_PORT: ${BETTERPPTX_PORT:-3344}
+      BETTERPPTX_PUBLIC_BLACK_BOX: ${BETTERPPTX_PUBLIC_BLACK_BOX:-1}
+      BETTERPPTX_PUBLIC_BASE: ${BETTERPPTX_PUBLIC_BASE:-https://REPLACE-WITH-PUBLIC-ORIGIN}
+      BETTERPPTX_PUBLIC_MCP_URL: ${BETTERPPTX_PUBLIC_MCP_URL:-https://REPLACE-WITH-PUBLIC-ORIGIN/mcp}
+      BETTERPPTX_FFMPEG_PATH: ${BETTERPPTX_FFMPEG_PATH:-/usr/bin/ffmpeg}
+      BETTERPPTX_FFPROBE_PATH: ${BETTERPPTX_FFPROBE_PATH:-/usr/bin/ffprobe}
+      BETTERPPTX_AVATAR_PROVIDER: ${BETTERPPTX_AVATAR_PROVIDER:-test-static}
+      # This compose file is a local/CI fixture environment, never a production fallback.
+      BETTERPPTX_AVATAR_DEVELOPMENT_MODE: ${BETTERPPTX_AVATAR_DEVELOPMENT_MODE:-1}
+      BETTERPPTX_AVATAR_WORKER_URL: ${BETTERPPTX_AVATAR_WORKER_URL:-http://avatar-musetalk-worker:7860}
+      BETTERPPTX_AVATAR_WORKER_ROUTE: ${BETTERPPTX_AVATAR_WORKER_ROUTE:-/v1/avatar/lipsync}
+      BETTERPPTX_AVATAR_WORKER_TOKEN: ${BETTERPPTX_AVATAR_WORKER_TOKEN:-}
+      BETTERPPTX_AVATAR_MAX_CONCURRENCY: ${BETTERPPTX_AVATAR_MAX_CONCURRENCY:-1}
+      BETTERPPTX_AVATAR_MAX_SECONDS: ${BETTERPPTX_AVATAR_MAX_SECONDS:-120}
+      BETTERPPTX_AVATAR_TIMEOUT_MS: ${BETTERPPTX_AVATAR_TIMEOUT_MS:-600000}
+      BETTERPPTX_AVATAR_CACHE_DIR: ${BETTERPPTX_AVATAR_CACHE_DIR:-/var/lib/betterpptx/avatar}
+      BETTERPPTX_AVATAR_CACHE_TTL_MS: ${BETTERPPTX_AVATAR_CACHE_TTL_MS:-2592000000}
+      BETTERPPTX_AVATAR_CACHE_MAX_MB: ${BETTERPPTX_AVATAR_CACHE_MAX_MB:-10240}
+      BETTERPPTX_AVATAR_JOB_TTL_MS: ${BETTERPPTX_AVATAR_JOB_TTL_MS:-86400000}
+      BETTERPPTX_AVATAR_JOB_MAX_MB: ${BETTERPPTX_AVATAR_JOB_MAX_MB:-20480}
+      BETTERPPTX_BILLING_PROVIDER: ${BETTERPPTX_BILLING_PROVIDER:-payram}
+      BETTERPPTX_BILLING_ENFORCE: ${BETTERPPTX_BILLING_ENFORCE:-1}
+      BETTERPPTX_PAYRAM_API_KEY: ${BETTERPPTX_PAYRAM_API_KEY:-}
+    ports:
+      - "${BETTERPPTX_PORT:-3344}:3344"
+    volumes:
+      - betterpptx_outputs:/var/lib/betterpptx/outputs
+      - betterpptx_avatar:/var/lib/betterpptx/avatar
+    restart: unless-stopped
+
+  avatar-musetalk-worker:
+    image: ${BETTERPPTX_MUSETALK_WORKER_IMAGE:-ghcr.io/your-org/betterpptx-avatar-musetalk:1.5}
+    profiles: ["musetalk"]
+    environment:
+      HOST: 0.0.0.0
+      PORT: 7860
+      AVATAR_WORKER_TOKEN: ${BETTERPPTX_AVATAR_WORKER_TOKEN:-}
+    volumes:
+      - avatar_worker_models:/models
+      - avatar_worker_cache:/cache
+    gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+  avatar-sadtalker-worker:
+    image: ${BETTERPPTX_SADTALKER_WORKER_IMAGE:-ghcr.io/your-org/betterpptx-avatar-sadtalker:latest}
+    profiles: ["sadtalker"]
+    environment:
+      HOST: 0.0.0.0
+      PORT: 7860
+      AVATAR_WORKER_TOKEN: ${BETTERPPTX_AVATAR_WORKER_TOKEN:-}
+    volumes:
+      - avatar_worker_models:/models
+      - avatar_worker_cache:/cache
+    gpus: all
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    restart: unless-stopped
+
+volumes:
+  betterpptx_outputs:
+  betterpptx_avatar:
+  avatar_worker_models:
+  avatar_worker_cache:

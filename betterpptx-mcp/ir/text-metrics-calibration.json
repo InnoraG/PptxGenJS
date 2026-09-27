@@ -1,0 +1,23 @@
+{
+  "_provenance": "M6: measured from PowerPoint's own layout via COM (Shape.TextFrame.TextRange.BoundWidth/BoundHeight) on 2026-06-29, Windows host. widthFactor = BoundWidth/char ÷ fontSize at 18pt; lineHeightFactor = single-line BoundHeight ÷ fontSize at 16pt. Stored values add ~5% safety so the estimator stays conservative (prefer a false-positive shrink/warn over silent overflow).",
+  "lineHeightFactor": 1.2,
+  "defaultWidthFactor": 0.5,
+  "widthFactorByFont": {
+    "segoe ui": 0.5,
+    "calibri": 0.46,
+    "aptos": 0.48,
+    "arial": 0.5,
+    "georgia": 0.5,
+    "consolas": 0.58,
+    "times new roman": 0.46
+  },
+  "measuredRaw": {
+    "segoe ui": 0.476,
+    "calibri": 0.437,
+    "aptos": 0.453,
+    "arial": 0.479,
+    "georgia": 0.475,
+    "consolas": 0.559
+  },
+  "reproduce": "tools/measure-text-metrics.ps1 (COM BoundWidth/BoundHeight sweep). Re-run on a new host to recalibrate."
+}

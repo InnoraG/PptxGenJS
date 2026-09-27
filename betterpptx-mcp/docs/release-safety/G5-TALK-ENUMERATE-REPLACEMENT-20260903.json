@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "betterpptx.g5-source-replacement-authorization.v1",
+  "status": "APPROVED",
+  "recordedAt": "2026-09-03",
+  "authorizationKind": "explicit-owner-task-current-library-replacement",
+  "authorizationBasis": "The owner explicitly requested replacing the current talk library animation with the supplied Talking.fbx and enumerate with Counting.fbx. This record covers those two motions in the existing Joe, Louise and Pete project-presenter library, including public semantic selection.",
+  "decisionScope": "Use these exact skeletal sources and verified character bundles to construct embedded project presenters. Preserve the existing in-project distribution boundary. This is not a new third-party licence determination, standalone source redistribution grant, or owner visual acceptance of the result.",
+  "semanticCatalogSelectionAllowed": true,
+  "currentLibraryReplacementAuthorized": true,
+  "rawAssetDistributionAllowed": false,
+  "ownerVisualAcceptanceRecorded": false,
+  "sources": [
+    {
+      "id": "ordinary-talk-native-v1",
+      "sourceTake": "Talking",
+      "originalFilename": "Talking.fbx",
+      "originalSha256": "3df90719aac821c11b2f7590136e80f47ed6130d37260f1dcee3c9b8471c1bf9",
+      "path": "betterpptx-mcp/assets/ordinary-talk-native-v1.glb",
+      "sha256": "1029ba9997a6da3ed0f8ef933600ad67fc6aa6ff9540ecb94ac17b259a7ebd78",
+      "bytes": 868736,
+      "durationMs": 10267,
+      "playbackProof": {
+        "path": "betterpptx-mcp/assets/ordinary-talk-native-v1-playback-proof.json",
+        "sha256": "922bd8b97d34c329949e473705efae1932d404c68689609441a3557122568d56"
+      }
+    },
+    {
+      "id": "ordinary-enumerate-native-v1",
+      "sourceTake": "Counting",
+      "originalFilename": "Counting.fbx",
+      "originalSha256": "8b0975f8e4f98c7eeee84551e8a976a43186def4eebf5c36b38f8e163ebbeff0",
+      "path": "betterpptx-mcp/assets/ordinary-enumerate-native-v1.glb",
+      "sha256": "c0203ad97475c1b22c18e16f640c4d7c928e766a04693e2d4814f16d4d417242",
+      "bytes": 584884,
+      "durationMs": 6633,
+      "playbackProof": {
+        "path": "betterpptx-mcp/assets/ordinary-enumerate-native-v1-playback-proof.json",
+        "sha256": "13060b6ae09e63bdf6ccd88ae74edb91002bd9c1d34af95da42d9470e503f859"
+      }
+    }
+  ],
+  "presenters": [
+    { "identity": "joe", "sha256": "4e6bdce20c194e8326ee92bd0bd24b46b713cbef7cd13906f3af26c73e3f455a", "bytes": 5338292, "replacesSha256": "c97e5c8da788ae84ff62e5225d3a94e338ff75c1ec356d9601611974e5ce1e47" },
+    { "identity": "louise", "sha256": "b0afc53516de27f6bd3f7ba30915677f4c989c54153af5d014490bf235fae1f3", "bytes": 5819576, "replacesSha256": "34bd0237ddb5961c7c1ebb31c6a28644e1966fb2d1f4c193096c8778d6a1e25c" },
+    { "identity": "pete", "sha256": "aa76447ae9aec973763e229fc5554c799744a6c55b324697e1a6bac629005ad3", "bytes": 5535152, "replacesSha256": "99d0f66e010e295cfc2157dea47fb5e428f6ad0cb831aa30ec5696e10b5cd34a" }
+  ],
+  "verification": {
+    "kind": "maintainer-native-powerpoint-full-clip-review",
+    "pptxSha256": "200d3fdc611b69f2fe89b1c3446b1c308101db9b2257f9a726b370d94fd5bf0d",
+    "videoSha256": "83c541f171e957f1cba0ea73783c16f0df2b72a4d869dcc1cdf1c77ec22af7b3",
+    "independentNumericalAuditSha256": "bf9590dab24157c1c0f43782db4410ae5c4cc9391cf122c180892b4adfcac2c8",
+    "preserved": "Geometry, materials, proportions, stopped pose, original 30-fps source timing, all finger rotations, and the other sixteen ordinary motions.",
+    "limits": "Small source/retarget foot drift and the Counting source endpoint discontinuity remain; this does not certify perfect ground contact or a seamless loop. It does not verify the unrelated Northstar narration report."
+  },
+  "distributionBoundary": "Server-side motion sources and character bundles used only to construct embedded project presenters; no standalone/raw GLB, BVH or FBX download, reusable-source resale, or public source/proof metadata exposure.",
+  "earlierFrozenSourcesAndDecisionsModified": false,
+  "hashChangePolicy": "A changed source, target, proof, path or distribution boundary requires a new exact-byte record and relevant verification."
+}

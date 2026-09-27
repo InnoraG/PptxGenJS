@@ -26,6 +26,10 @@ function fail(code, message, details = {}) {
 	throw new SafeFetchError(code, message, details)
 }
 
+function abortFailure() {
+	return new SafeFetchError('SAFE_FETCH_ABORTED', 'Server-side fetch was aborted.')
+}
+
 function normalizeUrl(raw) {
 	let url
 	try { url = new URL(String(raw || '').trim()) }
@@ -164,11 +168,13 @@ function responseHeaders(res) {
 	return headers
 }
 
-function requestOnce(url, { method, headers, body, timeoutMs, maxBytes, requireImage } = {}) {
+function requestOnce(url, { method, headers, body, timeoutMs, maxBytes, requireImage, signal } = {}) {
 	return new Promise(async (resolve, reject) => {
+		if (signal?.aborted) { reject(abortFailure()); return }
 		let record
 		try { record = await resolveSafeAddress(url) }
 		catch (err) { reject(err); return }
+		if (signal?.aborted) { reject(abortFailure()); return }
 
 		const transport = url.protocol === 'https:' ? https : http
 		const options = {
@@ -185,6 +191,7 @@ function requestOnce(url, { method, headers, body, timeoutMs, maxBytes, requireI
 		}
 
 		const req = transport.request(options, res => {
+			if (signal?.aborted) { req.destroy(abortFailure()); return }
 			const headersOut = responseHeaders(res)
 			const contentLength = Number(headersOut['content-length'] || 0)
 			if (contentLength > maxBytes) {
@@ -206,6 +213,7 @@ function requestOnce(url, { method, headers, body, timeoutMs, maxBytes, requireI
 				chunks.push(chunk)
 			})
 			res.on('end', () => {
+				cleanup()
 				resolve({
 					status: res.statusCode || 0,
 					statusText: res.statusMessage || '',
@@ -217,8 +225,12 @@ function requestOnce(url, { method, headers, body, timeoutMs, maxBytes, requireI
 				})
 			})
 		})
+		const onAbort = () => req.destroy(abortFailure())
+		const cleanup = () => signal?.removeEventListener('abort', onAbort)
+		if (signal) signal.addEventListener('abort', onAbort, { once: true })
 		req.on('timeout', () => req.destroy(new SafeFetchError('SAFE_FETCH_TIMEOUT', 'Server-side fetch timed out.')))
-		req.on('error', reject)
+		req.on('error', error => { cleanup(); reject(error) })
+		if (signal?.aborted) { req.destroy(abortFailure()); return }
 		if (body !== undefined && body !== null) req.write(body)
 		req.end()
 	})
@@ -233,9 +245,10 @@ export async function safeFetchToBuffer(rawUrl, options = {}) {
 	const requireImage = !!options.requireImage
 	const headers = options.headers || {}
 	const body = options.body
+	const signal = options.signal
 
 	for (let redirects = 0; redirects <= maxRedirects; redirects++) {
-		const res = await requestOnce(url, { method, headers, body, timeoutMs, maxBytes, requireImage })
+		const res = await requestOnce(url, { method, headers, body, timeoutMs, maxBytes, requireImage, signal })
 		if (![301, 302, 303, 307, 308].includes(res.status) || !res.location) return res
 		if (redirects === maxRedirects) fail('SAFE_FETCH_REFUSED', 'Too many redirects.')
 		url = normalizeUrl(new URL(res.location, url).href)
@@ -251,7 +264,7 @@ export async function safeFetchJson(rawUrl, options = {}) {
 			...(options.headers || {}),
 		},
 	})
-	if (!res.ok) throw new SafeFetchError('SAFE_FETCH_FAILED', `HTTP ${res.status}`)
+	if (!res.ok) throw new SafeFetchError('SAFE_FETCH_FAILED', `HTTP ${res.status}`, { status: res.status, statusText: res.statusText })
 	try { return JSON.parse(res.buffer.toString('utf8')) }
-	catch { throw new SafeFetchError('SAFE_FETCH_FAILED', 'Response was not valid JSON.') }
+	catch { throw new SafeFetchError('SAFE_FETCH_FAILED', 'Response was not valid JSON.', { status: res.status, contentType: res.headers?.['content-type'] || '' }) }
 }

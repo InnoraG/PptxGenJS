@@ -1,0 +1,114 @@
+{
+  "schemaVersion": "betterpptx.avatar-license-ledger.v1",
+  "asOf": "2026-07-20",
+  "ownerApproval": {
+    "status": "APPROVED_AND_CLOSED",
+    "artifact": "betterpptx-mcp/docs/release-safety/AVATAR-LICENSE-OWNER-APPROVAL-2026-07-19.json",
+    "scope": "LivePortrait+MuseTalk talking-head lane only",
+    "approvedAt": "2026-07-19T02:59:31.659Z",
+    "publicEnablementAllowed": false,
+    "licenseGateClosed": true
+  },
+  "productScope": "PowerPoint-native narration recording with embedded talking-head media; native 3D is a separate representation",
+  "entries": [
+    {
+      "id": "liveportrait-code",
+      "component": "LivePortrait source code",
+      "license": "MIT",
+      "commercialStatus": "cleared-code-only",
+      "reviewStatus": "cleared",
+      "evidence": "https://github.com/KlingAIResearch/LivePortrait/blob/main/LICENSE",
+      "obligation": "Retain the MIT copyright and permission notice."
+    },
+    {
+      "id": "liveportrait-insightface-models",
+      "component": "Legacy InsightFace detection models (removed from the worker image)",
+      "license": "non-commercial research",
+      "commercialStatus": "excluded-from-worker",
+      "reviewStatus": "cleared",
+      "evidence": "https://github.com/KlingAIResearch/LivePortrait/blob/main/LICENSE",
+      "obligation": "Do not include these model files in the worker image, SBOM, or customer path; the commercial-safe worker uses the pinned YuNet detector instead."
+    },
+    {
+      "id": "liveportrait-yunet-detector",
+      "component": "OpenCV Zoo YuNet face detector used by the commercial LivePortrait path",
+      "license": "MIT",
+      "commercialStatus": "commercial-safe-by-model-and-code-license",
+      "reviewStatus": "cleared",
+      "evidence": "https://github.com/opencv/opencv_zoo/tree/47534e27c9851bb1128ccc0102f1145e27f23f98/models/face_detection_yunet",
+      "obligation": "Retain the OpenCV Zoo MIT notice and verify the pinned ONNX SHA-256 during each worker image build."
+    },
+    {
+      "id": "musetalk-code",
+      "component": "MuseTalk source code",
+      "license": "MIT",
+      "commercialStatus": "commercial-use-stated",
+      "reviewStatus": "cleared",
+      "evidence": "https://github.com/TMElyralab/MuseTalk/blob/main/LICENSE",
+      "obligation": "Retain the MIT notice and review all bundled dependencies."
+    },
+    {
+      "id": "musetalk-trained-model",
+      "component": "MuseTalk trained model",
+      "license": "commercial-use-stated by upstream README",
+      "commercialStatus": "commercial-use-stated-by-upstream",
+      "reviewStatus": "cleared",
+      "evidence": "https://github.com/TMElyralab/MuseTalk#disclaimerlicense",
+      "obligation": "Retain the upstream commercial-use statement and pin the exact checkpoint revision and hash in the reviewed worker image."
+    },
+    {
+      "id": "musetalk-transitive-models",
+      "component": "Whisper, sd-vae-ft-mse, DWPose and MediaPipe Face Landmarker transitive models",
+      "license": "MIT / Apache-2.0 / CreativeML OpenRAIL-M metadata; MediaPipe Apache-2.0",
+      "commercialStatus": "commercial-use-permitted-with-notices",
+      "reviewStatus": "cleared",
+      "evidence": "https://github.com/TMElyralab/MuseTalk#disclaimerlicense; https://huggingface.co/TMElyralab/MuseTalk/tree/main/musetalk; https://huggingface.co/stabilityai/sd-vae-ft-mse; https://huggingface.co/yzd-v/DWPose; https://github.com/google-ai-edge/mediapipe/blob/master/LICENSE; https://developers.google.com/edge/mediapipe/solutions/vision/face_landmarker",
+      "obligation": "Retain upstream notices and model-card terms; the non-commercial BiSeNet face parser and ResNet18 checkpoints are excluded from the worker image and customer path."
+    },
+    {
+      "id": "musetalk-testdata",
+      "component": "MuseTalk upstream test data",
+      "license": "non-commercial research",
+      "commercialStatus": "excluded-from-product",
+      "reviewStatus": "cleared",
+      "evidence": "https://github.com/TMElyralab/MuseTalk#disclaimerlicense",
+      "obligation": "Do not bundle or use upstream test data in customer production paths."
+    },
+    {
+      "id": "musetalk-mediapipe-parser",
+      "component": "MediaPipe Face Landmarker geometric jaw/mouth mask adapter",
+      "license": "Apache-2.0",
+      "commercialStatus": "commercial-safe-by-code-and-model-license",
+      "reviewStatus": "cleared",
+      "evidence": "https://github.com/google-ai-edge/mediapipe/blob/master/LICENSE",
+      "obligation": "Retain the Apache-2.0 notice and verify the pinned Face Landmarker task SHA-256."
+    },
+    {
+      "id": "betterpptx-owned-detail-enhancer",
+      "component": "BetterPPTX deterministic temporal detail enhancer",
+      "license": "product-owned implementation",
+      "commercialStatus": "commercial-safe-by-provenance",
+      "reviewStatus": "cleared",
+      "evidence": "betterpptx-mcp/deploy/avatar-worker/owned_temporal_detail_enhancer.py",
+      "obligation": "Keep the stage deterministic and non-generative; do not add third-party restoration weights without a new ledger review."
+    },
+    {
+      "id": "sam2-matting",
+      "component": "SAM 2.1 small video segmentation and released checkpoint",
+      "license": "Apache-2.0",
+      "commercialStatus": "commercial-safe-by-code-and-checkpoint-license",
+      "reviewStatus": "cleared",
+      "evidence": "https://github.com/facebookresearch/sam2#license",
+      "obligation": "Retain Apache-2.0/BSD notices and verify commit 2b90b9f5ceec907a1c18123530e92e794ad901a4 plus checkpoint SHA-256 6d1aa6f30de5c92224f8172114de081d104bbd23dd9dc5c58996f0cad5dc4d38."
+    },
+    {
+      "id": "betterpptx-default-presenter",
+      "component": "BetterPPTX default geometric presenter artwork",
+      "license": "product-owned generated artwork",
+      "commercialStatus": "commercial-safe-by-provenance",
+      "reviewStatus": "cleared",
+      "evidence": "betterpptx-mcp/avatar/assets/default-presenter.meta.json",
+      "obligation": "Do not replace with an unlicensed realistic likeness."
+    }
+  ]
+}

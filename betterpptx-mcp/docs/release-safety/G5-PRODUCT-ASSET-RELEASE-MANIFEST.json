@@ -1,0 +1,485 @@
+{
+  "schemaVersion": "betterpptx.g5-product-asset-release-manifest.v1",
+  "measuredAt": "2026-09-04",
+  "policy": {
+    "requiredForRelease": true,
+    "approvedStatuses": [
+      "APPROVED"
+    ],
+    "missingOrPendingAction": "fail-closed",
+    "motionRuntime": {
+      "mode": "mixamo-only",
+      "activeSourceProviders": ["mixamo"],
+      "quarantinedSourceProviders": ["nvidia-kimodo"],
+      "policyArtifact": "betterpptx-mcp/docs/release-safety/G5-MIXAMO-ONLY-ANIMATION-POLICY-20260904.json"
+    }
+  },
+  "assets": [
+    {
+      "id": "kinetic-clips-pool",
+      "path": "betterpptx-mcp/assets/kinetic-clips.glb",
+      "sha256": "0b24cf525add356daf1acb9900e24e204874eaf036344547516071673bfe7876",
+      "bytes": 3252016,
+      "approvalStatus": "APPROVED",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-ASSET-LICENSE-LEDGER.md",
+      "distributionForm": "server-side baked kinetic pool; per-deck selection remains <=18 clips"
+    },
+    {
+      "id": "ordinary-18-gesture-library",
+      "displayName": "curated 18-clip presenter deployment bundle",
+      "path": "betterpptx-mcp/assets/powerpoint-proven-mixamo-library.glb",
+      "sha256": "3363308deb44806bc6f6914ec88b09e32f4e04985355e1c32081d6a5a21765f3",
+      "bytes": 7545976,
+      "approvalStatus": "APPROVED",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-BUNDLE-OWNER-DECISION-20260814.json",
+      "distributionForm": "server-side skeletal-motion source used to construct project presenters; no standalone/raw library download or reusable-source resale; this is not the complete gesture catalog and not authoring-clipmap-v3"
+    },
+    {
+      "id": "default-presenter-joe",
+      "path": "betterpptx-mcp/assets/default-presenter-joe.glb",
+      "sha256": "9e4035eb9509b6fa047a6a6c28c6d550f8b293bec15a9bb87e2f943eae9cbcac",
+      "bytes": 5341464,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "explicit-owner-task-current-library-replacement",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-MIXAMO-ONLY-ANIMATION-POLICY-20260904.json",
+      "supersededArtifacts": [
+        {
+          "sha256": "105594811c8b979af8cd4918e972961ae12fb7e22fa76e3e115542bb2b4cb151",
+          "bytes": 8899436,
+          "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-BUNDLE-OWNER-DECISION-20260814.json"
+        }
+      ],
+      "distributionForm": "current Joe default presenter; embedded only in generated presentation projects; no standalone/raw GLB download or reusable-source resale"
+    },
+    {
+      "id": "default-presenter-louise",
+      "path": "betterpptx-mcp/assets/default-presenter-louise.glb",
+      "sha256": "462c35353d0cda44a44a77e51946765713c9309ef2c4d8f94ce5cb0f74ae846e",
+      "bytes": 5822736,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "explicit-owner-task-current-library-replacement",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-MIXAMO-ONLY-ANIMATION-POLICY-20260904.json",
+      "supersededArtifacts": [
+        {
+          "sha256": "de219e1f6ef01d9612a2464652a2d7a4bd089526b9691e1057cc68675c2789c4",
+          "bytes": 6487668,
+          "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-BUNDLE-OWNER-DECISION-20260814.json"
+        }
+      ],
+      "distributionForm": "current Louise default presenter; embedded only in generated presentation projects; no standalone/raw GLB download or reusable-source resale"
+    },
+    {
+      "id": "default-presenter-pete",
+      "path": "betterpptx-mcp/assets/default-presenter-pete.glb",
+      "sha256": "026cb2d30de10d144804776dc10dd16058a58c7f7979870752ad831c5e70cf6d",
+      "bytes": 5538316,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "explicit-owner-task-current-library-replacement",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-MIXAMO-ONLY-ANIMATION-POLICY-20260904.json",
+      "distributionForm": "Current Pete worker presenter; embedded only in generated presentation projects; no standalone/raw GLB download or reusable-source resale."
+    },
+    {
+      "id": "ordinary-talk-native-v1",
+      "path": "betterpptx-mcp/assets/ordinary-talk-native-v1.glb",
+      "sha256": "1029ba9997a6da3ed0f8ef933600ad67fc6aa6ff9540ecb94ac17b259a7ebd78",
+      "bytes": 868736,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "explicit-owner-task-current-library-replacement",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-TALK-ENUMERATE-REPLACEMENT-20260903.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download or reusable-library resale."
+    },
+    {
+      "id": "ordinary-enumerate-native-v1",
+      "path": "betterpptx-mcp/assets/ordinary-enumerate-native-v1.glb",
+      "sha256": "c0203ad97475c1b22c18e16f640c4d7c928e766a04693e2d4814f16d4d417242",
+      "bytes": 584884,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "explicit-owner-task-current-library-replacement",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-TALK-ENUMERATE-REPLACEMENT-20260903.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download or reusable-library resale."
+    },
+    {
+      "id": "kinetic-clips-extension",
+      "displayName": "15-source/29-row kinetic extension library",
+      "path": "betterpptx-mcp/assets/kinetic-clips-extension.glb",
+      "sha256": "0b7a9b73c5fb5a805b195198540804140335b8912b778cc88454a8c3d93ea889",
+      "bytes": 646700,
+      "approvalStatus": "APPROVED",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-PRESENTER-MOTION-OWNER-DECISION-20260831.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct project presenters; no standalone/raw library download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "authoring-interaction-18",
+      "displayName": "18-clip semantic interaction library",
+      "path": "betterpptx-mcp/assets/authoring-interaction-clips-v3-proven.glb",
+      "sha256": "116e168a9321f0d51659faaea6fcba00ee7c00c7e0568335be2d9f4355f54840",
+      "bytes": 771148,
+      "approvalStatus": "APPROVED",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-PRESENTER-MOTION-OWNER-DECISION-20260831.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct project presenters; no standalone/raw library download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-landing-native-v1",
+      "displayName": "Native-axis Falling To Landing source correction",
+      "path": "betterpptx-mcp/assets/kinetic-landing-native-v1.glb",
+      "sha256": "7b6b77cf73a34f300360da0fa880260dc46b7dff77f600cc64834e46fc275b9e",
+      "bytes": 149908,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-NATIVE-LANDING-SOURCE-CORRECTION-20260903.json",
+      "distributionForm": "Server-side skeletal-motion source correction used only to construct embedded project presenters; no standalone/raw library download, BVH/FBX redistribution, or reusable-source resale. This record does not grant visual acceptance or production promotion."
+    },
+    {
+      "id": "kinetic-forward-slide-native-v1",
+      "displayName": "Native-axis forward_slide kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-forward-slide-native-v1.glb",
+      "sha256": "5058b1184e4c101af7accc56c0a4ff09a3ceae1508b7f3122564b691981793ff",
+      "bytes": 85060,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-active-idle-native-v1",
+      "displayName": "Native-axis active_idle kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-active-idle-native-v1.glb",
+      "sha256": "85670af6d445e225b0f3cd4eaa09abc948a4aa234de6ad936debda3bd1075dc7",
+      "bytes": 360160,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-sprint-native-v1",
+      "displayName": "Native-axis sprint kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-sprint-native-v1.glb",
+      "sha256": "7ccba76c4737c0640963f6a2e3c988bc0ae99a0501cc6015ce839c2224c1902a",
+      "bytes": 58920,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-dive-roll-native-v1",
+      "displayName": "Native-axis dive_roll kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-dive-roll-native-v1.glb",
+      "sha256": "9c8903adadddec1a6b3855e9b994712439dac3f7c248f823e0e1f734388dcc48",
+      "bytes": 173160,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-flying-native-v1",
+      "displayName": "Native-axis flying kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-flying-native-v1.glb",
+      "sha256": "23bf1904e75c90bd6b557c17cf641596df0acca37736d1351dc7f2c143a3b4d3",
+      "bytes": 81156,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-floating-drift-native-v1",
+      "displayName": "Native-axis floating_drift kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-floating-drift-native-v1.glb",
+      "sha256": "efd5dcd381b446813059fbd499528f988fd86418efd5d8cbef34f30424a0e799",
+      "bytes": 155808,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-heavy-jump-native-v1",
+      "displayName": "Native-axis heavy_jump kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-heavy-jump-native-v1.glb",
+      "sha256": "95f5bd46043b9feceba309a6e6bf9b9cf7fcd1fa82af91b9d366961e03c010ef",
+      "bytes": 75408,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-freefall-native-v1",
+      "displayName": "Native-axis freefall kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-freefall-native-v1.glb",
+      "sha256": "3bf38cdece1adf4f93cc1a682da3dec05e3b03402c83b383753e0154e0d43d90",
+      "bytes": 63572,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-backflip-native-v1",
+      "displayName": "Native-axis backflip kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-backflip-native-v1.glb",
+      "sha256": "219a08794b13b752332a02ff7e1e77020378f965bfd0b8571afa631e97713e40",
+      "bytes": 175952,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-heavy-kick-native-v1",
+      "displayName": "Native-axis heavy_kick kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-heavy-kick-native-v1.glb",
+      "sha256": "e608d3458e6be66fce542f724bbd2d71d8dc7c7eb5d08a74b72efc0721135d1a",
+      "bytes": 98672,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-ground-pound-native-v1",
+      "displayName": "Native-axis ground_pound kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-ground-pound-native-v1.glb",
+      "sha256": "6b2809a591ccbfc3b9a21fe8523cae219d4874633eb237a91187699c422f4ecb",
+      "bytes": 292592,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-heavy-push-native-v1",
+      "displayName": "Native-axis heavy_push kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-heavy-push-native-v1.glb",
+      "sha256": "75b7056b3a35d6e80ce8b6e4e29bffdcf6d81d4ded366b5a7ea5bde68dcd1642",
+      "bytes": 81752,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-victory-jump-native-v1",
+      "displayName": "Native-axis victory_jump kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-victory-jump-native-v1.glb",
+      "sha256": "9c8ab4d86be51616991409f60fb9e0228e8fa6d1d7466e0cff9dceb1e3b6be58",
+      "bytes": 91784,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-skyward-launch-native-v1",
+      "displayName": "Native-axis skyward_launch kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-skyward-launch-native-v1.glb",
+      "sha256": "6c1eb2e1de9b4e292ca4a8bebbf278ba89400cf45ce5fdfa5a80d5c97181724b",
+      "bytes": 94464,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-orbit-turn-native-v1",
+      "displayName": "Native-axis orbit_turn kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-orbit-turn-native-v1.glb",
+      "sha256": "ded89ee0ddec23dae63dc08658fd7b7214692fbfb3e0564822a96d3b4652fedb",
+      "bytes": 95484,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-gforce-lean-native-v1",
+      "displayName": "Native-axis gforce_lean kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-gforce-lean-native-v1.glb",
+      "sha256": "31448df04f6112b07f256bf5e5f685f6abab10cf6d8cdc3cd52dc4dee799216c",
+      "bytes": 88956,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-magical-reveal-native-v1",
+      "displayName": "Native-axis magical_reveal kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-magical-reveal-native-v1.glb",
+      "sha256": "d0c37ad23e279a63d182388f55dfe6e34addc5d0ec9b97f042a4342731a9c2d3",
+      "bytes": 179096,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-rolling-native-v1",
+      "displayName": "Native-axis rolling kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-rolling-native-v1.glb",
+      "sha256": "78b37be92ab8be50818535b413525e44533c4a9078f0e77d6811a7f304bb3a8c",
+      "bytes": 123520,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-elastic-stretch-native-v1",
+      "displayName": "Native-axis elastic_stretch kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-elastic-stretch-native-v1.glb",
+      "sha256": "69a7dff808912ca226b414ff04c1e99f14ae26d34d1723ecf785569b80e6ea75",
+      "bytes": 327044,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-stage-stomp-native-v1",
+      "displayName": "Native-axis stage_stomp kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-stage-stomp-native-v1.glb",
+      "sha256": "58c154f68193f6e108e1d3283c1aafadfc4ebc930105bd62f2e93d0319f0ac11",
+      "bytes": 93600,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-shield-block-native-v1",
+      "displayName": "Native-axis shield_block kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-shield-block-native-v1.glb",
+      "sha256": "34999b42dc4d3c69e6e507adb781f2e215dd96f21f39bb5ccbd1f482164e1727",
+      "bytes": 61792,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-scroll-wheel-pull-native-v1",
+      "displayName": "Native-axis scroll_wheel_pull kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-scroll-wheel-pull-native-v1.glb",
+      "sha256": "199df3db0bc25305c59c1b496195567ac5b4b621dd388f44ef23ab7d3d916855",
+      "bytes": 512952,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-window-breaker-native-v1",
+      "displayName": "Native-axis window_breaker kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-window-breaker-native-v1.glb",
+      "sha256": "ceec47856c0cfbdf81a6ee44df17cc5b7f87622c1c10be77be612402b6181c3d",
+      "bytes": 68844,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-bow-pull-native-v1",
+      "displayName": "Native-axis bow_pull kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-bow-pull-native-v1.glb",
+      "sha256": "18516c48e888af534286a56b7d9b74996194cae996ba5bc9642a79662fcc5755",
+      "bytes": 67584,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-spin-kick-native-v1",
+      "displayName": "Native-axis spin_kick kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-spin-kick-native-v1.glb",
+      "sha256": "9347d29b4e0ffa94cd0295de1bb1beda3d851e0627d3c69797f86e2d7b041b22",
+      "bytes": 163216,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-scanning-lookup-native-v1",
+      "displayName": "Native-axis scanning_lookup kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-scanning-lookup-native-v1.glb",
+      "sha256": "352eb2448f6c83aa21296be1c1132b9930946407b7f6a91b038881731f7f178a",
+      "bytes": 133788,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-side-dodge-native-v1",
+      "displayName": "Native-axis side_dodge kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-side-dodge-native-v1.glb",
+      "sha256": "12d2b23c16bba2bb2b9038a3da141b3d8a34713dfba062bf64d059f18ab90f46",
+      "bytes": 65788,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-uppercut-native-v1",
+      "displayName": "Native-axis uppercut kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-uppercut-native-v1.glb",
+      "sha256": "99725a32ce680fd65a5822b9dfe4a079467fee230477fdfa1dfce404b2a1569a",
+      "bytes": 79092,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "kinetic-atlas-lift-native-v1",
+      "displayName": "Native-axis atlas_lift kinetic source",
+      "path": "betterpptx-mcp/assets/kinetic-atlas-lift-native-v1.glb",
+      "sha256": "2c43136ac266a5d8cbaa1a6a2d0d6f407a53d9965e853e712054fde2b274848e",
+      "bytes": 274180,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH/FBX redistribution, or reusable-source resale."
+    },
+    {
+      "id": "interaction-greet-bow-native-v1",
+      "displayName": "Native-axis 15_greet_bow interaction source",
+      "path": "betterpptx-mcp/assets/interaction-greet-bow-native-v1.glb",
+      "sha256": "f480562c7cc5165f1d71f8f3ec49e30f65534e93855f0248b6425ef85bd3d83c",
+      "bytes": 445152,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-INTERACTION-NATIVE-FIRST-FRAME-CORRECTION-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH redistribution, or reusable-source resale."
+    },
+    {
+      "id": "interaction-agree-nod-native-v1",
+      "displayName": "Native-axis 16_agree_nod interaction source",
+      "path": "betterpptx-mcp/assets/interaction-agree-nod-native-v1.glb",
+      "sha256": "6b1e64bdf040c209b222efdf50db5f9cd76f624b0358edfc4e349ca345efc1b0",
+      "bytes": 327016,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-INTERACTION-NATIVE-FIRST-FRAME-CORRECTION-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH redistribution, or reusable-source resale."
+    },
+    {
+      "id": "interaction-disagree-shake-native-v1",
+      "displayName": "Native-axis 17_disagree_shake interaction source",
+      "path": "betterpptx-mcp/assets/interaction-disagree-shake-native-v1.glb",
+      "sha256": "dd070db73d075cfd66666b6c3076f3afe54ff5ce927629c9a835f4f0cb7bcfb4",
+      "bytes": 327056,
+      "approvalStatus": "APPROVED",
+      "approvalKind": "task-authorized-native-axis-source-correction",
+      "approvalArtifact": "betterpptx-mcp/docs/release-safety/G5-INTERACTION-NATIVE-FIRST-FRAME-CORRECTION-20260904.json",
+      "distributionForm": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw source download, BVH redistribution, or reusable-source resale."
+    }
+  ]
+}

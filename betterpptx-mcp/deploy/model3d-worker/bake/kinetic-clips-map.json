@@ -1,0 +1,153 @@
+{
+  "_comment": "kinetic slug -> staged FBX plus root-motion policy. Consumed by mixamo_bake.py (5th arg). inPlace=false preserves rest-relative Hips motion; rootAnchor selects the grounded endpoint used as the canonical origin.",
+  "clips": {
+    "superhero_landing": {
+      "fbx": "Falling To Landing.fbx",
+      "inPlace": false,
+      "rootAnchor": "end",
+      "sourceTake": "Falling To Landing",
+      "sourceQualifier": "closest local Mixamo vertical landing; replaces the incorrect Swing To Land mapping"
+    },
+    "forward_slide": {
+      "fbx": "Running Slide.fbx",
+      "inPlace": true
+    },
+    "active_idle": {
+      "fbx": "../idle.fbx",
+      "inPlace": true,
+      "sourceTake": "Breathing Idle",
+      "sourceQualifier": "proven front-facing presenter idle; replaces the oblique combat guard"
+    },
+    "sprint": {
+      "fbx": "Sprint (In Place).fbx",
+      "inPlace": true
+    },
+    "dive_roll": {
+      "fbx": "Dive Roll.fbx",
+      "inPlace": false,
+      "rootAnchor": "start"
+    },
+    "flying": {
+      "fbx": "Flying.fbx",
+      "inPlace": true
+    },
+    "floating_drift": {
+      "fbx": "Floating.fbx",
+      "inPlace": true
+    },
+    "heavy_jump": {
+      "fbx": "Jump.fbx",
+      "inPlace": false,
+      "rootAnchor": "start"
+    },
+    "freefall": {
+      "fbx": "Falling Idle.fbx",
+      "inPlace": true
+    },
+    "backflip": {
+      "fbx": "Backflip.fbx",
+      "inPlace": false,
+      "rootAnchor": "start"
+    },
+    "heavy_kick": {
+      "fbx": "Mma Kick.fbx",
+      "inPlace": false,
+      "rootAnchor": "start",
+      "displayName": "Roundhouse Kick",
+      "sourceTake": "Mma Kick",
+      "sourceQualifier": "spinning roundhouse take; compatibility slug retained until a grounded front-kick source is approved"
+    },
+    "ground_pound": {
+      "fbx": "Hell Slammer A.fbx",
+      "inPlace": false,
+      "rootAnchor": "start"
+    },
+    "heavy_push": {
+      "fbx": "Pushing.fbx",
+      "inPlace": false,
+      "rootAnchor": "start"
+    },
+    "victory_jump": {
+      "fbx": "Cheering.fbx",
+      "inPlace": false,
+      "rootAnchor": "start"
+    },
+    "skyward_launch": {
+      "fbx": "Jumping.fbx",
+      "inPlace": false,
+      "rootAnchor": "start"
+    },
+    "orbit_turn": {
+      "fbx": "Turning.fbx",
+      "inPlace": true
+    },
+    "gforce_lean": {
+      "fbx": "Leaning.fbx",
+      "inPlace": true
+    },
+    "magical_reveal": {
+      "fbx": "Spell Casting.fbx",
+      "inPlace": false,
+      "rootAnchor": "start"
+    },
+    "rolling": {
+      "fbx": "Run To Rolling.fbx",
+      "inPlace": true
+    },
+    "elastic_stretch": {
+      "fbx": "Arm Stretching.fbx",
+      "inPlace": true
+    },
+    "stage_stomp": {
+      "fbx": "Stomp.fbx",
+      "inPlace": false,
+      "rootAnchor": "start"
+    },
+    "shield_block": {
+      "fbx": "Blocking.fbx",
+      "inPlace": true
+    },
+    "scroll_wheel_pull": {
+      "fbx": "Pulling A Rope.fbx",
+      "inPlace": false,
+      "rootAnchor": "start"
+    },
+    "window_breaker": {
+      "fbx": "Elbow Punch.fbx",
+      "inPlace": false,
+      "rootAnchor": "start"
+    },
+    "bow_pull": {
+      "fbx": "Standing Draw Arrow.fbx",
+      "inPlace": false,
+      "rootAnchor": "start"
+    },
+    "drop_to_landing": {
+      "fbx": "Falling To Landing.fbx",
+      "inPlace": false,
+      "rootAnchor": "end"
+    },
+    "spin_kick": {
+      "fbx": "Spin Flip Kick.fbx",
+      "inPlace": false,
+      "rootAnchor": "start"
+    },
+    "scanning_lookup": {
+      "fbx": "Looking Around.fbx",
+      "inPlace": true
+    },
+    "side_dodge": {
+      "fbx": "Dodging Right.fbx",
+      "inPlace": true
+    },
+    "uppercut": {
+      "fbx": "Uppercut.fbx",
+      "inPlace": false,
+      "rootAnchor": "start"
+    },
+    "atlas_lift": {
+      "fbx": "Lifting.fbx",
+      "inPlace": true
+    }
+  }
+}

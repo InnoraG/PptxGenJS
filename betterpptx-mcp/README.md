@@ -1,5 +1,23 @@
 # betterpptx-mcp
 
+## Authoring Excellence interaction contract
+
+New deck construction goes through the MCP `betterpptx.deck.generate_from_spec`
+front door and its JSON-spec compiler. Presenter interactions are semantic:
+`slides[].interactions` accepts `{actor, verb, target, hand?, distIn?}` with
+verbs `touch`, `point-at`, `press`, `push`, `knock-over`, and `carry`. `target`
+must be a stable same-slide content `objectName`/`name`. The compiler resolves
+geometry and timing from the actor's empirical `clipTimelines` manifest and
+records the result in `_synergyPlan`; clients inspect that result but never
+hand-author it. Interaction-heavy slides without a solved plan are rejected,
+as are hand-authored multi-`playScene` choreographies. Production Baker output
+must persist a PowerPoint-oracle `manifest.clipTimelines` alongside contacts.
+
+The dedicated 18-slot interaction clip contract is checked by
+`verify-authoring-clipset-v3.mjs`; every slot must have a licensed Mixamo
+source, baked bytes, and oracle-measured timeline before it can be advertised
+as shippable.
+
 A complete **Model Context Protocol** server that exposes the EVOLVED
 `pptxgenjs` library (the one in this repo — v4.0.1, far beyond public
 `pptxgenjs`) as a clean set of MCP tools.
@@ -13,7 +31,7 @@ client.
 - **Bin**: `betterpptx-mcp` (registered in root `package.json`)
 - **Entry**: `betterpptx-mcp/cli.mjs` → `betterpptx-mcp/server.mjs`
 - **Transports**:
-  - **stdio** (`@modelcontextprotocol/sdk`) — Claude Desktop / Claude Code / Codex
+  - **stdio** (`@modelcontextprotocol/server` + `@modelcontextprotocol/client`) — Claude Desktop / Claude Code / Codex
   - **Streamable HTTP** (`server-http.mjs`) — claude.ai & chatgpt.com web connectors,
     with three auth modes (`bearer` header · `path` URL-secret · `none`) and public
     file downloads (`/files/...`). See **[GO_PUBLIC.md](./GO_PUBLIC.md)**.
@@ -253,16 +271,41 @@ Non-full mode caps each event at 200k characters; full mode is uncapped unless
 - Capacity guards (deck LRU/TTL eviction, heavy-op concurrency gate, disk budget)
   keep memory/disk bounded under load; live numbers at `GET /health`.
 
-### Local smoke test (in-process, fast)
+Public FTR save is fail-closed until the exact frozen package can be rendered by
+PowerPoint. On an approved Windows/PowerPoint render host, set
+`BETTERPPTX_AUTHORITATIVE_POWERPOINT_PREVIEW=1`; this enables the existing
+PowerPoint export path without enabling local-maintainer privileges. Linux or
+Cloud Run deployments do not satisfy this dependency by themselves and must
+report `external-infrastructure-required` until an approved authoritative
+Windows render service is connected. Never enable `BETTERPPTX_LOCAL_MAINTAINER`
+on a public deployment merely to bypass this gate.
+
+### Local Authoring Excellence smoke test (real MCP transport)
 
 ```bash
 node betterpptx-mcp/demo-runner.mjs
-# → outputs/BetterPptxMcp_Showcase_v2_<stamp>.pptx
+# → outputs/BetterPptxMcp_AuthoringDemo_<stamp>.pptx
 ```
 
-This calls `callBetterPptxTool` (the tool-layer function) directly, bypassing
-the stdio transport. It's the same code path the MCP server hits when it
-receives a `tools/call` — just without JSON-RPC framing in the way.
+This starts a fresh MCP worker, discovers `betterpptx.help.capabilities` and
+`betterpptx.help.workflow`, and verifies the versioned
+`authoring-excellence.api.v1` contract before compiling a semantic Director
+JSON spec through `betterpptx.deck.generate_from_spec`. The AI supplies story,
+roles, regions, and layout intent; the engine owns content-aware placement,
+geometry, timing, and quality readback. The demo deliberately has no direct
+engine import, primitive slide mutations, or hand-authored coordinates.
+
+For an AI client, the discovery sequence is:
+
+1. `betterpptx.help.capabilities({ detail: "full" })` — read the authoring
+   principles, decision guide, semantic vocabulary, forbidden inputs, kinetic
+   policy, and validation contracts.
+2. `betterpptx.help.workflow({ detail: "full" })` — read the governed stages
+   and exit criteria.
+3. `betterpptx.deck.generate_from_spec` — submit semantic intent with `phase:
+   "dryRun"`, inspect the engine plan/readback, then repeat with `phase:
+   "commit"`.
+4. Run the returned validation/readback tools before `betterpptx.deck.save`.
 
 ### WIRE-ONLY demo (proves the deck builds purely over MCP)
 
@@ -348,10 +391,13 @@ Transport-agnostic recipe layer:
 
 ## Built-in showcase
 
-`betterpptx.demo.build_showcase` (also runnable directly via
-`node betterpptx-mcp/demo-runner.mjs`) produces a 17-slide AUTOPLAY deck
-that exercises **every** evolved capability — every slide advances after
-7 seconds, loops continuously, runs in kiosk mode:
+`betterpptx.demo.build_showcase` is a project-internal legacy regression
+fixture. It is not the production authoring route and is not used by
+`demo-runner.mjs`; maintained authoring goes through MCP discovery plus
+`betterpptx.deck.generate_from_spec`.
+
+The older primitive showcase below remains useful only for testing individual
+serialization capabilities and must not be used as an AI authoring recipe:
 
 | Slide | Content                                                                                              |
 | ----- | ---------------------------------------------------------------------------------------------------- |

@@ -1,0 +1,25 @@
+{
+  "schema": "betterpptx.g1.powerpoint-visual-evidence.v1",
+  "measuredAt": "2026-08-15T16:12:50Z",
+  "application": "Microsoft PowerPoint 16.0 native PNG export",
+  "isolation": "export aborted if any pre-existing PowerPoint process was present",
+  "review": "All six exact-hash renders were inspected. Each slide shows one visible ellipse presenter in the accepted window, no same-box fallback picture, no clipping or overlap, and intact native chart, table, 3D, WordArt, and shape proof where authored.",
+  "files": [
+    {
+      "path": "betterpptx-mcp/outputs/g1-native-recordstudio-evolved-20260814/g1-evolved-native-recordstudio-review-20260814-notes-only.pptx",
+      "bytes": 23207270,
+      "sha256": "dbbecd52e780f0b3cdbb9cd80d93c21a719758df96c96eecd7305f2b27c510d0",
+      "status": "PASS",
+      "slides": 6,
+      "renders": [
+        { "slide": 1, "path": "betterpptx-mcp/outputs/g1-native-recordstudio-evolved-20260814/release-revalidation/powerpoint-export/Slide1.PNG", "bytes": 332440, "sha256": "febed287c400e6ec96bf852883f67e70d12744c6649a534e15c64d6a210f2bb1", "width": 1600, "height": 900 },
+        { "slide": 2, "path": "betterpptx-mcp/outputs/g1-native-recordstudio-evolved-20260814/release-revalidation/powerpoint-export/Slide2.PNG", "bytes": 263213, "sha256": "e5838ac32b6d899bc7a96d160a5ddcf429f7e8a4ac46f437c6aa19a1e54ab14e", "width": 1600, "height": 900 },
+        { "slide": 3, "path": "betterpptx-mcp/outputs/g1-native-recordstudio-evolved-20260814/release-revalidation/powerpoint-export/Slide3.PNG", "bytes": 244260, "sha256": "9b9985b7c86a92926568ef6ea224c4158621bc803b100a35f80ac7e08d7f95ec", "width": 1600, "height": 900 },
+        { "slide": 4, "path": "betterpptx-mcp/outputs/g1-native-recordstudio-evolved-20260814/release-revalidation/powerpoint-export/Slide4.PNG", "bytes": 229828, "sha256": "5fe51440f7b27bdb4f06eb4adf3466f123a6a03fd3e60852e003f790d39e46ee", "width": 1600, "height": 900 },
+        { "slide": 5, "path": "betterpptx-mcp/outputs/g1-native-recordstudio-evolved-20260814/release-revalidation/powerpoint-export/Slide5.PNG", "bytes": 213042, "sha256": "578fb93cfedd86a13c04517cc706a03e1fcecb474d6bda7ab840e0712931f513", "width": 1600, "height": 900 },
+        { "slide": 6, "path": "betterpptx-mcp/outputs/g1-native-recordstudio-evolved-20260814/release-revalidation/powerpoint-export/Slide6.PNG", "bytes": 273839, "sha256": "ac4b130559a051fdb1fabf50200d5cae2d4d8137bbc9219c54ec4e08482695c4", "width": 1600, "height": 900 }
+      ]
+    }
+  ],
+  "pass": true
+}

@@ -1,0 +1,37 @@
+{
+  "identicalOutputDigest": true,
+  "records": [
+    {
+      "capability": "reference",
+      "coldStart": true,
+      "contentType": "image/png",
+      "gpuSeconds": 15.447,
+      "gpuType": "L40S",
+      "height": 1024,
+      "label": "cached-cold",
+      "model": "black-forest-labs/FLUX.2-klein-4B",
+      "modelRevision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
+      "outputPath": "betterpptx-mcp/deploy/image-edit-worker/canary-benchmark-cached-cold.png",
+      "seconds": 4.303,
+      "sha256": "487d43446866e69491d75c4468f1ed3071689c72b8c985175ef97f8719352b28",
+      "width": 1024
+    },
+    {
+      "capability": "reference",
+      "coldStart": false,
+      "contentType": "image/png",
+      "gpuSeconds": 2.974,
+      "gpuType": "L40S",
+      "height": 1024,
+      "label": "warm",
+      "model": "black-forest-labs/FLUX.2-klein-4B",
+      "modelRevision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
+      "outputPath": "betterpptx-mcp/deploy/image-edit-worker/canary-benchmark-warm.png",
+      "seconds": 2.974,
+      "sha256": "487d43446866e69491d75c4468f1ed3071689c72b8c985175ef97f8719352b28",
+      "width": 1024
+    }
+  ],
+  "referenceKind": "owned-synthetic",
+  "schemaVersion": "betterpptx.image-edit-worker-benchmark.v1"
+}

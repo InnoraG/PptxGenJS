@@ -1,0 +1,89 @@
+name: BetterPPTX MCP CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "betterpptx-mcp/**"
+      - "deploy/**"
+      - "src/**"
+      - "types/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".dockerignore"
+      - ".gcloudignore"
+      - ".github/workflows/betterpptx-mcp-ci.yml"
+      - ".github/workflows/betterpptx-mcp-canary.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "betterpptx-mcp/**"
+      - "deploy/**"
+      - "src/**"
+      - "types/**"
+      - "package.json"
+      - "package-lock.json"
+      - ".dockerignore"
+      - ".gcloudignore"
+      - ".github/workflows/betterpptx-mcp-ci.yml"
+      - ".github/workflows/betterpptx-mcp-canary.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: betterpptx-mcp-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Verify source and container
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    steps:
+      - name: Check out the exact triggering revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: Install locked root dependencies
+        run: npm ci
+
+      - name: Install locked MCP runtime dependencies
+        run: npm ci --prefix betterpptx-mcp
+
+      - name: Reject high or critical production dependency advisories
+        run: |
+          npm audit --omit=dev --audit-level=high
+          npm audit --prefix betterpptx-mcp --omit=dev --audit-level=high
+
+      - name: Verify release/schema version binding
+        run: npm run verify:release-version --prefix betterpptx-mcp
+
+      - name: Type-check the PowerPoint library
+        run: npx tsc --noEmit
+
+      - name: Run core and authoring regression tests
+        run: |
+          npm run test:unit
+          npm run test:authoring-augmentation --prefix betterpptx-mcp
+          node --test betterpptx-mcp/test/inline-image-dimensions-security.test.mjs
+          node --test betterpptx-mcp/test/public-artifact-download-sanitization.test.mjs
+          node --test betterpptx-mcp/test/production-non-rendering-save.test.mjs
+
+      - name: Build the production container without publishing it
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_digest="$(git archive "$GITHUB_SHA" | sha256sum | cut -d ' ' -f1)"
+          docker build \
+            --build-arg BETTERPPTX_BUILD_SOURCE_DIGEST="$source_digest" \
+            --build-arg BETTERPPTX_SOURCE_REVISION="$GITHUB_SHA" \
+            --file deploy/docker/Dockerfile.mcp \
+            --tag "betterpptx-mcp-ci:$GITHUB_SHA" .

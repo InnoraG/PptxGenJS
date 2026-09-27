@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "betterpptx.deck-spec.v1",
+  "title": "Dimensional typography lesson",
+  "authoringContract": {
+    "workflow": "ai-sovereign-v1",
+    "creativeAuthority": "ai",
+    "directorMode": "off",
+    "verificationMode": "complete",
+    "geometryAuthority": "ai",
+    "placementPolicy": "ai-authored-geometry-v1",
+    "coordinateSystem": "inches"
+  },
+  "styleIntent": {
+    "artDirection": "editorial",
+    "mode": "dark"
+  },
+  "validation": {
+    "validateBeforeSave": true,
+    "requireAccessibility": true
+  },
+  "slides": [
+    {
+      "id": "hero",
+      "title": "Product reveal",
+      "content": [
+        {
+          "kind": "textBox",
+          "name": "hero-title",
+          "text": "WERT",
+          "rect": {
+            "x": 0.9,
+            "y": 2.2,
+            "w": 11.5,
+            "h": 1.5
+          },
+          "options": {
+            "align": "center",
+            "fontSize": 58,
+            "bold": true,
+            "wordArt": {
+              "transform": "textPlain"
+            },
+            "text3D": {
+              "material": "warmMatte",
+              "bevel": {
+                "type": "circle",
+                "width": 4,
+                "height": 4
+              },
+              "extrusion": 8,
+              "extrusionColor": "6D28D9",
+              "lightRig": "threePt",
+              "rotationX": 8,
+              "rotationY": -10,
+              "perspective": 20
+            },
+            "textGlow": {
+              "size": 8,
+              "color": "8B5CF6",
+              "opacity": 0.35
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

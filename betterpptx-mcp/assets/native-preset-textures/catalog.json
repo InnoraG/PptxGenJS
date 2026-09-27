@@ -1,0 +1,179 @@
+{
+  "schema": "betterpptx.native-preset-texture.v1",
+  "source": "PowerPoint COM Fill.PresetTextured 1-24, saved and extracted",
+  "editability": {
+    "powerPointFillParameters": "ui-editable",
+    "embeddedTexturePixels": "asset-editable",
+    "nativePresetId": "mcp-regenerable"
+  },
+  "presets": [
+    {
+      "presetId": "texture.papyrus",
+      "comId": 1,
+      "file": "betterpptx-mcp/assets/native-preset-textures/papyrus.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image1.jpeg"
+    },
+    {
+      "presetId": "texture.canvas",
+      "comId": 2,
+      "file": "betterpptx-mcp/assets/native-preset-textures/canvas.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image2.jpeg"
+    },
+    {
+      "presetId": "texture.denim",
+      "comId": 3,
+      "file": "betterpptx-mcp/assets/native-preset-textures/denim.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image3.jpeg"
+    },
+    {
+      "presetId": "texture.wovenMat",
+      "comId": 4,
+      "file": "betterpptx-mcp/assets/native-preset-textures/wovenMat.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image4.jpeg"
+    },
+    {
+      "presetId": "texture.waterDroplets",
+      "comId": 5,
+      "file": "betterpptx-mcp/assets/native-preset-textures/waterDroplets.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image5.jpeg"
+    },
+    {
+      "presetId": "texture.paperBag",
+      "comId": 6,
+      "file": "betterpptx-mcp/assets/native-preset-textures/paperBag.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image6.jpeg"
+    },
+    {
+      "presetId": "texture.fishFossil",
+      "comId": 7,
+      "file": "betterpptx-mcp/assets/native-preset-textures/fishFossil.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image7.jpeg"
+    },
+    {
+      "presetId": "texture.sand",
+      "comId": 8,
+      "file": "betterpptx-mcp/assets/native-preset-textures/sand.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image8.jpeg"
+    },
+    {
+      "presetId": "texture.greenMarble",
+      "comId": 9,
+      "file": "betterpptx-mcp/assets/native-preset-textures/greenMarble.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image9.jpeg"
+    },
+    {
+      "presetId": "texture.whiteMarble",
+      "comId": 10,
+      "file": "betterpptx-mcp/assets/native-preset-textures/whiteMarble.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image10.jpeg"
+    },
+    {
+      "presetId": "texture.brownMarble",
+      "comId": 11,
+      "file": "betterpptx-mcp/assets/native-preset-textures/brownMarble.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image11.jpeg"
+    },
+    {
+      "presetId": "texture.granite",
+      "comId": 12,
+      "file": "betterpptx-mcp/assets/native-preset-textures/granite.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image12.jpeg"
+    },
+    {
+      "presetId": "texture.newsprint",
+      "comId": 13,
+      "file": "betterpptx-mcp/assets/native-preset-textures/newsprint.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image13.jpeg"
+    },
+    {
+      "presetId": "texture.recycledPaper",
+      "comId": 14,
+      "file": "betterpptx-mcp/assets/native-preset-textures/recycledPaper.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image14.jpeg"
+    },
+    {
+      "presetId": "texture.parchment",
+      "comId": 15,
+      "file": "betterpptx-mcp/assets/native-preset-textures/parchment.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image15.jpeg"
+    },
+    {
+      "presetId": "texture.stationery",
+      "comId": 16,
+      "file": "betterpptx-mcp/assets/native-preset-textures/stationery.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image16.jpeg"
+    },
+    {
+      "presetId": "texture.blueTissuePaper",
+      "comId": 17,
+      "file": "betterpptx-mcp/assets/native-preset-textures/blueTissuePaper.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image17.jpeg"
+    },
+    {
+      "presetId": "texture.pinkTissuePaper",
+      "comId": 18,
+      "file": "betterpptx-mcp/assets/native-preset-textures/pinkTissuePaper.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image18.jpeg"
+    },
+    {
+      "presetId": "texture.purpleMesh",
+      "comId": 19,
+      "file": "betterpptx-mcp/assets/native-preset-textures/purpleMesh.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image19.jpeg"
+    },
+    {
+      "presetId": "texture.bouquet",
+      "comId": 20,
+      "file": "betterpptx-mcp/assets/native-preset-textures/bouquet.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image20.jpeg"
+    },
+    {
+      "presetId": "texture.cork",
+      "comId": 21,
+      "file": "betterpptx-mcp/assets/native-preset-textures/cork.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image21.jpeg"
+    },
+    {
+      "presetId": "texture.walnut",
+      "comId": 22,
+      "file": "betterpptx-mcp/assets/native-preset-textures/walnut.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image22.jpeg"
+    },
+    {
+      "presetId": "texture.oak",
+      "comId": 23,
+      "file": "betterpptx-mcp/assets/native-preset-textures/oak.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image23.jpeg"
+    },
+    {
+      "presetId": "texture.mediumWood",
+      "comId": 24,
+      "file": "betterpptx-mcp/assets/native-preset-textures/mediumWood.jpeg",
+      "tile": "<a:tile tx=\"0\" ty=\"0\" sx=\"100000\" sy=\"100000\" flip=\"none\" algn=\"tl\"/>",
+      "media": "../media/image24.jpeg"
+    }
+  ]
+}

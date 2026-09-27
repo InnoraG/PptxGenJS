@@ -8,6 +8,7 @@ import { isProceduralAssetHandle, materializeProceduralAssetHandle } from './pro
 import type { BrandKit, ExpressiveBuildResult } from './types.js'
 import { validateExpressiveSpec } from './validation/expressive.js'
 import { normalizeNativeChartType } from './chart-presets.js'
+import { resolveChartPlan } from './chart-plan.js'
 
 const SLIDE_WIDE = { width: 13.333, height: 7.5 }
 
@@ -109,7 +110,7 @@ function objectName(object: any): string | undefined {
 }
 
 function baseOptions(object: any, rect?: Rect, brandKit?: BrandKit): any {
-	const reserved = new Set(['kind', 'objectType', 'text', 'objects', 'chartType', 'charts', 'data', 'series', 'labels', 'values', 'rows', 'src', 'path', 'mediaType', 'shapeType', 'type', 'animations', 'from', 'to', 'name', 'options', 'place', 'featureBudget'])
+	const reserved = new Set(['kind', 'objectType', 'text', 'objects', 'chartType', 'charts', 'data', 'series', 'labels', 'values', 'rows', 'src', 'path', 'mediaType', 'shapeType', 'type', 'animations', 'from', 'to', 'name', 'options', 'place', 'featureBudget', 'chartPresetId', 'chartGalleryTilePresetId', 'chartStylePresetId', 'chartGalleryVariant', 'chartStyleId', 'chartStyleModernId', 'chartColorStyleId', 'chartLayoutPresetId', 'chartTreatmentPresetId', 'chartTreatmentPresetIds'])
 	const options: Record<string, unknown> = {}
 	for (const [key, value] of Object.entries(object || {})) {
 		if (!reserved.has(key)) options[key] = value
@@ -197,14 +198,14 @@ function center(rect: Rect): { x: number; y: number } {
 	return { x: rect.x + rect.w / 2, y: rect.y + rect.h / 2 }
 }
 
-function addPrimitive(slide: any, object: any, ctx: {
+async function addPrimitive(slide: any, object: any, ctx: {
 	repoRoot: string
 	outputDir: string
 	brandKit?: BrandKit
 	rects: Map<string, Rect>
 	coverage: Set<string>
 	offset?: { x: number; y: number }
-}, rect: Rect): void {
+	}, rect: Rect): Promise<void> {
 	const offset = ctx.offset || { x: 0, y: 0 }
 	const placed = { ...rect, x: rect.x + offset.x, y: rect.y + offset.y }
 	const kind = objectKind(object)
@@ -237,6 +238,13 @@ function addPrimitive(slide: any, object: any, ctx: {
 	}
 	if (kind === 'chart') {
 		const options = baseOptions(object, placed, ctx.brandKit)
+		const rawChartType = object.chartType || object.type || (object?.options && object.options.chartType)
+		const requestedPlan = {
+			...(object?.options && typeof object.options === 'object' ? object.options : {}),
+			...Object.fromEntries(['chartPresetId', 'chartType', 'chartGalleryTilePresetId', 'chartStylePresetId', 'chartGalleryVariant', 'chartStyleId', 'chartStyleModernId', 'chartColorStyleId', 'chartLayoutPresetId', 'chartTreatmentPresetId', 'chartTreatmentPresetIds'].filter(key => object?.[key] != null).map(key => [key, object[key]])),
+		}
+		const resolvedPlan = await resolveChartPlan(requestedPlan, ctx.repoRoot)
+		Object.assign(options, resolvedPlan.plan)
 		if (Array.isArray(object.charts) || Array.isArray(object.chartType)) {
 			const charts = (object.charts || object.chartType).map((chart: any) => ({
 				...chart,
@@ -247,8 +255,8 @@ function addPrimitive(slide: any, object: any, ctx: {
 			}))
 			slide.addChart(charts as any, options)
 		} else {
-			const rawChartType = object.chartType || object.type || 'bar'
-			const chartType = normalizeNativeChartType(rawChartType) || rawChartType
+			const selectedChartType = resolvedPlan.plan.chartType || rawChartType || 'bar'
+			const chartType = normalizeNativeChartType(selectedChartType) || selectedChartType
 			const lower = String(chartType).toLowerCase()
 			if (/scatter|bubble|radar|doughnut|bar3d|area|line/.test(lower)) ctx.coverage.add('advancedCharts')
 			if (String(rawChartType).toLowerCase().includes('column')) options.barDir = options.barDir || 'col'
@@ -325,7 +333,9 @@ function addPrimitive(slide: any, object: any, ctx: {
 	if (kind === 'group') {
 		const childObjects = Array.isArray(object.objects) ? object.objects : []
 		const childRects = solveLayout(object.componentLayout, childObjects, { width: placed.w, height: placed.h }, ctx.brandKit)
-		childObjects.forEach((child, index) => addPrimitive(slide, child, { ...ctx, offset: { x: placed.x, y: placed.y } }, childRects[index]))
+		for (let index = 0; index < childObjects.length; index += 1) {
+			await addPrimitive(slide, childObjects[index], { ...ctx, offset: { x: placed.x, y: placed.y } }, childRects[index])
+		}
 	}
 }
 
@@ -404,7 +414,9 @@ export async function buildExpressiveDeck(args: any, outputPath: string, sourceP
 		const objects = Array.isArray(slideSpec.objects) ? slideSpec.objects : []
 		const rects = solveLayout(slideSpec.componentLayout, objects, SLIDE_WIDE, brandKit)
 		const objectRects = new Map<string, Rect>()
-		objects.forEach((object: any, index: number) => addPrimitive(slide, object, { repoRoot, outputDir, brandKit, rects: objectRects, coverage }, rects[index]))
+		for (let index = 0; index < objects.length; index += 1) {
+			await addPrimitive(slide, objects[index], { repoRoot, outputDir, brandKit, rects: objectRects, coverage }, rects[index])
+		}
 		for (const animation of Array.isArray(slideSpec.animations) ? slideSpec.animations : []) {
 			addAnimation(slide, animation, coverage)
 		}

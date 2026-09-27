@@ -1,0 +1,95 @@
+{
+  "schemaVersion": "betterpptx.release.owner-action-packet.v1",
+  "status": "OWNER_ACTIONS_PENDING",
+  "approvalPolicy": "No approval is inferred. The owner must record decisions in the source manifests after review.",
+  "provenance": {
+    "commit": "recorded in strict-release-gate-snapshot.json",
+    "strictSnapshot": "betterpptx-mcp/outputs/strict-release-gate-snapshot.json",
+    "note": "The untracked machine snapshot is authoritative for the exact current commit and clean/dirty state; this tracked packet intentionally avoids a self-referential SHA."
+  },
+  "actions": {
+    "g1": {
+      "id": "g1-owner-approval-exact-delivery-candidate",
+      "status": "COMPLETE",
+      "requiredDecision": "Complete: owner approval is hash-bound to the exact active native Record Studio candidate.",
+      "manifest": "betterpptx-mcp/docs/release-safety/G1-PRODUCTION-DELIVERY-RELEASE-MANIFEST.json",
+      "artifacts": [
+        {
+          "id": "g1-evolved-native-recordstudio-review-notes-only",
+          "path": "betterpptx-mcp/outputs/g1-native-recordstudio-evolved-20260814/g1-evolved-native-recordstudio-review-20260814-notes-only.pptx",
+          "sha256": "dbbecd52e780f0b3cdbb9cd80d93c21a719758df96c96eecd7305f2b27c510d0",
+          "bytes": 23207270,
+          "approvalStatus": "OWNER_APPROVED",
+          "packageScan": "CLEAN",
+          "powerPointPlayback": "PASS",
+          "presenterFrame": {
+            "leftPt": 791.4959716796875,
+            "topPt": 371.5199890136719,
+            "widthPt": 162,
+            "heightPt": 162,
+            "playOnEntry": -1
+          }
+        }
+      ],
+      "evidence": {
+        "manifestReport": "betterpptx-mcp/outputs/g1-delivery-release-manifest-report.json",
+        "playbackEvidence": "betterpptx-mcp/docs/release-safety/G1-EVOLVED-POWERPOINT-PLAYBACK-2026-08-15.json",
+        "reopenEvidence": "betterpptx-mcp/docs/release-safety/G1-EVOLVED-POWERPOINT-REOPEN-2026-08-15.json",
+        "visualEvidence": "betterpptx-mcp/docs/release-safety/G1-EVOLVED-POWERPOINT-VISUAL-2026-08-15.json",
+        "allMeasuredChecksPass": true
+      }
+    },
+    "g4": {
+      "id": "g4-live-deployment-rotation-breakglass-evidence",
+      "status": "OPEN_EXTERNAL_EVIDENCE",
+      "requiredDecision": "Supply immutable live deployment, rotation, rollback/break-glass, and no-raw-secret evidence.",
+      "evidencePath": "betterpptx-mcp/docs/release-safety/G4-DEPLOYMENT-EVIDENCE.json",
+      "preflightPath": "betterpptx-mcp/docs/release-safety/G4-LIVE-DEPLOYMENT-PREFLIGHT-2026-08-15.json",
+      "localControlsRemainPass": true
+    },
+    "g5": {
+      "id": "g5-owner-approval-product-bundles",
+      "status": "COMPLETE",
+      "requiredDecision": "Complete: all exact product assets are owner-approved at their recorded boundaries.",
+      "manifest": "betterpptx-mcp/docs/release-safety/G5-PRODUCT-ASSET-RELEASE-MANIFEST.json",
+      "assets": [
+        {
+          "id": "kinetic-clips-pool",
+          "path": "betterpptx-mcp/assets/kinetic-clips.glb",
+          "sha256": "0b24cf525add356daf1acb9900e24e204874eaf036344547516071673bfe7876",
+          "bytes": 3252016,
+          "approvalStatus": "APPROVED",
+          "present": true
+        },
+        {
+          "id": "ordinary-18-gesture-library",
+          "path": "betterpptx-mcp/assets/powerpoint-proven-mixamo-library.glb",
+          "sha256": "3363308deb44806bc6f6914ec88b09e32f4e04985355e1c32081d6a5a21765f3",
+          "bytes": 7545976,
+          "approvalStatus": "APPROVED",
+          "present": true
+        },
+        {
+          "id": "default-presenter-joe",
+          "path": "betterpptx-mcp/assets/default-presenter-joe.glb",
+          "sha256": "105594811c8b979af8cd4918e972961ae12fb7e22fa76e3e115542bb2b4cb151",
+          "bytes": 8899436,
+          "approvalStatus": "APPROVED",
+          "present": true
+        },
+        {
+          "id": "default-presenter-louise",
+          "path": "betterpptx-mcp/assets/default-presenter-louise.glb",
+          "sha256": "de219e1f6ef01d9612a2464652a2d7a4bd089526b9691e1057cc68675c2789c4",
+          "bytes": 6487668,
+          "approvalStatus": "APPROVED",
+          "present": true
+        }
+      ],
+      "evidence": {
+        "manifestReport": "betterpptx-mcp/outputs/g5-product-asset-ledger-report.json",
+        "localHashAndPresencePass": true
+      }
+    }
+  }
+}

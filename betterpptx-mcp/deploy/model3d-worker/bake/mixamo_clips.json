@@ -1,0 +1,29 @@
+{
+  "_comment": "EXPANDED presenter gesture set — 18 Mixamo clips STAGED at /opt/mocap (was 9). intent -> Mixamo animation FBX. Fetched 2026-07-09 via Mixamo (Adobe login) as FBX Binary / Without Skin / In Place / 30fps. Mixamo animations target mixamorig:* == our canonical rig, so mixamo_bake.py is a near-identity name-match retarget (COPY_ROTATION LOCAL, rotation-only -> inherently in-place). `core:true` = the 12-clip priority set the auto-director uses. `synthesized:true` = hand-keyed (no download). `available:false` = considered but no clean Mixamo match (NOT downloaded) -> MUST stay OUT of canonical-clipmap.json or the bake RuntimeErrors on the missing FBX (mixamo_bake.py line 61). NEXT: verify PowerPoint's multi-clip ceiling (>9), then freeze canonical-clipmap.json v2 to the supported count, bake_clip_library --mixamo per profile, wire presenter-director. License: embed-in-product OK, no raw-file redistribution (.gitignore blocks *.fbx here).",
+  "clips": {
+    "idle":      { "fbx": "idle.fbx",        "core": true,  "note": "Mixamo 'Breathing Idle' — loopable resting stance (default between gestures)" },
+    "talk":      { "fbx": "talk.fbx",        "core": true,  "note": "Mixamo 'Talking' — loopable speaking gesture (default while narrating)" },
+    "greet":     { "fbx": "greet.fbx",       "core": true,  "note": "Mixamo 'Waving'" },
+    "point":     { "fbx": "point.fbx",       "core": true,  "note": "Mixamo 'Pointing' (forward)" },
+    "emphasize": { "fbx": "emphasize.fbx",   "core": true,  "note": "Mixamo 'Standing Arguing' — forceful two-hand emphatic chops" },
+    "magnitude": { "fbx": "magnitude.fbx",   "core": true,  "note": "Mixamo 'Rallying' — arms-raised expansive 'this is big' gesture" },
+    "contrast":  { "fbx": "contrast.fbx",    "core": true,  "note": "Mixamo 'Weight Shift Gesture' — alternating shift ('on one hand / on the other')" },
+    "enumerate": { "synthesized": true,      "core": true,  "note": "hand-keyed alternating-hand beats (no download, zero provenance)" },
+    "ask":       { "fbx": "ask.fbx",         "core": true,  "note": "Mixamo 'Shrugging' (questioning)" },
+    "present":   { "fbx": "present.fbx",     "core": true,  "note": "Mixamo 'Standing Greeting' — welcoming open gesture toward the audience" },
+    "agree":     { "fbx": "agree.fbx",       "core": true,  "note": "Mixamo 'Lengthy Head Nod' (affirm)" },
+    "bow":       { "fbx": "bow.fbx",         "core": true,  "note": "Mixamo 'Quick Informal Bow' (close / thank-you)" },
+
+    "greet_formal": { "fbx": "greet_formal.fbx", "core": false, "note": "Mixamo 'Salute' (formal open)" },
+    "think":     { "fbx": "think.fbx",       "core": false, "note": "Mixamo 'Thinking' (hand on chin)" },
+    "disagree":  { "fbx": "disagree.fbx",    "core": false, "note": "Mixamo 'Shaking Head No' (negate / caution)" },
+    "happy":     { "fbx": "happy.fbx",       "core": false, "note": "Mixamo 'Cheering' (celebrate a win)" },
+    "surprise":  { "fbx": "surprise.fbx",    "core": false, "note": "Mixamo 'Surprised' (reveal / wow moment)" },
+    "walk":      { "fbx": "walk.fbx",        "core": false, "note": "Mixamo 'Walking' (In Place ON) — for Morph-travel between slides" },
+    "clap":      { "fbx": "clap.fbx",        "core": false, "note": "Mixamo 'Clapping' (applause on a reveal / close)" },
+
+    "point_up":  { "available": false, "note": "SKIPPED — no clean upward-point in Mixamo (only forward/down variants, which duplicate 'point'). Director should fall back to 'point'." },
+    "wait":      { "available": false, "note": "SKIPPED — no clean 'Hands On Hips' / 'Waiting' standing pose in Mixamo (fuzzy sits/poses only); redundant with 'idle'." },
+    "explain":   { "available": false, "note": "SKIPPED — no 'Explaining' animation in Mixamo; redundant with 'talk' / 'emphasize'." }
+  }
+}

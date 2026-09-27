@@ -29,9 +29,10 @@ if (-not (Test-Path $ts)) {
 Write-Host "==> 1/4 tailscale up (browser login to your tailnet)" -ForegroundColor Cyan
 & $ts up
 
-Write-Host "==> 2/4 enable Funnel on port $Port (persisted in tailscaled, survives reboot)" -ForegroundColor Cyan
+Write-Host "==> 2/4 enable Funnel on HTTPS 443 → http://127.0.0.1:$Port (persisted in tailscaled, survives reboot)" -ForegroundColor Cyan
+# Funnel public ports are 443/8443/10000. Do not advertise 3344 as the public port.
 # If Funnel isn't allowed yet, this prints an admin URL to enable it — open it, approve, re-run.
-& $ts funnel --bg $Port
+& $ts funnel --bg --yes --https=443 "http://127.0.0.1:$Port"
 
 Write-Host "==> 3/4 resolve public URL" -ForegroundColor Cyan
 $dns = ((& $ts status --json | ConvertFrom-Json).Self.DNSName).TrimEnd('.')

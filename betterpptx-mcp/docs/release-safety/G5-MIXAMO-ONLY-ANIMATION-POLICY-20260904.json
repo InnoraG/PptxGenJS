@@ -1,0 +1,112 @@
+{
+  "schemaVersion": "betterpptx.g5.mixamo-only-animation-policy.v1",
+  "decisionAt": "2026-09-04",
+  "decision": "ACTIVE_RUNTIME_MIXAMO_ONLY",
+  "ownerDirection": "Temporarily remove the own-provider animation path from the active presenter pipeline until its rigging, orientation, contact and native PowerPoint playback proof is independently complete.",
+  "runtimePolicy": {
+    "mode": "mixamo-only",
+    "activeSourceProviders": [
+      "mixamo"
+    ],
+    "quarantinedSourceProviders": [
+      "nvidia-kimodo"
+    ],
+    "sourceRegistryRevision": "2026-09-04.mixamo-only-v1",
+    "failClosed": true,
+    "noSilentSubstitution": true
+  },
+  "scope": {
+    "activeSelection": "governed catalog rows and default presenter contract",
+    "preservedForLaterProof": [
+      "kinetic-clips-extension.glb",
+      "authoring-interaction-clips-v3-proven.glb",
+      "historical interaction playback proofs and source ledger rows"
+    ],
+    "rawAssetsDeleted": false
+  },
+  "mixamoPresenterRoster": {
+    "contract": "betterpptx-mcp/assets/default-presenter-motion-contract.json",
+    "sourceRows": 18,
+    "activeMixamoRows": 18,
+    "quarantinedNonMixamoRows": 0,
+    "activeDefaultPresenterAssets": [
+      {
+        "id": "default-presenter-joe",
+        "path": "betterpptx-mcp/assets/default-presenter-joe.glb",
+        "sha256": "9e4035eb9509b6fa047a6a6c28c6d550f8b293bec15a9bb87e2f943eae9cbcac",
+        "bytes": 5341464
+      },
+      {
+        "id": "default-presenter-louise",
+        "path": "betterpptx-mcp/assets/default-presenter-louise.glb",
+        "sha256": "462c35353d0cda44a44a77e51946765713c9309ef2c4d8f94ce5cb0f74ae846e",
+        "bytes": 5822736
+      },
+      {
+        "id": "default-presenter-pete",
+        "path": "betterpptx-mcp/assets/default-presenter-pete.glb",
+        "sha256": "026cb2d30de10d144804776dc10dd16058a58c7f7979870752ad831c5e70cf6d",
+        "bytes": 5538316
+      }
+    ],
+    "rosterBuild": {
+      "status": "PASS_ACTIVE_MIXAMO_ROSTER",
+      "activeMaterializerUses": "governed Mixamo source rows and Mixamo-only default presenter contract",
+      "quarantinedSlotsAreNotSelected": true,
+      "postBuildArticulationConstraints": [],
+      "postBuildSmoothing": false
+    }
+  },
+  "verification": {
+    "resolverGate": "PASS",
+    "catalogGate": "PASS",
+    "defaultRosterRebuilt": "PASS",
+    "showcaseRegenerated": "PASS",
+    "powerPointReadback": "PASS",
+    "nativeVideoPlayback": "PASS",
+    "showcase": {
+      "pptx": "outputs/kinetics96-story-20260904/The-Last-Light-56-Mixamo-Only-v2.pptx",
+      "manifest": "outputs/kinetics96-story-20260904/The-Last-Light-56-Mixamo-Only-v2.manifest.json",
+      "packageAudit": "outputs/kinetics96-story-20260904/The-Last-Light-56-Mixamo-Only-v2.package-audit.json",
+      "slides": 58,
+      "activeMotionCount": 56,
+      "pptxSha256": "7f9a0b87843dc8de694312e5bd2c22a5317829359a1442325fdccda5b04d0a1f"
+    },
+    "nativeProof": {
+      "sourceReadback": "PASS",
+      "openedWithoutRepair": true,
+      "video": "D:/PptxGenJS_Claude/.codex-tmp/kinetics96-story/qa/mixamo-only-v2-powerpoint/story-native-playback.mp4",
+      "videoSha256": "e810ec5fb74e01e68924ab3ae6acf4899e0534a2c0f702eda51451e7dc4bdab0",
+      "resolution": "1920x1080",
+      "fps": 30,
+      "visualSampleReview": "PASS_OBSERVED_CUTS_AND_TARGETED_RISK_SHEETS"
+    },
+    "durableVerification": "outputs/kinetics96-story-20260904/The-Last-Light-56-Mixamo-Only-v2.verification.json",
+    "defaultPresenterRoster": {
+      "allActiveRowsMixamo": true,
+      "joe": {
+        "sha256": "9e4035eb9509b6fa047a6a6c28c6d550f8b293bec15a9bb87e2f943eae9cbcac",
+        "bytes": 5341464
+      },
+      "louise": {
+        "sha256": "462c35353d0cda44a44a77e51946765713c9309ef2c4d8f94ce5cb0f74ae846e",
+        "bytes": 5822736
+      },
+      "pete": {
+        "sha256": "026cb2d30de10d144804776dc10dd16058a58c7f7979870752ad831c5e70cf6d",
+        "bytes": 5538316
+      },
+      "menaResearch": {
+        "sha256": "2253cfc9b2b0811c13fd73e05da1dc91cee98e17a8151441030cf2c88e278c8a",
+        "bytes": 9059392,
+        "status": "research-only-owner-gated"
+      }
+    },
+    "kineticProofBinding": {
+      "artifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+      "targetRoster": "rebuilt all-Mixamo Joe/Louise/Pete GLBs",
+      "sourceBytesUnchanged": true
+    }
+  },
+  "productionPromotion": false
+}

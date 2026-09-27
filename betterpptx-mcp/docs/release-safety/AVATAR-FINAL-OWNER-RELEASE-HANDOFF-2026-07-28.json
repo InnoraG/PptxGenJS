@@ -1,0 +1,94 @@
+{
+  "schemaVersion": "betterpptx.avatar.final-owner-release-handoff.v1",
+  "status": "OWNER_ACTIONS_REQUIRED",
+  "generatedAt": "2026-07-29",
+  "scope": "commercial LivePortrait/MuseTalk talking head plus separate Meshy/Mixamo native 3D release gates",
+  "servingBaseline": {
+    "cloudRunService": "betterpptx-mcp-staging",
+    "region": "us-central1",
+    "revision": "betterpptx-mcp-staging-00085-7nm",
+    "provider": "liveportrait-musetalk-commercial",
+    "enhancement": "RestoreFormer++",
+    "motionProfile": "blink-closed-soft-gaze with 40% gaze blend",
+    "mouthProfile": "jaw-strong",
+    "quotaMode": "unbounded-metered",
+    "estimatedGpuSecondsPerRequest": 120,
+    "publicEnablementAllowed": false
+  },
+  "engineeringEvidence": {
+    "readiness": "betterpptx-mcp/outputs/avatar-production-readiness-report.json",
+    "completionAudit": "betterpptx-mcp/outputs/avatar-goal-completion-audit.json",
+    "ownerClosureForm": "betterpptx-mcp/outputs/visualizations/avatar-owner-closure-form.html",
+    "visualTracker": "betterpptx-mcp/outputs/visualizations/avatar-presenter-progress.html",
+    "ownerDecisionPacketVerifier": "betterpptx-mcp/outputs/avatar-owner-closure-decision-report.json",
+    "recordStudioCombinedProof": "betterpptx-mcp/outputs/commercial-poc/recording-import-preservation-test/commercial-avatar-recordstudio-ink-laser-proof.pptx",
+    "recordStudioAnnotationReport": "betterpptx-mcp/outputs/commercial-poc/recording-import-preservation-test/recordstudio-annotation-roundtrip-report.json",
+    "finalAuthoringExcellenceProof": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-excellence-final-3min-quick-reference.pptx",
+    "finalAuthoringExcellenceReport": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-excellence-final-3min-quick-reference-report.json",
+    "finalAuthoringExcellencePackageReport": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-excellence-final-3min-package-report.json",
+    "finalAuthoringExcellencePlayback": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/quick-reference-playback-report.json",
+    "finalAuthoringExcellenceVisualQa": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/visual-qa/quick-reference-canonical-slide-01.png",
+    "authoringDirectorTenSlideProof": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-director-final-10-slide.pptx",
+    "authoringDirectorTenSlideReport": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-director-final-10-slide-report.json",
+    "authoringDirectorTenSlidePackageReport": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/authoring-director-10-slide-package-report.json",
+    "authoringDirectorTenSlidePlayback": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/authoring-director-10-slide-playback-report-final.json",
+    "authoringDirectorTenSlidePauseResume": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/authoring-director-10-slide-pause-resume-report.json",
+    "authoringDirectorAvatarRuntime": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/authoring-director-avatar-runtime-report.json",
+    "authoringDirectorTenSlideVisualQa": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/visual-qa-10-slide/slide-04.png",
+    "identityReviewMediaAudit": "betterpptx-mcp/outputs/avatar-identity-review-media-audit.json",
+    "currentThreeMinuteRoundArtifact": "betterpptx-mcp/outputs/commercial-poc/current-commercial-20260728/final-commercial-avatar-3min-current-round-cropped.pptx",
+    "currentThreeMinuteFramingProof": "betterpptx-mcp/outputs/commercial-poc/current-commercial-20260728/current-commercial-avatar-round-cropped-framing-report.json",
+    "currentThreeMinutePlaybackProof": "betterpptx-mcp/outputs/commercial-poc/current-commercial-20260728/current-round-playback-report.json"
+  },
+  "openGates": [
+    {
+      "id": "provider-billing-reconciliation",
+      "status": "OPEN_OWNER_ACTION",
+      "requiredDecision": "Review the revision-matched commercial App/hour exports for betterpptx-mcp-staging-00085-7nm and either provide native request attribution or explicitly approve the documented aggregate allocation policy.",
+      "evidence": [
+        "betterpptx-mcp/outputs/avatar-provider-billing-reconciliation-report.json",
+        "betterpptx-mcp/outputs/avatar-provider-billing-coverage-report.json",
+        "betterpptx-mcp/outputs/avatar-modal-billing-snapshot-active-window-telcomgapp-20260729-fresh.json",
+        "betterpptx-mcp/outputs/avatar-modal-billing-snapshot-active-window-fluxworkerai-20260729-fresh.json",
+        "betterpptx-mcp/outputs/avatar-modal-billing-snapshot-active-window-telcomgapp-20260728.json",
+        "betterpptx-mcp/outputs/avatar-modal-billing-snapshot-active-window-fluxworkerai-20260728.json",
+        "betterpptx-mcp/outputs/avatar-modal-billing-snapshot-commercial-window-telcomgapp-20260726.json",
+        "betterpptx-mcp/outputs/avatar-modal-billing-snapshot-commercial-window-fluxworkerai-20260726.json",
+        "betterpptx-mcp/outputs/avatar-provider-billing-aggregate-policy-report.json"
+      ],
+      "ownerAttestationFields": ["auditedUtcWindow", "exportReference", "completeWindowAttested", "ownerApproved", "notes"],
+      "releaseCondition": "providerInvoiceReconciled=true and ownerApprovalRecorded=true"
+    },
+    {
+      "id": "lpmt-talking-head-identity-quality",
+      "status": "OPEN_OWNER_REVIEW",
+      "requiredDecision": "Inspect the commercial LP/MT packet once and explicitly choose PASS or FAIL. This is visual QA, not biometric matching; native 3D identity is out of scope.",
+      "evidence": [
+        "betterpptx-mcp/outputs/visualizations/avatar-lpmt-identity-review.html",
+        "betterpptx-mcp/outputs/avatar-identity-quality-review-packet.json",
+        "betterpptx-mcp/outputs/avatar-identity-review-readiness-report.json"
+      ],
+      "ownerAttestationFields": ["ownerName", "ownerOrganization", "reviewedAt", "ownerConfirmation", "decision", "evidenceReference"],
+      "releaseCondition": "reviewProtocol.decision=PASS"
+    },
+    {
+      "id": "native-meshy-mixamo-production-authoring",
+      "status": "OPEN_OWNER_ACTION",
+      "requiredDecision": "Complete Meshy/Mixamo terms and consent worksheet, configure the private Meshy account, provide 1–4 new owner-approved images, authorize one bounded paid live A/B, and record immutable deployment/rollback evidence.",
+      "evidence": [
+        "research-demos/2026-07-18-meshy-avatar/visual-artifacts/release-gates/meshy-owner-preflight-20260718.json",
+        "research-demos/2026-07-18-meshy-avatar/visual-artifacts/release-gates/meshy-owner-decision-worksheet-20260718.json",
+        "research-demos/2026-07-18-meshy-avatar/visual-artifacts/release-gates/meshy-mixamo-commercial-terms-review-20260719.json",
+        "betterpptx-mcp/outputs/presenter-meshy-ab-dryrun-report.json"
+      ],
+      "ownerAttestationFields": ["accountPlanAndTerms", "inputConsentScope", "mixamoDistributionDecision", "approvedInputManifestSha256", "paidCanaryAuthorization", "profileRevisionAndRollbackEvidence"],
+      "releaseCondition": "providerConfigured=true and ownerWorksheetComplete=true and mixamoAttributionReviewed=true and productionNative3dModeDeployed=true and liveABPassed=true"
+    }
+  ],
+  "safety": {
+    "rawSecretsPrinted": false,
+    "customerDataIncluded": false,
+    "automationMustNotInferApproval": true,
+    "noPaidProviderCallWasInitiatedByThisHandoff": true
+  }
+}

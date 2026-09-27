@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "betterpptx.avatar-model-provenance-lock.v1",
+  "asOf": "2026-07-20",
+  "status": "resale-safe-image-freeze",
+  "sourceRepositories": [
+    {
+      "id": "musetalk-source",
+      "repository": "https://github.com/TMElyralab/MuseTalk.git",
+      "observedHead": "0a89dec45a0192b824e3cf4daf96c239440c5ed8",
+      "pinRequiredInWorkerBuild": true
+    },
+    {
+      "id": "liveportrait-source",
+      "repository": "https://github.com/KwaiVGI/LivePortrait.git",
+      "observedHead": "9b294b3d0536135442ea73cb01e6cb3ca7029dd3",
+      "pinRequiredInWorkerBuild": true
+    },
+    {
+      "id": "opencv-zoo-yunet-source",
+      "repository": "https://github.com/opencv/opencv_zoo.git",
+      "observedHead": "47534e27c9851bb1128ccc0102f1145e27f23f98",
+      "pinRequiredInWorkerBuild": true
+    },
+    {
+      "id": "sam2-source",
+      "repository": "https://github.com/facebookresearch/sam2.git",
+      "observedHead": "2b90b9f5ceec907a1c18123530e92e794ad901a4",
+      "pinRequiredInWorkerBuild": true
+    }
+  ],
+  "modelArtifacts": [
+    {
+      "id": "musetalk-checkpoint",
+      "source": "https://huggingface.co/TMElyralab/MuseTalk",
+      "revision": "3ef28bc5cff08c90ad8178a25f1b570cd800170f",
+      "sha256": "7ebf6c98c181e20838e4c0054e96e944ac60d5d692cc01db42839fe11b787007",
+      "files": [{ "path": "musetalkV15/unet.pth", "sha256": "7ebf6c98c181e20838e4c0054e96e944ac60d5d692cc01db42839fe11b787007" }]
+    },
+    {
+      "id": "liveportrait-checkpoint",
+      "source": "https://huggingface.co/KwaiVGI/LivePortrait",
+      "revision": "82a4fa6735ca58432b6ce39301b4b9ee066dea47",
+      "sha256": "251e6a94ad667a1d0c69526d292677165110ef7f0cf0f6d199f0e414e8aa0ca5",
+      "files": [
+        { "path": "liveportrait/base_models/appearance_feature_extractor.pth", "sha256": "5279bb8654293dbdf327030b397f107237dd9212fb11dd75b83dfb635211ceb5" },
+        { "path": "liveportrait/base_models/motion_extractor.pth", "sha256": "251e6a94ad667a1d0c69526d292677165110ef7f0cf0f6d199f0e414e8aa0ca5" },
+        { "path": "liveportrait/base_models/spade_generator.pth", "sha256": "4780afc7909a9f84e24c01d73b31a555ef651521a1fe3b2429bd04534d992aee" },
+        { "path": "liveportrait/base_models/warping_module.pth", "sha256": "2f61a6f265fe344f14132364859a78bdbbc2068577170693da57fb96d636e282" },
+        { "path": "liveportrait/landmark.onnx", "sha256": "31d22a5041326c31f19b78886939a634a5aedcaa5ab8b9b951a1167595d147db" },
+        { "path": "liveportrait/retargeting_models/stitching_retargeting_module.pth", "sha256": "3652d5a3f95099141a56986aaddec92fadf0a73c87a20fac9a2c07c32b28b611" }
+      ]
+    },
+    {
+      "id": "yunet-face-detector",
+      "source": "https://github.com/opencv/opencv_zoo/tree/47534e27c9851bb1128ccc0102f1145e27f23f98/models/face_detection_yunet",
+      "revision": "47534e27c9851bb1128ccc0102f1145e27f23f98",
+      "sha256": "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4",
+      "files": [{ "path": "face_detection_yunet_2023mar.onnx", "sha256": "8f2383e4dd3cfbb4553ea8718107fc0423210dc964f9f4280604804ed2552fa4" }]
+    },
+    {
+      "id": "sd-vae-ft-mse",
+      "source": "https://huggingface.co/stabilityai/sd-vae-ft-mse",
+      "revision": "31f26fdeee1355a5c34592e401dd41e45d25a493",
+      "sha256": "1b4889b6b1d4ce7ae320a02dedaeff1780ad77d415ea0d744b476155c6377ddc",
+      "files": [{ "path": "diffusion_pytorch_model.bin", "sha256": "1b4889b6b1d4ce7ae320a02dedaeff1780ad77d415ea0d744b476155c6377ddc" }]
+    },
+    {
+      "id": "whisper-tiny",
+      "source": "https://huggingface.co/openai/whisper-tiny",
+      "revision": "169d4a4341b33bc18d8881c4b69c2e104e1cc0af",
+      "sha256": "9607f98a2b22d9e229ae43c52ecea79dcede9e0c5cfae67e8da6eda86d8aac1d",
+      "files": [{ "path": "pytorch_model.bin", "sha256": "9607f98a2b22d9e229ae43c52ecea79dcede9e0c5cfae67e8da6eda86d8aac1d" }]
+    },
+    {
+      "id": "dwpose",
+      "source": "https://huggingface.co/yzd-v/DWPose",
+      "revision": "1a7144101628d69ee7a3768d1ee3a094070dc388",
+      "sha256": "0d9408b13cd863c4e95a149dd31232f88f2a12aa6cf8964ed74d7d97748c7a07",
+      "files": [{ "path": "dw-ll_ucoco_384.pth", "sha256": "0d9408b13cd863c4e95a149dd31232f88f2a12aa6cf8964ed74d7d97748c7a07" }]
+    },
+    {
+      "id": "mediapipe-face-landmarker",
+      "source": "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+      "revision": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+      "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+      "files": [{ "path": "face_landmarker.task", "sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff" }]
+    },
+    {
+      "id": "sam2.1-hiera-small",
+      "source": "https://dl.fbaipublicfiles.com/segment_anything_2/092824/sam2.1_hiera_small.pt",
+      "revision": "2b90b9f5ceec907a1c18123530e92e794ad901a4",
+      "sha256": "6d1aa6f30de5c92224f8172114de081d104bbd23dd9dc5c58996f0cad5dc4d38",
+      "files": [{ "path": "sam2.1_hiera_small.pt", "sha256": "6d1aa6f30de5c92224f8172114de081d104bbd23dd9dc5c58996f0cad5dc4d38" }]
+    }
+  ],
+  "requirements": {
+    "workerBuildMustUseImmutableGitCommits": true,
+    "workerBuildMustUseImmutableModelRevisions": true,
+    "everyWeightMustHaveSha256": true,
+    "sbomRequired": true,
+    "licenseReviewRemainsSeparate": true
+  }
+}

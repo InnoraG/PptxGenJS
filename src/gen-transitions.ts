@@ -87,7 +87,12 @@ export function genXmlTransition(transition: TransitionProps): string {
     if (transition.advanceAfterTime) attrs += ` advTm="${transition.advanceAfterTime}"`
     
     // P14 duration attribute (only added inside Choice when using createExt)
-    const p14DurAttr = transition.duration ? ` p14:dur="${transition.duration}"` : ''
+    // Semantic authoring layers use the readable durationMs alias while the
+    // public TransitionProps API historically exposed duration. Treat both as
+    // the same native millisecond control so an authored slider is never
+    // silently dropped when the transition is emitted directly by the library.
+    const transitionDuration = transition.duration ?? transition.durationMs
+    const p14DurAttr = transitionDuration ? ` p14:dur="${transitionDuration}"` : ''
 
     // Direction mapping
     const isVert = transition.direction === 'vert'
@@ -97,8 +102,17 @@ export function genXmlTransition(transition: TransitionProps): string {
     // 2. Helper to build a complete <p:transition>...</p:transition> block
     const buildTrans = (content: string) => `<p:transition${attrs}>${content}</p:transition>`
 
-    // 3. Helper for standard (legacy) transitions - PRESERVE EXISTING LOGIC
-    const createStd = (content: string) => buildTrans(content)
+    // 3. Standard effects also support the Office 2010 duration extension.
+    // Keep their legacy representation byte-for-byte when no duration is set;
+    // an explicit duration uses the same effect and advance controls in both
+    // branches, with p14:dur only in the modern Choice.
+    const createStd = (content: string) => {
+        const standardDuration = transition.duration !== undefined ? transition.duration : transition.durationMs
+        if (typeof standardDuration !== 'number' || !Number.isFinite(standardDuration)) return buildTrans(content)
+        const choice = `<mc:Choice Requires="p14"><p:transition${attrs} p14:dur="${standardDuration}">${content}</p:transition></mc:Choice>`
+        const fallback = `<mc:Fallback xmlns="">${buildTrans(content)}</mc:Fallback>`
+        return `<mc:AlternateContent ${MC} ${P14}>${choice}${fallback}</mc:AlternateContent>`
+    }
 
     // 4. Helper for Extended (p14/p15/p159) transitions - WRAP IN AlternateContent
     // Reference file structure: xmlns on AlternateContent, Fallback has xmlns=""

@@ -1,6 +1,11 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 
+import {
+	meteredFirestoreGet,
+	meteredFirestoreSet,
+} from '../billing/firestore-meter.mjs'
+
 export class EntitlementStoreConfigError extends Error {
 	constructor(code, message, details = {}) {
 		super(message)
@@ -81,7 +86,7 @@ function createFirestoreEntitlementStore() {
 	}
 
 	async function getKeyState(fingerprint) {
-		const snap = await (await collection()).doc(String(fingerprint)).get()
+		const snap = await meteredFirestoreGet((await collection()).doc(String(fingerprint)))
 		return snap.exists ? sanitizePersistedState(snap.data() || {}) : null
 	}
 
@@ -94,7 +99,7 @@ function createFirestoreEntitlementStore() {
 	async function persistKeyState(fingerprint, state) {
 		const now = new Date().toISOString()
 		const ref = (await collection()).doc(String(fingerprint))
-		const snap = await ref.get()
+		const snap = await meteredFirestoreGet(ref)
 		const existing = snap.exists ? sanitizePersistedState(snap.data() || {}) : {}
 		const next = {
 			...existing,
@@ -103,7 +108,7 @@ function createFirestoreEntitlementStore() {
 			createdAt: existing.createdAt || now,
 			updatedAt: now,
 		}
-		await ref.set(next, { merge: true })
+		await meteredFirestoreSet(ref, next, { merge: true })
 		return next
 	}
 

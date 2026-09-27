@@ -8,6 +8,8 @@
 
 // Motion path animation builder - generates <p:animMotion> elements
 
+import { lowerMotionPathToPowerPoint, MotionPathCoordinateSpace } from './motion-path-coordinate'
+
 /**
  * Build a motion path animation
  * @param shapeId - Shape ID
@@ -20,9 +22,10 @@ export function buildMotionPathAnimation(
   shapeId: number | string,
   pathData: string,
   duration: number,
-  idCounter: { id: number }
+  idCounter: { id: number },
+  coordinateSpace: MotionPathCoordinateSpace = 'slide'
 ): string {
-  const path = pathData || 'M 0 0 L 0.25 0 Z'; // Default simple line if no path
+  const path = lowerMotionPathToPowerPoint(pathData || 'M 0 0 L 0.25 0 Z', coordinateSpace); // Default simple line if no path
   const dur = duration || 2000; // Motion paths typically 2 seconds
   
   // Build the animMotion element

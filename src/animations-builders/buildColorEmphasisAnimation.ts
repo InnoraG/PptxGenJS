@@ -70,7 +70,7 @@ export function buildColorEmphasisAnimation(ctx: AnimationBuildContext): string 
             childElements = buildDesaturateElements(targetXml, duration);
             break;
         case 26: // Pulse
-            childElements = buildPulseElements(targetXml, isParagraph);
+            childElements = buildPulseElements(targetXml, isParagraph, animation.duration);
             break;
         default:
             // Fallback: generic emphasis effect
@@ -396,15 +396,21 @@ function buildDesaturateElements(targetXml: string, duration: number): string {
  * Pulse: animEffect + animScale for pulse effect
  * Structure: animEffect (fade out with tmFilter) + animScale (5% growth with autoRev)
  */
-function buildPulseElements(targetXml: string, isParagraph: boolean): string {
+function buildPulseElements(targetXml: string, isParagraph: boolean, authoredDuration?: number): string {
     const effectId = getNextAnimationId();
     const scaleId = getNextAnimationId();
     
-    // Pulse duration pattern (from frozen reference):
-    // - asOneObject/background: effectDur=1000, scaleDur=500
-    // - paragraphs: effectDur=500, scaleDur=250 (half of asOneObject)
-    const effectDuration = isParagraph ? 500 : 1000;
-    const scaleDuration = isParagraph ? 250 : 500;
+    // An explicit duration owns the complete pulse, including growth and return.
+    // Omitted/null retains the frozen defaults: 1000ms for whole/background
+    // targets and 500ms for paragraphs. Zero remains an explicit zero-duration
+    // effect rather than silently restoring either default.
+    const effectDuration = authoredDuration ?? (isParagraph ? 500 : 1000);
+    // Native duration attributes are integer milliseconds. For an odd complete
+    // duration, a 200% scale-child speed represents the two equal half-cycles
+    // exactly without fractional duration attributes or a rounded endpoint.
+    const oddDuration = effectDuration % 2 !== 0;
+    const scaleDuration = oddDuration ? effectDuration : effectDuration / 2;
+    const scaleSpeed = oddDuration ? ' spd="200000"' : '';
     
     return `
                 <p:animEffect transition="out" filter="fade">
@@ -415,7 +421,7 @@ function buildPulseElements(targetXml: string, isParagraph: boolean): string {
                 </p:animEffect>
                 <p:animScale>
                     <p:cBhvr>
-                        <p:cTn id="${scaleId}" dur="${scaleDuration}" autoRev="1" fill="hold"/>
+                        <p:cTn id="${scaleId}" dur="${scaleDuration}"${scaleSpeed} autoRev="1" fill="hold"/>
                         <p:tgtEl>${targetXml}</p:tgtEl>
                     </p:cBhvr>
                     <p:by x="105000" y="105000"/>

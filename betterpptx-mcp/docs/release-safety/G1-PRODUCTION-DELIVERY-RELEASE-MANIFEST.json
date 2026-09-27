@@ -1,0 +1,126 @@
+{
+  "schema": "betterpptx.g1-production-delivery-release-manifest.v1",
+  "status": "OWNER_APPROVED",
+  "publicDeliveryAllowed": false,
+  "createdAt": "2026-08-14",
+  "regeneration": {
+    "authoritativeRoute": "public MCP capability discovery -> betterpptx.assets.upload -> betterpptx.deck.generate_from_spec dryRun/commit with AI-authored avatarNarration -> native Record Studio validation -> quality/package validation -> betterpptx.deck.save",
+    "forbiddenRoute": "ordinary slide media promoted or cosmetically imitated as a talking head",
+    "engineContract": "betterpptx.ai-native-record-studio.v1",
+    "sourcePresenterBytesPreserved": true,
+    "historicalCandidatesRemainQuarantined": true
+  },
+  "ownerApproval": {
+    "status": "APPROVED",
+    "reviewer": "owner",
+    "decision": "APPROVED",
+    "reviewedAt": "2026-08-15",
+    "scope": "Owner approved the exact six-slide evolved native Record Studio candidate identified by SHA-256 dbbecd52e780f0b3cdbb9cd80d93c21a719758df96c96eecd7305f2b27c510d0. The three earlier one-slide candidates are superseded and remain quarantined.",
+    "evidence": "betterpptx-mcp/docs/release-safety/G1-OWNER-APPROVAL-2026-08-15.json"
+  },
+  "blackBoxPolicy": {
+    "privateVocabularyScan": "required",
+    "powerPointReopen": "required",
+    "historicalCommercialPocArtifactsAreNotEligible": true
+  },
+  "playbackContract": {
+    "schema": "betterpptx.avatar.playback-contract.v1",
+    "requireAutoplay": true,
+    "requireNativeNarrationMarker": true,
+    "requireNativeRecordStudioCreation": true,
+    "requireInteractivePauseResume": true,
+    "requireNarrationNotes": true,
+    "requireBetterPptxNarrationNotes": true,
+    "notesOwnership": {
+      "canonicalFinalMarker": "[BetterPPTX-narration]",
+      "legacyReadableMarker": "[narration]",
+      "markerPlacement": "final-block-only",
+      "beforeMarker": "opaque-user-owned-preserve-never-narrate",
+      "afterMarker": "betterpptx-owned-editable-narration-source"
+    },
+    "talkingHeadFrame": {
+      "shape": "ellipse",
+      "crop": "centered-cover",
+      "canonicalWindowIn": {
+        "x": 10.993,
+        "y": 5.16,
+        "w": 2.25,
+        "h": 2.25
+      },
+      "sourceCropPolicy": "source-aware-centered-cover",
+      "reference16By9CropPerSidePercent": 21.875,
+      "toleranceIn": 0.01
+    }
+  },
+  "powerPointReopenEvidence": "betterpptx-mcp/docs/release-safety/G1-EVOLVED-POWERPOINT-REOPEN-2026-08-15.json",
+  "powerPointPlaybackEvidence": "betterpptx-mcp/docs/release-safety/G1-EVOLVED-POWERPOINT-PLAYBACK-2026-08-15.json",
+  "powerPointVisualEvidence": "betterpptx-mcp/docs/release-safety/G1-EVOLVED-POWERPOINT-VISUAL-2026-08-15.json",
+  "approvedEvolvedCandidate": {
+    "id": "g1-evolved-native-recordstudio-review-notes-only",
+    "path": "betterpptx-mcp/outputs/g1-native-recordstudio-evolved-20260814/g1-evolved-native-recordstudio-review-20260814-notes-only.pptx",
+    "bytes": 23207270,
+    "sha256": "dbbecd52e780f0b3cdbb9cd80d93c21a719758df96c96eecd7305f2b27c510d0",
+    "slides": 6,
+    "approvalStatus": "OWNER_APPROVED",
+    "notesOnlyNarrationSurface": true,
+    "nativePresenterWindowIn": { "x": 10.993, "y": 5.16, "w": 2.25, "h": 2.25 },
+    "playbackContract": {
+      "slides": [
+        { "slideIndex": 0, "videoObjectName": "Native Record Studio Presenter" },
+        { "slideIndex": 1, "videoObjectName": "Native Record Studio Presenter" },
+        { "slideIndex": 2, "videoObjectName": "Native Record Studio Presenter" },
+        { "slideIndex": 3, "videoObjectName": "Native Record Studio Presenter" },
+        { "slideIndex": 4, "videoObjectName": "Native Record Studio Presenter" },
+        { "slideIndex": 5, "videoObjectName": "Native Record Studio Presenter" }
+      ]
+    },
+    "technicalReport": "betterpptx-mcp/outputs/g1-native-recordstudio-evolved-20260814/G1-EVOLVED-REGENERATION-REPORT.json"
+  },
+  "artifacts": [
+    {
+      "id": "avatar-delivery-square-sanitized",
+      "path": "betterpptx-mcp/outputs/g1-native-recordstudio-20260814/avatar-delivery-square-sanitized-native-recordstudio-20260814.pptx",
+      "bytes": 1954277,
+      "sha256": "a594e8435005a929b938fb10af80e2bef0cab86755be5ebbff9a16effa5a70da",
+      "approvalStatus": "SUPERSEDED_BY_EVOLVED_OWNER_APPROVAL",
+      "playbackContract": {
+        "talkingHeadFrame": {
+          "sourceCropPercent": { "left": 0, "right": 0, "top": 10, "bottom": 10 }
+        },
+        "slides": [
+          { "slideIndex": 0, "videoObjectName": "Native Record Studio Presenter" }
+        ]
+      }
+    },
+    {
+      "id": "avatar-delivery-sanitized",
+      "path": "betterpptx-mcp/outputs/g1-native-recordstudio-20260814/avatar-delivery-sanitized-native-recordstudio-20260814.pptx",
+      "bytes": 1937453,
+      "sha256": "fee690ffaae36ab0fbcbdefe2e0a56407d42cd8f937e45436e743f1792ab0d46",
+      "approvalStatus": "SUPERSEDED_BY_EVOLVED_OWNER_APPROVAL",
+      "playbackContract": {
+        "talkingHeadFrame": {
+          "sourceCropPercent": { "left": 0, "right": 0, "top": 10, "bottom": 10 }
+        },
+        "slides": [
+          { "slideIndex": 0, "videoObjectName": "Native Record Studio Presenter" }
+        ]
+      }
+    },
+    {
+      "id": "avatar-delivery-narration-sanitized",
+      "path": "betterpptx-mcp/outputs/g1-native-recordstudio-20260814/avatar-delivery-narration-sanitized-native-recordstudio-20260814.pptx",
+      "bytes": 1935774,
+      "sha256": "f1b3ac7d6c53558c75f05ff82d752fd3d792f57cabfbc221e8d587b120cf23d1",
+      "approvalStatus": "SUPERSEDED_BY_EVOLVED_OWNER_APPROVAL",
+      "playbackContract": {
+        "talkingHeadFrame": {
+          "sourceCropPercent": { "left": 0, "right": 0, "top": 10, "bottom": 10 }
+        },
+        "slides": [
+          { "slideIndex": 0, "videoObjectName": "Native Record Studio Presenter" }
+        ]
+      }
+    }
+  ]
+}

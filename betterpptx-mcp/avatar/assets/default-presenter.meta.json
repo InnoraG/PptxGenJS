@@ -1,0 +1,12 @@
+{
+  "name": "BetterPPTX default presenter",
+  "createdAt": "2026-06-06",
+  "assetType": "semi-stylized presenter PNG",
+  "source": "Generated locally by BetterPPTX implementation script using simple geometric drawing commands.",
+  "creationTool": "Pillow via bundled Codex workspace Python runtime",
+  "commercialUseStatus": "product-owned generated geometric artwork; no third-party likeness, no model checkpoint, no stock image",
+  "notes": [
+    "Default avatar is intentionally non-photorealistic.",
+    "Do not replace with a realistic unknown human without license and consent review."
+  ]
+}

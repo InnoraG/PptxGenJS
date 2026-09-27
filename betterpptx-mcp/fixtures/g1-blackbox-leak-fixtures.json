@@ -1,0 +1,133 @@
+{
+  "schemaVersion": "betterpptx.g1-blackbox-leak-fixtures.v3",
+  "result": {
+    "provider": "black-forest-labs/FLUX.2-klein-4B",
+    "model": "black-forest-labs/FLUX.2-klein-4B",
+    "host": "Modal self-hosted L40S",
+    "gpuType": "L40S",
+    "sourcePath": "C:\\private\\betterpptx\\engine.mjs",
+    "note": "PPTX_ULTIMATE_DECYPHER_TOOL Express dependency source code",
+    "handle": "gen://image/0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+  },
+  "tool": {
+    "name": "betterpptx.assets.generate_image",
+    "description": "Flux.2 model provider from C:\\private\\engine.mjs",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "provider": { "type": "string" },
+        "model": { "type": "string" },
+        "sourcePath": { "type": "string" },
+        "outputDir": { "type": "string" },
+        "prompt": { "type": "string" }
+      }
+    }
+  },
+  "pathArgs": {
+    "outputDir": "C:\\private\\outputs",
+    "image": { "path": "C:\\private\\customer.png" },
+    "nested": { "source_path": "C:\\private\\nested\\secret.png", "FILE-PATH": "C:\\private\\nested\\other.png" }
+  },
+  "caseVariantResult": {
+    "Provider": "private-provider",
+    "MODEL": "private-model",
+    "source_path": "C:\\private\\engine.mjs",
+    "GPU_Type": "L40S",
+    "runtime": { "Host": "private compute service", "model_revision": "secret-revision" },
+    "handle": "gen://image/case-variant"
+  },
+  "caseVariantTool": {
+    "name": "betterpptx.assets.generate_image",
+    "description": "private provider schema",
+    "inputSchema": {
+      "type": "object",
+      "properties": {
+        "Provider": { "type": "string" },
+        "model_variant": { "type": "string" },
+        "source_path": { "type": "string" },
+        "prompt": { "type": "string" }
+      }
+    }
+  },
+  "corpus": {
+    "nestedResult": {
+      "result": [{
+        "metadata": {
+          "ProviderName": "private-provider",
+          "model_revision": "private-model-revision",
+          "localPath": "D:\\private\\worker.mjs",
+          "X-Pipeline": "liveportrait-musetalk-commercial"
+        },
+        "artifact": {
+          "fileName": "liveportrait-musetalk-restoreformer++-canary.pptx",
+          "download": "gen://video/avatar123"
+        },
+        "notes": ["RestoreFormer++ was used in a private staging canary."]
+      }],
+      "download": {
+        "downloadName": "liveportrait-musetalk-restoreformer++-canary.pptx"
+      }
+    },
+    "nestedTool": {
+      "name": "betterpptx.assets.generate_image",
+      "description": "nested provider/runtime/path schema from C:\\private\\engine.mjs",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "prompt": { "type": "string" },
+          "runtime": {
+            "type": "object",
+            "properties": {
+              "providerName": { "type": "string" },
+              "model_revision": { "type": "string" },
+              "localPath": { "type": "string" },
+              "execution": {
+                "type": "object",
+                "properties": {
+                  "gpu_type": { "type": "string" },
+                  "privateAssetPath": { "type": "string" }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "packageText": {
+      "slide": "<p:sld><a:t>X-Pipeline: liveportrait-musetalk-commercial</a:t><a:t>RestoreFormer++</a:t></p:sld>",
+      "notes": "<p:notes><a:t>X-Enhancement: restoreformer++</a:t></p:notes>",
+      "chart": "<c:chart><c:v>liveportrait-musetalk-restoreformer++</c:v></c:chart>"
+    },
+    "assetVersionMatrix": {
+      "safeHandles": [
+        "gen://image/0123456789abcdef0123456789abcdef",
+        "gen://video/abcdef0123456789abcdef0123456789",
+        "asset://generated/image/0123456789abcdef",
+        "model3d://rigged/abcdef0123456789",
+        "audio://narration/0123456789",
+        "texture://asset/abcdef0123456789"
+      ],
+      "providerBearingHandles": [
+        "gen://trellis/legacy-asset",
+        "gen://flux/legacy-asset",
+        "gen://unirig/legacy-asset",
+        "gen://modal/legacy-asset"
+      ],
+      "revisions": [
+        { "assetRevision": "asset-revision://0123456789abcdef", "schemaVersion": "v1", "handle": "gen://image/0123456789abcdef0123456789abcdef" },
+        { "assetRevision": "asset-revision://abcdef0123456789", "schemaVersion": "v2", "handle": "gen://video/abcdef0123456789abcdef0123456789" }
+      ]
+    }
+  },
+  "sidecarPayload": {
+    "embeddedAssetLicenses": {
+      "assets": [{
+        "type": "generated",
+        "provider": "trellis",
+        "generator": "trellis-2",
+        "model": "black-forest-labs/FLUX.1-schnell",
+        "host": "modal"
+      }]
+    }
+  }
+}

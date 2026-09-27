@@ -1,0 +1,24 @@
+{
+  "schema": "betterpptx.g1.owner-approval.v1",
+  "approvedAt": "2026-08-15",
+  "status": "APPROVED",
+  "artifact": {
+    "path": "betterpptx-mcp/outputs/g1-native-recordstudio-evolved-20260814/g1-evolved-native-recordstudio-review-20260814-notes-only.pptx",
+    "sha256": "dbbecd52e780f0b3cdbb9cd80d93c21a719758df96c96eecd7305f2b27c510d0",
+    "bytes": 23207270,
+    "slides": 6
+  },
+  "decision": "Owner approved the exact hash-pinned evolved native Record Studio candidate and authorized G1 closure.",
+  "scope": {
+    "nativePresenter": true,
+    "notesOnlyNarrationSurface": true,
+    "captionsAndSubtitles": "removed-from-authoring-excellence",
+    "canonicalPresenterWindowIn": {
+      "x": 10.993,
+      "y": 5.16,
+      "w": 2.25,
+      "h": 2.25
+    }
+  },
+  "broaderRelease": "public delivery remains fail-closed until unrelated provenance, deployment, and other release gates are cleared."
+}

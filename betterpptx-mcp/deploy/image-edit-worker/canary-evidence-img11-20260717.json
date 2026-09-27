@@ -1,0 +1,53 @@
+{
+  "schemaVersion": "betterpptx.image-edit-worker-canary-evidence.v2",
+  "recordedAt": "2026-07-17",
+  "status": "private-research-canary-pass; production-gate-pending",
+  "execution": {
+    "modalProfile": "betterpptx-fluxworkerai1",
+    "workerCapability": "reference",
+    "gpuType": "L40S",
+    "width": 512,
+    "height": 512,
+    "steps": 1,
+    "seed": 1707,
+    "coldStart": true,
+    "seconds": 2.002,
+    "gpuSeconds": 12.379,
+    "peakAllocatedBytes": 17661892096,
+    "peakReservedBytes": 18228445184,
+    "gpuPortionUsdAtRecordedRate": 0.00671,
+    "rateUsdPerGpuSecond": 0.000542
+  },
+  "model": {
+    "repository": "black-forest-labs/FLUX.2-klein-4B",
+    "revision": "e7b7dc27f91deacad38e78976d1f2b499d76a294",
+    "licenseBoundary": "Apache-2.0 model; hosted runtime remains private and owner/legal gated"
+  },
+  "referencePolicy": {
+    "referenceKind": "owned-synthetic",
+    "inputPath": "fixtures/synthetic-reference.png",
+    "inputSha256": "02e7e8323b417a1135e68779174c4a757fc224037640f5cb0d602d8fd47c1379",
+    "customerImages": false,
+    "consentedHumanAssetSentToCloud": false,
+    "trainingEnabled": false
+  },
+  "output": {
+    "path": "outputs/img11-modal-canary-512-1707.png",
+    "sha256": "e590adfe03a30efa675626cced4274a401b648539a1da5ec4ef7bf6e3604ce3b",
+    "contentType": "image/png",
+    "dimensions": "512x512"
+  },
+  "limits": {
+    "boundedInput": true,
+    "boundedResolution": true,
+    "boundedSteps": true,
+    "costCeilingUsd": 0.02,
+    "costCeilingPassed": true
+  },
+  "remainingGates": [
+    "exact in-image dependency/license notice review",
+    "independent blind human calibration",
+    "broader perceptual corpus and endpoint-failover evidence",
+    "owner production-secret and legal approval"
+  ]
+}

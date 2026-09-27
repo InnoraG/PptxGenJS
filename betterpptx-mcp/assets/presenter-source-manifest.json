@@ -1,0 +1,278 @@
+{
+  "schemaVersion": "betterpptx.fresh-presenter-static-bases.v1",
+  "generatedAt": "2026-08-30T12:17:11.080Z",
+  "presenters": {
+    "joe": {
+      "fbx": {
+        "path": "C:/Users/SafeUser/Downloads/JoeFreshOriginal.fbx",
+        "bytes": 54363568,
+        "sha256": "4fc6e3952d97007e337897f76bceb5925d4cf4d83c8362f7898827f52a9b81b9"
+      },
+      "flat": {
+        "path": "D:\\PptxGenJS_Claude\\outputs\\kimodo\\joe-fresh-original-preserved-v1\\joe-fresh-original-flat.glb",
+        "bytes": 57978508,
+        "sha256": "7aca7f03a09ba3d6138b82c89ed5f34835b0781253382ccad319e4dd4db4b1f8"
+      },
+      "static": {
+        "path": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\presenter-source-joe-static.glb",
+        "bytes": 3798240,
+        "sha256": "6dbea686bb3299ddaefbeb18c0459337aeafeaf1978d6459d77aae4ea3c5df96"
+      },
+      "canonicalBoneNamesChanged": 65,
+      "matteChanges": 7,
+      "material": [
+        {
+          "name": "Ch33_body",
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "hasMetallicRoughnessTexture": false,
+          "hasSpecularExtension": false,
+          "hasSpecularTexture": false,
+          "specularFactor": null,
+          "specularColorFactor": null,
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Ch33_hair",
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "hasMetallicRoughnessTexture": false,
+          "hasSpecularExtension": false,
+          "hasSpecularTexture": false,
+          "specularFactor": null,
+          "specularColorFactor": null,
+          "alphaMode": "BLEND"
+        }
+      ],
+      "textureOptimization": {
+        "maxTextureSize": 512,
+        "beforeBytes": 57978148,
+        "afterBytes": 3798240,
+        "reductionPercent": 93.45,
+        "beforeSha256": "aab28aae8969303c2c6e0bca2aba3a06e3a86f8ac142efe74292b8b318808106",
+        "afterSha256": "6dbea686bb3299ddaefbeb18c0459337aeafeaf1978d6459d77aae4ea3c5df96",
+        "beforeCounts": {
+          "meshes": 9,
+          "nodes": 75,
+          "skins": 1,
+          "animations": 0,
+          "accessors": 55,
+          "bufferViews": 61,
+          "textures": 6,
+          "images": 6
+        },
+        "afterCounts": {
+          "meshes": 9,
+          "nodes": 75,
+          "skins": 1,
+          "animations": 0,
+          "accessors": 55,
+          "bufferViews": 59,
+          "textures": 4,
+          "images": 4
+        },
+        "payloadPreserved": true,
+        "texturePrune": {
+          "removedTextures": 2,
+          "removedImages": 2,
+          "retainedTextureCount": 4,
+          "retainedImageCount": 4
+        },
+        "images": [
+          {
+            "name": "Ch33_1001_Normal",
+            "mimeType": "image/png",
+            "beforeBytes": 21180687,
+            "afterBytes": 442892,
+            "beforeSize": [
+              4096,
+              4096
+            ],
+            "afterSize": [
+              512,
+              512
+            ]
+          },
+          {
+            "name": "Ch33_1001_Diffuse",
+            "mimeType": "image/png",
+            "beforeBytes": 15280569,
+            "afterBytes": 363195,
+            "beforeSize": [
+              4096,
+              4096
+            ],
+            "afterSize": [
+              512,
+              512
+            ]
+          },
+          {
+            "name": "Ch33_1002_Normal",
+            "mimeType": "image/png",
+            "beforeBytes": 5105098,
+            "afterBytes": 358642,
+            "beforeSize": [
+              2048,
+              2048
+            ],
+            "afterSize": [
+              512,
+              512
+            ]
+          },
+          {
+            "name": "Ch33_1002_Diffuse",
+            "mimeType": "image/png",
+            "beforeBytes": 5541841,
+            "afterBytes": 503244,
+            "beforeSize": [
+              2048,
+              2048
+            ],
+            "afterSize": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    },
+    "pete": {
+      "fbx": {
+        "path": "C:/Users/SafeUser/Downloads/PeteWorkerFreshOriginal.fbx",
+        "bytes": 64984528,
+        "sha256": "03f5922a1011f0a1f3a42888118b6643848b2163849fd9d0f7b7453d999fad59"
+      },
+      "flat": {
+        "path": "D:\\PptxGenJS_Claude\\outputs\\kimodo\\pete-fresh-original-preserved-v1\\pete-fresh-original-flat.glb",
+        "bytes": 69737852,
+        "sha256": "e914aabe47470652f512a1ea50e0a256acd0dbe1245447680e43759a5d935776"
+      },
+      "static": {
+        "path": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\presenter-source-pete-static.glb",
+        "bytes": 3995196,
+        "sha256": "e67394fc6504b2aaf33f5232fc54509e0413b7dd8ee5b47104a3cd95946ca94e"
+      },
+      "canonicalBoneNamesChanged": 65,
+      "matteChanges": 7,
+      "material": [
+        {
+          "name": "Ch17_body",
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "hasMetallicRoughnessTexture": false,
+          "hasSpecularExtension": false,
+          "hasSpecularTexture": false,
+          "specularFactor": null,
+          "specularColorFactor": null,
+          "alphaMode": "OPAQUE"
+        },
+        {
+          "name": "Ch17_hair",
+          "metallicFactor": 0,
+          "roughnessFactor": 1,
+          "hasMetallicRoughnessTexture": false,
+          "hasSpecularExtension": false,
+          "hasSpecularTexture": false,
+          "specularFactor": null,
+          "specularColorFactor": null,
+          "alphaMode": "BLEND"
+        }
+      ],
+      "textureOptimization": {
+        "maxTextureSize": 512,
+        "beforeBytes": 69737496,
+        "afterBytes": 3995196,
+        "reductionPercent": 94.27,
+        "beforeSha256": "f35b8547a7cddbcb8bc899d92aac90cb172bf5c6e013120bfb2a2e0065d2a744",
+        "afterSha256": "e67394fc6504b2aaf33f5232fc54509e0413b7dd8ee5b47104a3cd95946ca94e",
+        "beforeCounts": {
+          "meshes": 8,
+          "nodes": 74,
+          "skins": 1,
+          "animations": 0,
+          "accessors": 49,
+          "bufferViews": 55,
+          "textures": 6,
+          "images": 6
+        },
+        "afterCounts": {
+          "meshes": 8,
+          "nodes": 74,
+          "skins": 1,
+          "animations": 0,
+          "accessors": 49,
+          "bufferViews": 53,
+          "textures": 4,
+          "images": 4
+        },
+        "payloadPreserved": true,
+        "texturePrune": {
+          "removedTextures": 2,
+          "removedImages": 2,
+          "retainedTextureCount": 4,
+          "retainedImageCount": 4
+        },
+        "images": [
+          {
+            "name": "Ch17_1001_Normal",
+            "mimeType": "image/png",
+            "beforeBytes": 24767703,
+            "afterBytes": 529371,
+            "beforeSize": [
+              4096,
+              4096
+            ],
+            "afterSize": [
+              512,
+              512
+            ]
+          },
+          {
+            "name": "Ch17_1001_Diffuse",
+            "mimeType": "image/png",
+            "beforeBytes": 18312759,
+            "afterBytes": 531268,
+            "beforeSize": [
+              4096,
+              4096
+            ],
+            "afterSize": [
+              512,
+              512
+            ]
+          },
+          {
+            "name": "Ch17_1002_Normal",
+            "mimeType": "image/png",
+            "beforeBytes": 5067737,
+            "afterBytes": 354511,
+            "beforeSize": [
+              2048,
+              2048
+            ],
+            "afterSize": [
+              512,
+              512
+            ]
+          },
+          {
+            "name": "Ch17_1002_Diffuse",
+            "mimeType": "image/png",
+            "beforeBytes": 6485884,
+            "afterBytes": 513698,
+            "beforeSize": [
+              2048,
+              2048
+            ],
+            "afterSize": [
+              512,
+              512
+            ]
+          }
+        ]
+      }
+    }
+  }
+}

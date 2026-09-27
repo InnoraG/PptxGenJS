@@ -1,4 +1,10 @@
 import type { FeatureBudget } from './types.js'
+import {
+	POWERPOINT_TABLE_STYLE_CATALOG,
+	POWERPOINT_TABLE_STYLE_CATALOG_BY_NATIVE_ID,
+	POWERPOINT_TABLE_STYLE_CATALOG_BY_PUBLIC_ID,
+	type PowerPointTableStylePreset,
+} from './table-style-catalog.js'
 
 export type TablePresetMode = 'native-table' | 'visual-adapted' | 'preserve-only'
 
@@ -10,6 +16,8 @@ export interface TableStyleOptions {
 	lastColumn?: boolean
 	bandedColumns?: boolean
 	tableStyleId?: string
+	/** Opaque executable catalog id; resolved to the native GUID by the engine. */
+	tableStylePresetId?: string
 }
 
 export interface TablePreset {
@@ -49,6 +57,33 @@ export const POWERPOINT_TABLE_STYLE_OPTIONS = [
 	'lastColumn',
 	'bandedColumns',
 ]
+
+export { POWERPOINT_TABLE_STYLE_CATALOG }
+export type { PowerPointTableStylePreset }
+
+export function tableStyleByPublicId(id: string): PowerPointTableStylePreset | undefined {
+	return POWERPOINT_TABLE_STYLE_CATALOG_BY_PUBLIC_ID.get(String(id))
+}
+
+export function tableStyleByNativeId(id: string): PowerPointTableStylePreset | undefined {
+	return POWERPOINT_TABLE_STYLE_CATALOG_BY_NATIVE_ID.get(String(id).toUpperCase())
+}
+
+export function resolveTableStylePreset(value: unknown): PowerPointTableStylePreset | undefined {
+	if (value === undefined || value === null || value === '') return undefined
+	const asString = String(value)
+	return tableStyleByPublicId(asString) || tableStyleByNativeId(asString)
+}
+
+export function listPowerPointTableStyles(args: any = {}): PowerPointTableStylePreset[] {
+	const query = normalizeText(args?.query || args?.name)
+	const family = normalizeText(args?.family || args?.themeMode)
+	const limit = Math.max(1, Math.min(Number(args?.limit || POWERPOINT_TABLE_STYLE_CATALOG.length), POWERPOINT_TABLE_STYLE_CATALOG.length))
+	return POWERPOINT_TABLE_STYLE_CATALOG
+		.filter(style => !family || style.family === family)
+		.filter(style => !query || normalizeText(`${style.publicId} ${style.name} ${style.family}`).includes(query))
+		.slice(0, limit)
+}
 
 const SAMPLE_METRICS = [
 	['Metric', 'Current', 'Target', 'Status'],

@@ -1,0 +1,19 @@
+{
+  "clips": {
+    "look_away": { "fbx": "standing-candidates-v1/look away gesture.fbx" },
+    "dismissing": { "fbx": "standing-candidates-v1/dismissing gesture.fbx" },
+    "weight_shift": { "fbx": "standing-candidates-v1/weight shift.fbx" },
+    "sarcastic_nod": { "fbx": "standing-candidates-v1/sarcastic head nod.fbx" },
+    "shake_no": { "fbx": "standing-candidates-v1/shaking head no.fbx" },
+    "nod_yes": { "fbx": "standing-candidates-v1/head nod yes.fbx" },
+    "cocky": { "fbx": "standing-candidates-v1/being cocky.fbx" },
+    "annoyed_shake": { "fbx": "standing-candidates-v1/annoyed head shake.fbx" },
+    "hard_nod": { "fbx": "standing-candidates-v1/hard head nod.fbx" },
+    "angry": { "fbx": "standing-candidates-v1/angry gesture.fbx" },
+    "happy_hand": { "fbx": "standing-candidates-v1/happy hand gesture.fbx" },
+    "acknowledging": { "fbx": "standing-candidates-v1/acknowledging.fbx" },
+    "lengthy_nod": { "fbx": "standing-candidates-v1/lengthy head nod.fbx" },
+    "thoughtful_shake": { "fbx": "standing-candidates-v1/thoughtful head shake.fbx" },
+    "relieved_sigh": { "fbx": "standing-candidates-v1/relieved sigh.fbx" }
+  }
+}

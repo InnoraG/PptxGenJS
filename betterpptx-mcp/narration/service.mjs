@@ -4,6 +4,9 @@ import { listVoices, resolveVoice } from './licenseGate.mjs'
 import { hashText, materializeAudioInput, writeAudioArtifact } from './audio.mjs'
 import { parseWavDuration, wavDurationFromFile } from './wavDuration.mjs'
 import { getProvider, assertTextWithinLimit, withSynthSlot } from './providers/index.mjs'
+import { recordResourceLabels, recordResourceUsage } from '../billing/resource-meter.mjs'
+import { normalizeNarrationForTts } from './tts-text.mjs'
+import { analyzePcmWavQuality, assertPcmWavQuality, repairPcmWavForNarration } from './wavQuality.mjs'
 
 const MAX_AUDIO_BYTES = Number(process.env.BETTERPPTX_TTS_MAX_AUDIO_MB || 64) * 1048576
 
@@ -23,7 +26,8 @@ export async function synthesizeNarration(args = {}) {
 	if (narrationDisabled()) throw new Error('Narration is disabled by BETTERPPTX_NARRATION_DISABLED=1.')
 	const providerName = args.provider || process.env.BETTERPPTX_TTS_PROVIDER || 'piper-http'
 	const provider = getProvider(providerName)
-	const text = normalizeScript(args.text)
+	const notesText = normalizeScript(args.text)
+	const text = normalizeScript(args.synthesisText || normalizeNarrationForTts(notesText) || notesText)
 	assertTextWithinLimit(text)
 
 	let voiceDecision = null
@@ -33,6 +37,8 @@ export async function synthesizeNarration(args = {}) {
 	voiceDecision = resolveVoice({
 		voice: args.voice,
 		lang: args.lang,
+		gender: args.gender,
+		speaker: args.speaker,
 		allowUnreviewedVoices: args.allowUnreviewedVoices,
 	})
 	voice = voiceDecision.voice
@@ -43,6 +49,8 @@ export async function synthesizeNarration(args = {}) {
 	logEvent('narration.tts.request', {
 		provider: provider.name,
 		voiceId: voice?.id,
+		gender: voiceDecision.gender,
+		speaker: voiceDecision.speaker,
 		textHash,
 		textChars: text.length,
 		licenseDecision: license?.commercialUse,
@@ -51,26 +59,55 @@ export async function synthesizeNarration(args = {}) {
 	const result = await withSynthSlot(() => provider.synthesize({
 		text,
 		voice,
-		speaker: args.speaker,
+		speaker: voiceDecision.speaker,
 		lengthScale: args.lengthScale,
 		noiseScale: args.noiseScale,
 		noiseWScale: args.noiseWScale,
 	}))
 	if (!result?.wav || result.wav.length <= 0) throw new Error('TTS provider returned empty audio.')
 	if (result.wav.length > MAX_AUDIO_BYTES) throw new Error(`Generated audio is too large (${result.wav.length} bytes > ${MAX_AUDIO_BYTES}).`)
-	const parsed = parseWavDuration(result.wav)
+	const providerAudioQuality = analyzePcmWavQuality(result.wav)
+	const needsRepair = providerAudioQuality.status === 'failed' || providerAudioQuality.findings?.some(finding => ['AUDIO_NEAR_CLIPPING', 'AUDIO_CLIPPING_DETECTED', 'AUDIO_DISCONTINUITY_DETECTED'].includes(finding.code))
+	const repaired = needsRepair ? repairPcmWavForNarration(result.wav) : { buffer: result.wav, changed: false, evidence: { status: 'not-needed', methods: [] } }
+	const wav = repaired.buffer
+	const parsed = parseWavDuration(wav)
 	if (!parsed) throw new Error('TTS provider did not return PCM WAV audio.')
-	const filePath = await writeAudioArtifact({ buffer: result.wav, extn: 'wav', prefix: `tts-${(voice?.id || 'voice').replace(/[^A-Za-z0-9_-]/g, '_')}` })
+	const audioQuality = assertPcmWavQuality(wav)
+	if (repaired.changed) warnings.push(`AUDIO_POST_PROCESSED: Provider PCM was peak-normalized and de-clicked before validation (${repaired.evidence.repairedSamples} corrected samples).`)
+	warnings = warnings.concat(audioQuality.findings.filter(finding => finding.severity === 'warning').map(finding => `${finding.code}: ${finding.message}`))
+	const filePath = await writeAudioArtifact({ buffer: wav, extn: 'wav', prefix: `tts-${(voice?.id || 'voice').replace(/[^A-Za-z0-9_-]/g, '_')}` })
 	const duration = await wavDurationFromFile(filePath)
+	recordResourceUsage({
+		ttsCharacters: text.length,
+		ttsAudioSeconds: duration.durationMs / 1000,
+		artifactBytes: wav.length,
+	})
+	// Cost-learning label: per-voice chars->seconds ratios are fitted from observations
+	// so future quotes predict duration without synthesizing.
+	recordResourceLabels({ ttsVoice: voice?.id || 'unknown', ttsProvider: provider.name })
 	logEvent('narration.tts.result', {
 		provider: provider.name,
 		voiceId: voice?.id,
+		gender: voiceDecision.gender,
+		speaker: voiceDecision.speaker,
 		textHash,
 		durationMs: duration.durationMs,
-		bytes: result.wav.length,
+		bytes: wav.length,
 		filePath,
 		warnings,
+		providerAudioQuality,
+		audioQuality,
+		audioPostProcessing: repaired.evidence,
 	})
+	const settingsDigest = hashText(JSON.stringify({
+		voiceId: voice?.id || null,
+		gender: voiceDecision.gender || null,
+		speaker: voiceDecision.speaker ?? null,
+		lengthScale: args.lengthScale ?? null,
+		noiseScale: args.noiseScale ?? null,
+		noiseWScale: args.noiseWScale ?? null,
+		synthesisText: text,
+	}))
 	return {
 		ok: true,
 		wavPath: filePath,
@@ -81,10 +118,27 @@ export async function synthesizeNarration(args = {}) {
 			language: voice?.language,
 			locale: voice?.locale,
 			quality: voice?.quality,
+			gender: voiceDecision.gender || voice?.gender,
+			genderSource: voice?.genderSource,
+			genderConfidence: voice?.genderConfidence,
+			...(voiceDecision.speaker !== undefined ? { speaker: voiceDecision.speaker } : {}),
 		},
 		license,
 		warnings,
+		audioQuality,
+		audioPostProcessing: repaired.evidence,
 		textHash,
+		notesText,
+		synthesisText: text,
+		ttsExecution: {
+			engine: 'internal',
+			voiceId: voice?.id || null,
+			sampleRateHz: duration.sampleRate || parsed.sampleRate || 22050,
+			runtimeVersion: process.env.BETTERPPTX_TTS_RUNTIME_VERSION || null,
+			modelDigest: voice?.id ? `sha256:${hashText(voice.id)}` : null,
+			deterministicSettingsDigest: `sha256:${settingsDigest}`,
+			audioPostProcessing: repaired.evidence,
+		},
 	}
 }
 
@@ -113,10 +167,12 @@ export async function resolveNarrationAudio(args = {}) {
 	}
 	const synth = await synthesizeNarration({
 		text: args.script,
+		synthesisText: args.synthesisText,
 		voice: args.voice,
 		lang: args.lang,
 		provider: args.provider,
 		speaker: args.speaker,
+		gender: args.gender,
 		lengthScale: args.lengthScale,
 		noiseScale: args.noiseScale,
 		noiseWScale: args.noiseWScale,
@@ -134,6 +190,10 @@ export async function resolveNarrationAudio(args = {}) {
 		warnings: synth.warnings,
 		textHash: synth.textHash,
 		provider: synth.provider,
+		ttsExecution: synth.ttsExecution,
+		audioQuality: synth.audioQuality,
+		notesText: synth.notesText,
+		synthesisText: synth.synthesisText,
 	}
 }
 

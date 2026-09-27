@@ -1,9 +1,10 @@
 // Build voices/manifest.json from the authoritative Piper voices.json + each
 // voice's live MODEL_CARD. This is the seed data for the §4 license gate.
 //
-// It NEVER asserts a human "approved" status. It records what the live card
-// says (verbatim + normalized) and a machine verdict. A human flips chosen
-// candidates to reviewStatus:"approved" before production use.
+// It NEVER creates a human "approved" status. It records what the live card
+// says (verbatim + normalized) and a machine verdict, while preserving an
+// existing human approval only when the refreshed machine license verdict is
+// still usable. A human flips chosen candidates to reviewStatus:"approved".
 //
 //   node build-voice-manifest.mjs           # fetch (cached) + build
 //   node build-voice-manifest.mjs --offline # build from cached cards only
@@ -11,12 +12,16 @@
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { enrichVoiceWithProfile, genderCoverage, loadVoiceProfiles } from './voiceProfiles.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const VOICES_DIR = path.join(__dirname, 'voices')
 const CARDS_DIR = path.join(VOICES_DIR, 'modelcards')
 const UPSTREAM = path.join(VOICES_DIR, 'voices.upstream.json')
 const OUT = path.join(VOICES_DIR, 'manifest.json')
+const VOICE_PROFILES = loadVoiceProfiles()
+const PRIOR_MANIFEST = fs.existsSync(OUT) ? JSON.parse(fs.readFileSync(OUT, 'utf8')) : null
+const PRIOR_BY_ID = new Map((PRIOR_MANIFEST?.voices || []).map(voice => [voice.id, voice]))
 const BASE = 'https://huggingface.co/rhasspy/piper-voices/resolve/main'
 const OFFLINE = process.argv.includes('--offline')
 const CONCURRENCY = 8
@@ -85,7 +90,7 @@ async function mapLimit(items, limit, fn) {
 }
 
 const entries = Object.entries(voices)
-const built = await mapLimit(entries, CONCURRENCY, async ([key, v]) => {
+const built = (await mapLimit(entries, CONCURRENCY, async ([key, v]) => {
 	const fileNames = Object.keys(v.files)
 	const onnx = fileNames.find(f => f.endsWith('.onnx'))
 	const cfg = fileNames.find(f => f.endsWith('.onnx.json'))
@@ -94,11 +99,13 @@ const built = await mapLimit(entries, CONCURRENCY, async ([key, v]) => {
 	const card = parseCard(cardText)
 	const cls = classify(card.rawLicense)
 	const lineageReview = /lessac|blizzard/i.test(card.finetunedFrom || '')
-	const reviewStatus = cls.commercialUse === 'forbidden' ? 'rejected'
+	const machineReviewStatus = cls.commercialUse === 'forbidden' ? 'rejected'
 		: cls.commercialUse === 'unknown' ? 'unreviewed' : 'candidate'
+	const prior = PRIOR_BY_ID.get(key)
+	const reviewStatus = prior?.reviewStatus === 'approved' && ['allowed', 'attribution'].includes(cls.commercialUse) ? 'approved' : machineReviewStatus
 	const notes = [cls.reason, lineageReview ? 'finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage' : '']
 		.filter(Boolean).join('; ')
-	return {
+	return enrichVoiceWithProfile({
 		id: key,
 		name: v.name,
 		language: v.language.family,
@@ -106,7 +113,7 @@ const built = await mapLimit(entries, CONCURRENCY, async ([key, v]) => {
 		localeName: `${v.language.name_english}, ${v.language.country_english}`,
 		quality: v.quality,
 		numSpeakers: v.num_speakers,
-		isDefaultForLocale: false,
+		isDefaultForLocale: Boolean(prior?.isDefaultForLocale),
 		modelUrl: onnx ? `${BASE}/${onnx}` : null,
 		configUrl: cfg ? `${BASE}/${cfg}` : null,
 		modelCardUrl: cardPath ? `${BASE}/${cardPath}` : null,
@@ -120,10 +127,11 @@ const built = await mapLimit(entries, CONCURRENCY, async ([key, v]) => {
 		lineageReview,
 		reviewStatus,
 		verifiedFromModelCard: cardText != null,
-		reviewedBy: 'automated:build-voice-manifest.mjs',
-		notes,
-	}
-})
+		reviewedBy: reviewStatus === 'approved' ? (prior?.reviewedBy || 'human-approved') : 'automated:build-voice-manifest.mjs',
+		...(reviewStatus === 'approved' && prior?.reviewedAt ? { reviewedAt: prior.reviewedAt } : {}),
+		notes: reviewStatus === 'approved' && prior?.notes ? prior.notes : notes,
+	}, VOICE_PROFILES)
+}))
 
 // Pick a recommended default per locale: most permissive, then best quality,
 // then prefer a voice WITHOUT lessac lineage at the same tier.
@@ -132,6 +140,11 @@ for (const v of built) (byLocale[v.locale] ||= []).push(v)
 for (const [, list] of Object.entries(byLocale)) {
 	const usable = list.filter(v => v.commercialUse === 'allowed' || v.commercialUse === 'attribution')
 	if (!usable.length) continue
+	const preserved = usable.find(v => v.isDefaultForLocale)
+	if (preserved) {
+		for (const candidate of list) candidate.isDefaultForLocale = candidate.id === preserved.id
+		continue
+	}
 	usable.sort((a, b) =>
 		RANK[a.commercialUse] - RANK[b.commercialUse] ||
 		(a.lineageReview ? 1 : 0) - (b.lineageReview ? 1 : 0) ||
@@ -143,11 +156,14 @@ const localesAll = [...new Set(built.map(v => v.locale))].sort()
 const localesClear = localesAll.filter(loc => byLocale[loc].some(v => v.isDefaultForLocale))
 const byUse = built.reduce((m, v) => (m[v.commercialUse] = (m[v.commercialUse] || 0) + 1, m), {})
 const langHasClear = fam => built.some(v => v.language === fam && v.isDefaultForLocale)
+const genderPairs = genderCoverage(built, ['female', 'male'], VOICE_PROFILES)
 
 const manifest = {
+	...(PRIOR_MANIFEST || {}),
 	schemaVersion: 2,
 	generatedAt: new Date().toISOString().slice(0, 10),
 	source: 'https://huggingface.co/rhasspy/piper-voices (voices.json + per-voice MODEL_CARD)',
+	voiceProfiles: 'voices/voice-profiles.json',
 	policy: 'zero-cost voices whose license permits embedding the synthesized audio in a sold, closed-SaaS .pptx. CC0/MIT/permissive=allowed; CC-BY/CC-BY-SA=attribution; NC/research/GPL/unknown=not usable. See plan §4.5.',
 	disclaimer: 'Machine-classified from the live MODEL_CARD. NOT legal advice and NOT human-approved. Flip chosen candidates to reviewStatus:"approved" after review. sha256 of each .onnx is computed when the model is downloaded into the image.',
 	stats: {
@@ -157,6 +173,11 @@ const manifest = {
 		byCommercialUse: byUse,
 		mandatory: { fr: langHasClear('fr'), en: langHasClear('en') },
 		localesWithoutUsableVoice: localesAll.filter(l => !localesClear.includes(l)),
+		genderPairCoverage: {
+			requiredGenders: genderPairs.requiredGenders,
+			localesWithPair: genderPairs.localesWithPair,
+			localesMissingPair: genderPairs.localesMissingPair.map(row => ({ locale: row.locale, availableGenders: row.availableGenders, missingGenders: row.missingGenders })),
+		},
 	},
 	voices: built.sort((a, b) => a.locale.localeCompare(b.locale) || a.id.localeCompare(b.id)),
 }

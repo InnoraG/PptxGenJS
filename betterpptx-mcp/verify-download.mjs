@@ -35,7 +35,12 @@ function redactUrl(url) {
 }
 
 const MCP = resolveMcpUrl()
-const H = { 'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream' }
+const AUTHORIZATION = process.env.BETTERPPTX_AUTHORIZATION || (process.env.BETTERPPTX_TOKEN ? `Bearer ${process.env.BETTERPPTX_TOKEN}` : '')
+const H = {
+	'Content-Type': 'application/json',
+	'Accept': 'application/json, text/event-stream',
+	...(AUTHORIZATION ? { Authorization: AUTHORIZATION } : {}),
+}
 const sse = t => { for (const l of String(t).split('\n')) { const m = l.match(/^data:\s*(.+)$/); if (m) return JSON.parse(m[1]) } return null }
 const body = async r => { const ct = r.headers.get('content-type') || ''; const raw = await r.text(); return ct.includes('event-stream') ? sse(raw) : (raw ? JSON.parse(raw) : null) }
 let SID = null
@@ -50,13 +55,44 @@ async function main() {
 	const init = await call('initialize', { protocolVersion: '2024-11-05', clientInfo: { name: 'dl-verify', version: '1' }, capabilities: {} })
 	console.log('initialize ->', init?.result?.serverInfo?.name, 'session', SID ? 'yes' : 'no')
 	await fetch(MCP, { method: 'POST', headers: { ...H, 'mcp-session-id': SID }, body: JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized', params: {} }) })
-	const deck = await tool('betterpptx.deck.new', { layout: 'LAYOUT_WIDE', title: 'Download test' })
-	await tool('betterpptx.slide.add', { deckId: deck.deckId, background: { color: '0B1020' } })
-	await tool('betterpptx.slide.add_text', { deckId: deck.deckId, slideIndex: 0, text: 'Downloadable BetterPPTX deck', options: { x: 1, y: 2.4, w: 11, h: 1.1, fontSize: 38, bold: true, color: 'FFFFFF', align: 'center', objectName: 'download-title' } })
-	await tool('betterpptx.slide.add_text', { deckId: deck.deckId, slideIndex: 0, text: 'Public MCP save returns a browser-fetchable .pptx URL.', options: { x: 2, y: 3.6, w: 9, h: 0.6, fontSize: 18, color: 'CBD5E1', align: 'center', objectName: 'download-subtitle' } })
-	await tool('betterpptx.slide.add', { deckId: deck.deckId, background: { color: '111827' }, transition: { type: 'morph', option: 'byObject', duration: 800 } })
-	await tool('betterpptx.slide.add_text', { deckId: deck.deckId, slideIndex: 1, text: 'Download verified', options: { x: 1, y: 2.4, w: 11, h: 1.1, fontSize: 42, bold: true, color: '22D3EE', align: 'center', objectName: 'download-title' } })
-	const saved = await tool('betterpptx.deck.save', { deckId: deck.deckId, fileName: 'BetterPPTX Download Test.pptx' })
+	const generated = await tool('betterpptx.deck.generate_from_spec', {
+		spec: {
+			schemaVersion: 'betterpptx.deck-spec.v1',
+			title: 'Download test',
+			layout: 'LAYOUT_WIDE',
+			authoringContract: {
+				level: 'deterministic',
+				coordinateSystem: 'inches',
+				layerModel: 'flat-object-array',
+				textPolicy: 'Use textBox or title for standalone text.',
+			},
+			slides: [
+				{
+					id: 'download-title',
+					title: 'Downloadable BetterPPTX deck',
+					layoutIntent: 'title-body',
+					background: { color: '0B1020' },
+					content: [
+						{ kind: 'title', name: 'title', text: 'Downloadable BetterPPTX deck', bbox: { x: 1, y: 2.4, w: 11, h: 1.1 }, style: { fontSize: 38, bold: true, color: 'FFFFFF', align: 'center' } },
+						{ kind: 'textBox', name: 'subtitle', text: 'Public MCP save returns a browser-fetchable .pptx URL.', bbox: { x: 2, y: 3.6, w: 9, h: 0.6 }, style: { fontSize: 18, color: 'CBD5E1', align: 'center' } },
+					],
+				},
+				{
+					id: 'download-verified',
+					title: 'Download verified',
+					layoutIntent: 'title-body',
+					background: { color: '111827' },
+					transition: { type: 'morph', option: 'byObject', duration: 800 },
+					content: [
+						{ kind: 'title', name: 'title', text: 'Download verified', bbox: { x: 1, y: 2.4, w: 11, h: 1.1 }, style: { fontSize: 42, bold: true, color: '22D3EE', align: 'center' } },
+					],
+				},
+			],
+		},
+		detail: 'summary',
+		validateAfterCompile: true,
+	})
+	const saved = await tool('betterpptx.deck.save', { deckId: generated.deckId, deckVersion: generated.deckVersion, fileName: 'BetterPPTX Download Test.pptx' })
 	console.log('deck.save ->', JSON.stringify({ bytes: saved.bytes, downloadUrl: saved.downloadUrl, downloadName: saved.downloadName }))
 	if (!saved.downloadUrl) { console.log('DOWNLOAD VERIFY: FAIL (no downloadUrl returned)'); process.exit(1) }
 	// Fetch the download URL like a browser

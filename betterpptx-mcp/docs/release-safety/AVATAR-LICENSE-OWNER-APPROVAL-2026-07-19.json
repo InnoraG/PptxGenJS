@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "betterpptx.avatar-license-owner-approval.v1",
+  "status": "APPROVED_AND_CLOSED",
+  "approvedAt": "2026-07-19T02:59:31.659Z",
+  "approverRole": "authenticated product owner",
+  "approvalStatement": "The product owner approves the commercial model/license direction for the LivePortrait+MuseTalk talking-head avatar lane, subject to the conditions recorded here.",
+  "scope": "PowerPoint-native narration recording with embedded LivePortrait+MuseTalk talking-head media, YuNet detection, MediaPipe jaw parsing, BetterPPTX-owned deterministic detail enhancement, and SAM2 matting",
+  "conditions": [
+    "This is an owner product decision and risk acceptance; it is not a representation of external legal counsel or a change to an upstream license.",
+    "The exact worker source revisions, model revisions, weight hashes, image digest, notices, and SBOM must remain pinned and reviewable.",
+    "The legacy InsightFace detector, BiSeNet face parser, ResNet18 parser checkpoints, CodeFormer, and RVM must remain absent from the resale-safe worker image; the frozen replacements are pinned OpenCV Zoo YuNet, the Apache-2.0 MediaPipe Face Landmarker mask adapter, the BetterPPTX-owned deterministic detail enhancer, and pinned Apache-2.0 SAM2. MuseTalk's upstream README states that its trained model is available for any purpose, including commercial use.",
+    "Upstream test data remains excluded from the product and customer paths.",
+    "Native 3D Meshy/Mixamo/presenter-asset licensing is a separate representation and is not approved by this record.",
+    "Public/customer enablement remains disabled until the separate billing reconciliation and identity-quality gates pass; this record closes licensing for the exact frozen worker image."
+  ],
+  "evidence": {
+    "licenseLedger": "betterpptx-mcp/avatar/license-ledger.json",
+    "reviewPacket": "betterpptx-mcp/outputs/avatar-license-review-packet.json",
+    "provenanceLock": "betterpptx-mcp/avatar/model-provenance-lock.json",
+    "sbom": "betterpptx-mcp/outputs/avatar-worker-sbom.cdx.json",
+    "recordedFrom": "owner-confirmation-2026-07-19"
+  },
+  "publicEnablementAllowed": false,
+  "licenseGateClosed": true,
+  "rawSecretsPrinted": false,
+  "customerData": false
+}

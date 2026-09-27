@@ -1,0 +1,89 @@
+{
+  "worker": "betterpptx-semantic-judge",
+  "status": "research-contract-only; deployment-fail-closed",
+  "model": "Qwen/Qwen3-VL-8B-Instruct",
+  "modelRevision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+  "declaredModelLicense": "Apache-2.0",
+  "officialModelCard": "https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct",
+  "officialLicenseEvidence": "model card currently declares apache-2.0; checked 2026-07-18",
+  "modelVariants": [
+    {
+      "name": "qwen3-vl-8b-instruct",
+      "model": "Qwen/Qwen3-VL-8B-Instruct",
+      "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+      "license": "Apache-2.0",
+      "officialModelCard": "https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct"
+    },
+    {
+      "name": "qwen3-vl-32b-instruct-fp8",
+      "model": "Qwen/Qwen3-VL-32B-Instruct-FP8",
+      "revision": "4bf2c2f39c37c0fede78bede4056e1f18cdf8109",
+      "license": "Apache-2.0",
+      "officialModelCard": "https://huggingface.co/Qwen/Qwen3-VL-32B-Instruct-FP8"
+    },
+    {
+      "name": "qwen3-vl-8b-thinking",
+      "model": "Qwen/Qwen3-VL-8B-Thinking",
+      "revision": "92f3c4b4feadd3a016ef468d103bb5f58b2a2c6b",
+      "license": "Apache-2.0",
+      "officialModelCard": "https://huggingface.co/Qwen/Qwen3-VL-8B-Thinking"
+    }
+  ],
+  "executionPolicy": {
+    "allowedHost": "private Modal only",
+    "externalAiApis": "forbidden",
+    "publicSurface": "MCP client and BetterPPTX tools only; no external AI provider",
+    "customerImages": "never sent to the worker; local research/demo assets only"
+  },
+  "directPins": {
+    "torch": "2.8.0",
+    "torchvision": "0.23.0",
+    "transformers": "5.14.1",
+    "accelerate": "1.14.0",
+    "huggingface_hub": "1.23.0",
+    "tokenizers": "0.22.2",
+    "safetensors": "0.8.0",
+    "pillow": "12.3.0",
+    "qwen-vl-utils": "0.0.14",
+    "fastapi": "0.139.2"
+  },
+  "customerImages": false,
+  "training": false,
+  "productionUseBlockedUntil": [
+    "exact dependency inventory and license review green",
+    "owner/legal approval of model and runtime hosted-service boundary",
+    "blind human calibration meets IMG5 agreement thresholds",
+    "private synthetic canary and cost/VRAM/failure evidence green"
+  ],
+  "dryRunResolution": {
+    "source": "pip --dry-run --report plus PyPI JSON metadata",
+    "pythonProfile": "cp312; Linux Modal target still requires a separate resolution",
+    "resolvedPackageCount": 49,
+    "packagesWithIncompleteLicenseMetadata": 22,
+    "knownMplPackages": ["certifi==2026.6.17", "tqdm==4.68.4"],
+    "linuxCudaTransitiveFamily": "Torch 2.8.0 resolves NVIDIA CUDA 12.8 packages on Linux x86_64; exact EULA/redistribution review is required.",
+    "evidenceFile": "resolved-dependencies-dry-run.json",
+    "approval": "blocked"
+  },
+  "linuxModalDryRun": {
+    "source": "pip --dry-run --report with Linux wheel targets; no install and no model download",
+    "pythonProfile": "cp312",
+    "platformTags": ["manylinux_2_17_x86_64", "manylinux_2_28_x86_64"],
+    "resolvedWheelMetadataCount": 66,
+    "torchConditionalLinuxCudaDependencies": 15,
+    "evidenceFile": "resolved-dependencies-linux-modal-dry-run.json",
+    "evidenceSha256": "8e89a2f3d20797af231636636d420adea4e1db71129045400d34bf5736d9efc4",
+    "resolutionNote": "The report selects Linux wheel metadata; exact Modal environment markers and CUDA/NVIDIA records still require an in-image Linux resolution before approval.",
+    "approval": "blocked"
+  },
+  "inImageInventory": {
+    "source": "Modal CPU-only attestation from the exact deployed image; no model inference or customer image",
+    "reportFile": "../../outputs/semantic-judge-in-image-inventory.json",
+    "resolvedPackageCount": 102,
+    "packagesWithLicenseEvidence": 102,
+    "packagesMissingLicenseEvidence": 0,
+    "torchConditionalLinuxCudaDependencies": 15,
+    "evidenceSha256": "4487ae394b22bc3d2093c3911a94b15395f9daddf583fa61019e40fcaf0c0fd6",
+    "approval": "research-canary-green; production-blocked"
+  }
+}

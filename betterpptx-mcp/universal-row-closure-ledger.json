@@ -1,0 +1,786 @@
+{
+  "schemaVersion": "betterpptx.universal-row-closure-ledger.v1",
+  "frozenCatalogRows": 2258,
+  "formalClosedRows": [
+    {
+      "catalogRowId": "cap_a110570f7caeb8b6230b",
+      "family": "foundation",
+      "label": "rotation",
+      "controlId": "shape.transform.rotation",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826161910Z/g6-foundation-rotation-row-proof.json",
+      "proofSha256": "74d78ee0fc90ac8b30d6c6bd7885c7a13dc4523d7c473ecf32a52a5e18f0a275",
+      "witnesses": [
+        "native-five-point-serialization-and-reset",
+        "package-integrity",
+        "office-authored-mutation",
+        "savecopyas-reopen-retention",
+        "deterministic-script-editability",
+        "visual-renders",
+        "fresh-public-discovery-lifecycle",
+        "no-private-leakage"
+      ]
+    },
+    {
+      "catalogRowId": "cap_de980017863e62603d8f",
+      "family": "foundation",
+      "label": "text outline",
+      "controlId": "textOutline.color|textOutline.transparency|textOutline.widthPt",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826162702Z/g6-foundation-text-outline-row-proof.json",
+      "proofSha256": "0114ec4f49a1ece11e3fc670a58c526dd74497b7b0c2cdfc69c176ce8c2adf14",
+      "witnesses": [
+        "native-five-point-serialization-and-reset",
+        "package-integrity",
+        "office-authored-mutation",
+        "savecopyas-reopen-retention",
+        "deterministic-script-editability",
+        "visual-renders",
+        "fresh-public-discovery-lifecycle",
+        "no-private-leakage"
+      ]
+    },
+    {
+      "catalogRowId": "cap_5c94a4a3c8c6bee8dde5",
+      "family": "foundation",
+      "label": "character spacing",
+      "controlId": "textCharacterSpacing.charSpacing",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826163750Z/g6-foundation-text-controls-row-batch-proof.json",
+      "proofSha256": "eda5db9c7075faef28f05ed8adee7c8d7a45ac0c7b86801b14fb4cc3e6679877",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_e195e5bfb5f77413d7bc",
+      "family": "foundation",
+      "label": "line spacing",
+      "controlId": "textLineSpacing.lineSpacing|textLineSpacing.lineSpacingMultiple",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826163750Z/g6-foundation-text-controls-row-batch-proof.json",
+      "proofSha256": "eda5db9c7075faef28f05ed8adee7c8d7a45ac0c7b86801b14fb4cc3e6679877",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_90e80207835fc47aa779",
+      "family": "foundation",
+      "label": "paragraph spacing before",
+      "controlId": "textParagraphSpacing.paraSpaceBefore",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826163750Z/g6-foundation-text-controls-row-batch-proof.json",
+      "proofSha256": "eda5db9c7075faef28f05ed8adee7c8d7a45ac0c7b86801b14fb4cc3e6679877",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_87e2e792706583fd5056",
+      "family": "foundation",
+      "label": "paragraph spacing after",
+      "controlId": "textParagraphSpacing.paraSpaceAfter",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826163750Z/g6-foundation-text-controls-row-batch-proof.json",
+      "proofSha256": "eda5db9c7075faef28f05ed8adee7c8d7a45ac0c7b86801b14fb4cc3e6679877",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_905bff9036f8fafcc464",
+      "family": "foundation",
+      "label": "underline",
+      "controlId": "textRun.underline|underline.color",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826163750Z/g6-foundation-text-controls-row-batch-proof.json",
+      "proofSha256": "eda5db9c7075faef28f05ed8adee7c8d7a45ac0c7b86801b14fb4cc3e6679877",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_0fc3299869ce3b4533c7",
+      "family": "media-images-avatar",
+      "label": "rotation",
+      "controlId": "object.transform.rotation.picture-media-carrier",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826164107Z/g6-shapes-rotation-row-proof.json",
+      "proofSha256": "fa458892e95933a3d4d5a6644ee8634bb788cce2e72437c258372114487efc00",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_b39ba8fc1a63b00cb72e",
+      "family": "media-images-avatar",
+      "label": "crop",
+      "controlId": "imageFraming.framingMode",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826164659Z/g6-media-crop-row-proof.json",
+      "proofSha256": "95bd49c589663e8ab62acb4cd327677b6ee3dbea489d28bf173e8243de2d3341",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_7c17e40fcac63b5357e6",
+      "family": "shapes-gradients",
+      "label": "rotation",
+      "controlId": "object.transform.rotation.shape-carrier",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826164859Z/g6-shapes-rotation-row-proof.json",
+      "proofSha256": "e244b699a90be3c919c047871f3780627cb35332ef493e2975109bf2568ab756",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_bcc3cef44d76f188a60b",
+      "family": "shapes-gradients",
+      "label": "line width",
+      "controlId": "shapeConnectorLine.widthPt",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826165307Z/g6-shape-line-width-row-proof.json",
+      "proofSha256": "ec778d71a97334a2d5549533d56150c4db8a612e9324daa5a62bc36b75a7763f",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_a4d8dddf1aa4493281ce",
+      "family": "shapes-gradients",
+      "label": "flip horizontal",
+      "controlId": "shape.transform.flipH",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826174306Z/g6-shape-flip-row-batch-proof.json",
+      "proofSha256": "15ba0db1f7bcc902696ebf0e15a8b8abbcbf2d50d53c5198e32c93b48e47e335",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_c167b455cc3815bc6e88",
+      "family": "shapes-gradients",
+      "label": "flip vertical",
+      "controlId": "shape.transform.flipV",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826174306Z/g6-shape-flip-row-batch-proof.json",
+      "proofSha256": "15ba0db1f7bcc902696ebf0e15a8b8abbcbf2d50d53c5198e32c93b48e47e335",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_0c51cde91a6cc3745fc3",
+      "family": "shapes-gradients",
+      "label": "glow",
+      "controlId": "shapes.effects.glow.opacity",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826175145Z/g6-shape-effects-row-batch-proof.json",
+      "proofSha256": "a1f653e3454dcb8b5ac6974cd308c7007fe46636a0019dd8fd48e251dd978940",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_3eb5ffd295fb7bf5e978",
+      "family": "shapes-gradients",
+      "label": "soft edges",
+      "controlId": "shapes.effects.softEdge.radiusPt",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826175145Z/g6-shape-effects-row-batch-proof.json",
+      "proofSha256": "a1f653e3454dcb8b5ac6974cd308c7007fe46636a0019dd8fd48e251dd978940",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_4f805537db52aa726106",
+      "family": "shapes-gradients",
+      "label": "reflection",
+      "controlId": "shapes.effects.reflection.endOpacity",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826175145Z/g6-shape-effects-row-batch-proof.json",
+      "proofSha256": "a1f653e3454dcb8b5ac6974cd308c7007fe46636a0019dd8fd48e251dd978940",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_a2729e1c7cce7ae612e3",
+      "family": "shapes-gradients",
+      "label": "shadows",
+      "controlId": "shapes.effects.shadow.angleDeg",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826175145Z/g6-shape-effects-row-batch-proof.json",
+      "proofSha256": "a1f653e3454dcb8b5ac6974cd308c7007fe46636a0019dd8fd48e251dd978940",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_40334e5ee6cf200090f4",
+      "family": "foundation",
+      "label": "text glow",
+      "controlId": "text.effects.glow.radiusPt",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826180156Z/g6-text-glow-row-proof.json",
+      "proofSha256": "05886c697d358063a8fec4b5aab07459142fb821e0a79b229bf10a2c18126a63",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_4f8e8c0ca3de5ee67a59",
+      "family": "foundation",
+      "label": "text fill",
+      "controlId": "textFill.transparency",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826180913Z/g6-text-fill-row-proof.json",
+      "proofSha256": "6c877b24208375ef29321a487e056acecef123398a8649181881a8dd447c21ef",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_c05f5aeba99417b066dc",
+      "family": "foundation",
+      "label": "auto-fit",
+      "controlId": "textBox.fit",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_c90f75400db77aa6983b",
+      "family": "foundation",
+      "label": "wrapping",
+      "controlId": "textBox.wrap",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_e5248705fc6a9f3f71e1",
+      "family": "foundation",
+      "label": "margins",
+      "controlId": "textBox.margin",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_439f3e8f13450a33a56a",
+      "family": "foundation",
+      "label": "vertical align top",
+      "controlId": "textBox.valign.top",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_2763d4e6aa48e44db0c4",
+      "family": "foundation",
+      "label": "vertical align middle",
+      "controlId": "textBox.valign.middle",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_eb42d2d2f31fea1b2d64",
+      "family": "foundation",
+      "label": "vertical align bottom",
+      "controlId": "textBox.valign.bottom",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_4e5312e3ef0e6d3e7efa",
+      "family": "foundation",
+      "label": "horizontal align left",
+      "controlId": "textParagraph.align.left",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_a047d7b84bf5f6cc06cd",
+      "family": "foundation",
+      "label": "horizontal align center",
+      "controlId": "textParagraph.align.center",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_d8deb00beac846040989",
+      "family": "foundation",
+      "label": "horizontal align right",
+      "controlId": "textParagraph.align.right",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_2d288805ece2be28edae",
+      "family": "foundation",
+      "label": "horizontal align justify",
+      "controlId": "textParagraph.align.justify",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_f3afe12d1ed14afdc3fb",
+      "family": "foundation",
+      "label": "RTL mode",
+      "controlId": "textParagraph.rtlMode",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_e36292b39664d30dd35d",
+      "family": "foundation",
+      "label": "indentation",
+      "controlId": "textParagraph.indent|hanging",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_9c5ff02e6246382bf30f",
+      "family": "foundation",
+      "label": "bullet levels",
+      "controlId": "textParagraph.indentLevel",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_2f6a86d84b861b139262",
+      "family": "foundation",
+      "label": "strike",
+      "controlId": "textRun.strike",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_cd99143a9b633e1fc41a",
+      "family": "foundation",
+      "label": "superscript",
+      "controlId": "textRun.superscript",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_2e725a73ed30f68c8b34",
+      "family": "foundation",
+      "label": "subscript",
+      "controlId": "textRun.subscript",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826182142Z/g6-foundation-text-surface-row-batch-proof.json",
+      "proofSha256": "774c7922dbc1c4b9df36e860bb499c549a6668ee21d77050a8c80cbf2451340c",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_fd35285a6fd377e4dced",
+      "family": "foundation",
+      "label": "text shadow",
+      "controlId": "style.textShadow.type|style.textShadow.color|style.textShadow.opacity|style.textShadow.blurPt|style.textShadow.distancePt|style.textShadow.angleDeg|style.textShadow.scaleX|style.textShadow.scaleY|style.textShadow.skewXDeg|style.textShadow.skewYDeg|style.textShadow.rotateWithShape",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826212714Z/g6-text-effects-row-batch-proof.json",
+      "proofSha256": "c1ddd0278d0e3b32db97259f70726b790cb19635e1ddd28c37948faca75bdfe1",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_1a45766e33e6fe6870bc",
+      "family": "foundation",
+      "label": "text reflection",
+      "controlId": "style.textReflection.blurPt|style.textReflection.distancePt|style.textReflection.directionDeg|style.textReflection.startOpacity|style.textReflection.endOpacity|style.textReflection.startPosition|style.textReflection.endPosition|style.textReflection.scaleY",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826212714Z/g6-text-effects-row-batch-proof.json",
+      "proofSha256": "c1ddd0278d0e3b32db97259f70726b790cb19635e1ddd28c37948faca75bdfe1",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_d1669295fb7da6e2c381",
+      "family": "layouts-themes-masters",
+      "label": "add placeholder",
+      "controlId": "layout.placeholderVariants|master.placeholderVariants|layoutContract.placeholderBindings|native.placeholder.type|native.placeholder.idx|native.placeholder.size",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826214926Z/g6-layout-theme-inheritance-row-batch-proof.json",
+      "proofSha256": "8d60f64e9fc8d2208b1e0ada3428ac4b94c4ee8b25fdcd3562389377fecaa6a5",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_83f0de9c1899b83183cf",
+      "family": "layouts-themes-masters",
+      "label": "custom slide sizes",
+      "controlId": "layout.width|layout.height|layout.type|presentation.customCanvas",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826214926Z/g6-layout-theme-inheritance-row-batch-proof.json",
+      "proofSha256": "8d60f64e9fc8d2208b1e0ada3428ac4b94c4ee8b25fdcd3562389377fecaa6a5",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_b51c14e5e0419885f223",
+      "family": "layouts-themes-masters",
+      "label": "font inheritance",
+      "controlId": "theme.fontFace|theme.headFontFace|theme.bodyFontFace|theme.lang|fontInheritance",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826214926Z/g6-layout-theme-inheritance-row-batch-proof.json",
+      "proofSha256": "8d60f64e9fc8d2208b1e0ada3428ac4b94c4ee8b25fdcd3562389377fecaa6a5",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_4215097cfd43e1a1eb40",
+      "family": "layouts-themes-masters",
+      "label": "layout relationships",
+      "controlId": "slide.layoutName|slide.masterName|relationshipBindingReadback",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826214926Z/g6-layout-theme-inheritance-row-batch-proof.json",
+      "proofSha256": "8d60f64e9fc8d2208b1e0ada3428ac4b94c4ee8b25fdcd3562389377fecaa6a5",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_b940f8b1cfd7c3c0a152",
+      "family": "layouts-themes-masters",
+      "label": "layout to slide inheritance",
+      "controlId": "slide.layoutName|layout.placeholders|layout.objects|slideDoesNotOwnBackground",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826214926Z/g6-layout-theme-inheritance-row-batch-proof.json",
+      "proofSha256": "8d60f64e9fc8d2208b1e0ada3428ac4b94c4ee8b25fdcd3562389377fecaa6a5",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_e069cdd245832a50a0bb",
+      "family": "layouts-themes-masters",
+      "label": "master to layout inheritance",
+      "controlId": "layout.masterName|master.objects|master.placeholderVariants|masterSourceRelationshipGraph",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260826214926Z/g6-layout-theme-inheritance-row-batch-proof.json",
+      "proofSha256": "8d60f64e9fc8d2208b1e0ada3428ac4b94c4ee8b25fdcd3562389377fecaa6a5",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_69af4fb2d1dc8eb08ea0",
+      "family": "shapes-gradients",
+      "label": "transparency",
+      "controlId": "shapeConnectorLine.transparency",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827030835Z/g6-shape-line-controls-row-batch-proof.json",
+      "proofSha256": "74edd5759b953631a9fbb6e94855e0b6a9d6b0df554de618bb149e43d270792a",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_57d362b1558501191dea",
+      "family": "shapes-gradients",
+      "label": "dash styles",
+      "controlId": "shapeConnectorLine.dashType",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827030835Z/g6-shape-line-controls-row-batch-proof.json",
+      "proofSha256": "74edd5759b953631a9fbb6e94855e0b6a9d6b0df554de618bb149e43d270792a",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_8f458fb69af8d2919424",
+      "family": "shapes-gradients",
+      "label": "arrow heads",
+      "controlId": "shapeConnectorLine.beginArrowType",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827030835Z/g6-shape-line-controls-row-batch-proof.json",
+      "proofSha256": "74edd5759b953631a9fbb6e94855e0b6a9d6b0df554de618bb149e43d270792a",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_281e77e18d9b2bfaf957",
+      "family": "shapes-gradients",
+      "label": "arrow tails",
+      "controlId": "shapeConnectorLine.endArrowType",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827030835Z/g6-shape-line-controls-row-batch-proof.json",
+      "proofSha256": "74edd5759b953631a9fbb6e94855e0b6a9d6b0df554de618bb149e43d270792a",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_308a8f434225efca1a24",
+      "family": "shapes-gradients",
+      "label": "line color",
+      "controlId": "shapeConnectorLine.color",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827031806Z/g6-shape-line-color-row-proof.json",
+      "proofSha256": "a669cf7d1a59adc6b5cf33a3cc38ed996ae84c4984f97279c42f380ef6c6db39",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_001ac19496f886e6538a",
+      "family": "shapes-gradients",
+      "label": "gradient angle",
+      "controlId": "fills.gradientGeometry.gradientAngle",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827033009Z/g6-shape-gradient-angle-row-proof.json",
+      "proofSha256": "e5a5d6ce25305fcee067b2a0cd6d71f4d1176725750fe186eb82165ff0da868e",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_7d7d0e2ca16cc58f5c94",
+      "family": "shapes-gradients",
+      "label": "Colored Outline - Black, Dark 1 -> shape-style-001",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827042737Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b5bfe8e8bcafeaf852f414c19f8e8d59ae86a8d1d900b1ca193263f26b21dede",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_71fb5714ced1f880cebe",
+      "family": "shapes-gradients",
+      "label": "Colored Outline - Blue, Accent 1 -> shape-style-002",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827042737Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b5bfe8e8bcafeaf852f414c19f8e8d59ae86a8d1d900b1ca193263f26b21dede",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_bc2afe2be1f147f3c73c",
+      "family": "shapes-gradients",
+      "label": "Colored Outline - Orange, Accent 2 -> shape-style-003",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827042737Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b5bfe8e8bcafeaf852f414c19f8e8d59ae86a8d1d900b1ca193263f26b21dede",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_352f7676d5929ff9ca5d",
+      "family": "shapes-gradients",
+      "label": "Colored Outline - Gray, Accent 3 -> shape-style-004",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827042737Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b5bfe8e8bcafeaf852f414c19f8e8d59ae86a8d1d900b1ca193263f26b21dede",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_f4573bc85b793324b1a2",
+      "family": "shapes-gradients",
+      "label": "Colored Outline - Gold, Accent 4 -> shape-style-005",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827042737Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b5bfe8e8bcafeaf852f414c19f8e8d59ae86a8d1d900b1ca193263f26b21dede",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_8b8f1645abd8fb9142dc",
+      "family": "shapes-gradients",
+      "label": "Colored Outline - Blue, Accent 5 -> shape-style-006",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827042737Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b5bfe8e8bcafeaf852f414c19f8e8d59ae86a8d1d900b1ca193263f26b21dede",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_5ed49c55cc64a8ba530a",
+      "family": "shapes-gradients",
+      "label": "Colored Outline - Green, Accent 6 -> shape-style-007",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827042737Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b5bfe8e8bcafeaf852f414c19f8e8d59ae86a8d1d900b1ca193263f26b21dede",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_d48cd8719596440e397c",
+      "family": "shapes-gradients",
+      "label": "Colored Fill - Black, Dark 1 -> shape-style-008",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827042737Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b5bfe8e8bcafeaf852f414c19f8e8d59ae86a8d1d900b1ca193263f26b21dede",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_70bd264b33b24ad5877e",
+      "family": "shapes-gradients",
+      "label": "Colored Fill - Blue, Accent 1 -> shape-style-009",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827042737Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b5bfe8e8bcafeaf852f414c19f8e8d59ae86a8d1d900b1ca193263f26b21dede",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_67b82d6f5b4c770879b5",
+      "family": "shapes-gradients",
+      "label": "Colored Fill - Orange, Accent 2 -> shape-style-010",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044034Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b68453c69c269d53217b83684f5a935b9f6d0f23afbcb74679102a993149cdc3",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_04ba074f391e3bf671f3",
+      "family": "shapes-gradients",
+      "label": "Colored Fill - Gray, Accent 3 -> shape-style-011",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044034Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b68453c69c269d53217b83684f5a935b9f6d0f23afbcb74679102a993149cdc3",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_8e70cbacdcaf3692dcf8",
+      "family": "shapes-gradients",
+      "label": "Colored Fill - Gold, Accent 4 -> shape-style-012",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044034Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b68453c69c269d53217b83684f5a935b9f6d0f23afbcb74679102a993149cdc3",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_d8bca0d7966c78d5f4bc",
+      "family": "shapes-gradients",
+      "label": "Colored Fill - Blue, Accent 5 -> shape-style-013",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044034Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b68453c69c269d53217b83684f5a935b9f6d0f23afbcb74679102a993149cdc3",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_09e2e5e0890c17788abd",
+      "family": "shapes-gradients",
+      "label": "Colored Fill - Green, Accent 6 -> shape-style-014",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044034Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b68453c69c269d53217b83684f5a935b9f6d0f23afbcb74679102a993149cdc3",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_10d1199e0b8294cea0f8",
+      "family": "shapes-gradients",
+      "label": "Light 1 Outline, Colored Fill - Black, Dark 1 -> shape-style-015",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044034Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b68453c69c269d53217b83684f5a935b9f6d0f23afbcb74679102a993149cdc3",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_18e7782c444c4f07f75d",
+      "family": "shapes-gradients",
+      "label": "Light 1 Outline, Colored Fill - Blue, Accent 1 -> shape-style-016",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044034Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b68453c69c269d53217b83684f5a935b9f6d0f23afbcb74679102a993149cdc3",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_66890b3ac5dec7357bd9",
+      "family": "shapes-gradients",
+      "label": "Light 1 Outline, Colored Fill - Orange, Accent 2 -> shape-style-017",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044034Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b68453c69c269d53217b83684f5a935b9f6d0f23afbcb74679102a993149cdc3",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_f8ccc3e5331ca951852a",
+      "family": "shapes-gradients",
+      "label": "Light 1 Outline, Colored Fill - Gray, Accent 3 -> shape-style-018",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044034Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "b68453c69c269d53217b83684f5a935b9f6d0f23afbcb74679102a993149cdc3",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_2aa8f453f68a6c51b73c",
+      "family": "shapes-gradients",
+      "label": "Light 1 Outline, Colored Fill - Gold, Accent 4 -> shape-style-019",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044859Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "36abaaf48b0f585fd1e9f0e42f2357bbdebd236f81f8dfb0c73d5229e30c850f",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_1d896293fed4f3a37f5f",
+      "family": "shapes-gradients",
+      "label": "Light 1 Outline, Colored Fill - Blue, Accent 5 -> shape-style-020",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044859Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "36abaaf48b0f585fd1e9f0e42f2357bbdebd236f81f8dfb0c73d5229e30c850f",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_1158d54b049f9cdb060f",
+      "family": "shapes-gradients",
+      "label": "Light 1 Outline, Colored Fill - Green, Accent 6 -> shape-style-021",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044859Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "36abaaf48b0f585fd1e9f0e42f2357bbdebd236f81f8dfb0c73d5229e30c850f",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_de605a7e44820021cd60",
+      "family": "shapes-gradients",
+      "label": "Subtle Effect - Black, Dark 1 -> shape-style-022",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044859Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "36abaaf48b0f585fd1e9f0e42f2357bbdebd236f81f8dfb0c73d5229e30c850f",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_18ac5c06e4f56b65a9b1",
+      "family": "shapes-gradients",
+      "label": "Subtle Effect - Blue, Accent 1 -> shape-style-023",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044859Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "36abaaf48b0f585fd1e9f0e42f2357bbdebd236f81f8dfb0c73d5229e30c850f",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_bcffb2958ce087cd0641",
+      "family": "shapes-gradients",
+      "label": "Subtle Effect - Orange, Accent 2 -> shape-style-024",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044859Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "36abaaf48b0f585fd1e9f0e42f2357bbdebd236f81f8dfb0c73d5229e30c850f",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_bba205e070be37d8bb2b",
+      "family": "shapes-gradients",
+      "label": "Subtle Effect - Gray, Accent 3 -> shape-style-025",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044859Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "36abaaf48b0f585fd1e9f0e42f2357bbdebd236f81f8dfb0c73d5229e30c850f",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_b74fe5c1e75c55bd01df",
+      "family": "shapes-gradients",
+      "label": "Subtle Effect - Gold, Accent 4 -> shape-style-026",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044859Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "36abaaf48b0f585fd1e9f0e42f2357bbdebd236f81f8dfb0c73d5229e30c850f",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    },
+    {
+      "catalogRowId": "cap_4c6b6a19a9fd33d692f2",
+      "family": "shapes-gradients",
+      "label": "Subtle Effect - Blue, Accent 5 -> shape-style-027",
+      "controlId": "shapeStylePresetId",
+      "status": "formally-closed",
+      "proof": "outputs/authoring-principle-corpus/finalized-jsonspec-archive/g6-frozen-catalog-row/20260827044859Z/g6-shape-style-row-batch-bind-proof.json",
+      "proofSha256": "36abaaf48b0f585fd1e9f0e42f2357bbdebd236f81f8dfb0c73d5229e30c850f",
+      "witnesses": ["native-five-point-serialization-and-reset", "package-integrity", "office-authored-mutation", "savecopyas-reopen-retention", "deterministic-script-editability", "visual-renders", "fresh-public-discovery-lifecycle", "no-private-leakage"]
+    }
+  ],
+  "formalClosure": "76/2258",
+  "policy": "Only row proofs that bind a frozen catalog row to every required native/public/readback/reset/Office/visual witness may enter this ledger. Aggregate family evidence, schema acceptance, preset replay, and surface inventory never enter it."
+}

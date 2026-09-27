@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "betterpptx.deck-spec.v1",
+  "title": "Custom process lesson",
+  "authoringContract": {
+    "workflow": "ai-sovereign-v1",
+    "creativeAuthority": "ai",
+    "directorMode": "off",
+    "verificationMode": "complete",
+    "geometryAuthority": "ai",
+    "placementPolicy": "ai-authored-geometry-v1",
+    "coordinateSystem": "inches"
+  },
+  "styleIntent": {
+    "artDirection": "editorial",
+    "mode": "dark"
+  },
+  "validation": {
+    "validateBeforeSave": true,
+    "requireAccessibility": true
+  },
+  "slides": [
+    {
+      "id": "process",
+      "title": "Approval loop",
+      "content": [
+        {
+          "kind": "group",
+          "name": "approval-loop",
+          "rect": {
+            "x": 1,
+            "y": 2,
+            "w": 11.3,
+            "h": 3
+          },
+          "chOff": {
+            "x": 0,
+            "y": 0,
+            "w": 11.3,
+            "h": 3
+          },
+          "chExt": {
+            "x": 0,
+            "y": 0,
+            "w": 11.3,
+            "h": 3
+          },
+          "children": [
+            {
+              "kind": "textShape",
+              "objectName": "review",
+              "text": "Review",
+              "x": 0,
+              "y": 0.7,
+              "w": 2.4,
+              "h": 1
+            },
+            {
+              "kind": "textShape",
+              "objectName": "approve",
+              "text": "Approve",
+              "x": 4.4,
+              "y": 0.7,
+              "w": 2.4,
+              "h": 1
+            },
+            {
+              "kind": "connector",
+              "objectName": "review-to-approve",
+              "x": 2.4,
+              "y": 1.2,
+              "w": 2,
+              "h": 0,
+              "startShapeId": 1,
+              "endShapeId": 2,
+              "connectorType": "straightConnector1"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

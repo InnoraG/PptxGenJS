@@ -58,7 +58,11 @@ export type CHART_NAME =
 	| 'waterfall'
 	| 'funnel'
 	| 'regionMap'
-export type SCHEME_COLORS = 'tx1' | 'tx2' | 'bg1' | 'bg2' | 'accent1' | 'accent2' | 'accent3' | 'accent4' | 'accent5' | 'accent6'
+export type SCHEME_COLORS =
+	| 'tx1' | 'tx2' | 'bg1' | 'bg2'
+	| 'dk1' | 'lt1' | 'dk2' | 'lt2'
+	| 'accent1' | 'accent2' | 'accent3' | 'accent4' | 'accent5' | 'accent6'
+	| 'hlink' | 'folHlink' | 'phClr'
 
 export const LETTERS: string[] = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
 export const BARCHART_COLORS: string[] = [
@@ -195,6 +199,7 @@ export enum ShapeType {
 	'curvedRightArrow' = 'curvedRightArrow',
 	'curvedUpArrow' = 'curvedUpArrow',
 	'custGeom' = 'custGeom',
+	'freeform' = 'freeform',
 	'decagon' = 'decagon',
 	'diagStripe' = 'diagStripe',
 	'diamond' = 'diamond',
@@ -335,12 +340,19 @@ export enum SchemeColor {
 	'text2' = 'tx2',
 	'background1' = 'bg1',
 	'background2' = 'bg2',
+	'dark1' = 'dk1',
+	'light1' = 'lt1',
+	'dark2' = 'dk2',
+	'light2' = 'lt2',
 	'accent1' = 'accent1',
 	'accent2' = 'accent2',
 	'accent3' = 'accent3',
 	'accent4' = 'accent4',
 	'accent5' = 'accent5',
 	'accent6' = 'accent6',
+	'hyperlink' = 'hlink',
+	'followedHyperlink' = 'folHlink',
+	'placeholder' = 'phClr',
 }
 export enum AlignH {
 	'left' = 'left',
@@ -590,6 +602,7 @@ export type SHAPE_NAME =
 	| 'curvedRightArrow'
 	| 'curvedUpArrow'
 	| 'custGeom'
+	| 'freeform'
 	| 'decagon'
 	| 'diagStripe'
 	| 'diamond'
@@ -766,6 +779,7 @@ export enum MASTER_OBJECTS {
 }
 
 export enum SLIDE_OBJECT_TYPES {
+	'cameo' = 'cameo',
 	'chart' = 'chart',
 	'equation' = 'equation',
 	'hyperlink' = 'hyperlink',
@@ -781,16 +795,31 @@ export enum SLIDE_OBJECT_TYPES {
 	'text' = 'text',
 	'notes' = 'notes',
 	'passthrough' = 'passthrough',
+	'connector' = 'connector',
+	'group' = 'group',
+	'zoom' = 'zoom',
+	'sectionZoom' = 'sectionZoom',
+	'summaryZoom' = 'summaryZoom',
 }
 export enum PLACEHOLDER_TYPES {
 	'title' = 'title',
 	'body' = 'body',
+	'centeredTitle' = 'ctrTitle',
+	'subTitle' = 'subTitle',
+	'object' = 'obj',
 	'image' = 'pic',
 	'chart' = 'chart',
 	'table' = 'tbl',
+	'clipArt' = 'clipArt',
+	'diagram' = 'dgm',
 	'media' = 'media',
+	'date' = 'dt',
+	'footer' = 'ftr',
+	'slideNumber' = 'sldNum',
+	'header' = 'hdr',
+	'slideImage' = 'sldImg',
 }
-export type PLACEHOLDER_TYPE = 'title' | 'body' | 'pic' | 'chart' | 'tbl' | 'media'
+export type PLACEHOLDER_TYPE = 'title' | 'body' | 'ctrTitle' | 'subTitle' | 'obj' | 'pic' | 'chart' | 'tbl' | 'clipArt' | 'dgm' | 'media' | 'dt' | 'ftr' | 'sldNum' | 'hdr' | 'sldImg'
 
 /**
  * NOTE: 20170304: BULLET_TYPES: Only default is used so far. I'd like to combine the two pieces of code that use these before implementing these as options

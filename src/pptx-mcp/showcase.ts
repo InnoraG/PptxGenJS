@@ -1,5 +1,6 @@
 import * as fs from 'fs'
 import * as path from 'path'
+import { createRequire } from 'module'
 import { spawnSync } from 'child_process'
 import { fileURLToPath, pathToFileURL } from 'url'
 import {
@@ -277,8 +278,19 @@ export async function loadBetterPptxMcpPresentationEngine(): Promise<any> {
 	]
 	for (const candidate of candidates) {
 		if (fs.existsSync(candidate)) {
-			const mod = await import(pathToFileURL(candidate).href)
-			return mod.default || mod
+			try {
+				const mod = await import(pathToFileURL(candidate).href)
+				return mod.default || mod
+			} catch (error) {
+				// The shipped ES bundle is intentionally kept as .js for browser
+				// consumers, while the MCP node runtime is often executed from a
+				// CommonJS package boundary. Use the paired CJS build when Node
+				// refuses to parse the ES bundle as a module.
+				const cjsCandidate = candidate.replace(/\.es\.js$/i, '.cjs.js')
+				if (!fs.existsSync(cjsCandidate)) throw error
+				const mod = createRequire(import.meta.url)(cjsCandidate)
+				return mod.default || mod
+			}
 		}
 	}
 	throw new Error(`${BETTERPPTX_MCP_BRAND} could not locate the bundled presentation engine`)
@@ -312,7 +324,6 @@ interface ShowcaseAssets {
 		intro: string
 		dynamics: string
 		validation: string
-		fallbackUsed: boolean
 	}
 }
 
@@ -509,6 +520,26 @@ function addLiveAnimation(
 	}
 }
 
+function recordNativeNarrationCue(
+	ctx: ShowcaseContext,
+	slideTitle: string,
+	objectName: string,
+	delay = 0,
+	dynamicKind = 'narration',
+	detail = 'native-audio-narration'
+): void {
+	recordLiveDynamics(ctx, slideTitle, {
+		objectName,
+		dynamicKind,
+		trigger: 'afterPrevious',
+		effect: 'nativeNarration',
+		startMs: Math.max(0, Number(delay) || 0),
+		durationMs: 1,
+		validationOracle: ['native-narration-timing', 'audio-relationship'],
+		detail,
+	})
+}
+
 function summarizePlayback(ctx: AutoplayContext): ShowcasePlaybackMetadata {
 	const estimatedRuntimeMs = ctx.slides.reduce((sum, slide) => sum + slide.dwellMs, 0)
 	const mediaCueCount = ctx.cues.filter(cue => cue.cueType.startsWith('media') || cue.cueType === 'content:media' || cue.cueType === 'content:narration').length
@@ -694,57 +725,35 @@ function writeMinimalModelFallbackPng(filePath: string): void {
 	fs.writeFileSync(filePath, Buffer.from(MINIMAL_MODEL_FALLBACK_PNG_BASE64, 'base64'))
 }
 
-function writeToneWav(filePath: string, seconds = 1.4, frequency = 440): void {
-	const sampleRate = 22050
-	const samples = Math.max(1, Math.floor(sampleRate * seconds))
-	const data = Buffer.alloc(samples * 2)
-	for (let i = 0; i < samples; i++) {
-		const envelope = Math.min(1, i / (sampleRate * 0.08), (samples - i) / (sampleRate * 0.1))
-		const value = Math.round(Math.sin((2 * Math.PI * frequency * i) / sampleRate) * 10000 * Math.max(0, envelope))
-		data.writeInt16LE(value, i * 2)
-	}
-	const header = Buffer.alloc(44)
-	header.write('RIFF', 0)
-	header.writeUInt32LE(36 + data.length, 4)
-	header.write('WAVE', 8)
-	header.write('fmt ', 12)
-	header.writeUInt32LE(16, 16)
-	header.writeUInt16LE(1, 20)
-	header.writeUInt16LE(1, 22)
-	header.writeUInt32LE(sampleRate, 24)
-	header.writeUInt32LE(sampleRate * 2, 28)
-	header.writeUInt16LE(2, 32)
-	header.writeUInt16LE(16, 34)
-	header.write('data', 36)
-	header.writeUInt32LE(data.length, 40)
-	fs.writeFileSync(filePath, Buffer.concat([header, data]))
-}
-
-function writeSpeechOrTone(filePath: string, text: string, toneFrequency: number): boolean {
-	if (process.platform === 'win32') {
-		const scriptPath = `${filePath}.speech.ps1`
-		const script = [
-			'param([string]$Text,[string]$OutPath)',
-			"$ErrorActionPreference='Stop'",
-			'Add-Type -AssemblyName System.Speech',
-			'$synth=New-Object System.Speech.Synthesis.SpeechSynthesizer',
-			'$synth.Rate=-1',
-			'$synth.Volume=92',
-			'$synth.SetOutputToWaveFile([IO.Path]::GetFullPath($OutPath))',
-			'$synth.Speak($Text)',
-			'$synth.Dispose()',
-		].join('\n')
-		fs.writeFileSync(scriptPath, script)
+function writeSpeechWav(filePath: string, text: string): void {
+	if (process.platform !== 'win32') throw new Error('Real TTS narration requires an available speech synthesis provider.')
+	const scriptPath = `${filePath}.speech.ps1`
+	const script = [
+		'param([string]$Text,[string]$OutPath)',
+		"$ErrorActionPreference='Stop'",
+		'Add-Type -AssemblyName System.Speech',
+		'$synth=New-Object System.Speech.Synthesis.SpeechSynthesizer',
+		'$synth.Rate=-1',
+		'$synth.Volume=92',
+		'$synth.SetOutputToWaveFile([IO.Path]::GetFullPath($OutPath))',
+		'$synth.Speak($Text)',
+		'$synth.Dispose()',
+	].join('\n')
+	fs.writeFileSync(scriptPath, script)
+	try {
 		const proc = spawnSync('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', scriptPath, '-Text', text, '-OutPath', filePath], {
 			encoding: 'utf8',
 			timeout: 15000,
 			windowsHide: true,
 		})
+		if (proc.status !== 0) {
+			const detail = proc.stderr?.trim() || proc.stdout?.trim() || `exit code ${proc.status}`
+			throw new Error(`Real TTS narration failed: ${detail}`)
+		}
+		if (!fs.existsSync(filePath) || fs.statSync(filePath).size <= 1024) throw new Error('Real TTS narration produced no usable audio.')
+	} finally {
 		fs.rmSync(scriptPath, { force: true })
-		if (proc.status === 0 && fs.existsSync(filePath) && fs.statSync(filePath).size > 1024) return false
 	}
-	writeToneWav(filePath, 1.35, toneFrequency)
-	return true
 }
 
 function ensureNarrationAssets(assetDir: string): ShowcaseAssets['narration'] {
@@ -752,16 +761,14 @@ function ensureNarrationAssets(assetDir: string): ShowcaseAssets['narration'] {
 		intro: path.join(assetDir, 'narration-intro.wav'),
 		dynamics: path.join(assetDir, 'narration-live-dynamics.wav'),
 		validation: path.join(assetDir, 'narration-validation.wav'),
-		fallbackUsed: false,
 	}
 	const scripts = [
-		[narration.intro, `${BETTERPPTX_MCP_BRAND} live MCP showcase. The deck runs unattended and demonstrates content animation, media, three dimensional models, morph, validation, and artifacts.`, 440],
-		[narration.dynamics, 'Live dynamics are attached to text, shapes, WordArt, charts, tables, SmartArt fixtures, media, motion paths, and morph scenes.', 554],
-		[narration.validation, 'Validation checks package integrity, timing XML, content-level animation coverage, media relationships, three dimensional assets, and artifact retrieval.', 659],
+		[narration.intro, `${BETTERPPTX_MCP_BRAND} live MCP showcase. The deck runs unattended and demonstrates content animation, media, three dimensional models, morph, validation, and artifacts.`],
+		[narration.dynamics, 'Live dynamics are attached to text, shapes, WordArt, charts, tables, SmartArt fixtures, media, motion paths, and morph scenes.'],
+		[narration.validation, 'Validation checks package integrity, timing XML, content-level animation coverage, media relationships, three dimensional assets, and artifact retrieval.'],
 	] as const
-	for (const [file, text, frequency] of scripts) {
-		const fallback = writeSpeechOrTone(file, text, frequency)
-		narration.fallbackUsed = narration.fallbackUsed || fallback
+	for (const [file, text] of scripts) {
+		writeSpeechWav(file, text)
 	}
 	return narration
 }
@@ -1383,7 +1390,7 @@ function addAudioLabSlides(pptx: any, assets: ShowcaseAssets, ctx: ShowcaseConte
 }
 
 function addVoiceLabSlides(pptx: any, assets: ShowcaseAssets, ctx: ShowcaseContext): void {
-	const s = slide(pptx, 'Voice Lab', 'Section narration clips, deterministic fallback tone policy, and autoplay voice cue timing.', ctx, 'voice', 'media', 10)
+	const s = slide(pptx, 'Voice Lab', 'Section narration clips, real TTS policy, and autoplay voice cue timing.', ctx, 'voice', 'media', 10)
 	card(s, 0.82, 1.48, 11.65, 4.78)
 	const clips = [
 		{ label: 'intro', path: assets.narration.intro, color: C.cyan },
@@ -1405,6 +1412,7 @@ function addVoiceLabSlides(pptx: any, assets: ShowcaseAssets, ctx: ShowcaseConte
 			objectName: `${mediaName}-panel`,
 		} as any)
 		if (fs.existsSync(clip.path)) {
+			const isNarrationClip = index === 0
 			s.addMedia({
 				type: 'audio',
 				path: clip.path,
@@ -1413,17 +1421,22 @@ function addVoiceLabSlides(pptx: any, assets: ShowcaseAssets, ctx: ShowcaseConte
 				y: 2.12,
 				w: 0.86,
 				h: 0.52,
-				interactivePlayback: ctx.playback.mode !== 'autoplay',
+				interactivePlayback: isNarrationClip ? false : ctx.playback.mode !== 'autoplay',
+				isNarration: isNarrationClip,
 				objectName: mediaName,
 			} as any)
-			addLiveAnimation(s, ctx, 'Voice Lab', mediaName, {
-				type: 'media',
-				effect: 'mediaplay',
-				mediaCommand: 'playFrom(0.0)',
-				duration: 1,
-				delay: 400 + index * 900,
-				trigger: 'afterPrevious',
-			} as any, index, index === 0 ? 'narration' : 'voice', undefined, ['media-command-xml', 'voice-audio-relationship'], `voice-cue:${clip.label}`)
+			if (isNarrationClip) {
+				recordNativeNarrationCue(ctx, 'Voice Lab', mediaName, 400 + index * 900, 'narration', `voice-cue:${clip.label}`)
+			} else {
+				addLiveAnimation(s, ctx, 'Voice Lab', mediaName, {
+					type: 'media',
+					effect: 'mediaplay',
+					mediaCommand: 'playFrom(0.0)',
+					duration: 1,
+					delay: 400 + index * 900,
+					trigger: 'afterPrevious',
+				} as any, index, 'voice', undefined, ['media-command-xml', 'voice-audio-relationship'], `voice-cue:${clip.label}`)
+			}
 		}
 		for (let bar = 0; bar < 10; bar++) {
 			const h = 0.18 + ((bar + index * 3) % 6) * 0.12
@@ -1441,9 +1454,6 @@ function addVoiceLabSlides(pptx: any, assets: ShowcaseAssets, ctx: ShowcaseConte
 		}
 		s.addText(clip.label, { x: x + 0.3, y: 4.92, w: 2.08, h: 0.22, fontSize: 11, bold: true, color: C.ink, align: 'center', margin: 0 })
 	})
-	if (assets.narration.fallbackUsed) {
-		s.addText('fallback tone embedded', { x: 4.74, y: 5.72, w: 3.9, h: 0.18, fontSize: 8, color: C.amber, align: 'center', margin: 0 })
-	}
 	const rows = rowsFor(ctx.ledger, 'Audio Voice Narration')
 	const specimens = rows.map((row, index) => addSpecimen(ctx, row, 'Voice Lab', 'voice-lab-cues', `voice-lab-${clips[index % clips.length].label}`, 'voice-narration-timing', 'voice lab applied fixture', { animationApplied: true }))
 	addCoverageNotes(s, specimens)
@@ -1801,17 +1811,11 @@ function addNarrationCue(slide: any, ctx: ShowcaseContext, slideTitle: string, a
 		y: H - 0.74,
 		w: 0.34,
 		h: 0.24,
-		interactivePlayback: ctx.playback.mode !== 'autoplay',
+		interactivePlayback: false,
+		isNarration: true,
 		objectName,
 	} as any)
-	addLiveAnimation(slide, ctx, slideTitle, objectName, {
-		type: 'media',
-		effect: 'mediaplay',
-		mediaCommand: 'playFrom(0.0)',
-		duration: 1,
-		delay,
-		trigger: 'afterPrevious',
-	}, 0, 'narration', undefined, ['media-command-xml', 'audio-relationship'], 'section-narration')
+	recordNativeNarrationCue(ctx, slideTitle, objectName, delay, 'narration', 'section-narration')
 }
 
 function semanticDynamicsForRow(row: CapabilityLedgerRow, index: number): { props: any; dynamicKind: string; oracle: string[] } {

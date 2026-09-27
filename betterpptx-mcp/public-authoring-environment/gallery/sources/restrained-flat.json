@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "betterpptx.deck-spec.v1",
+  "title": "Restrained flat lesson",
+  "authoringContract": {
+    "workflow": "ai-sovereign-v1",
+    "creativeAuthority": "ai",
+    "directorMode": "off",
+    "verificationMode": "complete",
+    "geometryAuthority": "ai",
+    "placementPolicy": "ai-authored-geometry-v1",
+    "coordinateSystem": "inches"
+  },
+  "styleIntent": {
+    "artDirection": "editorial",
+    "mode": "dark"
+  },
+  "validation": {
+    "validateBeforeSave": true,
+    "requireAccessibility": true
+  },
+  "slides": [
+    {
+      "id": "decision",
+      "title": "Decision basis",
+      "content": [
+        {
+          "kind": "textBox",
+          "name": "claim",
+          "text": "The evidence supports option B",
+          "rect": {
+            "x": 0.9,
+            "y": 1.2,
+            "w": 7.2,
+            "h": 1.2
+          },
+          "options": {
+            "fontSize": 36,
+            "bold": true
+          }
+        },
+        {
+          "kind": "table-panel",
+          "name": "evidence",
+          "rect": {
+            "x": 7.9,
+            "y": 1.4,
+            "w": 4.4,
+            "h": 3.8
+          },
+          "rows": [
+            [
+              "Option",
+              "Score"
+            ],
+            [
+              "A",
+              "63"
+            ],
+            [
+              "B",
+              "81"
+            ]
+          ],
+          "verified": true,
+          "evidenceSource": "Synthetic teaching fixture.",
+          "summary": "Option B has the higher illustrative score.",
+          "altText": "Illustrative comparison table: A 63, B 81."
+        }
+      ]
+    }
+  ]
+}

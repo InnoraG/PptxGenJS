@@ -1,0 +1,466 @@
+{
+  "schemaVersion": "betterpptx-public-capability-atlas.v1",
+  "releaseState": "development",
+  "ordering": "entry-id-lexicographic-only",
+  "truth": {
+    "creativeAuthority": "ai",
+    "catalogSemantics": "unranked-factual-inventory-with-route-only-rows",
+    "contractEvidence": "evidence-backed-by-manifest-bound-public-schemas",
+    "renderEvidence": "planned-none-accepted",
+    "selectorRule": "A generic authoring-catalog row is directly selectable only when its live status is implemented and its live selection object contains executableId or executableValue. route.exactSelection is routing metadata: it may name a public follow-up tool or a semantic spec destination, and it is never the selector. Follow a public tool only for a selectorless row and only when it supports a focused bounded request; otherwise treat the row as informational.",
+    "progressiveDiscoveryRule": "Use a focused family, intent, topology, or query and the smallest supported page before requesting more results."
+  },
+  "entries": [
+    {
+      "id": "accessible-native-composites",
+      "communicationFunctions": [
+        "make relationships perceivable without relying on colour alone",
+        "preserve an editable static reading order"
+      ],
+      "discovery": {
+        "tool": "betterpptx.authoring.capabilities",
+        "arguments": {
+          "family": "structural",
+          "intent": "accessible editable relationships with a complete static reading"
+        },
+        "resultContract": {
+          "kind": "public-capability-contract",
+          "selectorFields": []
+        }
+      },
+      "selectorBinding": {
+        "type": "live-public-contract",
+        "rule": "This call teaches a contract and does not itself return a selector. Use semantic object names, alt text, reading order, and exact selectors only when a later focused catalog explicitly returns them."
+      },
+      "nativeEditableFacts": {
+        "status": "entry-specific",
+        "rule": "Retain the editability and fallback facts returned for every selected object."
+      },
+      "constraints": [
+        "A reduced or static reading must preserve the complete message.",
+        "Validation evidence does not replace full-size visual inspection."
+      ],
+      "combinationPattern": "Pair one semantic relationship with concise text, redundant visual cues, and a complete accessibility summary.",
+      "counterexample": "Do not add decorative objects that make the reading order or intended relationship ambiguous.",
+      "renderEvidence": {
+        "status": "planned",
+        "caseIds": []
+      }
+    },
+    {
+      "id": "data-comparison-and-decision",
+      "communicationFunctions": [
+        "compare categories or periods",
+        "show a decision-relevant pattern"
+      ],
+      "discovery": {
+        "tool": "betterpptx.authoring.catalog",
+        "arguments": {
+          "family": "charts",
+          "includePlanned": false,
+          "limit": 8,
+          "offset": 0
+        },
+        "resultContract": {
+          "kind": "generic-authoring-catalog-page",
+          "directSelectorFields": [
+            "selection.executableId",
+            "selection.executableValue"
+          ],
+          "routeField": "route.exactSelection"
+        }
+      },
+      "selectorBinding": {
+        "type": "live-generic-catalog-route",
+        "rule": "Treat only an implemented row with an explicit selection.executableId or selection.executableValue as directly selectable. route.exactSelection may name a follow-up public chart catalog; it is never itself the selector. Selectorless rows are informational until that route returns an explicit id."
+      },
+      "nativeEditableFacts": {
+        "status": "entry-specific",
+        "rule": "Use only the native modes, fallback modes, data-shape facts, and coverage mode returned by the selected entry."
+      },
+      "constraints": [
+        "Choose from the claim and data shape, not from visual novelty.",
+        "Keep exact values available when the decision depends on them."
+      ],
+      "combinationPattern": "Pair one primary chart with a short decision statement and only the supporting values needed to verify the claim.",
+      "counterexample": "Do not use several chart families to repeat one fact or hide uncertainty behind decoration.",
+      "renderEvidence": {
+        "status": "planned",
+        "caseIds": []
+      }
+    },
+    {
+      "id": "dense-evidence-and-exact-values",
+      "communicationFunctions": [
+        "compare exact values",
+        "scan status, variance, risk, or evidence"
+      ],
+      "discovery": {
+        "tool": "betterpptx.authoring.catalog",
+        "arguments": {
+          "family": "tables",
+          "includePlanned": false,
+          "limit": 8,
+          "offset": 0
+        },
+        "resultContract": {
+          "kind": "generic-authoring-catalog-page",
+          "directSelectorFields": [
+            "selection.executableId",
+            "selection.executableValue"
+          ],
+          "routeField": "route.exactSelection"
+        }
+      },
+      "selectorBinding": {
+        "type": "live-generic-catalog-route",
+        "rule": "Treat only an implemented row with an explicit selection.executableId or selection.executableValue as directly selectable. Follow a public table-catalog route for selectorless capability rows and bind only an explicit id returned there."
+      },
+      "nativeEditableFacts": {
+        "status": "entry-specific",
+        "rule": "Preserve the selected entry's native-table, visual-adapted, or preservation facts without substitution."
+      },
+      "constraints": [
+        "Use a table only when exact lookup or row-and-column comparison is the communication task.",
+        "Text fit and contrast must remain valid at full-slide review size."
+      ],
+      "combinationPattern": "Use a compact evidence table beside one conclusion or decision, with the conclusion visually dominant.",
+      "counterexample": "Do not turn prose into a dense grid when sequence, hierarchy, or a chart would communicate faster.",
+      "renderEvidence": {
+        "status": "planned",
+        "caseIds": []
+      }
+    },
+    {
+      "id": "editable-custom-geometry",
+      "communicationFunctions": [
+        "express a distinctive editable symbol or contour",
+        "support a visual metaphor that standard native forms cannot express"
+      ],
+      "discovery": {
+        "tool": "betterpptx.custom_geometry.catalog",
+        "arguments": {
+          "query": "editable semantic symbol",
+          "useCase": "a distinctive contour whose meaning is not covered by a standard native form",
+          "limit": 2,
+          "format": "summary"
+        },
+        "resultContract": {
+          "kind": "opaque-handle-catalog",
+          "selectorFields": [
+            "assets[].handle"
+          ]
+        }
+      },
+      "selectorBinding": {
+        "type": "opaque-handle",
+        "rule": "Use only an exact custom-geometry handle returned by the connected public catalog."
+      },
+      "nativeEditableFacts": {
+        "status": "catalog-declared",
+        "rule": "Require the selected row to declare native editability and use its semantic handle field unchanged."
+      },
+      "constraints": [
+        "Use custom geometry only when standard native forms cannot express the intended meaning.",
+        "The semantic reason must be recorded and placement remains engine-owned."
+      ],
+      "combinationPattern": "Use one distinctive editable geometry with restrained text and a clear semantic role.",
+      "counterexample": "Do not replace a standard native shape merely to create novelty or hand-author its geometry.",
+      "renderEvidence": {
+        "status": "planned",
+        "caseIds": []
+      }
+    },
+    {
+      "id": "image-led-narrative",
+      "communicationFunctions": [
+        "establish setting, emotion, or product context",
+        "carry a visual narrative across slides"
+      ],
+      "discovery": {
+        "tool": "betterpptx.assets.search_stock",
+        "argumentsPolicy": {
+          "query": "derive from the current slide's semantic visual need",
+          "kind": "choose a supported visual media kind",
+          "perPage": 2
+        },
+        "resultContract": {
+          "kind": "opaque-handle-catalog",
+          "selectorFields": [
+            "results[].handle"
+          ]
+        }
+      },
+      "selectorBinding": {
+        "type": "opaque-handle",
+        "rule": "Use only a handle returned by the connected public asset catalog or upload result."
+      },
+      "nativeEditableFacts": {
+        "status": "entry-specific",
+        "rule": "Preserve the returned asset facts and choose native annotations when an editable explanation is required."
+      },
+      "constraints": [
+        "The image or scene must advance the message rather than act as filler.",
+        "Crops, overlays, and text polarity require full-size preview inspection."
+      ],
+      "combinationPattern": "Let one visual carry the scene, then add a concise claim and only the annotations needed to explain it.",
+      "counterexample": "Do not assemble unrelated assets merely to make a slide look busy or premium.",
+      "renderEvidence": {
+        "status": "planned",
+        "caseIds": []
+      }
+    },
+    {
+      "id": "mathematical-proof",
+      "communicationFunctions": [
+        "state a quantitative relationship",
+        "show the reasoning behind a result"
+      ],
+      "discovery": {
+        "tool": "betterpptx.authoring.catalog",
+        "arguments": {
+          "family": "equations",
+          "includePlanned": false,
+          "limit": 8,
+          "offset": 0
+        },
+        "resultContract": {
+          "kind": "generic-authoring-catalog-page",
+          "directSelectorFields": [
+            "selection.executableId",
+            "selection.executableValue"
+          ],
+          "routeField": "route.exactSelection"
+        }
+      },
+      "selectorBinding": {
+        "type": "live-generic-catalog-route",
+        "rule": "Bind only an implemented row's explicit selection.executableId or selection.executableValue. The equation-catalog name in route.exactSelection is related routing metadata, not the preset selector. These rows already supply direct selectors, and that companion route has no focused bounded request, so do not call it as a follow-up."
+      },
+      "nativeEditableFacts": {
+        "status": "catalog-declared",
+        "rule": "Use the representation and editability facts declared for the selected equation form."
+      },
+      "constraints": [
+        "Define symbols that are not already known to the audience.",
+        "The equation must support the spoken or written claim rather than decorate it."
+      ],
+      "combinationPattern": "Pair one readable equation with a plain-language interpretation and the evidence it explains.",
+      "counterexample": "Do not show a dense derivation when the audience needs only a decision rule or result.",
+      "renderEvidence": {
+        "status": "planned",
+        "caseIds": []
+      }
+    },
+    {
+      "id": "model3d-explanation",
+      "communicationFunctions": [
+        "explain a physical object or spatial relationship",
+        "use a consistent object as a narrative anchor"
+      ],
+      "discovery": {
+        "tool": "betterpptx.authoring.catalog",
+        "arguments": {
+          "family": "model3d",
+          "includePlanned": false,
+          "limit": 8,
+          "offset": 0
+        },
+        "resultContract": {
+          "kind": "generic-authoring-catalog-page",
+          "directSelectorFields": [
+            "selection.executableId",
+            "selection.executableValue"
+          ],
+          "routeField": "route.exactSelection"
+        }
+      },
+      "selectorBinding": {
+        "type": "live-generic-catalog-route",
+        "rule": "Bind a view only when an implemented row explicitly returns selection.executableId or selection.executableValue. For selectorless rows, follow the named public asset route with a focused query and bind only an opaque handle returned there."
+      },
+      "nativeEditableFacts": {
+        "status": "catalog-declared",
+        "rule": "Require the selected asset's public native, editable, view, and fallback facts before committing."
+      },
+      "constraints": [
+        "Use three-dimensional media only when depth, orientation, mechanism, or object continuity matters.",
+        "A complete static reading must remain available."
+      ],
+      "combinationPattern": "Use one selected model with a concise explanation, stable naming, and a deliberate view or motion choice.",
+      "counterexample": "Do not use three-dimensional media as a generic badge when a simple diagram communicates more clearly.",
+      "renderEvidence": {
+        "status": "planned",
+        "caseIds": []
+      }
+    },
+    {
+      "id": "narrated-timed-explanation",
+      "communicationFunctions": [
+        "pace an explanation",
+        "coordinate narration, slide timing, and semantic motion"
+      ],
+      "discovery": {
+        "tool": "betterpptx.authoring.catalog",
+        "arguments": {
+          "family": "motion-transitions-morph",
+          "includePlanned": false,
+          "limit": 8,
+          "offset": 0
+        },
+        "resultContract": {
+          "kind": "generic-authoring-catalog-page",
+          "directSelectorFields": [
+            "selection.executableId",
+            "selection.executableValue"
+          ],
+          "routeField": "route.exactSelection"
+        }
+      },
+      "selectorBinding": {
+        "type": "live-generic-catalog-route",
+        "rule": "Bind motion only from an implemented row with an explicit selection.executableId or selection.executableValue. A selectorless row that points at the public composition route describes capability only and is not a selectable motion."
+      },
+      "nativeEditableFacts": {
+        "status": "entry-specific",
+        "rule": "Retain the selected entry's native motion and fallback facts, including any static reading requirement."
+      },
+      "constraints": [
+        "Motion must clarify sequence, causality, state change, or attention.",
+        "Narration timing and slide timing must share one frozen clock."
+      ],
+      "combinationPattern": "Coordinate one narration purpose, one semantic motion purpose, and a complete reduced-motion reading.",
+      "counterexample": "Do not add repeated transitions or movement that has no communication role.",
+      "renderEvidence": {
+        "status": "planned",
+        "caseIds": []
+      }
+    },
+    {
+      "id": "presenter-gesture",
+      "communicationFunctions": [
+        "direct attention within a narrated explanation",
+        "use a consistent editable presenter"
+      ],
+      "discovery": {
+        "tool": "betterpptx.authoring.catalog",
+        "arguments": {
+          "family": "presenter-motion",
+          "includePlanned": false,
+          "limit": 8,
+          "offset": 0
+        },
+        "resultContract": {
+          "kind": "generic-authoring-catalog-page",
+          "directSelectorFields": [
+            "selection.executableId",
+            "selection.executableValue"
+          ],
+          "routeField": "route.exactSelection"
+        }
+      },
+      "selectorBinding": {
+        "type": "live-generic-catalog-route",
+        "rule": "Use only rows whose live status is implemented, selectable is true, and selection.executableValue contains the exact motion ID. Here route.exactSelection identifies the semantic destination field; the executable value remains the selector."
+      },
+      "nativeEditableFacts": {
+        "status": "catalog-declared",
+        "rule": "Treat only rows marked selectable and native editable as executable presenter choices."
+      },
+      "constraints": [
+        "The presenter gesture must have a clear attention or explanation purpose.",
+        "The deck must retain a complete static and reduced-motion reading."
+      ],
+      "combinationPattern": "Use a consistent presenter identity with one purposeful gesture per narrative beat and synchronized narration.",
+      "counterexample": "Do not use a presenter as constant decoration or as a substitute for clear slide structure.",
+      "renderEvidence": {
+        "status": "planned",
+        "caseIds": []
+      }
+    },
+    {
+      "id": "relationship-and-process",
+      "communicationFunctions": [
+        "show hierarchy, sequence, cycle, or relationship",
+        "teach a system without reducing it to bullets"
+      ],
+      "discovery": {
+        "tool": "betterpptx.smartart.catalog",
+        "argumentsPolicy": {
+          "dataShape": "derive the actual sequence, hierarchy, cycle, or relationship topology",
+          "query": "use one short factual topology term from the current story",
+          "limit": 2,
+          "offset": 0
+        },
+        "resultContract": {
+          "kind": "specialized-id-catalog",
+          "selectorFields": [
+            "layouts[].id",
+            "quickStyles[].id",
+            "colors[].id"
+          ]
+        }
+      },
+      "selectorBinding": {
+        "type": "live-specialized-catalog-exact-selector",
+        "rule": "Query the actual topology with a bounded page, then bind only exact layout, quick-style, and color-style ids explicitly returned by that live public catalog."
+      },
+      "nativeEditableFacts": {
+        "status": "entry-specific",
+        "rule": "Preserve the selected layout's native, editable, topology, and fallback facts."
+      },
+      "constraints": [
+        "The topology must match the actual relationship rather than merely fitting the item count.",
+        "Labels must remain concise enough to preserve hierarchy."
+      ],
+      "combinationPattern": "Use one relationship topology, one governing claim, and supporting evidence outside the diagram when needed.",
+      "counterexample": "Do not force a list into a cycle, hierarchy, or process that the underlying meaning does not support.",
+      "renderEvidence": {
+        "status": "planned",
+        "caseIds": []
+      }
+    },
+    {
+      "id": "structural-annotation-and-connection",
+      "communicationFunctions": [
+        "connect native objects",
+        "annotate a visual while retaining editability"
+      ],
+      "discovery": {
+        "tool": "betterpptx.authoring.catalog",
+        "arguments": {
+          "family": "structural",
+          "includePlanned": false,
+          "limit": 8,
+          "offset": 0
+        },
+        "resultContract": {
+          "kind": "generic-authoring-catalog-page",
+          "directSelectorFields": [
+            "selection.executableId",
+            "selection.executableValue"
+          ],
+          "routeField": "route.exactSelection"
+        }
+      },
+      "selectorBinding": {
+        "type": "live-generic-catalog-route",
+        "rule": "Bind only explicit executableId or executableValue fields from implemented rows. Selectorless structural rows that point at a public composition route are informational capabilities; use semantic targets without treating the route name as a selector."
+      },
+      "nativeEditableFacts": {
+        "status": "entry-specific",
+        "rule": "Retain each selected entry's connector, group, annotation, preservation, and fallback facts."
+      },
+      "constraints": [
+        "Every connector or annotation must identify a semantic target.",
+        "The relationship must survive rearrangement and full-slide validation."
+      ],
+      "combinationPattern": "Connect named semantic objects and use short labels that clarify the relationship without covering the evidence.",
+      "counterexample": "Do not manually draw unbound lines or use annotations as a substitute for a coherent composition.",
+      "renderEvidence": {
+        "status": "planned",
+        "caseIds": []
+      }
+    }
+  ]
+}

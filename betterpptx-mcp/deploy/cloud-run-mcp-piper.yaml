@@ -1,0 +1,198 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: betterpptx-mcp
+  annotations:
+    run.googleapis.com/launch-stage: BETA
+spec:
+  template:
+    metadata:
+      annotations:
+        run.googleapis.com/execution-environment: gen2
+        autoscaling.knative.dev/maxScale: "10"
+        run.googleapis.com/cpu-throttling: "false"
+    spec:
+      serviceAccountName: betterpptx-mcp-runtime@PROJECT_ID.iam.gserviceaccount.com
+      containerConcurrency: 10
+      timeoutSeconds: 900
+      containers:
+        - name: mcp
+          image: REGION-docker.pkg.dev/PROJECT_ID/betterpptx/betterpptx-mcp:TAG
+          ports:
+            - name: http1
+              containerPort: 3344
+          env:
+            - name: PORT
+              value: "3344"
+            - name: BETTERPPTX_HOST
+              value: "0.0.0.0"
+            - name: BETTERPPTX_PORT
+              value: "3344"
+            - name: BETTERPPTX_PUBLIC_BLACK_BOX
+              value: "1"
+            - name: BETTERPPTX_PUBLIC_SPEC_FIRST_ONLY
+              value: "1"
+            # Explicit production free-tier allowance. Development uses 100;
+            # never inherit the local/dev override in this manifest.
+            - name: BETTERPPTX_FREE_DECKS_PER_DAY
+              value: "5"
+            - name: BETTERPPTX_ENV
+              value: production
+            - name: BETTERPPTX_DEPLOYMENT_STAGE
+              value: production
+            - name: BETTERPPTX_VERIFICATION_POLICY
+              value: production-non-rendering
+            - name: BETTERPPTX_BILLING_PROVIDER
+              value: crypto_credits
+            - name: BETTERPPTX_BILLING_MODEL
+              value: pay_per_job
+            - name: BETTERPPTX_BILLING_ENFORCE
+              value: "1"
+            - name: BETTERPPTX_MONETIZED_MCP_ENABLED
+              value: "1"
+            - name: BETTERPPTX_REQUIRE_SHARED_STORES
+              value: "1"
+            # Accountless production: the exact x402 quote/job binding and
+            # settlement evidence are durable; no reusable customer-credit
+            # ledger or legacy credit-order store is configured.
+            - name: BETTERPPTX_X402_STORE
+              value: firestore
+            - name: BETTERPPTX_X402_RELAYER_LEASE_STORE
+              value: firestore
+            - name: BETTERPPTX_X402_SETTLEMENT_MODE
+              value: self_settle
+            - name: BETTERPPTX_INSTALL_USAGE_STORE
+              value: firestore
+            - name: BETTERPPTX_ENTITLEMENT_STORE
+              value: firestore
+            - name: BETTERPPTX_ARTIFACT_STORE
+              value: gcs
+            - name: BETTERPPTX_TTS_PROVIDER
+              value: piper-http
+            - name: BETTERPPTX_TTS_URL
+              value: http://127.0.0.1:5000
+            - name: BETTERPPTX_VOICES_MANIFEST
+              value: /voices/runtime-manifest.json
+            - name: BETTERPPTX_OUT_DIR
+              value: /out
+            - name: BETTERPPTX_ALLOWED_AUDIO_DIRS
+              value: /out
+            - name: BETTERPPTX_FFMPEG_PATH
+              value: /usr/bin/ffmpeg
+            - name: BETTERPPTX_FFPROBE_PATH
+              value: /usr/bin/ffprobe
+            # Owner-frozen production talking-head profile. Alternate workers are
+            # development-only and cannot be selected or used as a fallback here.
+            - name: BETTERPPTX_AVATAR_PROVIDER
+              value: liveportrait-musetalk-commercial
+            - name: BETTERPPTX_AVATAR_PRODUCTION_ONLY
+              value: "1"
+            - name: BETTERPPTX_AVATAR_PRODUCTION_MOTION_PROFILE
+              value: blink
+            - name: BETTERPPTX_AVATAR_PRODUCTION_MOUTH_PROFILE
+              value: jaw
+            - name: BETTERPPTX_AVATAR_LICENSE_APPROVED
+              value: "1"
+            - name: BETTERPPTX_AVATAR_ROTATION_MODE
+              value: deterministic
+            - name: BETTERPPTX_CREDENTIAL_STORE
+              value: /var/run/secrets/betterpptx/avatar-worker-credentials.json
+            - name: BETTERPPTX_AVATAR_JOB_STORE
+              value: firestore
+            - name: BETTERPPTX_FIRESTORE_AVATAR_JOB_COLLECTION
+              value: betterpptx_avatar_jobs
+            - name: BETTERPPTX_AVATAR_WORKER_STATE_STORE
+              value: firestore
+            - name: BETTERPPTX_FIRESTORE_AVATAR_WORKER_STATE_COLLECTION
+              value: betterpptx_avatar_worker_state
+            # Explicit owner decision: no hard daily cap, but every GPU-second
+            # remains metered and reconciled for cost/abuse visibility.
+            - name: BETTERPPTX_AVATAR_QUOTA_STATE_STORE
+              value: firestore
+            - name: BETTERPPTX_FIRESTORE_AVATAR_WORKER_QUOTA_COLLECTION
+              value: betterpptx_avatar_worker_quota
+            - name: BETTERPPTX_REQUIRE_AVATAR_QUOTA
+              value: "1"
+            - name: BETTERPPTX_AVATAR_WORKER_DAILY_GPU_SECONDS
+              value: unlimited
+            - name: BETTERPPTX_AVATAR_WORKER_ESTIMATED_GPU_SECONDS
+              value: "120"
+            - name: BETTERPPTX_AVATAR_PROVIDER_METROLOGY_STORE
+              value: firestore
+            - name: BETTERPPTX_FIRESTORE_AVATAR_PROVIDER_METROLOGY_COLLECTION
+              value: betterpptx_avatar_provider_metrology
+            - name: BETTERPPTX_REQUIRE_PROVIDER_METROLOGY
+              value: "1"
+            - name: BETTERPPTX_GEN_ASSET_STORE
+              value: gcs
+            - name: BETTERPPTX_GEN_ASSET_BUCKET
+              value: betterpptx-mcp-staging-artifacts-860007156914
+            - name: BETTERPPTX_GEN_ASSET_GCS_PREFIX
+              value: betterpptx-avatar-artifacts
+            - name: BETTERPPTX_NATIVE3D_MODE
+              value: production
+            - name: BETTERPPTX_NATIVE3D_OWNER_CLEARANCE
+              value: required
+            - name: BETTERPPTX_PAYRAM_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: betterpptx-payram-api-key
+                  key: latest
+          resources:
+            limits:
+              cpu: "2"
+              memory: 2Gi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 3344
+            periodSeconds: 5
+            failureThreshold: 24
+          volumeMounts:
+            - name: betterpptx-out
+              mountPath: /out
+            - name: avatar-worker-credentials
+              mountPath: /var/run/secrets/betterpptx
+              readOnly: true
+        - name: piper-tts
+          image: REGION-docker.pkg.dev/PROJECT_ID/betterpptx/piper-tts:TAG
+          env:
+            - name: PIPER_VOICES_DIR
+              value: /voices
+            - name: PIPER_PORT
+              value: "5000"
+            - name: PIPER_SYNTH_TIMEOUT_SECONDS
+              value: "300"
+          resources:
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 5000
+            periodSeconds: 5
+            failureThreshold: 36
+          volumeMounts:
+            - name: piper-voices
+              mountPath: /voices
+              readOnly: true
+      volumes:
+        - name: betterpptx-out
+          emptyDir:
+            medium: Memory
+            sizeLimit: 2Gi
+        - name: piper-voices
+          csi:
+            driver: gcsfuse.run.googleapis.com
+            readOnly: true
+            volumeAttributes:
+              # Provisioned 2026-07-03 via deploy/gcp/provision-piper-voices.ps1
+              # (24 approved voice models; runtime SA has roles/storage.objectViewer).
+              bucketName: betterpptx-mcp-staging-piper-voices-860007156914
+        - name: avatar-worker-credentials
+          secret:
+            secretName: betterpptx-avatar-worker-credentials
+            items:
+              - key: latest
+                path: avatar-worker-credentials.json

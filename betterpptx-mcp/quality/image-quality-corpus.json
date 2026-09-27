@@ -1,0 +1,12 @@
+{
+  "version": "img4-synthetic-corpus-v1",
+  "ownership": "owned-deterministic-geometric-fixtures-only",
+  "customerImages": false,
+  "records": [
+    { "id": "reference-blue", "file": "synthetic-reference.png", "aspect": "square", "noText": false },
+    { "id": "reference-style", "file": "synthetic-style-reference.png", "aspect": "square", "noText": false },
+    { "id": "single-edit", "file": "canary-output.png", "aspect": "square", "noText": true },
+    { "id": "multi-reference-edit", "file": "canary-multi-reference.png", "aspect": "square", "noText": true },
+    { "id": "warm-deterministic-edit", "file": "canary-benchmark-warm.png", "aspect": "square", "noText": true }
+  ]
+}

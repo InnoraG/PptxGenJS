@@ -1,0 +1,5 @@
+tunnel: 13dd6bd9-29ab-436f-9cab-4188bed1848b
+ingress:
+  - hostname: betterpptx.xmcpx.com
+    service: http://127.0.0.1:3344
+  - service: http_status:404

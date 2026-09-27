@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "betterpptx.authoring-motion-playback-proof.v1",
+  "status": "PASS",
+  "renderer": "native-powerpoint",
+  "source": {
+    "id": "interaction-greet-bow-native-v1",
+    "sha256": "f480562c7cc5165f1d71f8f3ec49e30f65534e93855f0248b6425ef85bd3d83c",
+    "sourceSlug": "15_greet_bow",
+    "sourceProvider": "nvidia-kimodo",
+    "durationMs": 4167
+  },
+  "retarget": {
+    "boneNamePolicy": "exact",
+    "channelPolicy": "rotation-only",
+    "rotationReference": "first-frame",
+    "rotationRetargetSpace": "world-delta"
+  },
+  "targets": [
+    {
+      "identity": "joe",
+      "targetGlbSha256": "4e6bdce20c194e8326ee92bd0bd24b46b713cbef7cd13906f3af26c73e3f455a",
+      "retargetRestProfileSha256": "2af414c0f4773bf4ddf7dd60ef0204bddb64ced204c21ce30bcb2664ed2a8f27",
+      "status": "PASS",
+      "nativeProofTargetGlbSha256": "b4034aaaeef217ad45ecf67716f40d692c01a54f2bbb063f617b624e43fa3973",
+      "nativeProofAnimationIndex": 0,
+      "nativeProofAnimationName": "00_motion.interaction.greet-bow",
+      "evidence": {
+        "pptxSha256": "d2aec36a579940d2a9ecb8261c6d04929e3b6ea69983f6579dbdbb0c202384c2",
+        "videoSha256": "d5c03791851cba4c2a98754fe558cbd7f21a32f6c546de34ecf2fea7aed6410a",
+        "visualReviewSha256": "2cb7bf7a43d8e891b9090464de3304908a34b71499db49ba8d8d83925a22e60d"
+      },
+      "checks": {
+        "fullClipPlayback": true,
+        "noTPose": true,
+        "noExcessiveTorsion": true,
+        "armDirectionMatchesSource": true,
+        "headBaselineAnchored": true
+      }
+    },
+    {
+      "identity": "louise",
+      "targetGlbSha256": "b0afc53516de27f6bd3f7ba30915677f4c989c54153af5d014490bf235fae1f3",
+      "retargetRestProfileSha256": "7eebad414224cd3718ffec6e6f1ef8003046722ece35ffde0344b72348907f43",
+      "status": "PASS",
+      "nativeProofTargetGlbSha256": "de611f5c2d2a1b63d230a52b0dd964e652462cb681498da0d5a34a05f9e8562d",
+      "nativeProofAnimationIndex": 0,
+      "nativeProofAnimationName": "00_motion.interaction.greet-bow",
+      "evidence": {
+        "pptxSha256": "d2aec36a579940d2a9ecb8261c6d04929e3b6ea69983f6579dbdbb0c202384c2",
+        "videoSha256": "d5c03791851cba4c2a98754fe558cbd7f21a32f6c546de34ecf2fea7aed6410a",
+        "visualReviewSha256": "2cb7bf7a43d8e891b9090464de3304908a34b71499db49ba8d8d83925a22e60d"
+      },
+      "checks": {
+        "fullClipPlayback": true,
+        "noTPose": true,
+        "noExcessiveTorsion": true,
+        "armDirectionMatchesSource": true,
+        "headBaselineAnchored": true
+      }
+    },
+    {
+      "identity": "pete",
+      "targetGlbSha256": "aa76447ae9aec973763e229fc5554c799744a6c55b324697e1a6bac629005ad3",
+      "retargetRestProfileSha256": "2ef3ab02a6366221c6d28d5b8aebb2ab577bd48ffb0054f00c0a446970965e5b",
+      "status": "PASS",
+      "nativeProofTargetGlbSha256": "76842641e7dbf98ab40e63143e3ce95cef9d1dc9bb14f9ea227e55f77d8eb864",
+      "nativeProofAnimationIndex": 0,
+      "nativeProofAnimationName": "00_motion.interaction.greet-bow",
+      "evidence": {
+        "pptxSha256": "d2aec36a579940d2a9ecb8261c6d04929e3b6ea69983f6579dbdbb0c202384c2",
+        "videoSha256": "d5c03791851cba4c2a98754fe558cbd7f21a32f6c546de34ecf2fea7aed6410a",
+        "visualReviewSha256": "2cb7bf7a43d8e891b9090464de3304908a34b71499db49ba8d8d83925a22e60d"
+      },
+      "checks": {
+        "fullClipPlayback": true,
+        "noTPose": true,
+        "noExcessiveTorsion": true,
+        "armDirectionMatchesSource": true,
+        "headBaselineAnchored": true
+      }
+    }
+  ],
+  "reviewScope": "Source-derived temporal-delta gate plus complete native playback and bounded maintainer visual review across three proved target rigs. First-frame source reference anchors the animated start to each visible presenter pose; not independent owner visual acceptance or production promotion.",
+  "policyCorrection": {
+    "kind": "first-frame-source-reference",
+    "sourceReferenceTimeSeconds": 0,
+    "sourceBytesUnchanged": true,
+    "correctionArtifact": "betterpptx-mcp/docs/release-safety/G5-INTERACTION-NATIVE-FIRST-FRAME-CORRECTION-20260904.json"
+  }
+}

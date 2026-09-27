@@ -1,0 +1,95 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "betterpptx.authoring-motion-catalog.v1",
+  "title": "BetterPPTX Authoring Motion Catalog",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "catalogVersion",
+    "catalogFingerprint",
+    "bundleCeiling",
+    "inventory",
+    "provenance",
+    "records",
+    "verification"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "betterpptx.authoring-motion-catalog.v1" },
+    "catalogVersion": { "type": "string", "minLength": 1 },
+    "catalogFingerprint": { "type": "string", "pattern": "^motion-catalog-[a-f0-9]+$" },
+    "bundleCeiling": { "const": 18 },
+    "inventory": {
+      "type": "object",
+      "required": ["kineticPlanEntries", "kineticBakedEntries", "ordinaryGestureEntries", "interactionCandidateEntries", "total", "selectable", "notSelectable", "byFamily", "byProductState"],
+      "additionalProperties": false,
+      "properties": {
+        "kineticPlanEntries": { "type": "integer", "minimum": 0 },
+        "kineticBakedEntries": { "type": "integer", "minimum": 0 },
+        "ordinaryGestureEntries": { "type": "integer", "minimum": 0 },
+        "interactionCandidateEntries": { "type": "integer", "minimum": 0 },
+        "total": { "type": "integer", "minimum": 0 },
+        "selectable": { "type": "integer", "minimum": 0 },
+        "notSelectable": { "type": "integer", "minimum": 0 },
+        "byFamily": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } },
+        "byProductState": { "type": "object", "additionalProperties": { "type": "integer", "minimum": 0 } }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["kineticPoolApproval", "ordinaryPoolApproval", "derivativeDistributionRule"],
+      "additionalProperties": false,
+      "properties": {
+        "kineticPoolApproval": { "type": "string" },
+        "ordinaryPoolApproval": { "type": "string" },
+        "derivativeDistributionRule": { "type": "string" }
+      }
+    },
+    "records": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/motionRecord" }
+    },
+    "verification": {
+      "type": "object",
+      "required": ["ok", "issues"],
+      "additionalProperties": false,
+      "properties": {
+        "ok": { "type": "boolean" },
+        "issues": { "type": "array", "items": { "type": "object" } }
+      }
+    }
+  },
+  "$defs": {
+    "motionRecord": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["motionId", "family", "slug", "displayName", "description", "narrativeUses", "semanticTags", "expressiveRoles", "interactionVerbs", "behavior", "lifecycle", "selectable", "privateEvidence"],
+      "properties": {
+        "motionId": { "type": "string", "pattern": "^motion\\.(kinetic|ordinary|interaction)\\.[a-z0-9-]+$" },
+        "family": { "enum": ["kinetic", "ordinary-gesture", "interaction"] },
+        "slug": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+        "displayName": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "narrativeUses": { "type": "array", "items": { "type": "string" } },
+        "semanticTags": { "type": "array", "items": { "type": "string" } },
+        "expressiveRoles": { "type": "array", "items": { "type": "string" } },
+        "interactionVerbs": { "type": "array", "items": { "type": "string" } },
+        "behavior": { "type": "object", "additionalProperties": true },
+        "lifecycle": {
+          "type": "object",
+          "required": ["sourceState", "buildState", "measurementState", "distributionState", "productState"],
+          "additionalProperties": false,
+          "properties": {
+            "sourceState": { "enum": ["SOURCE_IDENTIFIED", "PLANNED"] },
+            "buildState": { "enum": ["BAKED", "NOT_BAKED"] },
+            "measurementState": { "enum": ["UNMEASURED", "DURATION_MEASURED", "POWERPOINT_MEASURED", "CONTACT_MEASURED", "POWERPOINT_VISUAL_PROOF_FAILED"] },
+            "distributionState": { "enum": ["APPROVED_IN_PROJECT", "NOT_REVIEWED"] },
+            "productState": { "enum": ["EXECUTABLE_GENERAL_MOTION", "EXECUTABLE_INTERACTION_MOTION", "PLANNED_NOT_SELECTABLE", "IMPLEMENTED_NOT_SELECTABLE"] }
+          }
+        },
+        "selectable": { "type": "boolean" },
+        "privateEvidence": { "type": "object", "additionalProperties": true }
+      }
+    }
+  }
+}

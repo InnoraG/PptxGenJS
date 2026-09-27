@@ -4,6 +4,7 @@
 
 import { EquationProps, EquationTemplate, ISlideObject } from './core-interfaces'
 import { encodeXmlEntities, genXmlColorSelection } from './gen-utils'
+import { genXmlCNvPr } from './gen-accessibility'
 
 const NS_A14 = 'http://schemas.microsoft.com/office/drawing/2010/main'
 const NS_M = 'http://schemas.openxmlformats.org/officeDocument/2006/math'
@@ -29,19 +30,20 @@ function mathJc(align?: EquationProps['align']): string {
 	return 'centerGroup'
 }
 
-function mathRunProps(opts: EquationProps): string {
+function mathRunProps(opts: EquationProps, overrides: { italic?: boolean } = {}): string {
 	const lang = opts.lang || 'en-US'
 	const fontFace = opts.fontFace || 'Cambria Math'
 	const fontSize = opts.fontSize ? ` sz="${Math.round(opts.fontSize * 100)}"` : ''
-	const italic = opts.italic === false ? ' i="0"' : ' i="1"'
+	const italicValue = overrides.italic === undefined ? opts.italic : overrides.italic
+	const italic = italicValue === false ? ' i="0"' : ' i="1"'
 	const colorXml = opts.color ? genXmlColorSelection({ color: opts.color }) : ''
 	return `<a:rPr lang="${encodeXmlEntities(lang)}"${fontSize}${italic} smtClean="0">${colorXml}<a:latin typeface="${encodeXmlEntities(fontFace)}" panose="02040503050406030204" pitchFamily="18" charset="0"/></a:rPr>`
 }
 
-function mathText(text: unknown, opts: EquationProps): string {
+function mathText(text: unknown, opts: EquationProps, overrides: { italic?: boolean } = {}): string {
 	const value = text === undefined || text === null ? '' : String(text)
 	const preserveSpace = value !== value.trim() || value.includes('  ')
-	return `<m:r>${mathRunProps(opts)}<m:t${preserveSpace ? ' xml:space="preserve"' : ''}>${encodeXmlEntities(value)}</m:t></m:r>`
+	return `<m:r>${mathRunProps(opts, overrides)}<m:t${preserveSpace ? ' xml:space="preserve"' : ''}>${encodeXmlEntities(value)}</m:t></m:r>`
 }
 
 function firstSlot(node: any, names: string[]): unknown {
@@ -86,11 +88,14 @@ function renderTemplate(template: EquationTemplate, opts: EquationProps): string
 		case 'group':
 			return renderSlot(firstSlot(node, ['items', 'children']), opts)
 		case 'fraction':
-		case 'frac':
-			return '<m:f><m:fPr/>' +
+		case 'frac': {
+			const requestedType = String(node.fractionType || node.type || 'bar')
+			const fractionType = ['bar', 'skw', 'lin', 'noBar'].includes(requestedType) ? requestedType : 'bar'
+			return `<m:f><m:fPr><m:type m:val="${fractionType}"/></m:fPr>` +
 				`<m:num>${renderElementSlot(firstSlot(node, ['numerator', 'num']), opts)}</m:num>` +
 				`<m:den>${renderElementSlot(firstSlot(node, ['denominator', 'den']), opts)}</m:den>` +
 				'</m:f>'
+		}
 		case 'superscript':
 		case 'sup':
 			return '<m:sSup>' +
@@ -109,6 +114,13 @@ function renderTemplate(template: EquationTemplate, opts: EquationProps): string
 				`<m:sub>${renderElementSlot(firstSlot(node, ['subscript', 'sub', 'lower']), opts)}</m:sub>` +
 				`<m:sup>${renderElementSlot(firstSlot(node, ['exponent', 'sup', 'upper']), opts)}</m:sup>` +
 				'</m:sSubSup>'
+		case 'presubsup':
+		case 'preSubSup':
+			return '<m:sPre><m:sPrePr/>' +
+				`<m:sub>${renderElementSlot(firstSlot(node, ['subscript', 'sub', 'lower']), opts)}</m:sub>` +
+				`<m:sup>${renderElementSlot(firstSlot(node, ['exponent', 'sup', 'upper']), opts)}</m:sup>` +
+				`<m:e>${renderElementSlot(firstSlot(node, ['base', 'expression', 'body']), opts)}</m:e>` +
+				'</m:sPre>'
 		case 'radical':
 		case 'sqrt': {
 			const degree = firstSlot(node, ['degree'])
@@ -118,19 +130,15 @@ function renderTemplate(template: EquationTemplate, opts: EquationProps): string
 		case 'nary':
 		case 'summation':
 		case 'sum':
-		case 'integral': {
-			const symbol = node.symbol || (kind === 'integral' ? '∫' : '∑')
-			return '<m:nary>' +
-				`<m:naryPr><m:chr m:val="${encodeXmlEntities(String(symbol))}"/><m:limLoc m:val="undOvr"/></m:naryPr>` +
-				`<m:sub>${renderSlot(firstSlot(node, ['lower', 'subscript', 'sub']), opts)}</m:sub>` +
-				`<m:sup>${renderSlot(firstSlot(node, ['upper', 'exponent', 'sup']), opts)}</m:sup>` +
-				`<m:e>${renderElementSlot(firstSlot(node, ['body', 'expression', 'base']), opts)}</m:e>` +
-				'</m:nary>'
-		}
+		case 'integral':
 		case 'operator': {
-			const symbol = node.symbol || '∑'
+			const symbol = node.symbol || (kind === 'integral' ? '∫' : '∑')
+			const limitLocation = node.limitLocation === 'subSup' ? 'subSup' : 'undOvr'
+			const grow = node.grow === undefined ? '' : `<m:grow m:val="${node.grow ? '1' : '0'}"/>`
+			const hideSub = node.hideSub === undefined ? '' : `<m:subHide m:val="${node.hideSub ? '1' : '0'}"/>`
+			const hideSup = node.hideSup === undefined ? '' : `<m:supHide m:val="${node.hideSup ? '1' : '0'}"/>`
 			return '<m:nary>' +
-				`<m:naryPr><m:chr m:val="${encodeXmlEntities(String(symbol))}"/><m:limLoc m:val="undOvr"/></m:naryPr>` +
+				`<m:naryPr><m:chr m:val="${encodeXmlEntities(String(symbol))}"/>${grow}<m:limLoc m:val="${limitLocation}"/>${hideSub}${hideSup}</m:naryPr>` +
 				`<m:sub>${renderSlot(firstSlot(node, ['lower', 'subscript', 'sub']), opts)}</m:sub>` +
 				`<m:sup>${renderSlot(firstSlot(node, ['upper', 'exponent', 'sup']), opts)}</m:sup>` +
 				`<m:e>${renderElementSlot(firstSlot(node, ['body', 'expression', 'base']), opts)}</m:e>` +
@@ -141,8 +149,9 @@ function renderTemplate(template: EquationTemplate, opts: EquationProps): string
 			const left = node.left === undefined ? '(' : String(node.left)
 			const right = node.right === undefined ? ')' : String(node.right)
 			const sep = node.separator === undefined ? '' : `<m:sepChr m:val="${encodeXmlEntities(String(node.separator))}"/>`
+			const grow = node.grow === undefined ? '' : `<m:grow m:val="${node.grow ? '1' : '0'}"/>`
 			return '<m:d>' +
-				`<m:dPr><m:begChr m:val="${encodeXmlEntities(left)}"/><m:endChr m:val="${encodeXmlEntities(right)}"/>${sep}</m:dPr>` +
+				`<m:dPr><m:begChr m:val="${encodeXmlEntities(left)}"/><m:endChr m:val="${encodeXmlEntities(right)}"/>${sep}${grow}</m:dPr>` +
 				renderDelimitedItems(node, opts) +
 				'</m:d>'
 		}
@@ -159,7 +168,7 @@ function renderTemplate(template: EquationTemplate, opts: EquationProps): string
 		case 'log': {
 			const name = node.functionName ?? node.name ?? (kind === 'log' ? 'log' : 'f')
 			return '<m:func>' +
-				`<m:fName>${mathText(name, opts)}</m:fName>` +
+				`<m:fName>${typeof name === 'string' ? mathText(name, opts, { italic: false }) : renderElementSlot(name, opts)}</m:fName>` +
 				`<m:e>${renderElementSlot(firstSlot(node, ['body', 'expression', 'base']), opts)}</m:e>` +
 				'</m:func>'
 		}
@@ -189,6 +198,22 @@ function renderTemplate(template: EquationTemplate, opts: EquationProps): string
 				`<m:e>${renderElementSlot(firstSlot(node, ['body', 'expression', 'base']), opts)}</m:e>` +
 				`<m:lim>${renderElementSlot(firstSlot(node, ['lower', 'subscript', 'sub']), opts)}</m:lim>` +
 				'</m:limLow>'
+		case 'limitUpper':
+		case 'limupp':
+			return '<m:limUpp>' +
+				`<m:e>${renderElementSlot(firstSlot(node, ['body', 'expression', 'base']), opts)}</m:e>` +
+				`<m:lim>${renderElementSlot(firstSlot(node, ['upper', 'exponent', 'sup']), opts)}</m:lim>` +
+				'</m:limUpp>'
+		case 'groupChar':
+		case 'groupchr': {
+			const chr = node.groupChar ?? node.symbol ?? '⏞'
+			const pos = node.position === 'bottom' ? 'bot' : 'top'
+			const verticalJustification = node.verticalJustification === 'bottom' ? 'bot' : 'top'
+			return '<m:groupChr>' +
+				`<m:groupChrPr><m:chr m:val="${encodeXmlEntities(String(chr))}"/><m:pos m:val="${pos}"/><m:vertJc m:val="${verticalJustification}"/></m:groupChrPr>` +
+				`<m:e>${renderElementSlot(firstSlot(node, ['body', 'expression', 'base']), opts)}</m:e>` +
+				'</m:groupChr>'
+		}
 		case 'matrix': {
 			const rows = firstSlot(node, ['rows', 'cells'])
 			const matrixRows = Array.isArray(rows) ? rows as unknown[][] : []
@@ -197,7 +222,7 @@ function renderTemplate(template: EquationTemplate, opts: EquationProps): string
 		}
 		case 'text':
 		default:
-			return mathText(node.text ?? node.value ?? '', opts)
+			return mathText(node.text ?? node.value ?? '', opts, { italic: node.italic })
 	}
 }
 
@@ -226,10 +251,9 @@ function equationOmml(opts: EquationProps): string {
 function nativeShapeXml(slideItemObj: ISlideObject, ctx: EquationXmlContext, omml: string): string {
 	const opts = slideItemObj.equation || (slideItemObj.options as unknown as EquationProps)
 	const name = slideItemObj.options?.objectName || 'Equation'
-	const descr = opts.altText ? ` descr="${encodeXmlEntities(opts.altText)}"` : ''
 	return '<p:sp>' +
 		'<p:nvSpPr>' +
-		`<p:cNvPr id="${ctx.shapeId}" name="${name}" creationId="${ctx.creationId}"${descr}/>` +
+		genXmlCNvPr({ id: ctx.shapeId, name, creationId: ctx.creationId, options: opts }) +
 		'<p:cNvSpPr txBox="1"/><p:nvPr/>' +
 		'</p:nvSpPr>' +
 		'<p:spPr>' +
@@ -245,11 +269,12 @@ function nativeShapeXml(slideItemObj: ISlideObject, ctx: EquationXmlContext, omm
 
 function fallbackShapeXml(slideItemObj: ISlideObject, ctx: EquationXmlContext): string {
 	if (!slideItemObj.fallbackRid) return ''
+	const opts = slideItemObj.equation || (slideItemObj.options as unknown as EquationProps)
 	const name = slideItemObj.options?.objectName || 'Equation'
 	return '<mc:Fallback>' +
 		'<p:sp>' +
 		'<p:nvSpPr>' +
-		`<p:cNvPr id="${ctx.shapeId}" name="${name}" creationId="${ctx.creationId}"/>` +
+		genXmlCNvPr({ id: ctx.shapeId, name, creationId: ctx.creationId, options: opts }) +
 		'<p:cNvSpPr txBox="1"><a:spLocks noRot="1" noChangeAspect="1" noMove="1" noResize="1" noEditPoints="1" noAdjustHandles="1" noChangeArrowheads="1" noChangeShapeType="1" noTextEdit="1"/></p:cNvSpPr><p:nvPr/>' +
 		'</p:nvSpPr>' +
 		'<p:spPr>' +

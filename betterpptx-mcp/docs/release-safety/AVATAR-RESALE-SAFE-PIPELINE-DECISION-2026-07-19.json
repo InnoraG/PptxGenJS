@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "betterpptx.avatar-resale-safe-pipeline-decision.v1",
+  "status": "FROZEN_RESALE_SAFE_ENGINEERING_BASELINE",
+  "scope": "PowerPoint-native narration recording plus the intended Meshy-to-Mixamo native-3D presenter path",
+  "decision": "Freeze the talking-head worker as the resale-safe baseline. The production native-3D route is exclusively Meshy generation followed by the approved Mixamo rig/animation path and native PowerPoint 3D packaging; the self-hosted TRELLIS.2/UniRig/DRTK route is retained only for proof-of-concept and flow testing, not as the production 3D provider.",
+  "talkingHeadPipeline": [
+    { "stage": "input", "policy": "original user uploads remain authoritative; body branch may be original or alpha-only; face branch is dedicated original or deterministic crop/pad/resize" },
+    { "stage": "face-crop", "component": "OpenCV Zoo YuNet", "license": "MIT", "provenance": "pinned model revision and SHA-256" },
+    { "stage": "head-motion", "component": "LivePortrait", "license": "MIT", "provenance": "pinned source commit and model hashes" },
+    { "stage": "mouth-mask", "component": "MediaPipe Face Landmarker", "license": "Apache-2.0", "provenance": "pinned task SHA-256" },
+    { "stage": "lip-sync", "component": "MuseTalk", "license": "MIT plus upstream commercial-use statement for the selected checkpoint", "provenance": "pinned source/checkpoint revision and hash" },
+    { "stage": "restoration", "component": "none", "policy": "no GFPGAN, CodeFormer, RestoreFormer++, or other face-restoration dependency in the frozen worker" },
+    { "stage": "powerpoint", "component": "PowerPoint-native embedded MP4", "policy": "repair-free package and playback contract required" }
+  ],
+  "native3dProductionPath": {
+    "provider": "Meshy image-to-3D → Mixamo rig/animation → native PowerPoint 3D",
+    "status": "OPEN_PROVIDER_CLEARANCE",
+    "policy": "Meshy and Mixamo are the only intended production 3D components; body-only/original identity policy, provider terms, owner worksheet, live A/B, attribution, and resale review must pass before production enablement",
+    "meshOutputMayFeedLipSync": false
+  },
+  "native3dProofOfConceptPath": {
+    "provider": "self-hosted TRELLIS.2 + UniRig + DRTK permissive export path",
+    "status": "POC_FLOW_TEST_ONLY",
+    "policy": "Permissive path may validate compiler, packaging, fallback, and playback flows but must not be represented as the production 3D provider or used to close Meshy/Mixamo clearance",
+    "meshOutputMayFeedLipSync": false
+  },
+  "optionalNotInBaseline": [
+    { "id": "meshy-mixamo-production", "reason": "the intended production 3D path; external account/terms, owner worksheet, live A/B, Mixamo attribution, and resale review remain open" },
+    { "id": "realesrgan-core", "reason": "candidate only; no selected weight is deployed or relied upon for commercial clearance; GFPGAN path is prohibited" },
+    { "id": "face-restoration-family", "reason": "separate code/weight/training-data provenance and mouth-mask/temporal tests required" }
+  ],
+  "evidence": {
+    "licenseLedger": "betterpptx-mcp/outputs/avatar-license-ledger-report.json",
+    "workerProvenance": "betterpptx-mcp/outputs/avatar-worker-provenance-pins-report.json",
+    "restorationPolicy": "betterpptx-mcp/outputs/avatar-restoration-selection-report.json",
+    "meshIdentityPolicy": "betterpptx-mcp/outputs/meshy-provider-identity-policy-report.json",
+    "native3dRoutePolicy": "betterpptx-mcp/ir/native3d-policy.mjs",
+    "native3dRouteTest": "betterpptx-mcp/test/native3d-production-route.test.mjs",
+    "servingTemplatePolicy": "betterpptx-mcp/deploy/cloud-run-mcp-piper.yaml"
+  },
+  "publicEnablementAllowed": false,
+  "ownerGatesStillRequired": ["provider-billing-reconciliation", "independent-cross-representation-identity-review", "native-Meshy-plus-Mixamo-production-clearance"]
+}

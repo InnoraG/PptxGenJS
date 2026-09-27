@@ -1,0 +1,318 @@
+{
+  "schemaVersion": "betterpptx.visual-learning-gallery.v1",
+  "generatedAt": "2026-09-20T09:06:48.919Z",
+  "controlRegistry": {
+    "schemaVersion": "betterpptx.authoring-control-registry.v1",
+    "registryVersion": "2026-09-20.2",
+    "lessonCount": 8,
+    "capabilityControlDigest": "e6f305b8f34894839847d2b26ffd4c6a5e8eaf0539b9f6258a0c666af7572d2e"
+  },
+  "productionPolicy": "Static release-qualified media only. Production authoring does not invoke hosted PowerPoint rendering.",
+  "usage": "Catalog teaching examples are not previews of a user deck and never replace native objects in a final presentation.",
+  "samples": [
+    {
+      "id": "dimensional-typography",
+      "family": "wordart-text3d",
+      "result": "A short native headline gains controlled depth, material, and light while its text remains editable.",
+      "teachingExampleOnly": true,
+      "source": "sources/dimensional-typography.json",
+      "sourceSha256": "ef8a5ef0edd0bbca5c209e5c7a18fceae36c7a6efdf7ddd907cf44e4a186b0eb",
+      "artifact": "assets/dimensional-typography.pptx",
+      "artifactSha256": "7718da083a2563bfccc483c82c3c5026efb8fccaaef0ea7f53603ca5d92eee32",
+      "thumbnail": "assets/dimensional-typography.png",
+      "build": {
+        "semanticVersion": "1.6.0",
+        "toolSchemaVersion": "2026-09-20.2",
+        "capabilityControlDigest": "e6f305b8f34894839847d2b26ffd4c6a5e8eaf0539b9f6258a0c666af7572d2e"
+      },
+      "qualification": {
+        "generatedThrough": "betterpptx.deck.generate_from_spec public specification contract",
+        "deterministicValidation": true,
+        "renderEvidence": {
+          "performed": true,
+          "targetApplication": "Microsoft PowerPoint desktop",
+          "targetVersion": "installed-release-qualification-host",
+          "thumbnailSha256": "4284db5cbb58c8b02565fab5b1e3d750ff11ef2013313c246d40101ea1694b8e"
+        },
+        "reviewed": {
+          "performed": true,
+          "reviewerType": "model visual inspection",
+          "criteria": [
+            "legibility",
+            "clipping",
+            "composition",
+            "technique isolation"
+          ],
+          "playbackReviewed": false
+        }
+      },
+      "knownLimitations": [
+        "Static thumbnail does not prove animation playback."
+      ]
+    },
+    {
+      "id": "layered-motion",
+      "family": "motion-transitions-morph",
+      "result": "One named object can enter, travel, emphasize, exit, and re-enter with absolute or relative timing while other tracks run simultaneously.",
+      "teachingExampleOnly": true,
+      "source": "sources/layered-motion.json",
+      "sourceSha256": "50c2c48a56428c449cd1d8c3afd77d6e3e94404a519d9ec76a5b52e3592903de",
+      "artifact": "assets/layered-motion.pptx",
+      "artifactSha256": "1655d2de0b42631711d85d92e46910d25cb542dae5a836eb93549197a9da4566",
+      "thumbnail": "assets/layered-motion.png",
+      "build": {
+        "semanticVersion": "1.6.0",
+        "toolSchemaVersion": "2026-09-20.2",
+        "capabilityControlDigest": "e6f305b8f34894839847d2b26ffd4c6a5e8eaf0539b9f6258a0c666af7572d2e"
+      },
+      "qualification": {
+        "generatedThrough": "betterpptx.deck.generate_from_spec public specification contract",
+        "deterministicValidation": true,
+        "renderEvidence": {
+          "performed": true,
+          "targetApplication": "Microsoft PowerPoint desktop",
+          "targetVersion": "installed-release-qualification-host",
+          "thumbnailSha256": "e048692303ad7271e9c340f145b4f467844312d0f6815fc83ce07bf1a7ffd173"
+        },
+        "reviewed": {
+          "performed": true,
+          "reviewerType": "model visual inspection",
+          "criteria": [
+            "legibility",
+            "clipping",
+            "composition",
+            "technique isolation"
+          ],
+          "playbackReviewed": false
+        }
+      },
+      "timingSummary": [
+        "0–350 ms entrance fade",
+        "350–1750 ms arc motion with simultaneous colour emphasis",
+        "1750–2050 ms exit fade",
+        "2550–2850 ms re-entry fade"
+      ],
+      "motionSample": null,
+      "knownLimitations": [
+        "Static thumbnail does not prove animation playback."
+      ]
+    },
+    {
+      "id": "custom-process",
+      "family": "structural",
+      "result": "Named editable shapes and endpoint-bound connectors form a custom process when SmartArt cannot express the relationship.",
+      "teachingExampleOnly": true,
+      "source": "sources/custom-process.json",
+      "sourceSha256": "bd7ce735f50bfb72c2809b2a50c1d1829ef933e2fb75a7ed63d2ba4dc3c6c339",
+      "artifact": "assets/custom-process.pptx",
+      "artifactSha256": "f3deb91c507cdd3113a952914841d56f55b7eaf544ec2bc4abad1de1d348cf04",
+      "thumbnail": "assets/custom-process.png",
+      "build": {
+        "semanticVersion": "1.6.0",
+        "toolSchemaVersion": "2026-09-20.2",
+        "capabilityControlDigest": "e6f305b8f34894839847d2b26ffd4c6a5e8eaf0539b9f6258a0c666af7572d2e"
+      },
+      "qualification": {
+        "generatedThrough": "betterpptx.deck.generate_from_spec public specification contract",
+        "deterministicValidation": true,
+        "renderEvidence": {
+          "performed": true,
+          "targetApplication": "Microsoft PowerPoint desktop",
+          "targetVersion": "installed-release-qualification-host",
+          "thumbnailSha256": "07cc58c5eb3280475e74147c2d680ac2b499077aa6a0c29ef2f08717d21c36f9"
+        },
+        "reviewed": {
+          "performed": true,
+          "reviewerType": "model visual inspection",
+          "criteria": [
+            "legibility",
+            "clipping",
+            "composition",
+            "technique isolation"
+          ],
+          "playbackReviewed": false
+        }
+      },
+      "knownLimitations": [
+        "Static thumbnail does not prove animation playback."
+      ]
+    },
+    {
+      "id": "chart-emphasis",
+      "family": "charts",
+      "result": "A native chart keeps context muted and highlights the decision-relevant point or series.",
+      "teachingExampleOnly": true,
+      "source": "sources/chart-emphasis.json",
+      "sourceSha256": "ecd92afbb185a95f74ab1cb95a2ad908cd2adfece32e117d25db1cc017186138",
+      "artifact": "assets/chart-emphasis.pptx",
+      "artifactSha256": "7a67baaf888d815449c73c5e86954ef9611d04dd5d7a5a85b2b6f53af32dfe4f",
+      "thumbnail": "assets/chart-emphasis.png",
+      "build": {
+        "semanticVersion": "1.6.0",
+        "toolSchemaVersion": "2026-09-20.2",
+        "capabilityControlDigest": "e6f305b8f34894839847d2b26ffd4c6a5e8eaf0539b9f6258a0c666af7572d2e"
+      },
+      "qualification": {
+        "generatedThrough": "betterpptx.deck.generate_from_spec public specification contract",
+        "deterministicValidation": true,
+        "renderEvidence": {
+          "performed": true,
+          "targetApplication": "Microsoft PowerPoint desktop",
+          "targetVersion": "installed-release-qualification-host",
+          "thumbnailSha256": "410ced58383e14df694d66cecfc6e51b3266e20d95bc21f711f29adb4d93c855"
+        },
+        "reviewed": {
+          "performed": true,
+          "reviewerType": "model visual inspection",
+          "criteria": [
+            "legibility",
+            "clipping",
+            "composition",
+            "technique isolation"
+          ],
+          "playbackReviewed": false
+        }
+      },
+      "knownLimitations": [
+        "Static thumbnail does not prove animation playback."
+      ]
+    },
+    {
+      "id": "connected-object-identity",
+      "family": "motion-transitions-morph",
+      "result": "The same stable object name across adjacent slides creates native Morph continuity.",
+      "teachingExampleOnly": true,
+      "source": "sources/connected-object-identity.json",
+      "sourceSha256": "6510e272ae0d68aeb3481dae0480264ac9035919a2f66c21654141872ab1946d",
+      "artifact": "assets/connected-object-identity.pptx",
+      "artifactSha256": "35f5cd71b0fcd45ed1838c8ffc8b8779a969b628c76aa7f9fcece0de770701b2",
+      "thumbnail": "assets/connected-object-identity.png",
+      "build": {
+        "semanticVersion": "1.6.0",
+        "toolSchemaVersion": "2026-09-20.2",
+        "capabilityControlDigest": "e6f305b8f34894839847d2b26ffd4c6a5e8eaf0539b9f6258a0c666af7572d2e"
+      },
+      "qualification": {
+        "generatedThrough": "betterpptx.deck.generate_from_spec public specification contract",
+        "deterministicValidation": true,
+        "renderEvidence": {
+          "performed": true,
+          "targetApplication": "Microsoft PowerPoint desktop",
+          "targetVersion": "installed-release-qualification-host",
+          "thumbnailSha256": "de6113b95917b36f1e4ab06f26871e45e9a146a2e9d4105ea78f09d4218a663b"
+        },
+        "reviewed": {
+          "performed": true,
+          "reviewerType": "model visual inspection",
+          "criteria": [
+            "legibility",
+            "clipping",
+            "composition",
+            "technique isolation"
+          ],
+          "playbackReviewed": false
+        }
+      },
+      "knownLimitations": [
+        "Static thumbnail does not prove animation playback."
+      ]
+    },
+    {
+      "id": "animated-table-synergy",
+      "family": "tables",
+      "result": "An editable shape-built table reveals by row, column, or cell and exposes stable descendant targets for native timing and Synergy presenter contact.",
+      "teachingExampleOnly": true,
+      "source": "sources/animated-table-synergy.json",
+      "sourceSha256": "1d4264fe10282dbdf30988cdae83ceac4f6abfa6778cf3f8a3b55a5665a5ead0",
+      "artifact": "assets/animated-table-synergy.pptx",
+      "artifactSha256": "f3d5acc06aaa1401ca9f6360a569630832073ed1def57738ca4eb4fe695030fb",
+      "thumbnail": "assets/animated-table-synergy.png",
+      "build": {
+        "semanticVersion": "1.6.0",
+        "toolSchemaVersion": "2026-09-20.2",
+        "capabilityControlDigest": "e6f305b8f34894839847d2b26ffd4c6a5e8eaf0539b9f6258a0c666af7572d2e"
+      },
+      "qualification": {
+        "generatedThrough": "betterpptx.deck.generate_from_spec public specification contract",
+        "deterministicValidation": true,
+        "renderEvidence": {
+          "performed": true,
+          "targetApplication": "Microsoft PowerPoint desktop",
+          "targetVersion": "installed-release-qualification-host",
+          "thumbnailSha256": "bb2c5519f55224dd776155f3aa911b3d076e75d0042179e5d3404167de00b3b6"
+        },
+        "reviewed": {
+          "performed": true,
+          "reviewerType": "model visual inspection",
+          "criteria": [
+            "legibility",
+            "clipping",
+            "composition",
+            "technique isolation"
+          ],
+          "playbackReviewed": true
+        },
+        "playbackEvidence": {
+          "proof": "../../evidence/authoring-augmentation/animated-table-v1/release-qualification.json",
+          "powerpointVersion": "16.0",
+          "changedFraction": 0.399392,
+          "artifactSha256": "f3d5acc06aaa1401ca9f6360a569630832073ed1def57738ca4eb4fe695030fb"
+        }
+      },
+      "timingSummary": [
+        "Header remains visible",
+        "Rows 1–3 reveal in authored order",
+        "Every generated row and cell remains a stable native motion/Synergy target"
+      ],
+      "motionSample": {
+        "type": "paired-keyframes",
+        "before": "../../evidence/authoring-augmentation/animated-table-v1/table-before.png",
+        "after": "../../evidence/authoring-augmentation/animated-table-v1/table-after-800ms.png",
+        "elapsedMs": 800
+      },
+      "knownLimitations": [
+        "Playback proof is release qualification for the exact artifact hash, not a preview of a user deck."
+      ]
+    },
+    {
+      "id": "restrained-flat",
+      "family": "art-direction",
+      "result": "A strong flat composition uses scale, whitespace, typography, and one evidence object without ornamental depth.",
+      "teachingExampleOnly": true,
+      "source": "sources/restrained-flat.json",
+      "sourceSha256": "7ed6628ed446e2161ffc6889ae9c6b9b36741bc17dd8247cf890ccb037383d4b",
+      "artifact": "assets/restrained-flat.pptx",
+      "artifactSha256": "993ea0e4ad64321dfa80205fcf155f092e2e06765c5080575abafde1a0809a23",
+      "thumbnail": "assets/restrained-flat.png",
+      "build": {
+        "semanticVersion": "1.6.0",
+        "toolSchemaVersion": "2026-09-20.2",
+        "capabilityControlDigest": "e6f305b8f34894839847d2b26ffd4c6a5e8eaf0539b9f6258a0c666af7572d2e"
+      },
+      "qualification": {
+        "generatedThrough": "betterpptx.deck.generate_from_spec public specification contract",
+        "deterministicValidation": true,
+        "renderEvidence": {
+          "performed": true,
+          "targetApplication": "Microsoft PowerPoint desktop",
+          "targetVersion": "installed-release-qualification-host",
+          "thumbnailSha256": "0a0ed129578f14c609de18cde48077e0d63a88eae6c4e32d378c945f9301278d"
+        },
+        "reviewed": {
+          "performed": true,
+          "reviewerType": "model visual inspection",
+          "criteria": [
+            "legibility",
+            "clipping",
+            "composition",
+            "technique isolation"
+          ],
+          "playbackReviewed": false
+        }
+      },
+      "knownLimitations": [
+        "Static thumbnail does not prove animation playback."
+      ]
+    }
+  ]
+}

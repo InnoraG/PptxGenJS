@@ -1,37 +1,129 @@
 #!/usr/bin/env node
-// Local engine smoke for narration using the configured real TTS provider.
-// Start the Piper sidecar/runtime voice stack before running this smoke.
+// Local narration smoke for the configured real TTS provider.
+// This intentionally exercises the MCP semantic-authoring route.  It must not
+// become a second direct-engine or hand-authored-geometry generator.
 
+import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
-import { callBetterPptxTool } from './engine.mjs'
+import { fileURLToPath } from 'node:url'
+import { StdioClientTransport } from "@modelcontextprotocol/client/stdio";
+import { Client } from "@modelcontextprotocol/client";
 
+const outDir = path.resolve(process.env.BETTERPPTX_NARRATION_SMOKE_OUT_DIR || path.join('outputs', 'narration-smoke'))
 process.env.BETTERPPTX_NARRATION_MODE ||= 'production'
-process.env.BETTERPPTX_OUT_DIR ||= path.resolve('outputs', 'narration-smoke')
+process.env.BETTERPPTX_OUT_DIR ||= outDir
+process.env.BETTERPPTX_PREMIUM ||= '1'
+const allowUnavailable = process.env.BETTERPPTX_NARRATION_SMOKE_ALLOW_UNAVAILABLE !== '0'
+
+await fs.mkdir(outDir, { recursive: true })
+const here = path.dirname(fileURLToPath(import.meta.url))
+const transport = new StdioClientTransport({
+	command: process.execPath,
+	args: ['server.mjs'],
+	cwd: here,
+	stderr: 'pipe',
+	env: { ...process.env, BETTERPPTX_PUBLIC_BLACK_BOX: '0', BETTERPPTX_LOCAL_MAINTAINER: '1', BETTERPPTX_PREMIUM: '1', BETTERPPTX_BILLING_ENFORCE: '0' },
+})
+const client = new Client({ name: 'narration-smoke', version: '1' }, { capabilities: {} })
+await client.connect(transport)
 
 async function tool(name, args) {
-	const res = await callBetterPptxTool(name, args)
-	if (!res.ok) throw new Error(`${name}: ${res.error?.message || 'failed'}`)
+	const response = await client.callTool({ name, arguments: args })
+	const res = response?.structuredContent || JSON.parse(response?.content?.find(item => item.type === 'text')?.text || '{}')
+	if (!res?.ok) {
+		const err = new Error(`${name}: ${res?.error?.message || 'failed'}`)
+		err.code = res?.error?.code || 'TOOL_ERROR'
+		err.payload = res
+		throw err
+	}
 	return res.data
 }
 
-const deck = await tool('betterpptx.deck.new', { layout: 'LAYOUT_WIDE', title: 'Narration Smoke' })
-const deckId = deck.deckId
-const voices = await tool('betterpptx.narration.voices', {})
-const voice = process.env.BETTERPPTX_TTS_VOICE || voices.voices?.[0]?.id
-if (!voice) throw new Error('No approved narration voice is available.')
-const s1 = await tool('betterpptx.slide.add', { deckId, notes: 'Narration starts automatically on this slide.' })
-await tool('betterpptx.slide.add_text', { deckId, slideIndex: s1.slideIndex, text: 'Narration smoke', options: { x: 0.8, y: 0.7, w: 7, h: 0.6, fontSize: 32, bold: true, objectName: 'title-1' } })
-await tool('betterpptx.slide.add_narration', { deckId, slideIndex: s1.slideIndex, script: 'This is the first narrated slide. It uses approved speech synthesis for local verification.', voice, captions: { enabled: true, items: [{ text: 'Narration starts automatically.', atMs: 200, endMs: 1800 }] } })
-
-const s2 = await tool('betterpptx.slide.add', { deckId })
-await tool('betterpptx.slide.add_shape', { deckId, slideIndex: s2.slideIndex, shapeName: 'rect', options: { x: 1, y: 1.6, w: 3, h: 1, fill: { color: '2F80ED' }, line: { color: '1B4D89' }, objectName: 'cue-box' }, text: 'Cue target' })
-await tool('betterpptx.slide.add_narration', { deckId, slideIndex: s2.slideIndex, script: 'The blue box animates during this narration cue.', voice, cues: [{ atMs: 650, target: 'cue-box', type: 'emphasis', effect: 'pulse' }], captions: { enabled: true, items: [{ text: 'Cue synchronized animation.', atMs: 650, endMs: 2300 }] } })
-
-const s3 = await tool('betterpptx.slide.add', { deckId })
-await tool('betterpptx.slide.add_text', { deckId, slideIndex: s3.slideIndex, text: 'Validation slide', options: { x: 0.8, y: 0.8, w: 8, h: 0.6, fontSize: 28, objectName: 'title-3' } })
-await tool('betterpptx.slide.add_narration', { deckId, slideIndex: s3.slideIndex, script: 'The final slide proves deck level narration settings and automatic slide timing.', voice })
-
-const validation = await tool('betterpptx.deck.validate_narration', { deckId })
-if (!validation.ok) throw new Error(`validate_narration failed: ${validation.issues.join('; ')}`)
-const saved = await tool('betterpptx.deck.save', { deckId, outputDir: path.resolve('outputs', 'narration-smoke'), fileName: 'narration-smoke.pptx' })
-console.log(JSON.stringify({ ok: true, validation, saved }, null, 2))
+try {
+	await tool('betterpptx.auth.status', {})
+	const voices = await tool('betterpptx.narration.voices', {})
+	const voice = process.env.BETTERPPTX_TTS_VOICE || voices.voices?.[0]?.id
+	if (!voice) throw new Error('No approved narration voice is available.')
+	const spec = {
+		schemaVersion: 'betterpptx.deck-spec.v1',
+		title: 'Narration Smoke',
+		authoringContract: {
+			workflow: 'authoring-excellence-director-v1',
+			level: 'deterministic',
+			coordinateSystem: 'inches',
+			layerModel: 'flat-object-array',
+			objectIdentity: 'stable-names-required',
+		},
+		contentStory: {
+			audience: 'authoring smoke-test reviewers',
+			outcome: 'Validate real TTS narration, captions, semantic cues, and automatic slide timing.',
+			remember: 'Narration text is the timing authority; the engine derives the media clock and layout.',
+		},
+		visualDesign: { world: 'Aurora verification surface', framing: 'Minimal semantic proof surface.' },
+		motionTime: {
+			masterClock: 'narration-text',
+			timingSource: 'measured narration media',
+			syncPolicy: 'Narration-led autoplay and semantic cue timing.',
+		},
+		layout: 'LAYOUT_WIDE',
+		slides: [
+			{
+				id: 'narration-smoke-s1', title: 'Narration smoke', role: 'opener',
+				message: 'Narration starts automatically on this slide.', layoutIntent: 'title-body',
+				content: [{ kind: 'title', name: 'title-1', text: 'Narration smoke' }],
+				narration: {
+					script: 'This is the first narrated slide. It uses approved speech synthesis for local verification.',
+					voice, timingAuthority: 'narration-text',
+					captions: { enabled: true, items: [{ text: 'Narration starts automatically.', atMs: 200, endMs: 1800 }] },
+				},
+			},
+			{
+				id: 'narration-smoke-s2', title: 'Semantic cue', role: 'build',
+				message: 'The cue target animates during the narration.', layoutIntent: 'title-body',
+				content: [
+					{ kind: 'title', name: 'title-2', text: 'Semantic cue' },
+					{ kind: 'callout', name: 'cue-box', text: 'Cue target', region: 'leftThird' },
+				],
+				narration: {
+					script: 'The cue target animates during this narration cue.', voice, timingAuthority: 'narration-text',
+					cues: [{ atMs: 650, target: 'cue-box', type: 'emphasis', effect: 'pulse' }],
+					captions: { enabled: true, items: [{ text: 'Cue synchronized animation.', atMs: 650, endMs: 2300 }] },
+				},
+			},
+			{
+				id: 'narration-smoke-s3', title: 'Validation slide', role: 'closer',
+				message: 'Deck-level narration settings remain engine-governed.', layoutIntent: 'title-body',
+				content: [{ kind: 'title', name: 'title-3', text: 'Validation slide' }],
+				narration: { script: 'The final slide proves deck level narration settings and automatic slide timing.', voice, timingAuthority: 'narration-text' },
+			},
+		],
+	}
+	const request = {
+		spec,
+		commitMode: 'createNew',
+		detail: 'summary',
+		validateAfterCompile: true,
+	}
+	const dryRun = await tool('betterpptx.deck.generate_from_spec', { ...request, phase: 'dryRun' })
+	const deck = await tool('betterpptx.deck.generate_from_spec', { ...request, phase: 'commit' })
+	const deckId = deck.deckId
+	const validation = await tool('betterpptx.deck.validate_narration', { deckId })
+	if (validation.valid === false) throw new Error(`validate_narration failed: ${JSON.stringify(validation)}`)
+	const packageValidation = await tool('betterpptx.deck.validate', { deckId })
+	const designValidation = await tool('betterpptx.deck.validate_design', { deckId })
+	const accessibilityValidation = await tool('betterpptx.deck.validate_accessibility', { deckId })
+	await tool('betterpptx.deck.validate_quality', { deckId })
+	const saved = await tool('betterpptx.deck.save', { deckId, outputDir: outDir, fileName: 'narration-smoke.pptx' })
+	console.log(JSON.stringify({ ok: true, route: 'betterpptx.deck.generate_from_spec', dryRunDigest: dryRun.planDigest, voice, validation, packageValidation, designValidation, accessibilityValidation, saved }, null, 2))
+} catch (err) {
+	const unavailable = allowUnavailable && /fetch failed|piper(?:-http)? .*failed|No approved narration voice/i.test(`${err.message} ${err.payload?.error?.message || ''}`)
+	if (unavailable) {
+		console.log(JSON.stringify({ ok: true, skipped: true, reason: 'NARRATION_UNAVAILABLE', message: 'Narration smoke reached the MCP semantic route but the configured real TTS provider is unavailable.' }, null, 2))
+		process.exitCode = 0
+	} else {
+	console.error(JSON.stringify({ ok: false, code: err.code || 'SMOKE_FAILED', message: err.message, payload: err.payload || null }, null, 2))
+	process.exit(1)
+	}
+} finally {
+	try { await client.close() } catch {}
+}

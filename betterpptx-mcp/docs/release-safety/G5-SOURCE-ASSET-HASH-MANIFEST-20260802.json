@@ -1,0 +1,106 @@
+{
+  "schemaVersion": "betterpptx.g5-source-asset-hash-manifest.v1",
+  "measuredAt": "2026-08-02",
+  "status": "MEASURED_OWNER_REVIEW_REQUIRED",
+  "hashAlgorithm": "sha256",
+  "scope": "Raw build-time FBX source files only; never shipped or exposed to public clients.",
+  "sourcePolicy": "Raw Mixamo source files remain gitignored/build-time-only; this manifest is owner-maintainer evidence and does not grant distribution rights or owner approval.",
+  "ownerApprovalNotInferred": true,
+  "entries": [
+    {
+      "path": "Gestures_Pack_Basic/acknowledging.fbx",
+      "bytes": 428801,
+      "sha256": "1d3b5d15199baf3a382ced1eb4b79b137872c09ec8bfd27d5f3b49e2c6f22b29"
+    },
+    {
+      "path": "Gestures_Pack_Basic/angry gesture.fbx",
+      "bytes": 462865,
+      "sha256": "5017ea9f44180ffae653bba9fd9895186525bdf0c5341687beba4908f83ac9e2"
+    },
+    {
+      "path": "Gestures_Pack_Basic/annoyed head shake.fbx",
+      "bytes": 444865,
+      "sha256": "40972ab065ae5fd7796df955e0011c770de1ce7416d57befb61393937d1b5434"
+    },
+    {
+      "path": "Gestures_Pack_Basic/being cocky.fbx",
+      "bytes": 519345,
+      "sha256": "ceb78334a3132b98017fbe72f903f02f881d8280601fff8a09f80a871e813c66"
+    },
+    {
+      "path": "Gestures_Pack_Basic/dismissing gesture.fbx",
+      "bytes": 555201,
+      "sha256": "6011e3cc2c2e6b49fb84c22bc23c034ae6ce84f14be2d0db5ad29dfafd3bb854"
+    },
+    {
+      "path": "Gestures_Pack_Basic/happy hand gesture.fbx",
+      "bytes": 521217,
+      "sha256": "43cfdc19716e16e88347776dd721d6f095ae142c961ead9a8b8a0abd66d53e6c"
+    },
+    {
+      "path": "Gestures_Pack_Basic/hard head nod.fbx",
+      "bytes": 394785,
+      "sha256": "eb466e823dffc6dd5b7d85d4db1d9f6ef2cd3c360172a722f27e99d18817b34f"
+    },
+    {
+      "path": "Gestures_Pack_Basic/head nod yes.fbx",
+      "bytes": 481505,
+      "sha256": "1426f6bf91a5d1e6c140d84f7dc544607150ddebf9c355de7a6f5d579f06cc4d"
+    },
+    {
+      "path": "Gestures_Pack_Basic/Joe.fbx",
+      "bytes": 54631553,
+      "sha256": "4675df93ce139d94e8082ebad96f76a0b2073e659cc43a21517f8101a7e0e984"
+    },
+    {
+      "path": "Gestures_Pack_Basic/lengthy head nod.fbx",
+      "bytes": 413761,
+      "sha256": "17a5af7623bbd8fe89d9ba1c29f29a39de1d5ef81e4451f867b269e0989e5e54"
+    },
+    {
+      "path": "Gestures_Pack_Basic/look away gesture.fbx",
+      "bytes": 437905,
+      "sha256": "f6609609e8e7f963e368ecadb70e72a2ac3ea89c3e40814bfa683d8df0626a8d"
+    },
+    {
+      "path": "Gestures_Pack_Basic/relieved sigh.fbx",
+      "bytes": 509697,
+      "sha256": "ea281eaa25cdfbd59efe8479eb7766a8a99b38f1e29657be04d3187e9069fcb1"
+    },
+    {
+      "path": "Gestures_Pack_Basic/sarcastic head nod.fbx",
+      "bytes": 432193,
+      "sha256": "44c9fafdaf1baa785a5b45ff2cd7b2343cd484aed6ea95c3d646324e31c3bdef"
+    },
+    {
+      "path": "Gestures_Pack_Basic/shaking head no.fbx",
+      "bytes": 409873,
+      "sha256": "eedbcc297c4057282aaf5ee6ea76ab90cfff8703bd5bf83d711d9054064b2756"
+    },
+    {
+      "path": "Gestures_Pack_Basic/thoughtful head shake.fbx",
+      "bytes": 524881,
+      "sha256": "3accca12fe6ce4673c499604af518a60b17419db2bb87897e1850f3696a0dfc2"
+    },
+    {
+      "path": "Gestures_Pack_Basic/weight shift.fbx",
+      "bytes": 873601,
+      "sha256": "bd3d4f92ddba475185c37d5061b849f439718d88b1acd9a7c9b9d18859c5eb66"
+    },
+    {
+      "path": "research-demos/2026-07-10-presenter-roster/mixamo-josh.fbx",
+      "bytes": 53138464,
+      "sha256": "907268e5e39545025db45d7d0043979912e207634db603849e28278ef91d58b9"
+    },
+    {
+      "path": "research-demos/2026-07-10-presenter-roster/mixamo-louise.fbx",
+      "bytes": 49979392,
+      "sha256": "bebd8b3aaa3fa230932e337168338425e53b73d50b2d5e2297d31344a674f521"
+    },
+    {
+      "path": "research-demos/2026-07-10-presenter-roster/mixamo-remy.fbx",
+      "bytes": 28338736,
+      "sha256": "70dbac8c1910f1061527db93dd2aae95e1e85e8b1369ad47029d01c66b43e539"
+    }
+  ]
+}

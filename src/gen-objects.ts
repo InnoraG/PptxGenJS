@@ -28,6 +28,14 @@ import {
 import {
 	AddSlideProps,
 	BackgroundProps,
+	CameoProps,
+	ConnectorProps,
+	GroupChildProps,
+	GroupProps,
+	ZoomProps,
+	SectionZoomProps,
+	SummaryZoomProps,
+	SectionProps,
 	EquationProps,
 	IChartMulti,
 	IChartOptsLib,
@@ -35,6 +43,7 @@ import {
 	ISlideObject,
 	ImageProps,
 	MediaProps,
+	RecordStudioCaptureProps,
 	Model3DProps,
 	ObjectOptions,
 	OptsChartGridLine,
@@ -52,13 +61,143 @@ import {
 	TextPropsOptions,
 } from './core-interfaces'
 import { getSlidesForTableRows } from './gen-tables'
-import { encodeXmlEntities, getNewRelId, getSmartParseNumber, inch2Emu, valToPts, correctShadowOptions } from './gen-utils'
+import { CAMEO_DEFAULT_SIZE_EMU, CAMEO_PLACEHOLDER_SVG_DATAURI } from './cameo-placeholder'
+import { ZOOM_DEFAULT_W_EMU, ZOOM_DEFAULT_H_EMU, ZOOM_SLDID_BASE, ZOOM_PLACEHOLDER_PNG_DATAURI } from './zoom-placeholder'
+import { getNewRelId, getSmartParseNumber, getUuid, inch2Emu, valToPts, correctShadowOptions } from './gen-utils'
 import { createNativeSmartArt, SMARTART_REL_TYPES } from './gen-smartart'
+import { getChartStylePresetForNativeGallery } from './chart-presets'
+import { CHART_GALLERY, getChartGalleryVariant } from './chart-gallery'
+import { resolveAudioVideoPackageType, resolveImagePackageType } from './media-types'
 // Inline animation import removed - use slide.addAnimation() instead
 
 /** counter for included charts (used for index in their filenames) */
 let _chartCounter = 0
 let _nativeSmartArtCounter = 0
+
+const MIN_LINE_DIMENSION_IN = 0.001
+const MIN_LINE_DIMENSION_PERCENT = 0.01
+const SHAPE_LINE_DASH_TYPES = new Set(['solid', 'dash', 'dashDot', 'lgDash', 'lgDashDot', 'lgDashDotDot', 'sysDash', 'sysDot'])
+const SHAPE_LINE_ARROW_TYPES = new Set(['none', 'arrow', 'diamond', 'oval', 'stealth', 'triangle'])
+const SHAPE_LINE_ARROW_SIZES = new Set(['sm', 'med', 'lg'])
+
+/**
+ * Preserve authored non-visual accessibility state when an add* definition
+ * rebuilds its internal options object. In particular, false and null are
+ * meaningful lifecycle values and must not be lost through truthy fallbacks.
+ */
+function nonVisualAccessibilityOptions(opt: unknown): Record<string, unknown> {
+	if (!opt || typeof opt !== 'object') return {}
+	const source = opt as Record<string, unknown>
+	const result: Record<string, unknown> = {}
+	for (const key of ['accessibilityTitle', 'altText', 'isDecorative'] as const) {
+		if (Object.prototype.hasOwnProperty.call(source, key) && source[key] !== undefined) result[key] = source[key]
+	}
+	return result
+}
+
+function validateShapeLineProps(line: unknown, context: string, allowGradient = false): void {
+	if (line == null || typeof line === 'string') return
+	if (typeof line !== 'object' || Array.isArray(line)) throw new Error(`${context}: line must be a color string or line options object.`)
+	const value = line as ShapeLineProps
+	if (value.type != null && value.type !== 'none' && value.type !== 'solid' && !(allowGradient && value.type === 'gradient')) throw new Error(`${context}: line.type must be 'none', 'solid'${allowGradient ? ", or 'gradient'" : ''}.`)
+	if (value.type === 'gradient') {
+		const allowed = new Set(['type', 'gradientDirection', 'gradientAngle', 'gradientStops', 'rotateGradientWithShape', 'width', 'cap', 'dashType', 'beginArrowType', 'endArrowType', 'beginArrowWidth', 'beginArrowLength', 'endArrowWidth', 'endArrowLength'])
+		for (const key of Object.keys(value)) if (!allowed.has(key)) throw new Error(`${context}: line.${key} is not supported for a gradient stroke.`)
+		if (value.gradientDirection != null && value.gradientDirection !== 'linear') throw new Error(`${context}: line.gradientDirection must be 'linear'.`)
+		if (value.gradientAngle != null && (!Number.isFinite(value.gradientAngle) || value.gradientAngle < 0 || value.gradientAngle >= 360)) throw new Error(`${context}: line.gradientAngle must be between 0 and less than 360 degrees.`)
+		if (value.rotateGradientWithShape != null && typeof value.rotateGradientWithShape !== 'boolean') throw new Error(`${context}: line.rotateGradientWithShape must be boolean.`)
+		if (!Array.isArray(value.gradientStops) || value.gradientStops.length < 2 || value.gradientStops.length > 32) throw new Error(`${context}: line.gradientStops requires 2–32 ordered stops.`)
+		let previous = -1
+		for (const stop of value.gradientStops) {
+			if (!stop || typeof stop !== 'object' || Array.isArray(stop)) throw new Error(`${context}: each gradient stop must be an object.`)
+			for (const key of Object.keys(stop)) if (!['position', 'color', 'transparency'].includes(key)) throw new Error(`${context}: unsupported gradient stop field '${key}'.`)
+			if (typeof stop.position !== 'number' || !Number.isFinite(stop.position) || stop.position < 0 || stop.position > 100 || stop.position < previous) throw new Error(`${context}: gradient stop positions must be ordered percentages from 0 to 100.`)
+			previous = stop.position
+			const text = typeof stop.color === 'string' ? stop.color : ''
+			const hex = text.startsWith('#') ? text.slice(1) : text
+			const isHex = hex.length === 6 && Array.from(hex).every(char => '0123456789ABCDEFabcdef'.includes(char))
+			const isTheme = [...Object.values(SCHEME_COLOR_NAMES), 'dk1', 'lt1', 'dk2', 'lt2', 'hlink', 'folHlink', 'phClr'].includes(text)
+			if (!isHex && !isTheme) throw new Error(`${context}: gradient stop colors must be six-digit hexadecimal or theme colors.`)
+			if (stop.transparency != null && (!Number.isFinite(stop.transparency) || stop.transparency < 0 || stop.transparency > 100)) throw new Error(`${context}: gradient stop transparency must be between 0 and 100.`)
+		}
+	}
+	if (value.cap != null && !['flat', 'round', 'square'].includes(value.cap)) throw new Error(`${context}: line.cap must be 'flat', 'round', or 'square'.`)
+	if (value.dashType != null && !SHAPE_LINE_DASH_TYPES.has(value.dashType)) throw new Error(`${context}: unsupported line.dashType '${value.dashType}'.`)
+	for (const [field, arrow] of [['beginArrowType', value.beginArrowType], ['endArrowType', value.endArrowType]] as const) {
+		if (arrow != null && !SHAPE_LINE_ARROW_TYPES.has(arrow)) throw new Error(`${context}: unsupported line.${field} '${arrow}'.`)
+	}
+	for (const [field, size] of [
+		['beginArrowWidth', value.beginArrowWidth], ['beginArrowLength', value.beginArrowLength],
+		['endArrowWidth', value.endArrowWidth], ['endArrowLength', value.endArrowLength],
+	] as const) {
+		if (size != null && !SHAPE_LINE_ARROW_SIZES.has(size)) throw new Error(`${context}: unsupported line.${field} '${size}'.`)
+	}
+	if (value.width != null && (!Number.isFinite(value.width) || value.width < 0 || value.width > 1584)) {
+		throw new Error(`${context}: line.width must be a finite number between 0 and 1584 points.`)
+	}
+	if (value.transparency != null && (!Number.isFinite(value.transparency) || value.transparency < 0 || value.transparency > 100)) {
+		throw new Error(`${context}: line.transparency must be a finite percentage between 0 and 100.`)
+	}
+}
+
+function isLineShapeName(shapeName: SHAPE_NAME): boolean {
+	const value = String(shapeName)
+	return value === SHAPE_TYPE.LINE || value === SHAPE_TYPE.LINE_INVERSE || value === 'line' || value === 'lineInv'
+}
+
+function getPercentCoordinate(value: unknown): number | undefined {
+	if (typeof value !== 'string') return undefined
+	const text = value.trim()
+	if (!text.endsWith('%')) return undefined
+	const numeric = Number(text.slice(0, -1))
+	return Number.isFinite(numeric) ? numeric : undefined
+}
+
+function formatPercentCoordinate(value: number): `${number}%` {
+	return `${Number(value.toFixed(6))}%` as `${number}%`
+}
+
+function normalizeLineShapeOptions(shapeName: SHAPE_NAME, opts: ShapeProps): ShapeProps {
+	const options: ShapeProps = opts && typeof opts === 'object' ? { ...opts } : {}
+	if (!isLineShapeName(shapeName)) return options
+
+	const normalizeDimension = (dimensionKey: 'w' | 'h', originKey: 'x' | 'y', flipKey: 'flipH' | 'flipV') => {
+		const dimension = options[dimensionKey]
+
+		if (typeof dimension === 'number') {
+			if (!Number.isFinite(dimension)) return
+
+			let nextDimension = dimension
+			if (nextDimension < 0) {
+				const origin = options[originKey]
+				if (typeof origin === 'number' && Number.isFinite(origin)) options[originKey] = origin + nextDimension
+				nextDimension = Math.abs(nextDimension)
+				options[flipKey] = !Boolean(options[flipKey])
+			}
+			if (nextDimension === 0) nextDimension = MIN_LINE_DIMENSION_IN
+			options[dimensionKey] = nextDimension
+			return
+		}
+
+		const percentDimension = getPercentCoordinate(dimension)
+		if (typeof percentDimension === 'undefined') return
+
+		let nextPercent = percentDimension
+		if (nextPercent < 0) {
+			const originPercent = getPercentCoordinate(options[originKey])
+			if (typeof originPercent !== 'undefined') options[originKey] = formatPercentCoordinate(originPercent + nextPercent)
+			nextPercent = Math.abs(nextPercent)
+			options[flipKey] = !Boolean(options[flipKey])
+		}
+		if (nextPercent === 0) nextPercent = MIN_LINE_DIMENSION_PERCENT
+		options[dimensionKey] = formatPercentCoordinate(nextPercent)
+	}
+
+	normalizeDimension('w', 'x', 'flipH')
+	normalizeDimension('h', 'y', 'flipV')
+
+	return options
+}
 
 /**
  * Transforms a slide definition to a slide object that is then passed to the XML transformation process.
@@ -82,11 +221,39 @@ export function createSlideMaster(props: SlideMasterProps, target: SlideLayout):
 			else if (MASTER_OBJECTS[key] && key === 'text') addTextDefinition(tgt, [{ text: object[key].text }], object[key].options, false)
 			else if (MASTER_OBJECTS[key] && key === 'placeholder') {
 				// TODO: 20180820: Check for existing `name`?
-				object[key].options.placeholder = object[key].options.name
+				const authoredPlaceholderName = object[key].options.name
+				object[key].options.placeholder = authoredPlaceholderName
+				// Keep a deterministic semantic object identity for master placeholders.
+				// Without this, addTextDefinition assigns the generic `Text N` fallback;
+				// that fallback is then inherited by slide content and can overwrite the
+				// caller's stable objectName during placeholder-style merging.
+				if (!object[key].options.objectName) {
+					object[key].options.objectName = authoredPlaceholderName
+						? `Placeholder ${authoredPlaceholderName}`
+						: `Placeholder ${idx + 1}`
+				}
 				delete object[key].options.name // remap name for earier handling internally
 				object[key].options._placeholderType = object[key].options.type
 				delete object[key].options.type // remap name for earier handling internally
-				object[key].options._placeholderIdx = 100 + idx
+				// Preserve an authored Office placeholder index/size when supplied;
+				// the historical 100+array-index value remains the deterministic
+				// fallback for legacy master definitions.
+				const authoredPlaceholderIdx = object[key].options.idx ?? object[key].options.phIdx
+				const authoredPlaceholderSz = object[key].options.sz ?? object[key].options.phSz
+				const authoredPlaceholderOrient = object[key].options.orient ?? object[key].options.phOrient
+				const authoredPlaceholderHasCustomPrompt = object[key].options.hasCustomPrompt ?? object[key].options.customPrompt
+				object[key].options._placeholderIdx = authoredPlaceholderIdx !== undefined && authoredPlaceholderIdx !== null ? authoredPlaceholderIdx : 100 + idx
+				if (authoredPlaceholderSz) object[key].options._placeholderSz = authoredPlaceholderSz
+				if (authoredPlaceholderOrient) object[key].options._placeholderOrient = authoredPlaceholderOrient
+				if (authoredPlaceholderHasCustomPrompt !== undefined && authoredPlaceholderHasCustomPrompt !== null) object[key].options._placeholderHasCustomPrompt = authoredPlaceholderHasCustomPrompt
+				delete object[key].options.idx
+				delete object[key].options.phIdx
+				delete object[key].options.sz
+				delete object[key].options.phSz
+				delete object[key].options.orient
+				delete object[key].options.phOrient
+				delete object[key].options.hasCustomPrompt
+				delete object[key].options.customPrompt
 				addTextDefinition(tgt, [{ text: object[key].text }], object[key].options, true)
 				// TODO: ISSUE#599 - only text is suported now (add more below)
 				// else if (object[key].image) addImageDefinition(tgt, object[key].image)
@@ -206,7 +373,48 @@ export function addChartDefinition(target: PresSlide, type: CHART_NAME | IChartM
 			item.labels = [item.labels as string[]]
 		}
 	})
-	const options: IChartOptsLib = tmpOpt && typeof tmpOpt === 'object' ? tmpOpt : {}
+	const userOptions: IChartOptsLib = tmpOpt && typeof tmpOpt === 'object' ? tmpOpt : {}
+	const rawReplay = typeof (userOptions as any)._rawChartXml === 'string'
+		&& (userOptions as any)._rawChartXml.trim().length > 0
+		&& typeof (userOptions as any)._rawChartRelsXml === 'string'
+		&& (userOptions as any)._rawChartRelsXml.trim().length > 0
+	// A complete raw replay pair is the package authority. Do not let authoring
+	// presets fabricate semantic appearance fields or replace raw colour parts.
+	const galleryPreset = rawReplay ? undefined : getChartGalleryVariant(userOptions.chartGalleryVariant)
+	// Chart Colors are a native Office resource independent of the selected
+	// chart style. Resolve the native PowerPoint colorStyle id at the library
+	// boundary so an AI or
+	// MCP plan can request a governed color palette without hand-authoring
+	// series fills.  The serializer will emit the corresponding native
+	// chartColorStyle relationship for legacy and ChartEx charts.
+	const requestedColorStyleId = Number((userOptions as any).chartColorStyleId)
+	const nativeColorXml = Number.isInteger(requestedColorStyleId)
+		? CHART_GALLERY.nativeColorCatalog[requestedColorStyleId as keyof typeof CHART_GALLERY.nativeColorCatalog]
+		: undefined
+	const nativeColorPreset = !rawReplay && nativeColorXml
+		? {
+			_rawChartColorsXml: nativeColorXml,
+			_rawChartColorsName: `mcp-chart-colors-native-${requestedColorStyleId}.xml`,
+		}
+		: {}
+	const effectiveStyleModernId = (userOptions as any).chartStyleModernId ?? (galleryPreset as any)?.chartStyleModernId
+	const effectiveStyleId = (userOptions as any).chartStyleId ?? (galleryPreset as any)?.chartStyleId
+	const nativeGalleryStyle = Number.isInteger(effectiveStyleModernId)
+		|| (Number.isInteger(effectiveStyleId) && effectiveStyleId >= 1 && effectiveStyleId <= 48)
+	// Composite charts receive their family defaults per subtype in gen-charts;
+	// using the first subtype here leaks Bar-only options into Line, Area, etc.
+	const presetType = (Array.isArray(type) ? null : type) as CHART_NAME | null
+	const galleryStyleBase = !rawReplay && presetType
+		? getChartStylePresetForNativeGallery(presetType, nativeGalleryStyle)
+		: {}
+	const options: IChartOptsLib = {
+		...galleryStyleBase,
+		...(galleryPreset || {}),
+		...userOptions,
+		...nativeColorPreset,
+		chartArea: { ...(galleryStyleBase.chartArea || {}), ...(userOptions.chartArea || {}) },
+		plotArea: { ...(galleryStyleBase.plotArea || {}), ...(userOptions.plotArea || {}) },
+	}
 
 	// STEP 1: TODO: check for reqd fields, correct type, etc
 	// `type` exists in CHART_TYPE
@@ -231,7 +439,7 @@ export function addChartDefinition(target: PresSlide, type: CHART_NAME | IChartM
 	options.w = options.w || '50%'
 	options.h = options.h || '50%'
 	options.objectName = options.objectName
-		? encodeXmlEntities(options.objectName)
+		? options.objectName
 		: `Chart ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.chart).length}`
 
 	// B: Options: misc
@@ -385,21 +593,59 @@ export function addChartDefinition(target: PresSlide, type: CHART_NAME | IChartM
 	// STEP 4: Set props
 	resultObject._type = 'chart'
 	resultObject.options = options
-	resultObject.chartRid = getNewRelId(target)
+	const chartRelId = getNewRelId(target)
+	resultObject.chartRid = chartRelId
 	const isChartEx = typeof options._type === 'string' && CHARTEX_TYPES.has(options._type)
 	if (isChartEx) options._chartEx = true
+	// Generated charts may attach exact Office chartStyle/chartColorStyle
+	// resources captured from a Ribbon tile. Those parts are chart-owned in
+	// PowerPoint, so namespace each emitted part before content types and
+	// relationships are assembled. Raw replay keeps its already-rewritten names.
+	if (!(options as any)._rawChartXml) {
+		for (const key of ['_rawChartStyleName', '_rawChartColorsName']) {
+			const requested = (options as any)[key]
+			if (typeof requested !== 'string' || !requested) continue
+			const lower = requested.toLowerCase()
+			const extIndex = lower.lastIndexOf('.xml')
+			;(options as any)[key] = extIndex > 0
+				? `${requested.slice(0, extIndex)}-${chartId}${requested.slice(extIndex)}`
+				: `${requested}-${chartId}.xml`
+		}
+	}
 
 	// STEP 5: Add this chart to this Slide Rels (rId/rels count spans all slides! Count all images to get next rId)
-target._relsChart.push({
-rId: getNewRelId(target),
-data: tmpData,
-opts: options,
-type: options._type,
-chartFamily: isChartEx ? 'chartEx' : 'legacy',
-globalId: chartId,
-fileName: `${isChartEx ? 'chartEx' : 'chart'}${chartId}.xml`,
-Target: `../charts/${isChartEx ? 'chartEx' : 'chart'}${chartId}.xml`,
-})
+	target._relsChart.push({
+		rId: chartRelId,
+		data: tmpData,
+		opts: options,
+		type: options._type,
+		chartFamily: isChartEx ? 'chartEx' : 'legacy',
+		globalId: chartId,
+		fileName: `${isChartEx ? 'chartEx' : 'chart'}${chartId}.xml`,
+		Target: `../charts/${isChartEx ? 'chartEx' : 'chart'}${chartId}.xml`,
+	})
+
+	// ChartEx map packages include a governed picture fallback because some
+	// PowerPoint builds expose the editable chart object but render its native
+	// geographic layer as an empty/black frame.  Register the fallback through
+	// the normal media relationship path; the XML writer decides whether to
+	// place it in AlternateContent or as a compatibility overlay.
+	const fallbackImageBase64 = (options as any)._rawChartFallbackImageBase64
+	if (typeof fallbackImageBase64 === 'string' && fallbackImageBase64.length > 0) {
+		const fallbackContentType = String((options as any)._rawChartFallbackImageContentType || 'image/png')
+		const fallbackExt = imageExtensionFromDataUrl(fallbackImageBase64)
+		const fallbackRid = getNewRelId(target)
+		;(options as any)._rawChartFallbackImageRid = fallbackRid
+		target._relsMedia.push({
+			type: fallbackContentType,
+			extn: fallbackExt,
+			data: fallbackImageBase64,
+			path: `chart-fallback-${target._slideNum}-${chartId}.${fallbackExt}`,
+			rId: fallbackRid,
+			isDuplicate: false,
+			Target: `../media/chart-fallback-${target._slideNum}-${chartId}.${fallbackExt}`,
+		})
+	}
 
 	target._slideObjects.push(resultObject)
 
@@ -408,21 +654,44 @@ Target: `../charts/${isChartEx ? 'chartEx' : 'chart'}${chartId}.xml`,
 	return resultObject
 }
 
+function normalizeImageExtension(value: string): string {
+	const extension = String(value || '').trim().toLowerCase().replace(/^\./, '')
+	if (extension === 'jpg' || extension === 'pjpeg') return 'jpeg'
+	if (extension === 'svg+xml') return 'svg'
+	if (extension === 'tif') return 'tiff'
+	return /^[a-z0-9]+$/.test(extension) ? extension : 'png'
+}
+
+function imageExtensionFromDataHeader(data: string): string | undefined {
+	const comma = data.indexOf(',')
+	const header = (comma >= 0 ? data.substring(0, comma) : data).trim().toLowerCase()
+	if (header.length > 256) return undefined
+	const marker = 'image/'
+	const markerIndex = header.indexOf(marker)
+	if (markerIndex < 0) return undefined
+	const subtypeStart = markerIndex + marker.length
+	const semicolon = header.indexOf(';', subtypeStart)
+	const subtype = header.substring(subtypeStart, semicolon >= 0 ? semicolon : header.length)
+	return subtype ? normalizeImageExtension(subtype) : undefined
+}
+
 function imageExtensionFromDataUrl(data: string): string {
-	const lower = data.toLowerCase()
-	const prefix = 'data:image/'
-	if (!lower.startsWith(prefix)) return 'png'
-	const semi = lower.indexOf(';', prefix.length)
-	if (semi < 0) return 'png'
-	const ext = lower.slice(prefix.length, semi)
-	return ext === 'jpg' ? 'jpeg' : ext || 'png'
+	return imageExtensionFromDataHeader(data) || 'png'
 }
 
 function imageExtensionFromPath(path: string): string {
 	const cleanPath = path.substring(path.lastIndexOf('/') + 1).split('?')[0].split('#')[0]
 	const dot = cleanPath.lastIndexOf('.')
-	const ext = dot >= 0 ? cleanPath.slice(dot + 1).toLowerCase() : 'png'
-	return ext === 'jpg' ? 'jpeg' : ext || 'png'
+	return normalizeImageExtension(dot >= 0 ? cleanPath.slice(dot + 1) : 'png')
+}
+
+function imageMimeTypeFromExtension(extension: string): string {
+	if (extension === 'jpeg') return 'image/jpeg'
+	if (extension === 'svg') return 'image/svg+xml'
+	if (extension === 'tiff') return 'image/tiff'
+	if (extension === 'emf') return 'image/x-emf'
+	if (extension === 'wmf') return 'image/x-wmf'
+	return `image/${extension}`
 }
 
 /**
@@ -439,7 +708,7 @@ export function addEquationDefinition(target: PresSlide, opt: EquationProps): vo
 		throw new Error('addEquation() error: `source` is required.')
 	}
 
-	const objectName = opt.objectName ? encodeXmlEntities(opt.objectName) : `Equation ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.equation).length + 1}`
+	const objectName = opt.objectName || `Equation ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.equation).length + 1}`
 	const newObject: ISlideObject = {
 		_type: SLIDE_OBJECT_TYPES.equation,
 		shape: SHAPE_TYPE.RECTANGLE,
@@ -450,7 +719,10 @@ export function addEquationDefinition(target: PresSlide, opt: EquationProps): vo
 			w: opt.w || 5,
 			h: opt.h || 0.4,
 			objectName,
+			...nonVisualAccessibilityOptions(opt),
 			...(opt.rotate ? { rotate: opt.rotate } : {}),
+			...((opt as any).flipH !== undefined ? { flipH: (opt as any).flipH } : {}),
+			...((opt as any).flipV !== undefined ? { flipV: (opt as any).flipV } : {}),
 			...((opt as any).spid ? { spid: (opt as any).spid } : {}),
 		},
 	}
@@ -528,6 +800,24 @@ export function addNativeSmartArtDefinition(target: PresSlide, opt: SmartArtProp
 			w: opt.w ?? 7,
 			h: opt.h ?? 3.8,
 			objectName,
+			...nonVisualAccessibilityOptions(opt),
+			...(opt.fontFace ? { fontFace: opt.fontFace } : {}),
+			...(Number.isFinite(Number(opt.fontSize)) && Number(opt.fontSize) > 0 ? { fontSize: Number(opt.fontSize) } : {}),
+			...(opt.color ? { color: opt.color } : {}),
+			...(opt.textColors ? { textColors: JSON.parse(JSON.stringify(opt.textColors)) } : {}),
+			...(opt.palette ? { palette: JSON.parse(JSON.stringify(opt.palette)) } : {}),
+			...(opt.rightToLeft !== undefined ? { rightToLeft: opt.rightToLeft } : {}),
+			...(opt.title !== undefined ? { title: opt.title } : {}),
+			...(opt.altText !== undefined ? { altText: opt.altText } : {}),
+			...(opt.nodes ? { _smartArtAuthoredNodes: JSON.parse(JSON.stringify(opt.nodes)), nodes: JSON.parse(JSON.stringify(opt.nodes)) } : {}),
+			...(opt.layout !== undefined ? { layout: opt.layout } : {}),
+			...(opt.layoutId !== undefined ? { layoutId: opt.layoutId } : {}),
+			...(opt.layoutName !== undefined ? { layoutName: opt.layoutName } : {}),
+			...(opt.quickStyleId !== undefined ? { quickStyleId: opt.quickStyleId } : {}),
+			...(opt.quickStyleName !== undefined ? { quickStyleName: opt.quickStyleName } : {}),
+			...(opt.colorStyleId !== undefined ? { colorStyleId: opt.colorStyleId } : {}),
+			...(opt.colorStyleName !== undefined ? { colorStyleName: opt.colorStyleName } : {}),
+			...(opt.presetFallback !== undefined ? { presetFallback: opt.presetFallback } : {}),
 			...((opt as any).spid ? { spid: (opt as any).spid } : {}),
 		},
 	})
@@ -564,8 +854,32 @@ export function addImageDefinition(target: PresSlide, opt: ImageProps): void {
 	const objHyperlink = opt.hyperlink || ''
 	const strImageData = opt.data || ''
 	const strImagePath = opt.path || ''
+	const pictureAdjustments = opt.imageAdjustments as any
+	const artisticEffectInput = pictureAdjustments?.artisticEffect as any
+	const artisticEffectType = typeof artisticEffectInput === 'string'
+		? artisticEffectInput
+		: String(artisticEffectInput?.type || artisticEffectInput?.id || '')
+	const artisticEffectKey = artisticEffectType.replace(/^artistic\./i, '').replace(/[-_\s]/g, '').toLowerCase()
+	const hasLayeredPictureCorrection = ['temperature', 'saturation', 'sharpness']
+		.some(key => pictureAdjustments && Object.prototype.hasOwnProperty.call(pictureAdjustments, key) && Number.isFinite(Number(pictureAdjustments[key])))
+	const needsArtisticEffectWdp = Boolean(artisticEffectKey) || hasLayeredPictureCorrection
+	const nativeArtisticImage = pictureAdjustments?.nativeImage || (artisticEffectInput && typeof artisticEffectInput === 'object'
+		? artisticEffectInput.nativeImage
+		: undefined)
+	const artisticEffectPreviewImage = pictureAdjustments?.previewImage || (artisticEffectInput && typeof artisticEffectInput === 'object'
+		? artisticEffectInput.previewImage
+		: undefined)
+	let storedImageAdjustments = opt.imageAdjustments
+	if (nativeArtisticImage || artisticEffectPreviewImage) {
+		const { nativeImage: _nativeImage, previewImage: _previewImage, ...storedAdjustments } = pictureAdjustments || {}
+		if (storedAdjustments.artisticEffect && typeof storedAdjustments.artisticEffect === 'object') {
+			const { nativeImage: _nestedNativeImage, previewImage: _nestedPreviewImage, ...storedArtisticEffect } = storedAdjustments.artisticEffect
+			storedAdjustments.artisticEffect = storedArtisticEffect
+		}
+		storedImageAdjustments = storedAdjustments
+	}
 	let imageRelId = getNewRelId(target)
-	const objectName = opt.objectName ? encodeXmlEntities(opt.objectName) : `Image ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.image).length}`
+	const objectName = opt.objectName || `Image ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.image).length}`
 
 	// REALITY-CHECK:
 	if (!strImagePath && !strImageData) {
@@ -582,22 +896,23 @@ export function addImageDefinition(target: PresSlide, opt: ImageProps): void {
 		return null
 	}
 
-	// STEP 1: Set extension
-	// NOTE: Split to address URLs with params (eg: `path/brent.jpg?someParam=true`)
-	let strImgExtn = (
-		strImagePath
-			.substring(strImagePath.lastIndexOf('/') + 1)
-			.split('?')[0]
-			.split('.')
-			.pop()
-			.split('#')[0] || 'png'
-	).toLowerCase()
-
-	// However, pre-encoded images can be whatever mime-type they want (and good for them!)
-	if (strImageData && /image\/(\w+);/.exec(strImageData) && /image\/(\w+);/.exec(strImageData).length > 0) {
-		strImgExtn = /image\/(\w+);/.exec(strImageData)[1]
-	} else if (strImageData?.toLowerCase().includes('image/svg+xml')) {
-		strImgExtn = 'svg'
+	// STEP 1: Resolve one canonical package type and verify inline bytes agree.
+	const imagePackageType = resolveImagePackageType(strImageData, strImagePath)
+	const strImgExtn = imagePackageType.extn
+	if (needsArtisticEffectWdp && strImgExtn === 'svg' && !nativeArtisticImage?.path && !nativeArtisticImage?.data) {
+		throw new Error('Native Picture Format layered adjustments require raster image pixels. Supply PNG/JPEG data or an advanced pre-encoded imageAdjustments.nativeImage HD Photo layer for SVG input.')
+	}
+	if (nativeArtisticImage?.path && typeof nativeArtisticImage.path !== 'string') {
+		throw new Error('imageAdjustments.nativeImage.path must be a string when provided.')
+	}
+	if (nativeArtisticImage?.data && typeof nativeArtisticImage.data !== 'string') {
+		throw new Error('imageAdjustments.nativeImage.data must be a base64 string when provided.')
+	}
+	if (artisticEffectPreviewImage?.path && typeof artisticEffectPreviewImage.path !== 'string') {
+		throw new Error('imageAdjustments.previewImage.path must be a string when provided.')
+	}
+	if (artisticEffectPreviewImage?.data && typeof artisticEffectPreviewImage.data !== 'string') {
+		throw new Error('imageAdjustments.previewImage.data must be a base64 string when provided.')
 	}
 
 	// STEP 2: Set type/path
@@ -608,26 +923,51 @@ export function addImageDefinition(target: PresSlide, opt: ImageProps): void {
 	// FIXME: Measure actual image when no intWidth/intHeight params passed
 	// ....: This is an async process: we need to make getSizeFromImage use callback, then set H/W...
 	// if ( !intWidth || !intHeight ) { var imgObj = getSizeFromImage(strImagePath);
+	// Picture transparency is one PowerPoint control. Accept both the legacy
+	// top-level ImageProps field and the Picture Format grouping so JSON-spec
+	// authors do not get a silently inert nested value.
+	const pictureTransparency = typeof opt.transparency === 'number'
+		? opt.transparency
+		: (typeof opt.imageAdjustments?.transparency === 'number' ? opt.imageAdjustments.transparency : 0)
+	// Engine-measured source dimensions support semantic cover/contain/crop
+	// framing. Clients still author only the sizing type; the Director owns the
+	// target geometry. Raw fields below are narrow imported-picture passthrough.
 	newObject.options = {
 		x: intPosX || 0,
 		y: intPosY || 0,
 		w: intWidth || 1,
 		h: intHeight || 1,
-		altText: opt.altText || '',
+		// Keep the authored source in the semantic object record as well as the
+		// package relationship.  The exporter uses this to produce a durable,
+		// re-compilable JSON spec instead of degrading a generated picture to an
+		// opaque native-preservation block.  Local paths are filtered at the
+		// public boundary; inline data remains a portable source artifact.
+		...(strImageData ? { data: strImageData } : {}),
+		...(strImagePath ? { path: strImagePath } : {}),
+		// Private authoring carrier used by BetterPPTX readback. It records the
+		// public-safe source lane (inline/HTTPS/opaque handle), never a resolved
+		// local cache path. Keeping it on the semantic object makes save/open and
+		// inspect/export deterministic without exposing package internals.
+		...((opt as any)._authoredImageSource ? { _authoredImageSource: (opt as any)._authoredImageSource } : {}),
+		...nonVisualAccessibilityOptions(opt),
 		rounding: typeof opt.rounding === 'boolean' ? opt.rounding : false,
 		sizing,
 		placeholder: opt.placeholder,
 		...((opt as any).phType ? { phType: (opt as any).phType } : {}),
 		...((opt as any).phIdx !== undefined && (opt as any).phIdx !== null ? { phIdx: (opt as any).phIdx } : {}),
 		...((opt as any).phSz ? { phSz: (opt as any).phSz } : {}),
+		...((opt as any).phOrient ? { phOrient: (opt as any).phOrient } : {}),
+		...((opt as any).phHasCustomPrompt !== undefined && (opt as any).phHasCustomPrompt !== null ? { phHasCustomPrompt: Boolean((opt as any).phHasCustomPrompt) } : {}),
 		...((opt as any).hasBarePh ? { hasBarePh: true } : {}),
-		// Passthrough for native PP effects / picture metadata
 		...((opt as any)._rawHlinkClickXml ? { _rawHlinkClickXml: (opt as any)._rawHlinkClickXml } : {}),
 		...((opt as any)._rawCNvPicPrXml ? { _rawCNvPicPrXml: (opt as any)._rawCNvPicPrXml } : {}),
 		...((opt as any)._rawPicSpPrXml ? { _rawPicSpPrXml: (opt as any)._rawPicSpPrXml } : {}),
+		...((opt as any)._rawPicPrstGeomXml ? { _rawPicPrstGeomXml: (opt as any)._rawPicPrstGeomXml } : {}),
+		...(opt.pictureStyle ? { pictureStyle: opt.pictureStyle } : {}),
 		...((opt as any)._rawFillXml ? { _rawFillXml: (opt as any)._rawFillXml } : {}),
 		...((opt as any)._rawEffectLstXml ? { _rawEffectLstXml: (opt as any)._rawEffectLstXml } : {}),
 		...((opt as any)._rawSpPrScene3dXml ? { _rawSpPrScene3dXml: (opt as any)._rawSpPrScene3dXml } : {}),
+		...((opt as any)._rawSpPrExtLstXml ? { _rawSpPrExtLstXml: (opt as any)._rawSpPrExtLstXml } : {}),
 		...((opt as any)._rawLineXml ? { _rawLineXml: (opt as any)._rawLineXml } : {}),
 		...((opt as any)._emptySpPr ? { _emptySpPr: true } : {}),
 		...((opt as any)._rawBlipAttrs ? { _rawBlipAttrs: (opt as any)._rawBlipAttrs } : {}),
@@ -640,10 +980,21 @@ export function addImageDefinition(target: PresSlide, opt: ImageProps): void {
 		rotate: opt.rotate || 0,
 		flipV: opt.flipV || false,
 		flipH: opt.flipH || false,
-		transparency: opt.transparency || 0,
+		transparency: pictureTransparency,
+		...((opt as any)._imageSourceW ? { _imageSourceW: Number((opt as any)._imageSourceW) } : {}),
+		...((opt as any)._imageSourceH ? { _imageSourceH: Number((opt as any)._imageSourceH) } : {}),
+		...((opt as any)._semanticSizing ? { _semanticSizing: true } : {}),
 		objectName,
 		shadow: correctShadowOptions(opt.shadow),
-		// Preserve spid override if provided (for decyphered shapes preserving original PPTX shape IDs)
+		...(opt.line ? { line: opt.line } : {}),
+		...(opt.glow ? { glow: opt.glow } : {}),
+		...(opt.reflection ? { reflection: opt.reflection } : {}),
+		...(opt.softEdges ? { softEdges: opt.softEdges } : {}),
+		...(opt.blur ? { blur: opt.blur } : {}),
+		...(opt.fillOverlay ? { fillOverlay: opt.fillOverlay } : {}),
+		...(opt.effect3D ? { effect3D: opt.effect3D } : {}),
+		...(storedImageAdjustments ? { imageAdjustments: storedImageAdjustments } : {}),
+		...((opt as any).interactiveActions !== undefined ? { interactiveActions: (opt as any).interactiveActions } : {}),
 		...((opt as any).spid ? { spid: (opt as any).spid } : {}),
 	}
 
@@ -674,11 +1025,11 @@ export function addImageDefinition(target: PresSlide, opt: ImageProps): void {
 		newObject.imageRid = imageRelId + 1
 	} else {
 		// PERF: Duplicate media should reuse existing `Target` value and not create an additional copy
-		const dupeItem = target._relsMedia.filter(item => item.path && item.path === strImagePath && item.type === 'image/' + strImgExtn && !item.isDuplicate)[0]
+		const dupeItem = target._relsMedia.filter(item => item.path && item.path === strImagePath && item.type === imagePackageType.mimeType && !item.isDuplicate)[0]
 
 		target._relsMedia.push({
 			path: strImagePath || 'preencoded.' + strImgExtn,
-			type: 'image/' + strImgExtn,
+			type: imagePackageType.mimeType,
 			extn: strImgExtn,
 			data: strImageData || '',
 			rId: imageRelId,
@@ -686,6 +1037,39 @@ export function addImageDefinition(target: PresSlide, opt: ImageProps): void {
 			Target: dupeItem?.Target ? dupeItem.Target : `../media/image-${target._slideNum}-${target._relsMedia.length + 1}.${strImgExtn}`,
 		})
 		newObject.imageRid = imageRelId
+	}
+
+	// Native Picture Format Artistic Effects are not backed by the visible PNG/JPEG
+	// relationship. PowerPoint authors a second HD Photo (WDP) package part and the
+	// a14:imgLayer points at that relationship. The media encoder creates this layer
+	// from the already-loaded visible raster on supported Windows runtimes, or uses
+	// the optional advanced pre-encoded nativeImage override.
+	if (needsArtisticEffectWdp) {
+		const visibleEffectRel = target._relsMedia.find(rel => rel.rId === newObject.imageRid)
+		// Ordinary duplicate pictures may share one target. This picture's visible
+		// payload becomes an effect-rendered preview, so it must own a distinct part.
+		if (visibleEffectRel?.isDuplicate) {
+			visibleEffectRel.isDuplicate = false
+			visibleEffectRel.Target = `../media/image-${target._slideNum}-${target._relsMedia.length + 1}.${visibleEffectRel.extn || strImgExtn}`
+		}
+		const artisticEffectRelId = getNewRelId(target)
+		target._relsMedia.push({
+			path: nativeArtisticImage?.path || 'preencoded.wdp',
+			type: 'image/vnd.ms-photo',
+			extn: 'wdp',
+			data: nativeArtisticImage?.data || '',
+			rId: artisticEffectRelId,
+			Target: `../media/hdphoto-${target._slideNum}-${target._relsMedia.length + 1}.wdp`,
+			isArtisticEffectWdp: true,
+			artisticEffectSourceRid: newObject.imageRid,
+			artisticEffectSpec: artisticEffectInput && typeof artisticEffectInput === 'object'
+				? { ...artisticEffectInput, nativeImage: undefined, previewImage: undefined }
+				: { type: artisticEffectType },
+			pictureAdjustmentSpec: storedImageAdjustments ? { ...storedImageAdjustments } : {},
+			artisticEffectPreviewPath: artisticEffectPreviewImage?.path,
+			artisticEffectPreviewData: artisticEffectPreviewImage?.data,
+		})
+		newObject.artisticEffectRid = artisticEffectRelId
 	}
 
 	// STEP 5: Hyperlink support
@@ -713,6 +1097,323 @@ export function addImageDefinition(target: PresSlide, opt: ImageProps): void {
 }
 
 /**
+ * Adds a Cameo (live camera feed) object to a slide definition.
+ * Native PowerPoint 2021+/2024 cameo: a picture marked with `alf:liveFeedProps`, shown as the
+ * camera-glyph placeholder until a live show binds the camera. Uses a SINGLE svg media rel
+ * (no PNG fallback, unlike the addImage svg path). @see plans/cameo-ooxml-ground-truth.md
+ * @param {PresSlide} target - slide the cameo is added to
+ * @param {CameoProps} opt - cameo options
+ */
+export function addCameoDefinition(target: PresSlide, opt: CameoProps): void {
+	if ((opt as any)?.animation) {
+		throw new Error('Inline `animation` property is not supported. Use slide.addAnimation(cameo, animationProps) instead.')
+	}
+
+	const defSizeInch = CAMEO_DEFAULT_SIZE_EMU / EMU
+	const slideWInch = (target._presLayout?._sizeW || 0) / EMU
+	const slideHInch = (target._presLayout?._sizeH || 0) / EMU
+	const w = opt.w !== undefined && opt.w !== null ? opt.w : defSizeInch
+	const h = opt.h !== undefined && opt.h !== null ? opt.h : defSizeInch
+	const x = opt.x !== undefined && opt.x !== null ? opt.x : slideWInch ? Math.max(0, (slideWInch - defSizeInch) / 2) : 1
+	const y = opt.y !== undefined && opt.y !== null ? opt.y : slideHInch ? Math.max(0, (slideHInch - defSizeInch) / 2) : 1
+	const objectName = opt.objectName
+		? opt.objectName
+		: `Camera ${target._slideObjects.filter(o => o._type === SLIDE_OBJECT_TYPES.cameo).length + 1}`
+	const dataUri = opt.posterSvgDataUri || CAMEO_PLACEHOLDER_SVG_DATAURI
+	const imageRelId = getNewRelId(target)
+
+	const newObject: ISlideObject = {
+		_type: SLIDE_OBJECT_TYPES.cameo,
+		image: 'preencoded.svg',
+		imageRid: imageRelId,
+		options: { x, y, w, h, objectName, ...nonVisualAccessibilityOptions(opt), _cameoShape: opt.shape || 'ellipse' } as any,
+	}
+
+	target._relsMedia.push({
+		path: 'preencoded.svg',
+		type: 'image/svg+xml',
+		extn: 'svg',
+		data: dataUri,
+		rId: imageRelId,
+		Target: `../media/image-${target._slideNum}-${target._relsMedia.length + 1}.svg`,
+	})
+
+	target._slideObjects.push(newObject)
+}
+
+/**
+ * Adds a Slide Zoom (zoom navigation) object to a slide definition.
+ * Native PowerPoint 2019+/2024 Slide Zoom: a clickable thumbnail that jumps to a target slide.
+ * Emitted as mc:AlternateContent (pslz:sldZm Choice + hyperlinked picture Fallback) with a single
+ * png thumbnail rel and a .../slide rel to the target. @see plans/zoom-ooxml-ground-truth.md
+ * @param {PresSlide} target - slide the zoom is added to
+ * @param {ZoomProps} opt - zoom options
+ */
+export function addZoomDefinition(target: PresSlide, opt: ZoomProps): void {
+	if ((opt as any)?.animation) {
+		throw new Error('Inline `animation` property is not supported. Use slide.addAnimation(zoom, animationProps) instead.')
+	}
+	const targetSlide = Number(opt.targetSlide)
+	if (!Number.isInteger(targetSlide) || targetSlide < 1) {
+		throw new Error('slide.addZoom requires `targetSlide` as a 1-based slide index')
+	}
+
+	const defWInch = ZOOM_DEFAULT_W_EMU / EMU
+	const defHInch = ZOOM_DEFAULT_H_EMU / EMU
+	const slideWInch = (target._presLayout?._sizeW || 0) / EMU
+	const slideHInch = (target._presLayout?._sizeH || 0) / EMU
+	const w = opt.w !== undefined && opt.w !== null ? opt.w : defWInch
+	const h = opt.h !== undefined && opt.h !== null ? opt.h : defHInch
+	const x = opt.x !== undefined && opt.x !== null ? opt.x : slideWInch ? Math.max(0, (slideWInch - defWInch) / 2) : 1
+	const y = opt.y !== undefined && opt.y !== null ? opt.y : slideHInch ? Math.max(0, (slideHInch - defHInch) / 2) : 1
+	const objectName = opt.objectName
+		? opt.objectName
+		: `Slide Zoom ${target._slideObjects.filter(o => o._type === SLIDE_OBJECT_TYPES.zoom).length + 1}`
+	const dataUri = opt.thumbnailDataUri || ZOOM_PLACEHOLDER_PNG_DATAURI
+	if (opt.returnToParent !== undefined && opt.returnToParent !== null && typeof opt.returnToParent !== 'boolean') {
+		throw new Error('slide.addZoom `returnToParent` must be a boolean')
+	}
+	const transitionDur = opt.transitionDur !== undefined && opt.transitionDur !== null ? Number(opt.transitionDur) : 1000
+	if (!Number.isInteger(transitionDur) || transitionDur < 0 || transitionDur > 600000) {
+		throw new Error('slide.addZoom `transitionDur` must be an integer from 0 through 600000 milliseconds')
+	}
+	if (typeof dataUri !== 'string' || !/^data:image\/(?:png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$/.test(dataUri)) {
+		throw new Error('slide.addZoom `thumbnailDataUri` must be a PNG/JPEG base64 data URI')
+	}
+	const thumbnailIsJpeg = dataUri.startsWith('data:image/jpeg;base64,')
+	const thumbnailExtn = thumbnailIsJpeg ? 'jpg' : 'png'
+	const thumbnailMimeType = thumbnailIsJpeg ? 'image/jpeg' : 'image/png'
+
+	// Thumbnail image rel, then the target-slide rel (used by the fallback hyperlink).
+	const imageRelId = getNewRelId(target)
+	target._relsMedia.push({
+		path: `preencoded.${thumbnailExtn}`,
+		type: thumbnailMimeType,
+		extn: thumbnailExtn,
+		data: dataUri,
+		rId: imageRelId,
+		Target: `../media/image-${target._slideNum}-${target._relsMedia.length + 1}.${thumbnailExtn}`,
+	})
+	const slideRelId = getNewRelId(target)
+	target._rels.push({ type: SLIDE_OBJECT_TYPES.hyperlink, data: 'slide', rId: slideRelId, Target: String(targetSlide) } as any)
+
+	const newObject: ISlideObject = {
+		_type: SLIDE_OBJECT_TYPES.zoom,
+		image: `preencoded.${thumbnailExtn}`,
+		imageRid: imageRelId,
+		options: {
+			x, y, w, h, objectName,
+			...nonVisualAccessibilityOptions(opt),
+			_zoomSldId: ZOOM_SLDID_BASE + targetSlide,
+			_zoomSlideRid: slideRelId,
+			_zoomReturnToParent: opt.returnToParent ? 1 : 0,
+			_zoomTransitionDur: transitionDur,
+			_zoomGuid: '{' + getUuid('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx').toUpperCase() + '}',
+		} as any,
+	}
+	target._slideObjects.push(newObject)
+}
+
+/**
+ * Adds a Section Zoom (zoom navigation to a section) object to a slide definition.
+ * Native PowerPoint 2019+/2024 Section Zoom: a clickable thumbnail that jumps to a section.
+ * Emitted as mc:AlternateContent (psez:sectionZm Choice + picture Fallback hyperlinked to the
+ * section's first slide), with a png thumbnail rel and a .../slide rel. The zoom references the
+ * target section by its stable GUID (shared with presentation.xml's sectionLst).
+ * @see plans/section-zoom-ooxml-ground-truth.md
+ * @param {PresSlide} target - slide the zoom is added to
+ * @param {SectionZoomProps} opt - section zoom options
+ */
+export function addSectionZoomDefinition(target: PresSlide, opt: SectionZoomProps): void {
+	if ((opt as any)?.animation) {
+		throw new Error('Inline `animation` property is not supported. Use slide.addAnimation(zoom, animationProps) instead.')
+	}
+
+	// Resolve the target section (by title or 1-based index) from the presentation.
+	const sections: SectionProps[] = typeof target.getSections === 'function' ? target.getSections() : []
+	if (!sections.length) {
+		throw new Error('slide.addSectionZoom requires the presentation to have sections (use pptx.addSection({ title }))')
+	}
+	let section: SectionProps
+	if (typeof opt.targetSection === 'number') {
+		if (!Number.isInteger(opt.targetSection) || opt.targetSection < 1 || opt.targetSection > sections.length) {
+			throw new Error(`slide.addSectionZoom: targetSection index ${opt.targetSection} out of range (1..${sections.length})`)
+		}
+		section = sections[opt.targetSection - 1]
+	} else if (typeof opt.targetSection === 'string' && opt.targetSection.trim()) {
+		section = sections.filter(s => s.title === opt.targetSection)[0]
+		if (!section) throw new Error(`slide.addSectionZoom: no section titled "${opt.targetSection}"`)
+	} else {
+		throw new Error('slide.addSectionZoom requires `targetSection` (section title or 1-based index)')
+	}
+	const firstSlide = section._slides && section._slides[0]
+	if (!firstSlide) throw new Error(`slide.addSectionZoom: section "${section.title}" has no slides`)
+	// Stable section GUID shared with presentation.xml's sectionLst (assigned lazily, persisted).
+	if (!section._id) section._id = '{' + getUuid('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx').toUpperCase() + '}'
+
+	const defWInch = ZOOM_DEFAULT_W_EMU / EMU
+	const defHInch = ZOOM_DEFAULT_H_EMU / EMU
+	const slideWInch = (target._presLayout?._sizeW || 0) / EMU
+	const slideHInch = (target._presLayout?._sizeH || 0) / EMU
+	const w = opt.w !== undefined && opt.w !== null ? opt.w : defWInch
+	const h = opt.h !== undefined && opt.h !== null ? opt.h : defHInch
+	const x = opt.x !== undefined && opt.x !== null ? opt.x : slideWInch ? Math.max(0, (slideWInch - defWInch) / 2) : 1
+	const y = opt.y !== undefined && opt.y !== null ? opt.y : slideHInch ? Math.max(0, (slideHInch - defHInch) / 2) : 1
+	const objectName = opt.objectName
+		? opt.objectName
+		: `Section Zoom ${target._slideObjects.filter(o => o._type === SLIDE_OBJECT_TYPES.sectionZoom).length + 1}`
+	const dataUri = opt.thumbnailDataUri || ZOOM_PLACEHOLDER_PNG_DATAURI
+	const transitionDur = opt.transitionDur !== undefined && opt.transitionDur !== null ? Number(opt.transitionDur) : 1000
+	if (!Number.isInteger(transitionDur) || transitionDur < 0 || transitionDur > 600000) {
+		throw new Error('slide.addSectionZoom `transitionDur` must be an integer from 0 through 600000 milliseconds')
+	}
+	if (typeof dataUri !== 'string' || !/^data:image\/(?:png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$/.test(dataUri)) {
+		throw new Error('slide.addSectionZoom `thumbnailDataUri` must be a PNG/JPEG base64 data URI')
+	}
+	const thumbnailIsJpeg = dataUri.startsWith('data:image/jpeg;base64,')
+	const thumbnailExtn = thumbnailIsJpeg ? 'jpg' : 'png'
+	const thumbnailMimeType = thumbnailIsJpeg ? 'image/jpeg' : 'image/png'
+
+	// Thumbnail image rel, then the target-slide rel (used by the fallback hyperlink).
+	const imageRelId = getNewRelId(target)
+	target._relsMedia.push({
+		path: `preencoded.${thumbnailExtn}`,
+		type: thumbnailMimeType,
+		extn: thumbnailExtn,
+		data: dataUri,
+		rId: imageRelId,
+		Target: `../media/image-${target._slideNum}-${target._relsMedia.length + 1}.${thumbnailExtn}`,
+	})
+	const slideRelId = getNewRelId(target)
+	target._rels.push({ type: SLIDE_OBJECT_TYPES.hyperlink, data: 'slide', rId: slideRelId, Target: String(firstSlide._slideNum) } as any)
+
+	const newObject: ISlideObject = {
+		_type: SLIDE_OBJECT_TYPES.sectionZoom,
+		image: `preencoded.${thumbnailExtn}`,
+		imageRid: imageRelId,
+		options: {
+			x, y, w, h, objectName,
+			...nonVisualAccessibilityOptions(opt),
+			_zoomSectionId: section._id,
+			_zoomSlideRid: slideRelId,
+			_zoomTransitionDur: transitionDur,
+			_zoomGuid: '{' + getUuid('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx').toUpperCase() + '}',
+		} as any,
+	}
+	target._slideObjects.push(newObject)
+}
+
+/**
+ * Adds a Summary Zoom graphic to the (already-created) summary slide.
+ * Native PowerPoint 2019+/2024 Summary Zoom: one clickable thumbnail per content section, laid out
+ * in a grid. Emitted as mc:AlternateContent (psuz:summaryZm Choice with one summaryZmObj per section
+ * + a locked grpSp picture Fallback hyperlinked to each section's first slide). The summary slide's
+ * own section is excluded. Uses a deterministic grid; PowerPoint refreshes positions/previews on edit.
+ * @see plans/summary-zoom-ooxml-ground-truth.md
+ * @param {PresSlide} target - the generated summary slide
+ * @param {SummaryZoomProps} opt - summary zoom options
+ */
+export function addSummaryZoomDefinition(target: PresSlide, opt: SummaryZoomProps): void {
+	const allSections: SectionProps[] = typeof target.getSections === 'function' ? target.getSections() : []
+	// Exclude the summary slide's own section (the generated "Summary Section").
+	const ownSection = allSections.filter(s => (s._slides || []).indexOf(target) !== -1)[0]
+	let contentSections = allSections.filter(s => s !== ownSection && (s._slides || []).length > 0)
+	// Optional explicit subset / ordering.
+	if (Array.isArray(opt.sections) && opt.sections.length) {
+		const picked: SectionProps[] = []
+		opt.sections.forEach(ref => {
+			const sec = typeof ref === 'number' ? contentSections[ref - 1] : contentSections.filter(s => s.title === ref)[0]
+			if (!sec) throw new Error(`addSummaryZoom: section "${ref}" not found among content sections`)
+			if (picked.indexOf(sec) === -1) picked.push(sec)
+		})
+		contentSections = picked
+	}
+	if (!contentSections.length) throw new Error('addSummaryZoom requires at least one content section (with slides) to summarize')
+
+	const dataUri = opt.thumbnailDataUri || ZOOM_PLACEHOLDER_PNG_DATAURI
+	const transitionDur = opt.transitionDur !== undefined && opt.transitionDur !== null ? Number(opt.transitionDur) : 1000
+	if (!Number.isInteger(transitionDur) || transitionDur < 0 || transitionDur > 600000) {
+		throw new Error('addSummaryZoom `transitionDur` must be an integer from 0 through 600000 milliseconds')
+	}
+	if (typeof dataUri !== 'string' || !/^data:image\/(?:png|jpeg);base64,[A-Za-z0-9+/]+={0,2}$/.test(dataUri)) {
+		throw new Error('addSummaryZoom `thumbnailDataUri` must be a PNG/JPEG base64 data URI')
+	}
+	const thumbnailIsJpeg = dataUri.startsWith('data:image/jpeg;base64,')
+	const thumbnailExtn = thumbnailIsJpeg ? 'jpg' : 'png'
+	const thumbnailMimeType = thumbnailIsJpeg ? 'image/jpeg' : 'image/png'
+	const objectName = opt.objectName || 'Summary Zoom 1'
+
+	// Deterministic grid frame (centered, leaving a title band up top). PowerPoint re-layouts on edit.
+	const slideW = target._presLayout?._sizeW || Math.round(13.333 * EMU)
+	const slideH = target._presLayout?._sizeH || Math.round(7.5 * EMU)
+	const frameX = Math.round(slideW * 0.06)
+	const frameW = slideW - frameX * 2
+	const frameY = Math.round(slideH * 0.24)
+	const frameH = slideH - frameY - Math.round(slideH * 0.06)
+	const n = contentSections.length
+	const cols = Math.min(n, 4)
+	const rows = Math.ceil(n / cols)
+	const gap = Math.round(slideW * 0.012)
+	const tileW = Math.floor((frameW - gap * (cols - 1)) / cols)
+	const tileH = Math.floor((frameH - gap * (rows - 1)) / rows)
+
+	const objs: any[] = []
+	contentSections.forEach((sec, i) => {
+		const firstSlide = sec._slides && sec._slides[0]
+		if (!firstSlide) throw new Error(`addSummaryZoom: section "${sec.title}" has no slides`)
+		if (!sec._id) sec._id = '{' + getUuid('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx').toUpperCase() + '}'
+		// Per-section thumbnail rel + hyperlink-to-first-slide rel (used by the Fallback pics).
+		const imageRelId = getNewRelId(target)
+		target._relsMedia.push({
+			path: `preencoded.${thumbnailExtn}`,
+			type: thumbnailMimeType,
+			extn: thumbnailExtn,
+			data: dataUri,
+			rId: imageRelId,
+			Target: `../media/image-${target._slideNum}-${target._relsMedia.length + 1}.${thumbnailExtn}`,
+		})
+		const slideRelId = getNewRelId(target)
+		target._rels.push({ type: SLIDE_OBJECT_TYPES.hyperlink, data: 'slide', rId: slideRelId, Target: String(firstSlide._slideNum) } as any)
+		const col = i % cols
+		const row = Math.floor(i / cols)
+		objs.push({
+			sectionId: sec._id,
+			thumbRid: imageRelId,
+			slideRid: slideRelId,
+			guid: '{' + getUuid('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx').toUpperCase() + '}',
+			x: frameX + col * (tileW + gap),
+			y: frameY + row * (tileH + gap),
+			w: tileW,
+			h: tileH,
+		})
+	})
+
+	const summaryOptions: any = {
+		objectName,
+		// Expose the engine-computed frame through the ordinary geometry
+		// contract as well as the native summary payload.  This keeps Director
+		// validation, visual-balance checks, and edit inspection aligned with
+		// the actual centered grid instead of treating the object as zero-sized.
+		x: frameX / EMU,
+		y: frameY / EMU,
+		w: frameW / EMU,
+		h: frameH / EMU,
+		_zoomTransitionDur: transitionDur,
+		_summaryFrame: { x: frameX, y: frameY, w: frameW, h: frameH },
+		_summaryObjs: objs,
+	}
+	Object.assign(summaryOptions, nonVisualAccessibilityOptions(opt))
+
+	const newObject: ISlideObject = {
+		_type: SLIDE_OBJECT_TYPES.summaryZoom,
+		image: `preencoded.${thumbnailExtn}`,
+		imageRid: objs[0].thumbRid,
+		options: summaryOptions,
+	}
+	target._slideObjects.push(newObject)
+}
+
+/**
  * Adds a 3D model object to a slide definition.
  * @param {PresSlide} target - slide object that the model will be added to
  * @param {Model3DProps} opt - model options
@@ -731,7 +1432,7 @@ export function addModel3DDefinition(target: PresSlide, opt: Model3DProps): void
 	const strGlbPath = opt.glbFile || ''
 	const strRasterPath = opt.rasterFile || ''
 	const nativeOnly = opt.nativeOnly === true || !strRasterPath
-	const objectName = opt.objectName ? encodeXmlEntities(opt.objectName) : `3D Model ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.model3d).length + 1}`
+	const objectName = opt.objectName || `3D Model ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.model3d).length + 1}`
 
 	// REALITY-CHECK
 	if (!strGlbPath) {
@@ -745,6 +1446,7 @@ export function addModel3DDefinition(target: PresSlide, opt: Model3DProps): void
 		w: intSizeX,
 		h: intSizeY,
 		objectName,
+		...nonVisualAccessibilityOptions(opt),
 		rotate: opt.rotate || 0,
 		flipH: opt.flipH || false,
 		shadow: correctShadowOptions(opt.shadow),
@@ -753,6 +1455,11 @@ export function addModel3DDefinition(target: PresSlide, opt: Model3DProps): void
 		ambientLight: opt.ambientLight,
 		ptLights: opt.ptLights,
 		objViewport: opt.objViewport,
+		_model3dViewPresetId: (opt as any)._model3dViewPresetId,
+		_model3dAuthoredOverrides: (opt as any)._model3dAuthoredOverrides,
+		// Rigged-model "Scene" selection (embedded glTF animation). Forwarded only when set
+		// so static models are unaffected; the emitter turns it into an am3d:extLst.
+		...(opt.scene && typeof opt.scene === 'object' ? { scene: opt.scene } : {}),
 		nativeOnly,
 		_model3dXml: opt._model3dXml,
 		_originalGlbRid: opt._originalGlbRid,
@@ -798,6 +1505,51 @@ export function addModel3DDefinition(target: PresSlide, opt: Model3DProps): void
 	target._slideObjects.push(slideData)
 }
 
+function newClosedCaptionTrackId(): string {
+	const uuid = typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+		? crypto.randomUUID()
+		: `${Date.now().toString(16).padStart(8, '0')}-4${Math.floor(Math.random() * 0x1000).toString(16).padStart(3, '0')}-8${Math.floor(Math.random() * 0x1000).toString(16).padStart(3, '0')}-${Math.floor(Math.random() * 0x10000).toString(16).padStart(4, '0')}${Math.floor(Math.random() * 0x100000000000).toString(16).padStart(12, '0').slice(0, 12)}`
+	return `{${String(uuid).toUpperCase()}}`
+}
+
+function utf8ToBase64(text: string): string {
+	if (typeof Buffer !== 'undefined') return Buffer.from(text, 'utf8').toString('base64')
+	return btoa(unescape(encodeURIComponent(text)))
+}
+
+export function attachShapeFillImage(target: PresSlide, fill: any): void {
+	if (!fill || typeof fill !== 'object') return
+	const kind = String(fill.type || '').toLowerCase()
+	if (kind !== 'texture' && kind !== 'picture') return
+	if (Number(fill._blipRid) > 0) return
+	const tex = fill.texture || fill.picture || {}
+	let data = String(tex.data || fill.data || '')
+	const imgPath = String(tex.path || fill.path || tex.asset || tex.source?.asset || '')
+	if (!data && !imgPath) return
+	if (data && !data.includes(',') && !/^data:|^image\//i.test(data)) {
+		const sourceType = resolveImagePackageType('', imgPath)
+		data = `${sourceType.mimeType};base64,${data}`
+	}
+	const { extn, mimeType } = resolveImagePackageType(data, imgPath)
+	const relId = getNewRelId(target)
+	const duplicate = data
+		? target._relsMedia.find(item => !item.isBackground && item.data === data && String(item.type || '').startsWith('image/'))
+		: target._relsMedia.find(item => !item.isBackground && item.path && item.path === imgPath && String(item.type || '').startsWith('image/'))
+	if (duplicate?.rId) {
+		fill._blipRid = duplicate.rId
+		return
+	}
+	target._relsMedia.push({
+		path: imgPath || `preencoded.${extn}`,
+		type: mimeType,
+		extn,
+		data,
+		rId: relId,
+		Target: `../media/texture-${target._slideNum}-${relId}.${extn}`,
+	})
+	fill._blipRid = relId
+}
+
 /**
  * Adds a media object to a slide definition.
  * @param {PresSlide} `target` - slide object that the media will be added to
@@ -819,7 +1571,7 @@ export function addMediaDefinition(target: PresSlide, opt: MediaProps): void {
 	const strType = opt.type || 'audio'
 	let strExtn = ''
 	const strCover = opt.cover || IMG_PLAYBTN
-	const objectName = opt.objectName ? encodeXmlEntities(opt.objectName) : `Media ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.media).length}`
+	const objectName = opt.objectName || `Media ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.media).length}`
 	const slideData: ISlideObject = { _type: SLIDE_OBJECT_TYPES.media }
 
 	// STEP 1: REALITY-CHECK
@@ -837,7 +1589,12 @@ export function addMediaDefinition(target: PresSlide, opt: MediaProps): void {
 
 	// FIXME: 20190707
 	// strType = strData ? strData.split(';')[0].split('/')[0] : strType
-	strExtn = opt.extn || (strData ? strData.split(';')[0].split('/')[1] : strPath.split('.').pop()) || 'mp3'
+	const mediaPackageType = strType === 'online'
+		? { extn: 'mp4', mimeType: 'video/mp4' }
+		: resolveAudioVideoPackageType(strType, opt.extn, strData, strPath)
+	strExtn = mediaPackageType.extn
+	const mediaContentType = mediaPackageType.mimeType
+	const coverPackageType = resolveImagePackageType(strCover, '')
 
 	// STEP 2: Set type, media
 	slideData.mtype = strType
@@ -850,10 +1607,53 @@ export function addMediaDefinition(target: PresSlide, opt: MediaProps): void {
 	slideData.options.w = intSizeX
 	slideData.options.h = intSizeY
 	slideData.options.objectName = objectName
+	Object.assign(slideData.options, nonVisualAccessibilityOptions(opt))
+	// Media placeholders live on the picture-shaped media carrier's p:nvPr.
+	// Retain both canonical and native aliases so export/recompile reaches the
+	// existing gen-xml media serializer without losing idx=0 or explicit false.
+	if (opt.placeholder !== undefined) (slideData.options as any).placeholder = opt.placeholder
+	if (opt.phType !== undefined) (slideData.options as any).phType = opt.phType
+	if (opt.phIdx !== undefined && opt.phIdx !== null) (slideData.options as any).phIdx = opt.phIdx
+	if (opt.phSz !== undefined) (slideData.options as any).phSz = opt.phSz
+	if (opt.phOrient !== undefined) (slideData.options as any).phOrient = opt.phOrient
+	const phHasCustomPrompt = opt.phHasCustomPrompt ?? opt.hasCustomPrompt
+	if (phHasCustomPrompt !== undefined && phHasCustomPrompt !== null) (slideData.options as any).phHasCustomPrompt = phHasCustomPrompt
+	if (opt.hasBarePh === true) (slideData.options as any).hasBarePh = true
+	// Retain the semantic media identity alongside the package relationships.
+	// The relationship records remain authoritative for serialization; these
+	// fields make current-spec readback lossless and prevent audio from silently
+	// defaulting to video after an inspect/export/recompile cycle.
+	;(slideData.options as any).type = strType
+	;(slideData.options as any).extn = strExtn
+	if (Number.isFinite(Number((opt as any).durationMs))) (slideData.options as any).durationMs = Number((opt as any).durationMs)
+	if (strData) (slideData.options as any).data = strData
+	if (strPath) (slideData.options as any).path = strPath
+	if (strLink) (slideData.options as any).link = strLink
+	if (strCover) (slideData.options as any).cover = strCover
+	if ((opt as any)._authoredMediaSource) (slideData.options as any)._authoredMediaSource = (opt as any)._authoredMediaSource
+	if ((opt as any)._authoredMediaCover) (slideData.options as any)._authoredMediaCover = (opt as any)._authoredMediaCover
+	if (Array.isArray((opt as any)._authoredMediaCommands)) (slideData.options as any)._authoredMediaCommands = (opt as any)._authoredMediaCommands
 	if (typeof opt.transparency === 'number') slideData.options.transparency = opt.transparency
 	if ((opt as any).spid) (slideData.options as any).spid = (opt as any).spid
-	// Store interactivePlayback for animation generation (controls interactiveSeq generation)
-	slideData.options.interactivePlayback = opt.interactivePlayback
+	if (typeof opt.mediaVolume === 'number') (slideData.options as any).mediaVolume = opt.mediaVolume
+	if (typeof opt.isNarration === 'boolean') (slideData.options as any).isNarration = opt.isNarration
+	if (typeof opt.showWhenStopped === 'boolean') (slideData.options as any).showWhenStopped = opt.showWhenStopped
+	if (typeof opt.endOnStopAudio === 'boolean') (slideData.options as any).endOnStopAudio = opt.endOnStopAudio
+	if ((opt as any).sizing) (slideData.options as any).sizing = (opt as any).sizing
+	if (typeof (opt as any).rounding === 'boolean') (slideData.options as any).rounding = (opt as any).rounding
+	if ((opt as any)._picPrstGeom) (slideData.options as any)._picPrstGeom = (opt as any)._picPrstGeom
+	if (Number.isFinite(Number((opt as any)._sizingSourceW))) (slideData.options as any)._sizingSourceW = Number((opt as any)._sizingSourceW)
+	if (Number.isFinite(Number((opt as any)._sizingSourceH))) (slideData.options as any)._sizingSourceH = Number((opt as any)._sizingSourceH)
+	if ((opt as any)._rawBlipAttrs) (slideData.options as any)._rawBlipAttrs = (opt as any)._rawBlipAttrs
+	if (Object.prototype.hasOwnProperty.call(opt as any, '_rawBlipFillAttrs')) (slideData.options as any)._rawBlipFillAttrs = (opt as any)._rawBlipFillAttrs
+	if ((opt as any)._rawBlipInnerXml) (slideData.options as any)._rawBlipInnerXml = (opt as any)._rawBlipInnerXml
+	if ((opt as any)._rawBlipExtLstXml) (slideData.options as any)._rawBlipExtLstXml = (opt as any)._rawBlipExtLstXml
+	if ((opt as any)._rawBlipTailXml) (slideData.options as any)._rawBlipTailXml = (opt as any)._rawBlipTailXml
+	if ((opt as any)._rawSourceShapeXml) (slideData.options as any)._rawSourceShapeXml = (opt as any)._rawSourceShapeXml
+	if (Array.isArray((opt as any)._rawSourceRels)) (slideData.options as any)._rawSourceRels = (opt as any)._rawSourceRels
+	// Store interactivePlayback for animation generation (controls interactiveSeq generation).
+	// PowerPoint's audio-only narration recording uses no click-to-pause sequence by default.
+	slideData.options.interactivePlayback = opt.interactivePlayback ?? (opt.isNarration === true && strType === 'audio' ? false : undefined)
 
 	// STEP 4: Add this media to this Slide Rels (rId/rels count spans all slides! Count all media to get next rId)
 	/**
@@ -875,61 +1675,127 @@ export function addMediaDefinition(target: PresSlide, opt: MediaProps): void {
 			extn: strExtn,
 			rId: relId1,
 			Target: strLink,
+			mediaRelationshipRole: 'online',
 		})
 		slideData.mediaRid = relId1
 
 		// B: Add cover (preview/overlay) image
 		target._relsMedia.push({
-			path: 'preencoded.png',
+			path: `preencoded.${coverPackageType.extn}`,
 			data: strCover,
-			type: 'image/png',
-			extn: 'png',
+			type: coverPackageType.mimeType,
+			extn: coverPackageType.extn,
 			rId: getNewRelId(target),
-			Target: `../media/image-${target._slideNum}-${target._relsMedia.length + 1}.png`,
+			Target: `../media/image-${target._slideNum}-${target._relsMedia.length + 1}.${coverPackageType.extn}`,
+			mediaRelationshipRole: 'cover',
 		})
+		slideData.mediaCoverRid = target._relsMedia[target._relsMedia.length - 1].rId
 	} else {
 		// PERF: Duplicate media should reuse existing `Target` value and not create an additional copy
-		const dupeItem = target._relsMedia.filter(item => item.path && item.path === strPath && item.type === strType + '/' + strExtn && !item.isDuplicate)[0]
+		const dupeItem = target._relsMedia.filter(item => item.path && item.path === strPath && item.type === mediaContentType && !item.isDuplicate)[0]
 
 		// A: "relationships/video"
 		const relId1 = getNewRelId(target)
 		target._relsMedia.push({
 			path: strPath || 'preencoded' + strExtn,
-			type: strType + '/' + strExtn,
+			type: mediaContentType,
 			extn: strExtn,
 			data: strData || '',
 			rId: relId1,
 			isDuplicate: !!(dupeItem?.Target),
 			Target: dupeItem?.Target ? dupeItem.Target : `../media/media-${target._slideNum}-${target._relsMedia.length + 1}.${strExtn}`,
+			mediaRelationshipRole: 'primary',
 		})
 		slideData.mediaRid = relId1
 
 		// B: "relationships/media"
+		const companionRid = getNewRelId(target)
 		target._relsMedia.push({
 			path: strPath || 'preencoded' + strExtn,
-			type: strType + '/' + strExtn,
+			type: mediaContentType,
 			extn: strExtn,
 			data: strData || '',
-			rId: getNewRelId(target),
+			rId: companionRid,
 			isDuplicate: !!(dupeItem?.Target),
 			Target: dupeItem?.Target ? dupeItem.Target : `../media/media-${target._slideNum}-${target._relsMedia.length + 0}.${strExtn}`,
+			mediaRelationshipRole: 'companion',
 		})
+		slideData.mediaCompanionRid = companionRid
 
 		// C: Add cover (preview/overlay) image
 		target._relsMedia.push({
-			path: 'preencoded.png',
-			type: 'image/png',
-			extn: 'png',
+			path: `preencoded.${coverPackageType.extn}`,
+			type: coverPackageType.mimeType,
+			extn: coverPackageType.extn,
 			data: strCover,
 			rId: getNewRelId(target),
-			Target: `../media/image-${target._slideNum}-${target._relsMedia.length + 1}.png`,
+			Target: `../media/image-${target._slideNum}-${target._relsMedia.length + 1}.${coverPackageType.extn}`,
+			mediaRelationshipRole: 'cover',
 		})
+		slideData.mediaCoverRid = target._relsMedia[target._relsMedia.length - 1].rId
 	}
+
+	const captionTracks = Array.isArray((opt as any).closedCaptionTracks) ? (opt as any).closedCaptionTracks : []
+	const serializedCaptionTracks: Array<{ rId: number; language: string; label: string; isDefault: boolean; id: string }> = []
+	for (const track of captionTracks) {
+		if (!track) continue
+		const language = String(track.language || track.lang || 'en-US')
+		const label = String(track.label || language)
+		const vttText = String(track.vtt || track.text || '')
+		let data = String(track.data || '')
+		if (vttText && !data) data = `text/vtt;base64,${utf8ToBase64(vttText)}`
+		else if (data && !data.includes(',')) data = `text/vtt;base64,${data}`
+		else if (data && !/^data:|^text\/vtt/i.test(data) && data.includes(',')) {
+			/* already prefixed */
+		}
+		const relId = getNewRelId(target)
+		target._relsMedia.push({
+			path: track.path || 'preencoded.vtt',
+			type: 'text/vtt',
+			extn: 'vtt',
+			data,
+			rId: relId,
+			Target: `../media/caption-${target._slideNum}-${relId}.vtt`,
+			isCaptionTrack: true,
+		})
+		serializedCaptionTracks.push({ rId: relId, language, label, isDefault: track.default === true, id: String(track.id || newClosedCaptionTrackId()) })
+	}
+	if (serializedCaptionTracks.length) (slideData.options as any).closedCaptionTracks = serializedCaptionTracks
 
 	// LAST
 	target._slideObjects.push(slideData)
 
 	// NOTE: Inline animation removed - use slide.addAnimation() instead
+}
+
+/**
+ * Add the recorded-video object for a native PowerPoint Record Studio session.
+ *
+ * The object is deliberately created through a dedicated API so ordinary
+ * media cannot acquire Record Studio identity merely by copying geometry or
+ * setting a narration marker. The caller must still author the slide-level
+ * notes and timing/session structures.
+ */
+export function addRecordStudioCaptureDefinition(target: PresSlide, opt: RecordStudioCaptureProps): void {
+	if (opt.type && opt.type !== 'video') {
+		throw new Error('addRecordStudioCapture() requires a video payload.')
+	}
+	if (!opt.cover) {
+		throw new Error('addRecordStudioCapture() requires the native video poster image.')
+	}
+	addMediaDefinition(target, {
+		...opt,
+		type: 'video',
+		isNarration: true,
+		showWhenStopped: true,
+		endOnStopAudio: true,
+		interactivePlayback: opt.interactivePlayback ?? true,
+	})
+	const capture = target._slideObjects[target._slideObjects.length - 1]
+	if (capture?.options) {
+		;(capture.options as any)._nativeRecordStudioCapture = true
+		;(capture.options as any)._nativeRecordStudioOrigin = (opt as any)._nativeRecordStudioOrigin || 'ai-generated'
+	}
 }
 
 /**
@@ -952,7 +1818,9 @@ export function addNotesDefinition(target: PresSlide, notes: string): void {
  * @param {ShapeProps} opts shape options
  */
 export function addShapeDefinition(target: PresSlide, shapeName: SHAPE_NAME, opts: ShapeProps): void {
-	const options = typeof opts === 'object' ? opts : {}
+	const options = normalizeLineShapeOptions(shapeName, opts)
+	const explicitNoLine = Object.prototype.hasOwnProperty.call(options, 'line')
+		&& (options.line === null || (typeof options.line === 'object' && options.line?.type === 'none'))
 	
 	// VALIDATION: Inline animation property is not supported - use slide.addAnimation() instead
 	if ((options as any).animation) {
@@ -960,6 +1828,7 @@ export function addShapeDefinition(target: PresSlide, shapeName: SHAPE_NAME, opt
 	}
 	
 	options.line = options.line || { type: 'none' }
+	if (explicitNoLine) (options as ShapeProps & { _explicitNoLine?: boolean })._explicitNoLine = true
 	
 	// Determine object type: use 'shape' for pure shapes, 'text' for text boxes
 	// This allows shapes without text to skip txBody generation
@@ -1017,21 +1886,31 @@ export function addShapeDefinition(target: PresSlide, shapeName: SHAPE_NAME, opt
 		if (options.effect3D.bevel && options.effect3D.bevel.type && !validBevelTypes.includes(options.effect3D.bevel.type)) {
 			throw new Error(`addShape: \`effect3D.bevel.type\` must be one of: ${validBevelTypes.join(', ')}. Example: \`effect3D: { bevel: { type: "circle" } }\``)
 		}
-		const validMaterials = ['dkEdge', 'flat', 'legacyMatte', 'legacyMetal', 'legacyPlastic', 'legacyWireframe', 'matte', 'metal', 'plastic', 'powder', 'softEdge', 'softmetal', 'translucentPowder', 'warmMatte']
+		const validMaterials = ['dkEdge', 'flat', 'legacyMatte', 'legacyMetal', 'legacyPlastic', 'legacyWireframe', 'matte', 'metal', 'plastic', 'powder', 'softEdge', 'softmetal', 'translucentPowder', 'warmMatte', 'clear']
 		if (options.effect3D.material && !validMaterials.includes(options.effect3D.material)) {
 			throw new Error(`addShape: \`effect3D.material\` must be one of: ${validMaterials.join(', ')}. Example: \`effect3D: { material: "warmMatte" }\``)
 		}
 	}
 
 	// 1: ShapeLineProps defaults
+	if (!Object.prototype.hasOwnProperty.call(options as any, '_rawLineXml')) validateShapeLineProps(options.line, 'addShape()', true)
 	const newLineOpts: ShapeLineProps = {
 		type: options.line.type || 'solid',
-		color: options.line.color || DEF_SHAPE_LINE_COLOR,
-		transparency: options.line.transparency || 0,
-		width: options.line.width || 1,
+		...(options.line.type === 'gradient' ? {
+			gradientDirection: options.line.gradientDirection || 'linear',
+			gradientAngle: options.line.gradientAngle ?? 0,
+			gradientStops: options.line.gradientStops.map(stop => ({ ...stop })),
+			...(options.line.rotateGradientWithShape !== undefined ? { rotateGradientWithShape: options.line.rotateGradientWithShape } : {}),
+		} : { color: options.line.color || DEF_SHAPE_LINE_COLOR, transparency: options.line.transparency ?? 0 }),
+		width: options.line.width ?? 1,
+		...(options.line.cap != null ? { cap: options.line.cap } : {}),
 		dashType: options.line.dashType || 'solid',
 		beginArrowType: options.line.beginArrowType || null,
 		endArrowType: options.line.endArrowType || null,
+		beginArrowWidth: options.line.beginArrowWidth || null,
+		beginArrowLength: options.line.beginArrowLength || null,
+		endArrowWidth: options.line.endArrowWidth || null,
+		endArrowLength: options.line.endArrowLength || null,
 	}
 	if (typeof options.line === 'object' && options.line.type !== 'none') options.line = newLineOpts
 
@@ -1041,7 +1920,7 @@ export function addShapeDefinition(target: PresSlide, shapeName: SHAPE_NAME, opt
 	options.w = options.w || (options.w === 0 ? 0 : 1)
 	options.h = options.h || (options.h === 0 ? 0 : 1)
 	options.objectName = options.objectName
-		? encodeXmlEntities(options.objectName)
+		? options.objectName
 		: `Shape ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.text).length}`
 
 	// 3: Handle line (lots of deprecated opts)
@@ -1054,6 +1933,9 @@ export function addShapeDefinition(target: PresSlide, shapeName: SHAPE_NAME, opt
 	if (typeof options.lineDash === 'string') options.line.dashType = options.lineDash // @deprecated (part of `ShapeLineProps` now)
 	if (typeof options.lineHead === 'string') options.line.beginArrowType = options.lineHead // @deprecated (part of `ShapeLineProps` now)
 	if (typeof options.lineTail === 'string') options.line.endArrowType = options.lineTail // @deprecated (part of `ShapeLineProps` now)
+	if (!Object.prototype.hasOwnProperty.call(options as any, '_rawLineXml')) validateShapeLineProps(options.line, 'addShape()', true)
+
+	attachShapeFillImage(target, options.fill)
 
 	// 4: Create hyperlink rels
 	createHyperlinkRels(target, newObject)
@@ -1062,6 +1944,130 @@ export function addShapeDefinition(target: PresSlide, shapeName: SHAPE_NAME, opt
 	target._slideObjects.push(newObject)
 
 	// NOTE: Inline animation removed - use slide.addAnimation() instead
+}
+
+/**
+ * Adds a native, editable PowerPoint connector (`p:cxnSp`). This is kept
+ * separate from addShapeDefinition because a line shape (`p:sp`) does not
+ * retain endpoint binding in PowerPoint.
+ */
+export function addConnectorDefinition(target: PresSlide, opts: ConnectorProps = {}): void {
+	const options = { ...opts } as ConnectorProps
+	options.x = options.x ?? 1
+	options.y = options.y ?? 1
+	options.w = options.w ?? 1
+	options.h = options.h ?? 0
+	options.connectorType = options.connectorType || 'straightConnector1'
+	options.objectName = options.objectName
+		? options.objectName
+		: `Connector ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.connector).length + 1}`
+	const line = options.line || {}
+	const typedState = options._connectorStyleState?.schemaVersion === 'betterpptx.connector-style-state.v1'
+	if (typedState) {
+		const effectiveLine = options._connectorStyleState?.effectiveLine || line
+		validateShapeLineProps(effectiveLine, 'addConnector()')
+		// Typed connector composition deliberately stays sparse. Theme-gallery
+		// lines with no authored/default leaves must omit a:ln so p:style remains
+		// the native source of width, color, and effects.
+		options.line = { ...effectiveLine }
+	} else {
+		if (!Object.prototype.hasOwnProperty.call(options, '_rawConnectorLineXml')) validateShapeLineProps(line, 'addConnector()')
+		options.line = {
+			type: line.type === 'none' ? 'none' : (line.type || 'solid'),
+			color: line.color || DEF_SHAPE_LINE_COLOR,
+			transparency: line.transparency ?? 0,
+			width: line.width ?? 1,
+			...(line.cap != null ? { cap: line.cap } : {}),
+			dashType: line.dashType || 'solid',
+			beginArrowType: line.beginArrowType || null,
+			endArrowType: line.endArrowType || null,
+			beginArrowWidth: line.beginArrowWidth || null,
+			beginArrowLength: line.beginArrowLength || null,
+			endArrowWidth: line.endArrowWidth || null,
+			endArrowLength: line.endArrowLength || null,
+		}
+	}
+	const connector: ISlideObject = { _type: SLIDE_OBJECT_TYPES.connector, connector: options, options: options as ObjectOptions }
+	createHyperlinkRels(target, connector)
+	target._slideObjects.push(connector)
+}
+
+/** Adds a native editable PowerPoint group with engine-laid-out child primitives. */
+export function addGroupDefinition(target: PresSlide, opts: GroupProps): void {
+	const options = { ...opts, children: Array.isArray(opts?.children) ? opts.children.map(child => ({ ...child })) : [] } as GroupProps
+	if (!options.children.length) throw new Error('A native group requires at least one child.')
+	options.x = options.x ?? 1
+	options.y = options.y ?? 1
+	options.w = options.w ?? 2
+	options.h = options.h ?? 1
+	options.objectName = options.objectName || `Group ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.group).length + 1}`
+	// Prepare child objects through the same native paths used for ordinary
+	// slide objects. Relationships belong to the real slide; only the object
+	// list is isolated, so embedded media is not duplicated on the slide.
+	const childTarget = Object.create(target) as PresSlide
+	childTarget._slideObjects = []
+	const prepareChild = (source: GroupChildProps, index: number, parentName: string): GroupChildProps => {
+		const child = { ...source, style: source.style ? { ...source.style } : undefined }
+		child.objectName = child.objectName || `${parentName} child ${index + 1}`
+		if (child.kind === 'group') {
+			if (!Array.isArray(child.children) || !child.children.length) throw new Error('A nested native group requires at least one child.')
+			child.children = child.children.map((nested, nestedIndex) => prepareChild(nested, nestedIndex, child.objectName))
+			// A stable object identity is needed for a named animation target, but
+			// its slide-wide ID is assigned only at serialization. Keep the wrapper
+			// separate from its descriptor to avoid a self-referential child tree.
+			const { _nativeObject: ignoredNativeObject, children: ignoredChildren, ...nestedOptions } = child
+			child._nativeObject = { _type: SLIDE_OBJECT_TYPES.group, options: nestedOptions as ObjectOptions }
+			return child
+		}
+		if (child._nativeObject) return child
+		const childOptions = {
+			...child.style,
+			x: child.x ?? 0, y: child.y ?? 0, w: child.w ?? 1, h: child.h ?? 1,
+			objectName: child.objectName,
+			...(child.rotate !== undefined || child.rotation !== undefined ? { rotate: child.rotate ?? child.rotation } : {}),
+			...(child.flipH !== undefined ? { flipH: child.flipH } : {}),
+			...(child.flipV !== undefined ? { flipV: child.flipV } : {}),
+			...(child.fill !== undefined ? { fill: child.fill } : {}),
+			...(child.line !== undefined ? { line: child.line } : {}),
+		}
+		if (child.kind === 'text' || child.kind === 'textBox' || child.kind === 'textShape') {
+			if (typeof child.text !== 'string' && !Array.isArray(child.text)) throw new Error('A native group text child requires text.')
+			const textOptions = {
+				...childOptions,
+				isTextBox: child.kind !== 'textShape',
+				shape: child.kind === 'textShape' ? (child.shape || child.shapeName || SHAPE_TYPE.RECTANGLE) : SHAPE_TYPE.RECTANGLE,
+			} as TextPropsOptions
+			const textRuns = typeof child.text === 'string'
+				? [{ text: child.text, options: Object.fromEntries(Object.entries(textOptions).filter(([key]) => key !== 'hyperlink')) as TextPropsOptions }]
+				: JSON.parse(JSON.stringify(child.text)) as TextProps[]
+			addTextDefinition(childTarget, textRuns, textOptions, false)
+		} else if (child.kind === 'image' || child.kind === 'image-feature') {
+			const imageOptions = { ...childOptions, ...child.imageOptions, ...(child.data ? { data: child.data } : {}), ...(child.path ? { path: child.path } : {}) } as ImageProps
+			if (!imageOptions.data && !imageOptions.path) throw new Error('A native group image child requires resolved image data or path.')
+			addImageDefinition(childTarget, imageOptions)
+		} else if (child.kind === 'connector') {
+			addConnectorDefinition(childTarget, {
+				...childOptions,
+				...(child.glow !== undefined ? { glow: child.glow } : {}),
+				...(child.shadow !== undefined ? { shadow: child.shadow } : {}),
+				...(child.reflection !== undefined ? { reflection: child.reflection } : {}),
+				...(child.softEdges !== undefined ? { softEdges: child.softEdges } : {}),
+				connectorType: child.connectorType, routing: child.routing, startShapeId: child.startShapeId, startConnectionIndex: child.startConnectionIndex, endShapeId: child.endShapeId, endConnectionIndex: child.endConnectionIndex,
+			})
+		} else if (!child.kind || ['shape', 'freeform', 'customGeometry', 'custom-geometry'].includes(child.kind)) {
+			const custom = ['freeform', 'customGeometry', 'custom-geometry'].includes(child.kind)
+			addShapeDefinition(childTarget, custom ? 'custGeom' as SHAPE_NAME : (child.shape || child.shapeName || SHAPE_TYPE.RECTANGLE), { ...childOptions, _isPureShape: true, ...(child.points ? { points: child.points } : {}) } as ShapeProps)
+		} else {
+			throw new Error(`Unsupported native group child kind: ${String(child.kind)}`)
+		}
+		child._nativeObject = childTarget._slideObjects.pop()
+		if (!child._nativeObject) throw new Error(`Unable to prepare native group child ${child.objectName}.`)
+		return child
+	}
+	options.children = options.children.map((child, index) => prepareChild(child, index, options.objectName))
+	const group: ISlideObject = { _type: SLIDE_OBJECT_TYPES.group, group: options, options: options as ObjectOptions }
+	createHyperlinkRels(target, group)
+	target._slideObjects.push(group)
 }
 
 /**
@@ -1085,7 +2091,7 @@ export function addTableDefinition(
 ): PresSlide[] {
 	const slides: PresSlide[] = [target] // Create array of Slides as more may be added by auto-paging
 	const opt: TableProps = options && typeof options === 'object' ? options : {}
-	opt.objectName = opt.objectName ? encodeXmlEntities(opt.objectName) : `Table ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.table).length}`
+	opt.objectName = opt.objectName || `Table ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.table).length}`
 
 	// STEP 1: REALITY-CHECK
 	{
@@ -1139,7 +2145,11 @@ export function addTableDefinition(
 					if (cell.options && typeof cell.options === 'object') newCell.options = cell.options
 				}
 
-				// C: Set cell borders
+				// C: Set cell borders. Native PowerPoint table styles own the border
+				// treatment; injecting a per-cell `noFill` line would override the
+				// style's horizontal/vertical rules. Explicit cell/table borders still
+				// win, as they are author intent.
+				const hasNativeTableStyle = Boolean((opt as any).tableStyleId || (opt as any).tableStylePresetId || (opt as any)._nativeMinimal)
 				// eslint-disable-next-line @typescript-eslint/no-explicit-any
 				const nativeNoLineBorder = (opt as any)._nativeMinimal
 					? [
@@ -1149,29 +2159,38 @@ export function addTableDefinition(
 						{ type: 'none', _nativeTableBorder: true, _hasLineElement: false },
 					] as any
 					: null
-				newCell.options.border = newCell.options.border || opt.border || nativeNoLineBorder || [{ type: 'none' }, { type: 'none' }, { type: 'none' }, { type: 'none' }]
+				if (!newCell.options.border && !opt.border && hasNativeTableStyle) {
+					// Leave the border unset so <a:tblStyle> can supply it.
+					newCell.options.border = undefined
+				} else {
+					newCell.options.border = newCell.options.border || opt.border || nativeNoLineBorder || [{ type: 'none' }, { type: 'none' }, { type: 'none' }, { type: 'none' }]
+				}
 				const cellBorder = newCell.options.border
 
 				// CASE 1: border interface is: BorderOptions | [BorderOptions, BorderOptions, BorderOptions, BorderOptions]
-				if (!Array.isArray(cellBorder) && typeof cellBorder === 'object') newCell.options.border = [cellBorder, cellBorder, cellBorder, cellBorder]
+				if (cellBorder && !Array.isArray(cellBorder) && typeof cellBorder === 'object') newCell.options.border = [cellBorder, cellBorder, cellBorder, cellBorder]
 				// Handle: [null, null, {type:'solid'}, null]
-				if (!newCell.options.border[0]) newCell.options.border[0] = { type: 'none' }
-				if (!newCell.options.border[1]) newCell.options.border[1] = { type: 'none' }
-				if (!newCell.options.border[2]) newCell.options.border[2] = { type: 'none' }
-				if (!newCell.options.border[3]) newCell.options.border[3] = { type: 'none' }
+				if (newCell.options.border) {
+					if (!newCell.options.border[0]) newCell.options.border[0] = { type: 'none' }
+					if (!newCell.options.border[1]) newCell.options.border[1] = { type: 'none' }
+					if (!newCell.options.border[2]) newCell.options.border[2] = { type: 'none' }
+					if (!newCell.options.border[3]) newCell.options.border[3] = { type: 'none' }
+				}
 
 				// set complete BorderOptions for all sides
-				const arrSides = [0, 1, 2, 3]
-				arrSides.forEach(idx => {
-					const borderSide = newCell.options.border[idx]
-					newCell.options.border[idx] = {
-						...borderSide,
-						type: borderSide.type || DEF_CELL_BORDER.type,
-						color: borderSide.color || DEF_CELL_BORDER.color,
-						pt: typeof borderSide.pt === 'number' ? borderSide.pt : DEF_CELL_BORDER.pt,
-						...(typeof borderSide.transparency === 'number' ? { transparency: borderSide.transparency } : {}),
-					}
-				})
+				if (newCell.options.border) {
+					const arrSides = [0, 1, 2, 3]
+					arrSides.forEach(idx => {
+						const borderSide = newCell.options.border[idx]
+						newCell.options.border[idx] = {
+							...borderSide,
+							type: borderSide.type || DEF_CELL_BORDER.type,
+							color: borderSide.color || DEF_CELL_BORDER.color,
+							pt: typeof borderSide.pt === 'number' ? borderSide.pt : DEF_CELL_BORDER.pt,
+							...(typeof borderSide.transparency === 'number' ? { transparency: borderSide.transparency } : {}),
+						}
+					})
+				}
 
 				// LAST:
 				newRow.push(newCell)
@@ -1193,7 +2212,12 @@ export function addTableDefinition(
 	if (typeof opt.margin === 'number') opt.margin = [Number(opt.margin), Number(opt.margin), Number(opt.margin), Number(opt.margin)]
 	// NOTE: dont add default color on tables with hyperlinks! (it causes any textObj's with hyperlinks to have subsequent words to be black)
 	if (JSON.stringify({ arrRows: arrRows }).indexOf('hyperlink') === -1) {
-		if (!opt.color) opt.color = opt.color || DEF_FONT_COLOR // Set default color if needed (table option > inherit from Slide > default to black)
+		// Native PowerPoint table styles own the text treatment (especially the
+		// first-row contrast color). Do not inject the library's default black
+		// into every cell when a native style is selected; an explicit author
+		// color still wins and is preserved below.
+		const hasNativeTableStyle = Boolean((opt as any).tableStyleId || (opt as any).tableStylePresetId || (opt as any)._nativeMinimal)
+		if (!opt.color && !hasNativeTableStyle) opt.color = opt.color || DEF_FONT_COLOR // Set default color if needed (table option > inherit from Slide > default to black)
 	}
 	if (typeof opt.border === 'string') {
 		console.warn('addTable `border` option must be an object. Ex: `{border: {type:\'none\'}}`')
@@ -1338,7 +2362,8 @@ export function addTableDefinition(
 		if (opt.autoPageRepeatHeader) opt._arrObjTabHeadRows = arrRows.filter((_row, idx) => idx < opt.autoPageHeaderRows)
 
 		// Loop over rows and create 1-N tables as needed (ISSUE#21)
-		getSlidesForTableRows(arrRows, opt, presLayout, slideLayout).forEach((slide, idx) => {
+		const tableRowSlides = getSlidesForTableRows(arrRows, opt, presLayout, slideLayout)
+		tableRowSlides.forEach((slide, idx) => {
 			// A: Create new Slide when needed, otherwise, use existing (NOTE: More than 1 table can be on a Slide, so we will go up AND down the Slide chain)
 			if (!getSlide(target._slideNum + idx)) slides.push(addSlide({ masterName: slideLayout?._name || null }))
 
@@ -1349,13 +2374,18 @@ export function addTableDefinition(
 			{
 				const newSlide: PresSlide = getSlide(target._slideNum + idx)
 
-				opt.autoPage = false
+				const pageOpt = Object.assign({}, opt, {
+					autoPage: false,
+					_autoPageFragmentIndex: idx,
+					_autoPageFragmentCount: tableRowSlides.length,
+				})
+				if (idx > 0 && pageOpt.objectName) pageOpt.objectName = `${pageOpt.objectName}.page-${idx + 1}`
 
 				// Create hyperlink rels (IMPORTANT: Wait until table has been shredded across Slides or all rels will end-up on Slide 1!)
 				createHyperlinkRels(newSlide, slide.rows)
 
 				// Add rows to new slide
-				newSlide.addTable(slide.rows, Object.assign({}, opt))
+				newSlide.addTable(slide.rows, pageOpt)
 
 				// Add reference to the new slide so it can be returned, but don't add the first one because the user already has a reference to that one.
 				if (idx > 0) newAutoPagedSlides.push(newSlide)
@@ -1461,16 +2491,24 @@ export function addTextDefinition(target: PresSlide, text: TextProps[], opts: Te
 			}
 
 			// A.3: Text targeting a placeholder need to inherit the placeholders options (eg: margin, valign, etc.) (Issue #640)
-			if (itemOpts.placeholder && target._slideLayout && target._slideLayout._slideObjects) {
+			if (itemOpts.placeholder && !(itemOpts as any)._nativePlaceholderInheritance && target._slideLayout && target._slideLayout._slideObjects) {
 				const placeHold = target._slideLayout._slideObjects.filter(
 					item => item._type === 'placeholder' && item.options && item.options.placeholder && item.options.placeholder === itemOpts.placeholder
 				)[0]
-				if (placeHold?.options) itemOpts = { ...itemOpts, ...placeHold.options }
+				if (placeHold?.options) {
+					// Inherit visual/text defaults from the layout placeholder, but never
+					// replace authored edit identity with the placeholder's generated name.
+					const authoredObjectName = itemOpts.objectName
+					const authoredEditHandle = (itemOpts as any).editHandle
+					itemOpts = { ...itemOpts, ...placeHold.options }
+					if (authoredObjectName) itemOpts.objectName = authoredObjectName
+					if (authoredEditHandle) (itemOpts as any).editHandle = authoredEditHandle
+				}
 			}
 
 			// A.4: Other options
 			itemOpts.objectName = itemOpts.objectName
-				? encodeXmlEntities(itemOpts.objectName)
+				? itemOpts.objectName
 				: `Text ${target._slideObjects.filter(obj => obj._type === SLIDE_OBJECT_TYPES.text).length}`
 
 			// B:
@@ -1481,9 +2519,14 @@ export function addTextDefinition(target: PresSlide, text: TextProps[], opts: Te
 					color: itemOpts.line.color || DEF_SHAPE_LINE_COLOR,
 					transparency: itemOpts.line.transparency || 0,
 					width: itemOpts.line.width || 1,
+					...(itemOpts.line.cap != null ? { cap: itemOpts.line.cap } : {}),
 					dashType: itemOpts.line.dashType || 'solid',
 					beginArrowType: itemOpts.line.beginArrowType || null,
 					endArrowType: itemOpts.line.endArrowType || null,
+					beginArrowWidth: itemOpts.line.beginArrowWidth || null,
+					beginArrowLength: itemOpts.line.beginArrowLength || null,
+					endArrowWidth: itemOpts.line.endArrowWidth || null,
+					endArrowLength: itemOpts.line.endArrowLength || null,
 				}
 				if (typeof itemOpts.line === 'object') itemOpts.line = newLineOpts
 
@@ -1510,7 +2553,12 @@ export function addTextDefinition(target: PresSlide, text: TextProps[], opts: Te
 			itemOpts._bodyProp.autoFit = itemOpts.autoFit || false // DEPRECATED: (3.3.0) If true, shape will collapse to text size (Fit To shape)
 			itemOpts._bodyProp.anchor = !itemOpts.placeholder && !itemOpts._nativeMinimal ? TEXT_VALIGN.ctr : null // VALS: [t,ctr,b]
 			itemOpts._bodyProp.vert = itemOpts.vert || null // VALS: [eaVert,horz,mongolianVert,vert,vert270,wordArtVert,wordArtVertRtl]
-			itemOpts._bodyProp.wrap = typeof itemOpts.wrap === 'boolean' ? itemOpts.wrap : (itemOpts._nativeMinimal ? undefined : true)
+			// Preserve an explicit null as a real reset.  The ordinary authoring
+			// default is square wrapping, but a patch/spec that sets wrap:null must
+			// remove the authored bodyPr@wrap instead of being silently rewritten to
+			// square here.  Native-minimal imports already omit the default.
+			if (itemOpts.wrap === null) itemOpts._bodyProp.wrap = undefined
+			else itemOpts._bodyProp.wrap = typeof itemOpts.wrap === 'boolean' ? itemOpts.wrap : (itemOpts._nativeMinimal ? undefined : true)
 
 			// E: Inset
 			// @deprecated 3.10.0 (`inset` - use `margin`)
@@ -1562,7 +2610,7 @@ export function addTextDefinition(target: PresSlide, text: TextProps[], opts: Te
 				type: SLIDE_OBJECT_TYPES.hyperlink,
 				data: newObject.options.hyperlink.slide ? 'slide' : 'dummy',
 				rId: relId,
-				Target: encodeXmlEntities(newObject.options.hyperlink.url) || newObject.options.hyperlink.slide.toString(),
+				Target: newObject.options.hyperlink.url || newObject.options.hyperlink.slide.toString(),
 			})
 			newObject.options.hyperlink._rId = relId
 		}
@@ -1590,6 +2638,7 @@ export function addTextDefinition(target: PresSlide, text: TextProps[], opts: Te
 
 	// STEP 3: Create hyperlinks
 	createHyperlinkRels(target, newObject.text || '')
+	attachShapeFillImage(target, newObject.options?.fill)
 
 	// LAST: Add object to Slide
 	target._slideObjects.push(newObject)
@@ -1598,21 +2647,43 @@ export function addTextDefinition(target: PresSlide, text: TextProps[], opts: Te
 }
 
 /**
- * Adds placeholder objects to slide
+ * Builds the slide object list used for serialization, including empty layout
+ * placeholders that have not been populated on the slide. The authored slide
+ * model must remain unchanged: repeated writes and readback/export operations
+ * are allowed to observe only user-authored objects.
  * @param {PresSlide} slide - slide object containing layouts
+ * @return {ISlideObject[]} serialization-only object list
  */
-export function addPlaceholdersToSlideLayouts(slide: PresSlide): void {
+export function addPlaceholdersToSlideLayouts(slide: PresSlide): ISlideObject[] {
+	const serializationSlide = Object.assign(Object.create(Object.getPrototypeOf(slide)), slide, {
+		_slideObjects: [...slide._slideObjects],
+		_rels: [...(slide._rels || [])],
+		_relsChart: [...(slide._relsChart || [])],
+		_relsMedia: [...(slide._relsMedia || [])],
+	}) as PresSlide
 	// Add all placeholders on this Slide that dont already exist
 	(slide._slideLayout._slideObjects || []).forEach(slideLayoutObj => {
 		if (slideLayoutObj._type === SLIDE_OBJECT_TYPES.placeholder) {
 			// A: Search for this placeholder on Slide before we add
 			// NOTE: Check to ensure a placeholder does not already exist on the Slide
 			// They are created when they have been populated with text (ex: `slide.addText('Hi', { placeholder:'title' });`)
-			if (slide._slideObjects.filter(slideObj => slideObj.options && slideObj.options.placeholder === slideLayoutObj.options.placeholder).length === 0) {
-				addTextDefinition(slide, [{ text: '' }], slideLayoutObj.options, false)
+			const layoutOptions = slideLayoutObj.options as any
+			const layoutType = layoutOptions._placeholderType ?? layoutOptions.phType
+			const layoutIdx = layoutOptions._placeholderIdx ?? layoutOptions.phIdx
+			const alreadyPopulated = serializationSlide._slideObjects.some(slideObj => {
+				const slideOptions = slideObj.options as any
+				if (!slideOptions) return false
+				if (slideOptions.placeholder && slideOptions.placeholder === layoutOptions.placeholder) return true
+				const slideType = slideOptions._placeholderType ?? slideOptions.phType
+				const slideIdx = slideOptions._placeholderIdx ?? slideOptions.phIdx
+				return Boolean(layoutType && slideType === layoutType && slideIdx !== undefined && layoutIdx !== undefined && String(slideIdx) === String(layoutIdx))
+			})
+			if (!alreadyPopulated) {
+				addTextDefinition(serializationSlide, [{ text: '' }], { ...slideLayoutObj.options }, false)
 			}
 		}
 	})
+	return serializationSlide._slideObjects
 }
 
 /* -------------------------------------------------------------------------------- */
@@ -1622,7 +2693,16 @@ export function addPlaceholdersToSlideLayouts(slide: PresSlide): void {
  * @param {BackgroundProps} props - color string or an object with image definition
  * @param {PresSlide} target - slide object that the background is set to
  */
-export function addBackgroundDefinition(props: BackgroundProps, target: SlideLayout): void {
+export function addBackgroundDefinition(props: BackgroundProps | undefined, target: SlideLayout): void {
+	target._relsMedia = target._relsMedia || []
+	const previousBackgroundRid = target._bkgdImgRid
+	if (previousBackgroundRid) {
+		// Background relationships are deliberately not shared with shape fills,
+		// so replacement/clear can remove only the lifecycle-owned media safely.
+		target._relsMedia = target._relsMedia.filter(rel => !(rel.isBackground && rel.rId === previousBackgroundRid))
+		target._bkgdImgRid = undefined
+	}
+
 	// A: @deprecated
 	if (target.bkgd) {
 		if (!target.background) target.background = {}
@@ -1633,26 +2713,27 @@ export function addBackgroundDefinition(props: BackgroundProps, target: SlideLay
 			if (target.bkgd.path) target.background.path = target.bkgd.path
 			if (target.bkgd.src) target.background.path = target.bkgd.src // @deprecated (drop in 4.x)
 		}
+		props = target.background
 	}
+	if (!props) return
 	if (target.background?.fill) target.background.color = target.background.fill
 
 	// B: Handle media
-	if (props && (props.path || props.data)) {
-		// Allow the use of only the data key (`path` isnt reqd)
-		props.path = props.path || 'preencoded.png'
-		let strImgExtn = (props.path.split('.').pop() || 'png').split('?')[0] // Handle "blah.jpg?width=540" etc.
-		if (strImgExtn === 'jpg') strImgExtn = 'jpeg' // base64-encoded jpg's come out as "data:image/jpeg;base64,/9j/[...]", so correct exttnesion to avoid content warnings at PPT startup
-
-		target._relsMedia = target._relsMedia || []
-		const intRels = target._relsMedia.length + 1
+	const texture = props.texture && typeof props.texture === 'object' ? props.texture : undefined
+	const data = String(props.data || texture?.data || '')
+	const imagePath = String(props.path || texture?.path || '')
+	if (imagePath || data) {
+		const { extn, mimeType } = resolveImagePackageType(data, imagePath)
+		const intRels = getNewRelId(target)
 		// NOTE: `Target` cannot have spaces (eg:"Slide 1-image-1.jpg") or a "presentation is corrupt" warning comes up
 		target._relsMedia.push({
-			path: props.path,
-			type: SLIDE_OBJECT_TYPES.image,
-			extn: strImgExtn,
-			data: props.data || null,
+			path: imagePath || `preencoded.${extn}`,
+			type: mimeType,
+			extn,
+			data: data || null,
 			rId: intRels,
-			Target: `../media/${(target._name || '').replace(/\s+/gi, '-')}-image-${target._relsMedia.length + 1}.${strImgExtn}`,
+			Target: `../media/${(target._name || '').replace(/\s+/gi, '-')}-image-${intRels}.${extn}`,
+			isBackground: true,
 		})
 		target._bkgdImgRid = intRels
 	}
@@ -1705,7 +2786,7 @@ function createHyperlinkRels(
 					type: SLIDE_OBJECT_TYPES.hyperlink,
 					data: text.options.hyperlink.slide ? 'slide' : 'dummy',
 					rId: relId,
-					Target: encodeXmlEntities(text.options.hyperlink.url) || text.options.hyperlink.slide.toString(),
+					Target: text.options.hyperlink.url || text.options.hyperlink.slide.toString(),
 				})
 
 				text.options.hyperlink._rId = relId
@@ -1718,7 +2799,7 @@ function createHyperlinkRels(
 					type: SLIDE_OBJECT_TYPES.hyperlink,
 					data: text.options.hyperlink.slide ? 'slide' : 'dummy',
 					rId: text.options.hyperlink._rId,
-					Target: encodeXmlEntities(text.options.hyperlink.url) || text.options.hyperlink.slide.toString(),
+					Target: text.options.hyperlink.url || text.options.hyperlink.slide.toString(),
 				})
 			}
 		}

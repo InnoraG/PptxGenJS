@@ -1,0 +1,37 @@
+{
+  "version": "1",
+  "_comment": "The ONE canonical humanoid skeleton the CMU clips retarget onto (once, offline) and every generated UniRig avatar is NORMALIZED onto (normalize.py) so the same baked clips play on all avatars. Mixamo body topology, finger-FREE (22 bones). UniRig emits NO stable bone names — normalize by TOPOLOGY (hierarchy + rest position + L/R sign), then rename to these canonical names (Blender vertex groups are name-keyed, so the skin rebinds without repaint). `index` = fixed array order (the canonical bone index). Rest is unit-height, hips at origin, +Y up, +Z forward.",
+  "upAxis": "Y",
+  "forwardAxis": "Z",
+  "namePrefix": "mixamorig:",
+  "_restWorldNote": "restWorld = Blender Z-up rest head/tail (unit-ish height, hips at origin, arms out = T-pose). The single canonical rest ALL clips are authored at and every avatar is normalized onto; _canonical_rig.build_canonical_armature reads it. +X = character-left.",
+  "bones": [
+    { "index": 0,  "name": "mixamorig:Hips",          "parent": null,                  "restWorld": { "head": [0.0, 0.0, 1.00],  "tail": [0.0, 0.0, 1.05] } },
+    { "index": 1,  "name": "mixamorig:Spine",         "parent": "mixamorig:Hips",        "restWorld": { "head": [0.0, 0.0, 1.05],  "tail": [0.0, 0.0, 1.20] } },
+    { "index": 2,  "name": "mixamorig:Spine1",        "parent": "mixamorig:Spine",       "restWorld": { "head": [0.0, 0.0, 1.20],  "tail": [0.0, 0.0, 1.33] } },
+    { "index": 3,  "name": "mixamorig:Spine2",        "parent": "mixamorig:Spine1",      "restWorld": { "head": [0.0, 0.0, 1.33],  "tail": [0.0, 0.0, 1.42] } },
+    { "index": 4,  "name": "mixamorig:Neck",          "parent": "mixamorig:Spine2",      "restWorld": { "head": [0.0, 0.0, 1.45],  "tail": [0.0, 0.0, 1.52] } },
+    { "index": 5,  "name": "mixamorig:Head",          "parent": "mixamorig:Neck",        "restWorld": { "head": [0.0, 0.0, 1.52],  "tail": [0.0, 0.0, 1.66] } },
+    { "index": 6,  "name": "mixamorig:LeftShoulder",  "parent": "mixamorig:Spine2",      "restWorld": { "head": [0.06, 0.0, 1.40], "tail": [0.16, 0.0, 1.40] } },
+    { "index": 7,  "name": "mixamorig:LeftArm",       "parent": "mixamorig:LeftShoulder", "restWorld": { "head": [0.16, 0.0, 1.40], "tail": [0.36, 0.0, 1.40] } },
+    { "index": 8,  "name": "mixamorig:LeftForeArm",   "parent": "mixamorig:LeftArm",     "restWorld": { "head": [0.36, 0.0, 1.40], "tail": [0.56, 0.0, 1.40] } },
+    { "index": 9,  "name": "mixamorig:LeftHand",      "parent": "mixamorig:LeftForeArm", "restWorld": { "head": [0.56, 0.0, 1.40], "tail": [0.66, 0.0, 1.40] } },
+    { "index": 10, "name": "mixamorig:RightShoulder", "parent": "mixamorig:Spine2",      "restWorld": { "head": [-0.06, 0.0, 1.40], "tail": [-0.16, 0.0, 1.40] } },
+    { "index": 11, "name": "mixamorig:RightArm",      "parent": "mixamorig:RightShoulder", "restWorld": { "head": [-0.16, 0.0, 1.40], "tail": [-0.36, 0.0, 1.40] } },
+    { "index": 12, "name": "mixamorig:RightForeArm",  "parent": "mixamorig:RightArm",    "restWorld": { "head": [-0.36, 0.0, 1.40], "tail": [-0.56, 0.0, 1.40] } },
+    { "index": 13, "name": "mixamorig:RightHand",     "parent": "mixamorig:RightForeArm", "restWorld": { "head": [-0.56, 0.0, 1.40], "tail": [-0.66, 0.0, 1.40] } },
+    { "index": 14, "name": "mixamorig:LeftUpLeg",     "parent": "mixamorig:Hips",        "restWorld": { "head": [0.10, 0.0, 0.95], "tail": [0.10, 0.0, 0.55] } },
+    { "index": 15, "name": "mixamorig:LeftLeg",       "parent": "mixamorig:LeftUpLeg",   "restWorld": { "head": [0.10, 0.0, 0.55], "tail": [0.10, 0.0, 0.12] } },
+    { "index": 16, "name": "mixamorig:LeftFoot",      "parent": "mixamorig:LeftLeg",     "restWorld": { "head": [0.10, 0.0, 0.12], "tail": [0.10, 0.10, 0.06] } },
+    { "index": 17, "name": "mixamorig:LeftToeBase",   "parent": "mixamorig:LeftFoot",    "restWorld": { "head": [0.10, 0.10, 0.06], "tail": [0.10, 0.18, 0.04] } },
+    { "index": 18, "name": "mixamorig:RightUpLeg",    "parent": "mixamorig:Hips",        "restWorld": { "head": [-0.10, 0.0, 0.95], "tail": [-0.10, 0.0, 0.55] } },
+    { "index": 19, "name": "mixamorig:RightLeg",      "parent": "mixamorig:RightUpLeg",  "restWorld": { "head": [-0.10, 0.0, 0.55], "tail": [-0.10, 0.0, 0.12] } },
+    { "index": 20, "name": "mixamorig:RightFoot",     "parent": "mixamorig:RightLeg",    "restWorld": { "head": [-0.10, 0.0, 0.12], "tail": [-0.10, 0.10, 0.06] } },
+    { "index": 21, "name": "mixamorig:RightToeBase",  "parent": "mixamorig:RightFoot",   "restWorld": { "head": [-0.10, 0.10, 0.06], "tail": [-0.10, 0.18, 0.04] } }
+  ],
+  "tiers": {
+    "T1_full": { "minConfidence": 0.85, "requires": "all 22", "clips": "full set" },
+    "T2_body": { "minConfidence": 0.6, "requires": "core 15 (no toes; legs may lock)", "clips": "torso/arm/head only; legs at rest" },
+    "T3_idle": { "minConfidence": 0.0, "requires": "hips+spine+neck", "clips": "single safe-idle only; director pins to talk/idle" }
+  }
+}

@@ -1,0 +1,12 @@
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import process from 'node:process'
+process.env.BETTERPPTX_PUBLIC_BLACK_BOX='0'; process.env.BETTERPPTX_ALLOW_PRIMITIVE_TOOLS='1'; process.env.BETTERPPTX_LOCAL_MAINTAINER='1'; process.env.BETTERPPTX_PREMIUM='1'; process.env.BETTERPPTX_BILLING_ENFORCE='0'
+const root=path.resolve('betterpptx-mcp'); const source=path.join(root,'outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-excellence-final-3min.pptx'); const video=path.join(root,'outputs/commercial-poc/current-commercial-20260728/final-commercial-avatar-3min-current-square.mp4'); const poster=path.join(root,'outputs/commercial-poc/current-commercial-20260728/final-commercial-avatar-3min-current-square.png'); const dir=path.join(root,'outputs/commercial-poc/final-authoring-excellence-20260728/variants'); await fs.mkdir(dir,{recursive:true}); const {callBetterPptxTool}=await import('../engine.mjs'); const data=r=>{if(!r?.ok)throw new Error(JSON.stringify(r));return r.data||r}; const cover=`data:image/png;base64,${(await fs.readFile(poster)).toString('base64')}`
+const variants=[
+ {name:'replace-only', patch:{}, cover:false},
+ {name:'replace-geometry', patch:{x:10.9933333333,y:5.16,w:2.25,h:2.25}, cover:true},
+ {name:'replace-round', patch:{x:10.9933333333,y:5.16,w:2.25,h:2.25,rounding:true,sizing:{type:'cover',w:2.25,h:2.25}}, cover:true},
+ {name:'replace-geometry-interactive', patch:{x:10.9933333333,y:5.16,w:2.25,h:2.25}, cover:true, command:'togglePause'},
+]
+for(const v of variants){const c={sessionId:`variant-${v.name}-${Date.now()}`};const o=data(await callBetterPptxTool('betterpptx.deck.open_existing',{pptxPath:source,slideNumbers:[1],preserveTiming:true},c));try{data(await callBetterPptxTool('betterpptx.deck.set_show_settings',{deckId:o.deckId,useTimings:true,showAnimation:true,showNarration:true},c));data(await callBetterPptxTool('betterpptx.slide.update_media',{deckId:o.deckId,slideIndex:0,target:{objectName:'optional-talking-head-avatar'},replacementMediaPath:video,...(v.cover?{coverDataUri:cover}:{}),interactivePlayback:false,...(v.command?{command:v.command,preserveExistingTiming:false}:{}),...(Object.keys(v.patch).length?{optionsPatch:v.patch}:{})},c));const s=data(await callBetterPptxTool('betterpptx.deck.save',{deckId:o.deckId,outputDir:dir,fileName:`${v.name}.pptx`},c));console.log(s.filePath)}finally{try{await callBetterPptxTool('betterpptx.deck.dispose',{deckId:o.deckId},c)}catch{}}}

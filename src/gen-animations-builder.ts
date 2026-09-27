@@ -9,6 +9,7 @@
 
 import { AnimationProps, ISlideObject } from './core-interfaces'
 import { getNextAnimationId } from './gen-animations-ids'
+import { encodeXmlEntities } from './gen-utils'
 import {
 	AnimationConfig,
 	AnimationDirection,
@@ -104,9 +105,11 @@ import {
 	buildTurntableAnimation,
 	buildSwingAnimation,
 	buildJumpAndTurnAnimation,
-	buildLeaveAnimation
+	buildLeaveAnimation,
+	buildPlaySceneAnimation
 } from './animations-builders/build3DModelAnimation'
 import { normalizeModel3DAnimationEffectName } from './animations-builders/data3DAnimationTemplates'
+import { lowerMotionPathToPowerPoint } from './animations-builders/motion-path-coordinate'
 
 
 // ============================================================================
@@ -119,6 +122,7 @@ import { normalizeModel3DAnimationEffectName } from './animations-builders/data3
 
 import type { AnimationBuildContext } from './animations-builders/types'
 import { addHashPrefixForEntrance, addHashPrefix, getDefaultDelay } from './animations-builders/utils'
+import { applyAnimationTimingOptionsStructural } from './gen-animations-xml-utils'
 
 // Re-export for backward compatibility
 export type { AnimationBuildContext } from './animations-builders/types'
@@ -221,6 +225,7 @@ export const CUSTOM_BUILDER_MAP: Record<string, (ctx: AnimationBuildContext) => 
 	'buildSwingAnimation': buildSwingAnimation,
 	'buildJumpAndTurnAnimation': buildJumpAndTurnAnimation,
 	'buildLeaveAnimation': buildLeaveAnimation,
+	'buildPlaySceneAnimation': buildPlaySceneAnimation,
 }
 
 // ============================================================================
@@ -558,7 +563,10 @@ function buildPathAnimation(ctx: AnimationBuildContext): string {
 
 	// Get path data - animation options take priority over config defaults
 	// This allows custom paths to override the registry default for an effect
-	const pathData = (animation as any).pathData || (animation as any).path || config.pathData || 'M 0 0 L 0.25 0 Z'
+	const authoredPathData = animation.motionPathData || (animation as any).pathData || (animation as any).path || config.pathData || 'M 0 0 L 0.25 0 Z'
+	const pathData = lowerMotionPathToPowerPoint(authoredPathData, (animation as any).motionPathCoordinateSpace || 'slide')
+	if (animation.motionEasing != null && animation.motionEasing !== 'smooth' && animation.motionEasing !== 'linear') throw new Error('motionEasing must be smooth, linear, or null.')
+	const easing = animation.motionEasing === 'linear' ? 0 : 50000
 
 	// Build target XML based on sequence mode
 	let targetXml = `<p:spTgt spid="${shapeId}"/>`
@@ -571,16 +579,16 @@ function buildPathAnimation(ctx: AnimationBuildContext): string {
 
 	// Motion path animations use animMotion with ppt_x and ppt_y attributes
 	// Reference structure from frozen PPTX:
-	// - accel="50000" decel="50000" for smooth easing (on cTn wrapper)
+	// - smooth defaults to accel/decel 50000; sampled trajectories opt into 0 for linear motion
 	// - origin="layout" pathEditMode="relative" ptsTypes="" on animMotion
 	// - Attributes: ppt_x and ppt_y
 	return `<p:par>
-		<p:cTn id="${ids.main}" presetID="${config.presetId}" presetClass="path" presetSubtype="0" accel="50000" decel="50000" fill="hold" grpId="0" nodeType="${nodeType}">
+		<p:cTn id="${ids.main}" presetID="${config.presetId}" presetClass="path" presetSubtype="0" accel="${easing}" decel="${easing}" fill="hold" grpId="0" nodeType="${nodeType}">
 			<p:stCondLst>
 				<p:cond delay="${delay}"/>
 			</p:stCondLst>
 			<p:childTnLst>
-				<p:animMotion origin="layout" path="${pathData}" pathEditMode="relative" ptsTypes="">
+				<p:animMotion origin="layout" path="${encodeXmlEntities(pathData)}" pathEditMode="relative" ptsTypes="">
 					<p:cBhvr>
 						<p:cTn id="${ids.effect}" dur="${duration}" fill="hold"/>
 						<p:tgtEl>${targetXml}</p:tgtEl>
@@ -611,6 +619,18 @@ function buildPathAnimation(ctx: AnimationBuildContext): string {
  * 
  * Structure based on frozen Batch9 Slide 6 reference
  */
+export function normalizeMediaCommand(value: unknown): string {
+	const command = String(value || '').trim()
+	if (/^togglepause$/i.test(command)) return 'togglePause'
+	if (/^stop$/i.test(command)) return 'stop'
+	const play = /^playfrom\(\s*(\d+(?:\.\d+)?)\s*\)$/i.exec(command)
+	if (!play) throw new Error('mediaCommand must be togglePause, stop, or playFrom(non-negative-seconds).')
+	const seconds = Number(play[1])
+	if (!Number.isFinite(seconds) || seconds > 86400) throw new Error('mediaCommand playFrom seconds must be between 0 and 86400.')
+	const canonicalSeconds = Number.isInteger(seconds) ? `${seconds}.0` : String(seconds)
+	return `playFrom(${canonicalSeconds})`
+}
+
 function buildMediaAnimation(ctx: AnimationBuildContext): string {
 	const { shapeId, animation, config, ids } = ctx
 	const delay = animation.delay !== undefined ? animation.delay : (config.defaultDelay || 0)
@@ -633,9 +653,9 @@ function buildMediaAnimation(ctx: AnimationBuildContext): string {
 			mediaCommand = 'playFrom(0.0)' // default
 			isPlayCommand = true
 		}
-	} else if (mediaCommand.startsWith('playFrom')) {
-		isPlayCommand = true
 	}
+	mediaCommand = normalizeMediaCommand(mediaCommand)
+	isPlayCommand = mediaCommand.startsWith('playFrom')
 
 	// Duration handling:
 	// - playFrom commands: use animation.duration if specified (video playback duration), otherwise default to 1
@@ -663,7 +683,7 @@ function buildMediaAnimation(ctx: AnimationBuildContext): string {
 				<p:cond delay="${delay}"/>
 			</p:stCondLst>
 			<p:childTnLst>
-				<p:cmd type="call" cmd="${mediaCommand}">
+				<p:cmd type="call" cmd="${encodeXmlEntities(mediaCommand)}">
 					<p:cBhvr>
 						<p:cTn id="${ids.effect}" dur="${duration}" fill="hold"/>
 						<p:tgtEl>
@@ -750,11 +770,14 @@ function generateTarget(
 function buildRotationAnimation(ctx: AnimationBuildContext): string {
 	const { shapeId, animation, config } = ctx
 	const nodeType = ctx.nodeType || 'clickEffect'
-	const duration = animation.duration || config.defaultDuration || 700
+	const duration = animation.duration ?? (config.defaultDuration || 700)
 	const delay = animation.delay !== undefined ? animation.delay : (config.defaultDelay || 0)
 
 	// Get rotation parameters
-	const degrees = (animation as any).degrees || 360
+	// The documented public field wins, including zero and an explicit reset.
+	// Legacy degrees remains a local compatibility alias only when rotation is
+	// absent; rotation:null must not resurrect a stale alias override.
+	const degrees = animation.rotation !== undefined ? (animation.rotation ?? 360) : ((animation as any).degrees ?? 360)
 	const clockwise = (animation as any).clockwise !== false
 	const byValue = degrees * 60000 * (clockwise ? 1 : -1)
 
@@ -791,12 +814,12 @@ function buildRotationAnimation(ctx: AnimationBuildContext): string {
 function buildScaleAnimation(ctx: AnimationBuildContext): string {
 	const { shapeId, animation, config } = ctx
 	const nodeType = ctx.nodeType || 'clickEffect'
-	const duration = animation.duration || config.defaultDuration || 700
+	const duration = animation.duration ?? (config.defaultDuration || 700)
 	const delay = animation.delay !== undefined ? animation.delay : (config.defaultDelay || 0)
 
-	const scale = (animation as any).scale || 1.5
-	const scaleX = Math.round(scale * 100000)
-	const scaleY = Math.round(scale * 100000)
+	const scale = animation.scale ?? 1.5
+	const scaleX = Math.round((animation.scaleX ?? scale) * 100000)
+	const scaleY = Math.round((animation.scaleY ?? scale) * 100000)
 
 	const mainId = getNextAnimationId()
 	const scaleId = getNextAnimationId()
@@ -1612,9 +1635,15 @@ export function buildAnimation(
 	options?: { skipGrpId?: boolean }
 ): string {
 	const skipGrpId = options?.skipGrpId ?? false
+	if (animation.motionEasing != null && (animation.type !== 'motion' || !['smooth', 'linear'].includes(animation.motionEasing))) throw new Error('motionEasing requires a motion-path animation and must be smooth, linear, or null.')
 
 	// Call the internal builder
 	let xml = buildAnimationInternal(shapeId, animation, target)
+
+	// Apply generic timing sliders at the common native owner node.  This keeps
+	// repeatCount/autoReverse available across the registry without altering
+	// effect-specific child timing nodes.
+	xml = applyAnimationTimingOptionsStructural(xml, animation)
 
 	// Post-process: Remove grpId if skipGrpId is true (Multiple Animation Principle)
 	if (skipGrpId) {

@@ -54,7 +54,7 @@ export class CodeGenerator {
 
         // Build slides registry
         const slidesRegistry = model.slides.map(slide =>
-            `    { id: ${slide.index}, title: ${this.quote(slide.name || `Slide ${slide.index}`)}, definition: SLIDE_${slide.index} }`
+            `    { id: ${slide.index}, title: ${this.quote(slide.title || slide.name || `Slide ${slide.index}`)}, definition: SLIDE_${slide.index} }`
         ).join(',\n')
 
         // Build media assets map
@@ -91,6 +91,19 @@ const PRESENTATION = {
     layout: { width: ${model.metadata.layout.width}, height: ${model.metadata.layout.height} }
 };
 
+// Portable section topology. Temporary unique titles keep duplicate native
+// section names unambiguous while slides and zoom targets are reconstructed.
+const SECTIONS = ${JSON.stringify(model.sections || [])};
+const SECTION_REPLAY_TITLE_BY_ID = new Map(SECTIONS.map((section, index) => [section.id, '__decypher_section_' + (index + 1) + '__']));
+
+// Portable, relationship-independent inheritance graph. The structured
+// Physical masters and layouts are portable semantic carriers. Package part
+// names and relationship IDs stay private; bindings use stable semantic names.
+const THEME = ${JSON.stringify(model.theme || null)};
+const THEME_PRESET_ID = ${JSON.stringify(model.themePresetId || null)};
+const MASTERS = ${JSON.stringify(model.masters || [])};
+const LAYOUTS = ${JSON.stringify(model.layouts || [])};
+
 // ============================================================
 // MEDIA ASSETS
 // ============================================================
@@ -119,6 +132,20 @@ ${slidesRegistry}
 // ============================================================
 // SHAPE FACTORY
 // ============================================================
+function applyZoomThumbnail(slide, relationshipId, dataUri) {
+    const match = /^data:image\\/(png|jpeg);base64,/.exec(dataUri || '');
+    if (!relationshipId || !match) throw new Error('Zoom thumbnail must be a PNG/JPEG data URI.');
+    const media = slide._relsMedia?.find(candidate => candidate.rId === relationshipId);
+    if (!media) throw new Error('Zoom thumbnail relationship was not allocated.');
+    const extension = match[1] === 'jpeg' ? 'jpg' : 'png';
+    media.data = dataUri;
+    media.type = match[1] === 'jpeg' ? 'image/jpeg' : 'image/png';
+    media.extn = extension;
+    media.path = 'preencoded.' + extension;
+    const dot = media.Target.lastIndexOf('.');
+    if (dot >= 0) media.Target = media.Target.slice(0, dot + 1) + extension;
+}
+
 function addShapeFromDefinition(slide, def, passthroughXml) {
     if (def.type === '__passthrough__') {
         // Load and inject passthrough XML directly
@@ -129,6 +156,7 @@ function addShapeFromDefinition(slide, def, passthroughXml) {
             if (ptObj) {
                 ptObj.options = {
                     ...(ptObj.options || {}),
+					...(def.options || {}),
                     objectName: def.name,
                     spid: def.id,
                     x: def.x,
@@ -230,6 +258,68 @@ function addShapeFromDefinition(slide, def, passthroughXml) {
             }
             break;
 
+		case 'slideZoom':
+			if (!Number.isInteger(def.options?.targetSlide) || def.options.targetSlide < 1 ||
+				typeof def.options?.thumbnailDataUri !== 'string' || !def.options.thumbnailDataUri.startsWith('data:image/')) {
+				throw new Error(\`Slide Zoom "\${def.name}" is missing its resolved target or thumbnail payload.\`);
+			}
+			slide.addZoom({
+				...baseOpts,
+				targetSlide: def.options.targetSlide,
+				thumbnailDataUri: def.options.thumbnailDataUri,
+				...(Object.prototype.hasOwnProperty.call(def.options, 'returnToParent') ? { returnToParent: def.options.returnToParent } : {}),
+				...(Object.prototype.hasOwnProperty.call(def.options, 'transitionDur') ? { transitionDur: def.options.transitionDur } : {})
+			});
+			break;
+
+		case 'sectionZoom':
+			if (!Number.isInteger(def.options?.targetSection) || def.options.targetSection < 1 ||
+				typeof def.options?.thumbnailDataUri !== 'string' || !def.options.thumbnailDataUri.startsWith('data:image/')) {
+				throw new Error('Section Zoom "' + def.name + '" is missing its resolved section or thumbnail payload.');
+			}
+			slide.addSectionZoom({
+				...baseOpts,
+				targetSection: def.options.targetSection,
+				thumbnailDataUri: def.options.thumbnailDataUri,
+				...(Object.prototype.hasOwnProperty.call(def.options, 'transitionDur') ? { transitionDur: def.options.transitionDur } : {})
+			});
+			applyZoomThumbnail(slide, slide._slideObjects?.[slide._slideObjects.length - 1]?.imageRid, def.options.thumbnailDataUri);
+			break;
+
+		case 'summaryZoom': {
+			const items = def.options?.summaryZoomItems;
+			if (!Array.isArray(items) || items.length === 0 || items.some(item =>
+				!SECTION_REPLAY_TITLE_BY_ID.has(item.targetSectionId) ||
+				typeof item.thumbnailDataUri !== 'string' || !item.thumbnailDataUri.startsWith('data:image/') ||
+				!item.bbox)) {
+				throw new Error('Summary Zoom "' + def.name + '" is missing resolved section, thumbnail, or geometry evidence.');
+			}
+			slide.addSummaryZoom({
+				objectName: def.name,
+				sections: items.map(item => SECTION_REPLAY_TITLE_BY_ID.get(item.targetSectionId)),
+				thumbnailDataUri: items[0].thumbnailDataUri,
+				...(Object.prototype.hasOwnProperty.call(def.options, 'transitionDur') ? { transitionDur: def.options.transitionDur } : {}),
+				...(Object.prototype.hasOwnProperty.call(baseOpts, 'accessibilityTitle') ? { accessibilityTitle: baseOpts.accessibilityTitle } : {}),
+				...(Object.prototype.hasOwnProperty.call(baseOpts, 'altText') ? { altText: baseOpts.altText } : {}),
+				...(Object.prototype.hasOwnProperty.call(baseOpts, 'isDecorative') ? { isDecorative: baseOpts.isDecorative } : {})
+			});
+			const zoom = slide._slideObjects?.[slide._slideObjects.length - 1];
+			if (!zoom?.options?._summaryObjs || zoom.options._summaryObjs.length !== items.length) {
+				throw new Error('Summary Zoom "' + def.name + '" could not be reconstructed.');
+			}
+			zoom.options.x = def.x; zoom.options.y = def.y; zoom.options.w = def.w; zoom.options.h = def.h;
+			zoom.options._summaryFrame = { x: Math.round(def.x * 914400), y: Math.round(def.y * 914400), w: Math.round(def.w * 914400), h: Math.round(def.h * 914400) };
+			zoom.options._summaryObjs.forEach((nativeItem, index) => {
+				const item = items[index];
+				nativeItem.x = Math.round(item.bbox.x * 914400);
+				nativeItem.y = Math.round(item.bbox.y * 914400);
+				nativeItem.w = Math.round(item.bbox.w * 914400);
+				nativeItem.h = Math.round(item.bbox.h * 914400);
+				applyZoomThumbnail(slide, nativeItem.thumbRid, item.thumbnailDataUri);
+			});
+			break;
+		}
+
         case 'table':
             if (def.tableData) {
                 slide.addTable(def.tableData.rows, baseOpts);
@@ -246,37 +336,87 @@ function addShapeFromDefinition(slide, def, passthroughXml) {
 // ============================================================
 function buildTextContent(textModel) {
     const result = [];
-    
-    for (const para of textModel.paragraphs) {
-        for (const run of para.runs) {
+
+    for (let paraIndex = 0; paraIndex < textModel.paragraphs.length; paraIndex++) {
+        const para = textModel.paragraphs[paraIndex];
+        const paragraphStart = result.length;
+        for (let runIndex = 0; runIndex < para.runs.length; runIndex++) {
+            const run = para.runs[runIndex];
             const runObj = { text: run.text, options: {} };
-            
+
             if (run.properties) {
-                if (run.properties.fontSize) runObj.options.fontSize = run.properties.fontSize;
-                if (run.properties.fontFace) runObj.options.fontFace = run.properties.fontFace;
-                if (run.properties.bold) runObj.options.bold = true;
-                if (run.properties.italic) runObj.options.italic = true;
-                if (run.properties.underline) runObj.options.underline = true;
-                if (run.properties.strike) runObj.options.strike = true;
-                if (run.properties.color) runObj.options.color = run.properties.color;
-                if (run.properties.softBreakBefore) runObj.options.softBreakBefore = true;
+                for (const key of [
+                    'fontSize', 'fontFace', 'fontFaceComplexScript', 'bold', 'italic', 'underline', 'color', 'transparency',
+                    'highlight', 'subscript', 'superscript', 'charSpacing', 'baseline',
+                    'lang', 'rtl', 'softBreakBefore', 'standaloneBreakParagraph', 'hyperlink', 'field', 'outline'
+                ]) {
+                    if (Object.prototype.hasOwnProperty.call(run.properties, key)) {
+                        runObj.options[key] = run.properties[key];
+                    }
+                }
+                if (Object.prototype.hasOwnProperty.call(run.properties, 'strike')) {
+                    const strike = run.properties.strike;
+                    runObj.options.strike = strike === 'single' ? 'sngStrike' : strike === 'double' ? 'dblStrike' : strike;
+                }
+                if (Object.prototype.hasOwnProperty.call(run.properties, 'shadow')) runObj.options.textShadow = run.properties.shadow;
+                if (Object.prototype.hasOwnProperty.call(run.properties, 'glow')) runObj.options.textGlow = run.properties.glow;
             }
-            
-            if (para.properties) {
-                if (para.properties.align) runObj.options.align = para.properties.align;
-                if (para.properties.indent) runObj.options.indentLevel = para.properties.level || 0;
+
+            // DrawingML paragraph properties belong to the first run only.
+            if (runIndex === 0 && para.properties) {
+                if (Object.prototype.hasOwnProperty.call(para.properties, 'align')) runObj.options.align = para.properties.align;
+                if (Object.prototype.hasOwnProperty.call(para.properties, 'level')) runObj.options.indentLevel = para.properties.level;
+                if (Object.prototype.hasOwnProperty.call(para.properties, 'rtlMode')) runObj.options.rtlMode = para.properties.rtlMode;
+                if (Object.prototype.hasOwnProperty.call(para.properties, 'indent')) runObj.options.indent = para.properties.indent;
+                if (Object.prototype.hasOwnProperty.call(para.properties, 'hanging')) runObj.options.hanging = para.properties.hanging;
+                if (Object.prototype.hasOwnProperty.call(para.properties, 'lineSpacing')) runObj.options.lineSpacing = para.properties.lineSpacing;
+                if (Object.prototype.hasOwnProperty.call(para.properties, 'lineSpacingMultiple')) runObj.options.lineSpacingMultiple = para.properties.lineSpacingMultiple;
+                if (Object.prototype.hasOwnProperty.call(para.properties, 'spaceBefore')) runObj.options.paraSpaceBefore = para.properties.spaceBefore;
+                if (Object.prototype.hasOwnProperty.call(para.properties, 'spaceAfter')) runObj.options.paraSpaceAfter = para.properties.spaceAfter;
+                if (Object.prototype.hasOwnProperty.call(para.properties, 'tabStops')) runObj.options.tabStops = para.properties.tabStops;
+                if (para.properties.bullet) {
+                    const bullet = para.properties.bullet;
+                    if (bullet.type === 'none') {
+                        runObj.options.bullet = bullet.color || bullet.font || bullet.size !== undefined
+                            ? {
+                                none: true,
+                                ...(bullet.color ? { color: bullet.color } : {}),
+                                ...(bullet.font ? { font: bullet.font } : {}),
+                                ...(bullet.size !== undefined ? { fontSize: bullet.size } : {})
+                            }
+                            : false;
+                    } else if (bullet.type === 'number') {
+                        runObj.options.bullet = {
+                            type: 'number',
+                            ...(bullet.numberType ? { style: bullet.numberType } : {}),
+                            ...(bullet.startAt !== undefined ? { startAt: bullet.startAt } : {}),
+                            ...(bullet.color ? { color: bullet.color } : {}),
+                            ...(bullet.font ? { font: bullet.font } : {}),
+                            ...(bullet.size !== undefined ? { fontSize: bullet.size } : {})
+                        };
+                    } else {
+                        runObj.options.bullet = {
+                            ...(bullet.character ? { characterCode: bullet.character.codePointAt(0).toString(16).toUpperCase().padStart(4, '0') } : {}),
+                            ...(bullet.color ? { color: bullet.color } : {}),
+                            ...(bullet.font ? { font: bullet.font } : {}),
+                            ...(bullet.size !== undefined ? { fontSize: bullet.size } : {})
+                        };
+                    }
+                }
             }
-            
+
             result.push(runObj);
         }
-        
-        // Add line break between paragraphs (except last)
-        // Use breakLine: true to create actual paragraph breaks
-        if (textModel.paragraphs.indexOf(para) < textModel.paragraphs.length - 1) {
-            result.push({ text: '', options: { breakLine: true } });
+
+        // Empty paragraphs still need a carrier for their pPr/end-of-paragraph state.
+        if (result.length === paragraphStart) result.push({ text: '', options: {} });
+
+        // End the actual final run instead of synthesizing an extra empty paragraph.
+        if (paraIndex < textModel.paragraphs.length - 1) {
+            result[result.length - 1].options.breakLine = true;
         }
     }
-    
+
     return result;
 }
 
@@ -337,15 +477,110 @@ function addAnimationsFromDefinition(slide, animations, shapes, passthroughXml) 
 // ============================================================
 // GENERATOR FUNCTION
 // ============================================================
+function applyInheritanceGraph(pptx) {
+	if (THEME_PRESET_ID) {
+		if (THEME_PRESET_ID !== 'theme-office-001') throw new Error('Unsupported semantic theme preset: ' + THEME_PRESET_ID);
+		pptx._betterpptxThemePresetId = THEME_PRESET_ID;
+	}
+    if (THEME) {
+        const fontFace = THEME.fontFace || THEME.bodyFontFace || THEME.headFontFace || THEME.fonts?.minor || THEME.fonts?.major;
+        const headFontFace = THEME.headFontFace || THEME.fonts?.major || fontFace;
+        const bodyFontFace = THEME.bodyFontFace || THEME.fonts?.minor || fontFace;
+        const palette = THEME.colorScheme || THEME.colors;
+        pptx.theme = {
+            ...(THEME.name ? { name: THEME.name } : {}),
+            ...(headFontFace ? { headFontFace } : {}),
+            ...(bodyFontFace ? { bodyFontFace } : {}),
+            ...(THEME.lang ? { lang: THEME.lang } : {}),
+            ...(palette ? { palette } : {})
+        };
+    }
+
+    if (LAYOUTS.length === 0) {
+        pptx.defineLayout({ name: 'CUSTOM', width: PRESENTATION.layout.width, height: PRESENTATION.layout.height });
+        pptx.layout = 'CUSTOM';
+        return;
+    }
+
+    // Remove the constructor's synthetic blank layout before materializing the
+    // relationship-selected graph, so it does not become an extra native part.
+    pptx.slideLayouts.splice(0, pptx.slideLayouts.length);
+
+    const physicalMasterByName = new Map();
+    for (const master of MASTERS) {
+        const physicalMaster = pptx.definePhysicalSlideMaster({
+            title: master.title,
+            ...(Object.prototype.hasOwnProperty.call(master, 'background') ? { background: master.background } : {}),
+            ...(Object.prototype.hasOwnProperty.call(master, 'objects') ? { objects: master.objects } : {}),
+            ...(Object.prototype.hasOwnProperty.call(master, 'placeholders') ? { placeholders: master.placeholders } : {}),
+            ...(Object.prototype.hasOwnProperty.call(master, 'headerFooter') ? { headerFooter: master.headerFooter } : {}),
+            ...(Object.prototype.hasOwnProperty.call(master, 'colorMap') ? { colorMap: master.colorMap } : {}),
+            ...(Object.prototype.hasOwnProperty.call(master, 'textStyles') ? { textStyles: master.textStyles } : {})
+        });
+        physicalMaster._betterpptxOwnedMaster = true;
+        physicalMaster._betterpptxSemanticMasterName = master.title;
+        physicalMasterByName.set(master.title, physicalMaster);
+    }
+
+    for (const layout of LAYOUTS) {
+        const ownerName = layout.masterName || MASTERS[0]?.title;
+        const physicalMaster = ownerName ? physicalMasterByName.get(ownerName) : null;
+        if (!physicalMaster) throw new Error('Layout ' + layout.name + ' references an unprojected physical master.');
+        pptx.defineLayout({
+            name: layout.name,
+            width: layout.width,
+            height: layout.height,
+            ...(layout.type ? { type: layout.type } : {}),
+            ...(Object.prototype.hasOwnProperty.call(layout, 'background') ? { background: layout.background } : {}),
+            ...(Object.prototype.hasOwnProperty.call(layout, 'objects') ? { objects: layout.objects } : {}),
+            ...(Object.prototype.hasOwnProperty.call(layout, 'placeholders') ? { placeholders: layout.placeholders } : {}),
+            ...(Object.prototype.hasOwnProperty.call(layout, 'headerFooter') ? { headerFooter: layout.headerFooter } : {}),
+            ...(Object.prototype.hasOwnProperty.call(layout, 'colorMapOverride') ? { colorMapOverride: layout.colorMapOverride } : {})
+        });
+        const nativeLayout = [...pptx.slideLayouts].reverse().find(item => item?._name === layout.name);
+        if (!nativeLayout) throw new Error('Unable to materialize projected layout ' + layout.name + '.');
+        nativeLayout._betterpptxCarrierKind = 'layout';
+        nativeLayout._betterpptxOwnedLayout = true;
+        nativeLayout._betterpptxMasterName = ownerName;
+        nativeLayout._slideMaster = physicalMaster;
+    }
+    pptx.layout = LAYOUTS[0].name;
+}
+
 function generatePresentation() {
     const pptx = new PptxGenJS();
     
     // Apply presentation settings
     pptx.title = PRESENTATION.title;
     pptx.subject = PRESENTATION.subject;
-    // Define and set custom layout
-    pptx.defineLayout({ name: 'CUSTOM', width: PRESENTATION.layout.width, height: PRESENTATION.layout.height });
-    pptx.layout = 'CUSTOM';
+	applyInheritanceGraph(pptx);
+	for (const section of SECTIONS) {
+		pptx.addSection({ title: SECTION_REPLAY_TITLE_BY_ID.get(section.id) });
+	}
+	const generatedSlides = new Map();
+	for (const slideInfo of SLIDES) {
+		const slideDef = slideInfo.definition;
+		const replaySectionTitle = SECTION_REPLAY_TITLE_BY_ID.get(slideInfo.definition.sectionId);
+		const slideOptions = {};
+		if (SECTIONS.length > 0) slideOptions.sectionTitle = replaySectionTitle || '__decypher_unsectioned__';
+		if (slideDef.layoutName) {
+			const layout = LAYOUTS.find(item => item.name === slideDef.layoutName);
+			if (!layout) throw new Error('Slide ' + slideInfo.id + ' references an unprojected layout.');
+			const ownerName = layout.masterName || MASTERS[0]?.title;
+			if (slideDef.masterName && slideDef.masterName !== ownerName) {
+				throw new Error('Slide ' + slideInfo.id + ' master/layout binding is inconsistent.');
+			}
+			slideOptions.masterName = slideDef.layoutName;
+		} else if (LAYOUTS.length > 0) {
+			throw new Error('Slide ' + slideInfo.id + ' is outside the projected inheritance graph and cannot be safely replayed.');
+		}
+		const slide = pptx.addSlide(slideOptions);
+		slide._betterpptxSemanticId = slideDef.id || ('slide-' + (generatedSlides.size + 1));
+		if (slideDef.title || slideDef.name) slide._name = slideDef.title || slideDef.name;
+		if (Object.prototype.hasOwnProperty.call(slideDef, 'hidden')) slide.hidden = slideDef.hidden === true;
+		if (slideDef.masterName) slide._betterpptxMasterName = slideDef.masterName;
+		generatedSlides.set(slideInfo.id, slide);
+	}
     
     const allPassthroughXml = [];
     
@@ -354,7 +589,25 @@ function generatePresentation() {
         console.log(\`📄 Generating slide \${slideInfo.id}: \${slideInfo.title}\`);
         
         const slideDef = slideInfo.definition;
-        const slide = pptx.addSlide();
+		const slide = generatedSlides.get(slideInfo.id);
+		if (Object.prototype.hasOwnProperty.call(slideDef, 'showMasterShapes') &&
+			Object.prototype.hasOwnProperty.call(slideDef, 'showMasterBackground') &&
+			slideDef.showMasterShapes !== slideDef.showMasterBackground) {
+			throw new Error('Slide ' + slideInfo.id + ' has conflicting showMasterShapes/showMasterBackground values.');
+		}
+		if (Object.prototype.hasOwnProperty.call(slideDef, 'showMasterShapes') || Object.prototype.hasOwnProperty.call(slideDef, 'showMasterBackground')) {
+			const showMasterShapes = Object.prototype.hasOwnProperty.call(slideDef, 'showMasterShapes')
+				? slideDef.showMasterShapes : slideDef.showMasterBackground;
+			if (showMasterShapes === false) slide._showMasterSp = false;
+			else delete slide._showMasterSp;
+		}
+		if (Object.prototype.hasOwnProperty.call(slideDef, 'showMasterPhAnim')) {
+			if (slideDef.showMasterPhAnim === false) slide._showMasterPhAnim = false;
+			else delete slide._showMasterPhAnim;
+		}
+		if (Object.prototype.hasOwnProperty.call(slideDef, 'colorMapOverride')) {
+			slide._colorMapOverride = slideDef.colorMapOverride || null;
+		}
         const slidePassthrough = [];
         
         // Background
@@ -376,14 +629,17 @@ function generatePresentation() {
         
         // Transition
         if (slideDef.transition) {
+			const { advanceAfter, ...transition } = slideDef.transition;
             slide.transition = {
-                type: slideDef.transition.type,
-                speed: slideDef.transition.speed
+				...transition,
+				...(Object.prototype.hasOwnProperty.call(slideDef.transition, 'advanceAfterTime')
+					? { advanceAfterTime: slideDef.transition.advanceAfterTime }
+					: (Object.prototype.hasOwnProperty.call(slideDef.transition, 'advanceAfter') ? { advanceAfterTime: advanceAfter } : {}))
             };
         }
         
         // Notes
-        if (slideDef.notes) {
+		if (Object.prototype.hasOwnProperty.call(slideDef, 'notes')) {
             slide.addNotes(slideDef.notes);
         }
         
@@ -395,6 +651,10 @@ function generatePresentation() {
         }
     }
     
+	SECTIONS.forEach((section, index) => {
+		if (pptx.sections[index]) pptx.sections[index].title = section.title;
+	});
+
     // Report passthrough items
     if (allPassthroughXml.length > 0) {
         console.log('\\n⚠️ PASSTHROUGH ITEMS (cannot be modified):');
@@ -454,11 +714,42 @@ pptx.writeFile({ fileName: OUTPUT_PATH })
             ? `notes: ${this.quote(slide.notes.substring(0, 500))}`
             : '// No notes'
 
+		const showMasterShapesCode = Object.prototype.hasOwnProperty.call(slide, 'showMasterShapes')
+			? `showMasterShapes: ${slide.showMasterShapes === null ? 'null' : (slide.showMasterShapes ? 'true' : 'false')},`
+			: ''
+		const showMasterBackgroundCode = Object.prototype.hasOwnProperty.call(slide, 'showMasterBackground')
+			? `showMasterBackground: ${slide.showMasterBackground === null ? 'null' : (slide.showMasterBackground ? 'true' : 'false')},`
+			: ''
+		const showMasterPhAnimCode = Object.prototype.hasOwnProperty.call(slide, 'showMasterPhAnim')
+			? `showMasterPhAnim: ${slide.showMasterPhAnim ? 'true' : 'false'},`
+			: ''
+		const layoutNameCode = slide.layoutName ? `layoutName: ${this.quote(slide.layoutName)},` : ''
+		const masterNameCode = slide.masterName ? `masterName: ${this.quote(slide.masterName)},` : ''
+		const colorMapOverrideCode = Object.prototype.hasOwnProperty.call(slide, 'colorMapOverride')
+			? `colorMapOverride: ${JSON.stringify(slide.colorMapOverride)},`
+			: ''
+		const sectionIdCode = slide.sectionId ? `sectionId: ${this.quote(slide.sectionId)},` : ''
+		const idCode = slide.id ? `id: ${this.quote(slide.id)},` : ''
+		const titleCode = slide.title || slide.name ? `title: ${this.quote(slide.title || slide.name || '')},` : ''
+		const nameCode = slide.name ? `name: ${this.quote(slide.name)},` : ''
+		const hiddenCode = Object.prototype.hasOwnProperty.call(slide, 'hidden') ? `hidden: ${slide.hidden ? 'true' : 'false'},` : ''
+
         return `// ------------------------------------------------------------
 // SLIDE ${slide.index}: ${slide.name || 'Untitled'}
 // ------------------------------------------------------------
 const SLIDE_${slide.index} = {
     ${backgroundCode}
+	${idCode}
+	${titleCode}
+	${nameCode}
+	${hiddenCode}
+	${sectionIdCode}
+	${layoutNameCode}
+	${masterNameCode}
+	${colorMapOverrideCode}
+	${showMasterShapesCode}
+	${showMasterBackgroundCode}
+	${showMasterPhAnimCode}
     shapes: [
         ${shapesCode || '// No shapes'}
     ],
@@ -475,12 +766,14 @@ const SLIDE_${slide.index} = {
      */
     private buildShapeDefinition(shape: ShapeModel): string {
         if (shape.type === '__passthrough__') {
+			const optionsCode = this.buildOptionsCode(shape.options, shape.name)
             return `{
             // ⚠️ PASSTHROUGH: ${shape.passthrough?.reason}
             type: '__passthrough__',
             id: ${shape.id},
             name: ${this.quote(shape.name)},
             x: ${shape.x}, y: ${shape.y}, w: ${shape.w}, h: ${shape.h},
+			options: ${optionsCode},
             passthrough: {
                 reason: ${this.quote(shape.passthrough?.reason || 'Unknown')},
                 sourceXmlPath: ${this.quote(shape.passthrough?.sourceXmlPath || '')},
@@ -523,6 +816,33 @@ const SLIDE_${slide.index} = {
         if (options.shapeType) {
             parts.push(`shapeType: ${this.quote(options.shapeType)}`)
         }
+
+		if (options.placeholderBinding) {
+			parts.push(`placeholderBinding: ${JSON.stringify(options.placeholderBinding)}`)
+		}
+		if (options.importedPlaceholderRole !== undefined) {
+			parts.push(`importedPlaceholderRole: ${this.quote(options.importedPlaceholderRole)}`)
+		}
+		for (const key of ['phType', 'phSz', 'phOrient'] as const) {
+			if (options[key] !== undefined) parts.push(`${key}: ${this.quote(options[key] as string)}`)
+		}
+		if (options.phIdx !== undefined) parts.push(`phIdx: ${options.phIdx}`)
+		if (options.phHasCustomPrompt !== undefined) parts.push(`phHasCustomPrompt: ${options.phHasCustomPrompt ? 'true' : 'false'}`)
+		if (options.hasBarePh === true) parts.push('hasBarePh: true')
+		if (options.hyperlink !== undefined) parts.push(`hyperlink: ${JSON.stringify(options.hyperlink)}`)
+		if (options.interactiveActions !== undefined) parts.push(`interactiveActions: ${JSON.stringify(options.interactiveActions)}`)
+		for (const key of ['targetSlideId', 'thumbnailDataUri', 'accessibilityTitle', 'altText'] as const) {
+			if (options[key] !== undefined) parts.push(`${key}: ${this.quote(options[key] as string)}`)
+		}
+		if (options.targetSlide !== undefined) parts.push(`targetSlide: ${options.targetSlide}`)
+		if (options.targetSectionId !== undefined) parts.push(`targetSectionId: ${this.quote(options.targetSectionId)}`)
+		if (options.targetSection !== undefined) parts.push(`targetSection: ${options.targetSection}`)
+		if (options.sectionIds !== undefined) parts.push(`sectionIds: ${JSON.stringify(options.sectionIds)}`)
+		if (options.summarySectionId !== undefined) parts.push(`summarySectionId: ${this.quote(options.summarySectionId)}`)
+		if (options.summaryZoomItems !== undefined) parts.push(`summaryZoomItems: ${JSON.stringify(options.summaryZoomItems)}`)
+		if (options.returnToParent !== undefined) parts.push(`returnToParent: ${options.returnToParent ? 'true' : 'false'}`)
+		if (options.transitionDur !== undefined) parts.push(`transitionDur: ${options.transitionDur}`)
+		if (options.isDecorative !== undefined) parts.push(`isDecorative: ${options.isDecorative ? 'true' : 'false'}`)
 
         if (options.fill) {
             if (options.fill.type === 'solid' && options.fill.color) {

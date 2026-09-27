@@ -1,0 +1,67 @@
+{
+  "schemaVersion": "betterpptx.g5-source-correction-authorization.v1",
+  "status": "APPROVED",
+  "recordedAt": "2026-09-04",
+  "authorizationKind": "task-authorized-native-retarget-policy-correction",
+  "authorizationBasis": "The user explicitly requested correction of the anomalously high head observed in interaction-native-proof at the engine/MCP level, with deterministic bone/rest understanding preferred over slide-specific masking.",
+  "decisionScope": "The exact existing native interaction source bytes remain governed and selectable. This record authorizes the explicit first-frame world-delta reference policy and its fresh native proof rebind.",
+  "semanticCatalogSelectionAllowed": true,
+  "rawAssetDistributionAllowed": false,
+  "ownerVisualAcceptanceRecorded": false,
+  "productionPromotionAuthorized": false,
+  "policy": {
+    "boneNamePolicy": "exact",
+    "channelPolicy": "rotation-only",
+    "rotationReference": "first-frame",
+    "rotationRetargetSpace": "world-delta",
+    "meaning": "Remove the complete captured source baseline at the first sampled time, then apply temporal world-axis deltas to the destination visible presenter pose."
+  },
+  "assets": [
+    {
+      "id": "interaction-greet-bow-native-v1",
+      "path": "betterpptx-mcp/assets/interaction-greet-bow-native-v1.glb",
+      "sha256": "f480562c7cc5165f1d71f8f3ec49e30f65534e93855f0248b6425ef85bd3d83c",
+      "bytes": 445152,
+      "proofFile": "interaction-greet-bow-native-v1-playback-proof.json",
+      "priorProofSha256": "d61635f577ed5561d6ebb808c44f6555d0421f7b5a0ecd02f95e988a7091e533",
+      "correctedProofSha256": "16ada68b9fa2d81e2d8020b0129bb92862b2b0557befefb9ccc7210cc3a78d9a",
+      "decision": "APPROVED"
+    },
+    {
+      "id": "interaction-agree-nod-native-v1",
+      "path": "betterpptx-mcp/assets/interaction-agree-nod-native-v1.glb",
+      "sha256": "6b1e64bdf040c209b222efdf50db5f9cd76f624b0358edfc4e349ca345efc1b0",
+      "bytes": 327016,
+      "proofFile": "interaction-agree-nod-native-v1-playback-proof.json",
+      "priorProofSha256": "0cdb529dcf96011951fcbf54c64fbe61b8b6569c64eb293f8a41114cb110506f",
+      "correctedProofSha256": "9a178ada2a17e956e8be27a462b114bf82f830591b47978d545d273678dddede",
+      "decision": "APPROVED"
+    },
+    {
+      "id": "interaction-disagree-shake-native-v1",
+      "path": "betterpptx-mcp/assets/interaction-disagree-shake-native-v1.glb",
+      "sha256": "dd070db73d075cfd66666b6c3076f3afe54ff5ce927629c9a835f4f0cb7bcfb4",
+      "bytes": 327056,
+      "proofFile": "interaction-disagree-shake-native-v1-playback-proof.json",
+      "priorProofSha256": "28ca2d2f948856e12b387f3ccf4b33a963a9c230951333eef88360db3d0db418",
+      "correctedProofSha256": "f7f8f76f82420d4b505b88197012822348a28a47e6397491455312cccf4f1d94",
+      "decision": "APPROVED"
+    }
+  ],
+  "sourceLineage": {
+    "priorCorrectionArtifact": "betterpptx-mcp/docs/release-safety/G5-INTERACTION-NATIVE-SOURCE-CORRECTION-20260904.json",
+    "sourceReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v7\\staging-report.json",
+    "nativeProofReport": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v7\\powerpoint-proof\\powerpoint-native-proof.json",
+    "nativeProofSha256": "a9a183bcb358abf23a614a782742027d6dcda6fbf07c3b40a70e5bce3eaacfc3",
+    "visualReview": "D:\\PptxGenJS_Claude\\.codex-tmp\\kinetics96-story\\staging\\interaction-native-v7\\native-visual-review.json",
+    "visualReviewSha256": "2cb7bf7a43d8e891b9090464de3304908a34b71499db49ba8d8d83925a22e60d",
+    "sourceBytesUnchanged": true,
+    "oldFrozenAssetsAndDecisionsModified": false
+  },
+  "scopeExclusions": [
+    "raw BVH or reusable motion-library redistribution",
+    "independent owner visual acceptance",
+    "public production promotion or service deployment"
+  ],
+  "hashChangePolicy": "Any source byte, hash, path, or distribution-boundary change requires a new authorization record."
+}

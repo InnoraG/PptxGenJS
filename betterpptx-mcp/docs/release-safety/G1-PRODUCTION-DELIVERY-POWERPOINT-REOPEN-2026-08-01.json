@@ -1,0 +1,26 @@
+{
+  "schema": "betterpptx.g1.powerpoint-reopen-evidence.v1",
+  "measuredAt": "2026-08-01T15:46:33.1307940Z",
+  "application": "Microsoft PowerPoint COM",
+  "files": [
+    {
+      "path": "betterpptx-mcp/outputs/blackbox-delivery-refresh-20260801/4mX0bnJz097W5HDNVTcOgOXi/avatar-delivery-square-sanitized-20260801.pptx",
+      "status": "PASS",
+      "slides": 1,
+      "repaired": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/blackbox-delivery-refresh-20260801/72piOvn8qYsTIUIK1N_zFuHI/avatar-delivery-sanitized-20260801.pptx",
+      "status": "PASS",
+      "slides": 1,
+      "repaired": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/blackbox-delivery-refresh-20260801/iC57xyigJFbhBg3QU3snG4A7/avatar-delivery-narration-sanitized-20260801.pptx",
+      "status": "PASS",
+      "slides": 1,
+      "repaired": false
+    }
+  ],
+  "pass": true
+}

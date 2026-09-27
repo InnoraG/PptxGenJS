@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-05-30",
+  "generatedAt": "2026-09-04",
   "source": "https://huggingface.co/rhasspy/piper-voices (voices.json + per-voice MODEL_CARD)",
   "policy": "zero-cost voices whose license permits embedding the synthesized audio in a sold, closed-SaaS .pptx. CC0/MIT/permissive=allowed; CC-BY/CC-BY-SA=attribution; NC/research/GPL/unknown=not usable. See plan §4.5.",
   "disclaimer": "Machine-classified from the live MODEL_CARD. NOT legal advice and NOT human-approved. Flip chosen candidates to reviewStatus:\"approved\" after review. sha256 of each .onnx is computed when the model is downloaded into the image.",
@@ -33,7 +33,296 @@
       "sr_RS",
       "sw_CD",
       "tr_TR"
-    ]
+    ],
+    "genderPairCoverage": {
+      "requiredGenders": [
+        "female",
+        "male"
+      ],
+      "localesWithPair": [
+        "ca_ES",
+        "cy_GB",
+        "de_DE",
+        "en_GB",
+        "en_US",
+        "es_ES",
+        "eu_ES",
+        "fr_FR",
+        "hi_IN",
+        "hu_HU",
+        "is_IS",
+        "it_IT",
+        "kk_KZ",
+        "ku_TR",
+        "ml_IN",
+        "pl_PL",
+        "ru_RU",
+        "te_IN",
+        "uk_UA"
+      ],
+      "localesMissingPair": [
+        {
+          "locale": "ar_JO",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "bg_BG",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "cs_CZ",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "da_DK",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        },
+        {
+          "locale": "el_GR",
+          "availableGenders": [
+            "female"
+          ],
+          "missingGenders": [
+            "male"
+          ]
+        },
+        {
+          "locale": "es_AR",
+          "availableGenders": [
+            "female"
+          ],
+          "missingGenders": [
+            "male"
+          ]
+        },
+        {
+          "locale": "es_MX",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "fa_IR",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "fi_FI",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "id_ID",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        },
+        {
+          "locale": "ka_GE",
+          "availableGenders": [
+            "female"
+          ],
+          "missingGenders": [
+            "male"
+          ]
+        },
+        {
+          "locale": "lb_LU",
+          "availableGenders": [
+            "female"
+          ],
+          "missingGenders": [
+            "male"
+          ]
+        },
+        {
+          "locale": "lv_LV",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "ne_NP",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        },
+        {
+          "locale": "nl_BE",
+          "availableGenders": [
+            "female"
+          ],
+          "missingGenders": [
+            "male"
+          ]
+        },
+        {
+          "locale": "nl_NL",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "no_NO",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        },
+        {
+          "locale": "pt_BR",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "pt_PT",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "ro_RO",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "sk_SK",
+          "availableGenders": [
+            "female"
+          ],
+          "missingGenders": [
+            "male"
+          ]
+        },
+        {
+          "locale": "sl_SI",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "sq_AL",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "sr_RS",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        },
+        {
+          "locale": "sv_SE",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        },
+        {
+          "locale": "sw_CD",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        },
+        {
+          "locale": "tr_TR",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        },
+        {
+          "locale": "ur_PK",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "vi_VN",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        },
+        {
+          "locale": "zh_CN",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        }
+      ]
+    }
   },
   "voices": [
     {
@@ -59,7 +348,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "ar_JO-kareem-medium",
@@ -84,7 +379,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "bg_BG-dimitar-medium",
@@ -109,8 +410,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "reviewedAt": "2026-06-06"
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "ca_ES-upc_ona-medium",
@@ -135,7 +442,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "ShareAlike binds model adaptations, not program output; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "ShareAlike binds model adaptations, not program output; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "ca_ES-upc_ona-x_low",
@@ -160,7 +473,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "ShareAlike binds model adaptations, not program output"
+      "notes": "ShareAlike binds model adaptations, not program output",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "ca_ES-upc_pau-x_low",
@@ -185,7 +504,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "ShareAlike binds model adaptations, not program output"
+      "notes": "ShareAlike binds model adaptations, not program output",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "cs_CZ-jirka-low",
@@ -210,7 +535,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "cs_CZ-jirka-medium",
@@ -235,8 +566,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "reviewedAt": "2026-06-06"
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "cy_GB-bu_tts-medium",
@@ -261,7 +598,65 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "mixed",
+      "genderSource": "speaker-id-map",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female",
+        "male"
+      ],
+      "speakerProfiles": [
+        {
+          "speaker": 0,
+          "name": "benyw-de-pro",
+          "gender": "female",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 1,
+          "name": "benyw-gogledd-pro",
+          "gender": "female",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 2,
+          "name": "gwryw-gogledd-pro",
+          "gender": "male",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 3,
+          "name": "gwryw-gogledd-2",
+          "gender": "male",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 4,
+          "name": "gwryw-de-1",
+          "gender": "male",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 5,
+          "name": "gwryw-gogledd-1",
+          "gender": "male",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 6,
+          "name": "benyw-gogledd-1",
+          "gender": "female",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        }
+      ]
     },
     {
       "id": "cy_GB-gwryw_gogleddol-medium",
@@ -286,7 +681,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "da_DK-talesyntese-medium",
@@ -311,8 +710,12 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "reviewedAt": "2026-06-06"
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "de_DE-eva_k-x_low",
@@ -337,7 +740,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "de_DE-karlsson-low",
@@ -362,7 +771,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "de_DE-kerstin-low",
@@ -387,7 +800,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "de_DE-mls-medium",
@@ -412,7 +831,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "de_DE-pavoque-low",
@@ -437,7 +860,11 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial"
+      "notes": "non-commercial",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "de_DE-ramona-low",
@@ -462,7 +889,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "de_DE-thorsten_emotional-medium",
@@ -487,7 +920,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "de_DE-thorsten-high",
@@ -512,8 +949,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "reviewedAt": "2026-06-06"
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "de_DE-thorsten-low",
@@ -538,7 +981,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "de_DE-thorsten-medium",
@@ -563,7 +1012,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "el_GR-rapunzelina-low",
@@ -588,7 +1043,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "el_GR-rapunzelina-medium",
@@ -613,8 +1074,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "reviewedAt": "2026-06-06"
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "en_GB-alan-low",
@@ -639,7 +1106,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_GB-alan-medium",
@@ -664,7 +1135,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_GB-alba-medium",
@@ -689,7 +1164,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_GB-aru-medium",
@@ -714,7 +1193,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_GB-cori-high",
@@ -739,7 +1222,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "female",
+      "genderSource": "model-card",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "en_GB-cori-medium",
@@ -764,7 +1253,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "female",
+      "genderSource": "model-card",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "en_GB-jenny_dioco-medium",
@@ -789,7 +1284,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_GB-northern_english_male-medium",
@@ -814,7 +1313,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "ShareAlike binds model adaptations, not program output; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "ShareAlike binds model adaptations, not program output; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "model-card-title",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "en_GB-semaine-medium",
@@ -839,7 +1344,11 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_GB-southern_english_female-low",
@@ -864,7 +1373,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "ShareAlike binds model adaptations, not program output"
+      "notes": "ShareAlike binds model adaptations, not program output",
+      "gender": "female",
+      "genderSource": "model-card-title",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "en_GB-vctk-medium",
@@ -889,7 +1404,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-amy-low",
@@ -914,7 +1433,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-amy-medium",
@@ -939,7 +1462,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-arctic-medium",
@@ -964,7 +1491,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-bryce-medium",
@@ -989,7 +1520,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "male",
+      "genderSource": "model-card",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "en_US-danny-low",
@@ -1014,7 +1551,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-hfc_female-medium",
@@ -1039,7 +1580,13 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "female",
+      "genderSource": "model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "en_US-hfc_male-medium",
@@ -1064,7 +1611,13 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "en_US-joe-medium",
@@ -1089,7 +1642,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-john-medium",
@@ -1114,7 +1671,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "male",
+      "genderSource": "model-card",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "en_US-kathleen-low",
@@ -1139,7 +1702,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-kristin-medium",
@@ -1164,7 +1731,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "female",
+      "genderSource": "model-card",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "en_US-kusal-medium",
@@ -1189,7 +1762,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-l2arctic-medium",
@@ -1214,7 +1791,11 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-lessac-high",
@@ -1239,7 +1820,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-lessac-low",
@@ -1264,7 +1849,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-lessac-medium",
@@ -1289,7 +1878,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-libritts_r-medium",
@@ -1314,7 +1907,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-libritts-high",
@@ -1339,7 +1936,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-ljspeech-high",
@@ -1364,8 +1965,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-human-approved-2026-05-30",
+      "reviewedAt": "2026-05-30",
       "notes": "; approved as default CC0 no-lineage v1 narration voice; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "reviewedAt": "2026-05-30"
+      "gender": "female",
+      "genderSource": "model-card",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "en_US-ljspeech-medium",
@@ -1390,7 +1997,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "female",
+      "genderSource": "model-card",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "en_US-norman-medium",
@@ -1415,7 +2028,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "male",
+      "genderSource": "model-card",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "en_US-reza_ibrahim-medium",
@@ -1440,7 +2059,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-ryan-high",
@@ -1465,7 +2088,11 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial"
+      "notes": "non-commercial",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-ryan-low",
@@ -1490,7 +2117,11 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial"
+      "notes": "non-commercial",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-ryan-medium",
@@ -1515,7 +2146,11 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "en_US-sam-medium",
@@ -1540,7 +2175,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "es_AR-daniela-high",
@@ -1565,7 +2204,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "es_ES-carlfm-x_low",
@@ -1590,7 +2235,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "es_ES-davefx-medium",
@@ -1615,7 +2264,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "es_ES-mls_10246-low",
@@ -1640,7 +2293,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "es_ES-mls_9972-low",
@@ -1665,7 +2322,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "es_ES-sharvard-medium",
@@ -1690,7 +2351,30 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "mixed",
+      "genderSource": "speaker-id-map",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female",
+        "male"
+      ],
+      "speakerProfiles": [
+        {
+          "speaker": 0,
+          "name": "M",
+          "gender": "male",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 1,
+          "name": "F",
+          "gender": "female",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        }
+      ]
     },
     {
       "id": "es_MX-ald-medium",
@@ -1715,7 +2399,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "es_MX-claude-high",
@@ -1740,8 +2430,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "reviewedAt": "2026-06-06"
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "eu_ES-antton-medium",
@@ -1766,7 +2462,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "eu_ES-maider-medium",
@@ -1791,7 +2493,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "fa_IR-amir-medium",
@@ -1816,7 +2524,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "fa_IR-ganji_adabi-medium",
@@ -1841,7 +2553,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "fa_IR-ganji-medium",
@@ -1866,8 +2582,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "reviewedAt": "2026-06-06"
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "fa_IR-gyro-medium",
@@ -1892,7 +2614,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "male",
+      "genderSource": "model-card-lineage",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "fa_IR-reza_ibrahim-medium",
@@ -1917,7 +2645,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "fi_FI-harri-low",
@@ -1942,7 +2674,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "fi_FI-harri-medium",
@@ -1967,8 +2705,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "reviewedAt": "2026-06-06"
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "fr_FR-gilles-low",
@@ -1993,8 +2737,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-human-approved-2026-05-30",
+      "reviewedAt": "2026-05-30",
       "notes": "; approved as default CC0 no-lineage v1 narration voice; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "reviewedAt": "2026-05-30"
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "fr_FR-mls_1840-low",
@@ -2019,7 +2769,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "fr_FR-mls-medium",
@@ -2044,7 +2798,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "fr_FR-siwis-low",
@@ -2069,7 +2827,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "fr_FR-siwis-medium",
@@ -2094,7 +2856,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "fr_FR-tom-medium",
@@ -2119,7 +2885,13 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "copyleft software license on model — treat as not-usable pending counsel"
+      "notes": "copyleft software license on model — treat as not-usable pending counsel",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "fr_FR-upmc-medium",
@@ -2144,7 +2916,30 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "ShareAlike binds model adaptations, not program output; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "ShareAlike binds model adaptations, not program output; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "mixed",
+      "genderSource": "speaker-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female",
+        "male"
+      ],
+      "speakerProfiles": [
+        {
+          "speaker": 0,
+          "name": "jessica",
+          "gender": "female",
+          "genderSource": "speaker-name",
+          "genderConfidence": "curated"
+        },
+        {
+          "speaker": 1,
+          "name": "pierre",
+          "gender": "male",
+          "genderSource": "speaker-name",
+          "genderConfidence": "curated"
+        }
+      ]
     },
     {
       "id": "hi_IN-pratham-medium",
@@ -2169,7 +2964,13 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial"
+      "notes": "non-commercial",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "hi_IN-priyamvada-medium",
@@ -2194,7 +2995,13 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial"
+      "notes": "non-commercial",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "hi_IN-rohan-medium",
@@ -2219,7 +3026,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "model-card-dataset",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "hu_HU-anna-medium",
@@ -2244,8 +3057,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "reviewedAt": "2026-06-06"
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "hu_HU-berta-medium",
@@ -2270,7 +3089,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "hu_HU-imre-medium",
@@ -2295,7 +3120,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "id_ID-news_tts-medium",
@@ -2320,7 +3151,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "is_IS-bui-medium",
@@ -2345,7 +3180,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "is_IS-salka-medium",
@@ -2370,7 +3211,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "is_IS-steinn-medium",
@@ -2395,7 +3242,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "is_IS-ugla-medium",
@@ -2420,7 +3273,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "it_IT-paola-medium",
@@ -2445,7 +3304,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "it_IT-riccardo-x_low",
@@ -2470,7 +3335,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "ka_GE-natia-medium",
@@ -2495,7 +3366,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "kk_KZ-iseke-x_low",
@@ -2520,7 +3397,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "kk_KZ-issai-high",
@@ -2545,7 +3426,58 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "mixed",
+      "genderSource": "speaker-id-map",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female",
+        "male"
+      ],
+      "speakerProfiles": [
+        {
+          "speaker": 0,
+          "name": "ISSAI_KazakhTTS2_M2",
+          "gender": "male",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 1,
+          "name": "ISSAI_KazakhTTS_M1_Iseke",
+          "gender": "male",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 2,
+          "name": "ISSAI_KazakhTTS2_F3",
+          "gender": "female",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 3,
+          "name": "ISSAI_KazakhTTS_F1_Raya",
+          "gender": "female",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 4,
+          "name": "ISSAI_KazakhTTS2_F1",
+          "gender": "female",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 5,
+          "name": "ISSAI_KazakhTTS2_F2",
+          "gender": "female",
+          "genderSource": "speaker-id-map",
+          "genderConfidence": "verified"
+        }
+      ]
     },
     {
       "id": "kk_KZ-raya-x_low",
@@ -2570,7 +3502,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "ku_TR-berfin_renas-medium",
@@ -2595,7 +3531,30 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial"
+      "notes": "non-commercial",
+      "gender": "mixed",
+      "genderSource": "speaker-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female",
+        "male"
+      ],
+      "speakerProfiles": [
+        {
+          "speaker": 0,
+          "name": "Berfin",
+          "gender": "female",
+          "genderSource": "speaker-name",
+          "genderConfidence": "curated"
+        },
+        {
+          "speaker": 1,
+          "name": "Renas",
+          "gender": "male",
+          "genderSource": "speaker-name",
+          "genderConfidence": "curated"
+        }
+      ]
     },
     {
       "id": "lb_LU-marylux-medium",
@@ -2620,7 +3579,13 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "lv_LV-aivars-medium",
@@ -2645,8 +3610,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "reviewedAt": "2026-06-06"
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "ml_IN-arjun-medium",
@@ -2671,7 +3642,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "ml_IN-meera-medium",
@@ -2696,7 +3673,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "ne_NP-chitwan-medium",
@@ -2721,8 +3704,12 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "reviewedAt": "2026-06-06"
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "ne_NP-google-medium",
@@ -2747,7 +3734,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "ShareAlike binds model adaptations, not program output; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "ShareAlike binds model adaptations, not program output; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "ne_NP-google-x_low",
@@ -2772,7 +3763,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "ShareAlike binds model adaptations, not program output"
+      "notes": "ShareAlike binds model adaptations, not program output",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "nl_BE-nathalie-medium",
@@ -2797,7 +3792,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "nl_BE-nathalie-x_low",
@@ -2822,7 +3823,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "nl_BE-rdh-medium",
@@ -2847,8 +3854,12 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "reviewedAt": "2026-06-06"
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "nl_BE-rdh-x_low",
@@ -2873,7 +3884,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "nl_NL-alex-medium",
@@ -2898,7 +3913,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "nl_NL-mls_5809-low",
@@ -2923,7 +3944,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "nl_NL-mls_7432-low",
@@ -2948,7 +3973,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "nl_NL-mls-medium",
@@ -2973,7 +4002,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "nl_NL-pim-medium",
@@ -2998,7 +4031,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "nl_NL-ronnie-medium",
@@ -3023,7 +4062,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "no_NO-nvcc-medium",
@@ -3048,7 +4093,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": false,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "no License line in MODEL_CARD"
+      "notes": "no License line in MODEL_CARD",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "no_NO-talesyntese-medium",
@@ -3073,8 +4122,12 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "reviewedAt": "2026-06-06"
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "pl_PL-bass-high",
@@ -3099,7 +4152,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "no License line in MODEL_CARD"
+      "notes": "no License line in MODEL_CARD",
+      "gender": "male",
+      "genderSource": "model-card",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "pl_PL-darkman-medium",
@@ -3124,8 +4183,12 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "reviewedAt": "2026-06-06"
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "pl_PL-gosia-medium",
@@ -3150,7 +4213,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "pl_PL-mc_speech-medium",
@@ -3175,7 +4244,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "pl_PL-mls_6892-low",
@@ -3200,7 +4273,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "pt_BR-cadu-medium",
@@ -3225,8 +4302,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "reviewedAt": "2026-06-06"
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "pt_BR-edresson-low",
@@ -3251,7 +4334,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "pt_BR-faber-medium",
@@ -3276,7 +4365,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "pt_BR-jeff-medium",
@@ -3301,7 +4396,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "pt_PT-tugão-medium",
@@ -3326,7 +4427,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "ro_RO-mihai-medium",
@@ -3351,8 +4458,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "reviewedAt": "2026-06-06"
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "ru_RU-denis-medium",
@@ -3377,8 +4490,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "reviewedAt": "2026-06-06"
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "ru_RU-dmitri-medium",
@@ -3403,7 +4522,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "ru_RU-irina-medium",
@@ -3428,7 +4553,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "ru_RU-ruslan-medium",
@@ -3453,7 +4584,13 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "sk_SK-lili-medium",
@@ -3478,8 +4615,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "reviewedAt": "2026-06-06"
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "sl_SI-artur-medium",
@@ -3504,7 +4647,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "sq_AL-edon-medium",
@@ -3529,8 +4678,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "reviewedAt": "2026-06-06"
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "sr_RS-serbski_institut-medium",
@@ -3555,7 +4710,11 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "sv_SE-alma-medium",
@@ -3580,7 +4739,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "no License line in MODEL_CARD"
+      "notes": "no License line in MODEL_CARD",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "sv_SE-lisa-medium",
@@ -3605,7 +4768,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "no License line in MODEL_CARD"
+      "notes": "no License line in MODEL_CARD",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "sv_SE-nst-medium",
@@ -3630,8 +4797,12 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "reviewedAt": "2026-06-06"
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "sw_CD-lanfrica-medium",
@@ -3656,7 +4827,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "te_IN-maya-medium",
@@ -3681,7 +4856,13 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "te_IN-padmavathi-medium",
@@ -3706,7 +4887,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "te_IN-venkatesh-medium",
@@ -3731,7 +4918,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "tr_TR-dfki-medium",
@@ -3756,7 +4949,11 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "non-commercial; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "uk_UA-lada-x_low",
@@ -3781,7 +4978,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "uk_UA-mykyta-high",
@@ -3806,8 +5009,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "reviewedAt": "2026-06-06"
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "uk_UA-oleksa-high",
@@ -3832,7 +5041,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "uk_UA-tetiana-high",
@@ -3857,7 +5072,13 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "female",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "uk_UA-ukrainian_tts-medium",
@@ -3882,7 +5103,37 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": ""
+      "notes": "",
+      "gender": "mixed",
+      "genderSource": "speaker-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "female",
+        "male"
+      ],
+      "speakerProfiles": [
+        {
+          "speaker": 0,
+          "name": "lada",
+          "gender": "female",
+          "genderSource": "speaker-name",
+          "genderConfidence": "curated"
+        },
+        {
+          "speaker": 1,
+          "name": "mykyta",
+          "gender": "male",
+          "genderSource": "speaker-name",
+          "genderConfidence": "curated"
+        },
+        {
+          "speaker": 2,
+          "name": "tetiana",
+          "gender": "female",
+          "genderSource": "speaker-name",
+          "genderConfidence": "curated"
+        }
+      ]
     },
     {
       "id": "ur_PK-fasih-medium",
@@ -3907,8 +5158,14 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
+      "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "reviewedAt": "2026-06-06"
+      "gender": "male",
+      "genderSource": "model-card",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "vi_VN-25hours_single-low",
@@ -3933,7 +5190,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "vi_VN-vais1000-medium",
@@ -3958,7 +5219,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "vi_VN-vivos-x_low",
@@ -3983,7 +5248,11 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial"
+      "notes": "non-commercial",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "zh_CN-chaowen-medium",
@@ -4008,7 +5277,11 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "not approved for runtime 2026-06-06: synthesis requires the heavy g2pw/Torch/full offline Chinese phonemizer model path; keep as candidate until deterministic CJK sidecar/image profile is implemented and costed"
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "zh_CN-huayan-medium",
@@ -4033,7 +5306,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage"
+      "notes": "license not machine-clear; read dataset URL; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "zh_CN-huayan-x_low",
@@ -4058,7 +5335,11 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL"
+      "notes": "license not machine-clear; read dataset URL",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "zh_CN-xiao_ya-medium",
@@ -4083,9 +5364,14 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial"
+      "notes": "non-commercial",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     }
   ],
   "updatedAt": "2026-06-06T00:00:00.000Z",
-  "approvalPolicy": "Runtime production voices are selected as one best commercially allowed voice per language, using Piper quality tier first, then clean lineage, previous approval, default flag, and deterministic id tie-breaks. Attribution, forbidden, unknown-license, and runtime-failing voices remain excluded until an attribution/counsel or deterministic runtime path exists."
+  "approvalPolicy": "Runtime production voices are selected as one best commercially allowed voice per language, using Piper quality tier first, then clean lineage, previous approval, default flag, and deterministic id tie-breaks. Attribution, forbidden, unknown-license, and runtime-failing voices remain excluded until an attribution/counsel or deterministic runtime path exists.",
+  "voiceProfiles": "voices/voice-profiles.json"
 }

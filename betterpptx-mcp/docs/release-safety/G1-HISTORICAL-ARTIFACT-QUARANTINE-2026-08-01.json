@@ -1,0 +1,953 @@
+{
+  "schema": "betterpptx.g1.historical-artifact-quarantine.v1",
+  "generatedAt": "2026-08-02T18:06:32.000Z",
+  "sourceRoot": "betterpptx-mcp/outputs/commercial-poc",
+  "quarantineMode": "manifest-enforced-private-only",
+  "physicalMovePerformed": false,
+  "researchArtifactsPreserved": true,
+  "deliveryEligible": false,
+  "exactDeliveryManifest": "betterpptx-mcp/docs/release-safety/G1-PRODUCTION-DELIVERY-RELEASE-MANIFEST.json",
+  "privateTokens": [
+    "x-pipeline",
+    "x-enhancement",
+    "x-restoreformer-seconds",
+    "x-restoreformer-segments",
+    "liveportrait",
+    "musetalk",
+    "restoreformer",
+    "providerexecutionid",
+    "executionid"
+  ],
+  "scanned": 73,
+  "tokenBearing": 38,
+  "zeroHit": 35,
+  "artifacts": [
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/current-commercial-20260728/final-commercial-avatar-3min-current-round-cropped.pptx",
+      "bytes": 13729149,
+      "sha256": "8d783b5e35d071cc7b67e6ca97df19a32b8579dacae0bc6b1ef76afbc4e3a2b9",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/current-commercial-20260728/final-commercial-avatar-3min-current-square-recording-validated.pptx",
+      "bytes": 13729468,
+      "sha256": "4c5e81af1a144a6c126926118cb725c9ebccbd7af538d651a1c996b9bc71111e",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/slides/slide1.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk",
+            "restoreformer"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/current-commercial-20260728/quick-record-round-near-border.pptx",
+      "bytes": 2321857,
+      "sha256": "dd9d04b5141567c0ceef17acae4b0229a064b3fbd6d96bc5b5a6946e06a96449",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/current-commercial-20260728/quick-record-round-production-geometry.pptx",
+      "bytes": 2314591,
+      "sha256": "2557104125ace4f853120023622087eb327c343261cc0f99b53089cef5bb1f69",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/engine-avatar-recording-structure-check.pptx",
+      "bytes": 5459722,
+      "sha256": "f5fbfa8105dd3c26f50f0ed62fc7e6e7a4cc1f22bb6ab419faed60e4d7bbe1b1",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/.recording-studio-proof-seed-1785323343701.pptx",
+      "bytes": 26142719,
+      "sha256": "db3f3ef87ebb6c632b079dded6e3c72a97225af6fe3503826d1532f01facbdb6",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide2.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/.recording-studio-proof-seed-1785323398676.pptx",
+      "bytes": 26142712,
+      "sha256": "fab6ad7b5775358b60af13002249a01b198a784b6f1a54027fea5d208a586d16",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide2.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/.recording-studio-proof-seed-1785323522633.pptx",
+      "bytes": 26142720,
+      "sha256": "f40c008a8539c115fa73ff97ab0f42b3444c5b5051a9a0106bd6c105d2452cea",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide2.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/.recording-studio-proof-seed-1785327252370.pptx",
+      "bytes": 14828641,
+      "sha256": "f83b85d922174f66a5b3683c2a14fa6774dd406b08b2031d7f8b550f60a436b9",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide2.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/.recording-studio-proof-seed-1785327377251.pptx",
+      "bytes": 14828644,
+      "sha256": "6db338096eed41aa5e2fe19f9999b9bcf80a8dee2f4ab85e9614a0f27e8acfb0",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide2.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/.recording-studio-proof-seed-1785327475739.pptx",
+      "bytes": 14828648,
+      "sha256": "350ffc9df4d560b1218e4b805b724d17d6990922eef3fe49313d2757088a51be",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide2.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-director-final-10-slide-director-v2.pptx",
+      "bytes": 26579286,
+      "sha256": "7f6516f5f5e03bd12d65b9979a171b715e6f97c4c6246867a666b852da329bed",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-director-final-10-slide.pptx",
+      "bytes": 26579388,
+      "sha256": "2c4f7fd8a61ca68c12b8d40904d55bef2ac88872ca86d8031fd18db4e1c3e558",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-director-self-demonstrating-spec-v2.pptx",
+      "bytes": 25972629,
+      "sha256": "03e7901ee6794a6dd167f407346350f3857eb3c15df5427278f933b3548842b9",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-director-self-demonstrating-v2-mcp-reprocessed-final-v2.pptx",
+      "bytes": 15610777,
+      "sha256": "b0f0e82b8cf1284f5d4835e99fb7c861b67898d6f415fd3dc3884c0b47d21757",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-director-self-demonstrating-v2-mcp-reprocessed-final.pptx",
+      "bytes": 15610787,
+      "sha256": "85da2fbe87886ae10074d5410ec92d12394355238195f7ca91ff2aabf9ba0e9c",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-director-self-demonstrating-v2-mcp-reprocessed.pptx",
+      "bytes": 16266379,
+      "sha256": "ce5bcf96a27ade91d4e765c2af89ca9ef35bf79cd285affc4b97eed83a6592ef",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-excellence-final-3min-quick-reference.pptx",
+      "bytes": 27349019,
+      "sha256": "2ca824d154d42ba992da96fecab59e6c85999f2a566b6ce7da73b8dddaaa79e7",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-excellence-final-3min-regenerated-timing.pptx",
+      "bytes": 27349019,
+      "sha256": "fd2e378c0f85ce8c0cb50229f09353045ea1520a90157648ff67831f86c6c2e7",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-authoring-excellence-final-3min.pptx",
+      "bytes": 27306294,
+      "sha256": "65e6ba52ee4c8a4133e9156b1f7d1f42f17c91dc616176423273d98276ef8b03",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-recording-studio-proof-deck-v1.pptx",
+      "bytes": 26142612,
+      "sha256": "3a392ec7dd98eec9e8c439386ba4569791f67a0d718827760775c38cb13b0afa",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide2.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-recording-studio-proof-deck-v2-interactive.pptx",
+      "bytes": 26014753,
+      "sha256": "4cce88bae881604b302f85ea1b50cab38306c14d4ef215c4de67dc02c9e6cc37",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide2.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-recording-studio-proof-deck-v3-recordstudio.pptx",
+      "bytes": 14512819,
+      "sha256": "34e06fba6f1af88d7f44cbbf40ae2b2160a53dd91df643e9ceda1539c9886e66",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide2.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-recording-studio-proof-deck-v4-visible-poster.pptx",
+      "bytes": 14828633,
+      "sha256": "76ede48ab768f4589180aedd0ebd5618af11f7d0a782b8999c036237ce9f6c91",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide2.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-recording-studio-proof-deck-v5-poster-start-zero.pptx",
+      "bytes": 14828618,
+      "sha256": "010d576f5c3a6ef2bc9002f5ad17a64a354156a7f0b4568e754453946087279c",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide2.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-recording-studio-proof-deck-v6-audio-master-synced.pptx",
+      "bytes": 16140664,
+      "sha256": "fd4e23dcee990f11cbdc01238bf1fdff805b427fcd206bef85a36326458af50d",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide2.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-recording-studio-proof-deck-v7-piper-audio-master.pptx",
+      "bytes": 12111017,
+      "sha256": "47bdeda11d05bb855c96a75d6a8c6ef1a6ea3287172ee2958e38ecfae7155e26",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide2.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/betterpptx-recording-studio-proof-deck-v8-piper-choreography-master.pptx",
+      "bytes": 12240235,
+      "sha256": "81c412c2cee41ad69f6cfbb8dbcb71c1ac58bcf31d4efa5c48464728bbbeb5e0",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide2.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-avatar-narration-deck_0f50de73fec8-ms6gbiqb.pptx",
+      "bytes": 16263134,
+      "sha256": "f58569f3c0979122660dce1abd9dcc5826cfd322978dde33f6a0662b60144473",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-avatar-narration-deck_59d8075c4815-ms6gswq5.pptx",
+      "bytes": 15607449,
+      "sha256": "69aa0fc5cfe2e9e1a9326c21561278614d7aad17e8f98ac36e1d69e548fa0876",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-avatar-narration-deck_989529c7fd89-ms6g814o.pptx",
+      "bytes": 16263135,
+      "sha256": "6b19ef656c8136afa724081b58353337870158e51ce4afda9bb1f1eecb22066b",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-avatar-narration-deck_a64b5b67d2e4-ms6gk8zz.pptx",
+      "bytes": 15607445,
+      "sha256": "e0699f69f9cf0040d52d3bb3ced81288cab8f40addbf514ff1e6e5261e3ae7f3",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-avatar-narration-deck_bd8bfbf63527-ms6g2b68.pptx",
+      "bytes": 16263139,
+      "sha256": "93f3fc3dbed180620344163e9c5fa1692b46555648f82ccae414705c53aad622",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-avatar-narration-deck_d1ccace9fc91-ms6g5xy0.pptx",
+      "bytes": 16263141,
+      "sha256": "5f78fd9bd9e4f702d4af487fae04197c6adb513d7b13e4e0ec091c4aa1ec6e09",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-narration-deck_0f50de73fec8-ms6gb425.pptx",
+      "bytes": 16263137,
+      "sha256": "df9f2712d25daf29121fdbee12358ea56f6dae11e83aa195bb1dc213fc0f6366",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-narration-deck_0f50de73fec8-ms6gbrf7.pptx",
+      "bytes": 16263145,
+      "sha256": "cf27713e29d78e7e8388083e641f4340e9e0fa17b5fa2ea432e063953c865bc8",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-narration-deck_59d8075c4815-ms6gsiva.pptx",
+      "bytes": 15607440,
+      "sha256": "3542ae95fe45570142d6a4ee4b57518d1bd3a1ad9e819ea5c1a80346e1e82a5d",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-narration-deck_59d8075c4815-ms6gt60o.pptx",
+      "bytes": 15607447,
+      "sha256": "3ae16d0615097ea85e53f0d6901ecc74a8bf27452873a397642347295d63742b",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-narration-deck_989529c7fd89-ms6g7ocs.pptx",
+      "bytes": 16263135,
+      "sha256": "0c0ce0ae1e690769ce894a19a8ca6a77d574476cb99359d268febd9d6589ca52",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-narration-deck_989529c7fd89-ms6g8bh6.pptx",
+      "bytes": 16263140,
+      "sha256": "fe5df7a7cb9809a5cb7c3dfc341991d0fe4f94b20e6868ad900e5d910be0a737",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-narration-deck_a64b5b67d2e4-ms6gk09b.pptx",
+      "bytes": 15607444,
+      "sha256": "2b7bd47d1c96a663953bb24f0fad5764f6eeef592b5a1c19ca0de9b86ee3bbe9",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-narration-deck_a64b5b67d2e4-ms6gkf92.pptx",
+      "bytes": 15607450,
+      "sha256": "6f25574ac9d2ee2bb6683e57e2f84c9d49c523a28cd6624eb8e8d173bd1a9505",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-narration-deck_bd8bfbf63527-ms6g20rx.pptx",
+      "bytes": 16263142,
+      "sha256": "3833e0b978bc9713c3f1c8f97bcc14a8b0b2a05aa66f663ff5c982b8302e5dc8",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-narration-deck_bd8bfbf63527-ms6g2ipw.pptx",
+      "bytes": 16263137,
+      "sha256": "ff594267a4e79fd88c767822e3dda91e9cc8c0be7c60f77386399b55f2fd9f4f",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-narration-deck_d1ccace9fc91-ms6g5mpo.pptx",
+      "bytes": 16263139,
+      "sha256": "cb6c0a63a87e0ebe0ed14098e7b04b5442bbc71cc2f7a1ddf8974f5a28fe8345",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/validate-narration-deck_d1ccace9fc91-ms6g66i7.pptx",
+      "bytes": 16263139,
+      "sha256": "3f2ca27dbf24f316a17d0a62e733e1d663fc2b69a3fc031b62607c9779a294bc",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/notesSlides/notesSlide4.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/variants/no3d-runtime.pptx",
+      "bytes": 27071363,
+      "sha256": "81572f8013429398f0b7e0bbe76d37d302d7bc978ac4d8d3c3b45330f2351612",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/variants/replace-geometry-interactive.pptx",
+      "bytes": 27348142,
+      "sha256": "0bdfce63e78790640b96400abf11511d0918448aa74c86c2d21b258a4c1ba50d",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/variants/replace-geometry.pptx",
+      "bytes": 27348799,
+      "sha256": "de31d5b8b7ffd3fff00502189da620b316573f9214de032226775551954165ae",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/variants/replace-only.pptx",
+      "bytes": 27072499,
+      "sha256": "edd1e13ef55d9055d859cd31c4f930f38c130fcbc365d5d53672f04e892e68ae",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/variants/replace-round.pptx",
+      "bytes": 27348802,
+      "sha256": "1cc999cfe4d779ab159faca0b70383a32b5f19800bb53bdfba151561b7686ce1",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/variants/text-only.pptx",
+      "bytes": 27072573,
+      "sha256": "b2a08e3789eda7b53532615152e61c37ba980c3269481648ebda3aff682d8e13",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/variants/volume-clock.pptx",
+      "bytes": 27348929,
+      "sha256": "049498a9b5ecc44b03f17e2eb7ffafcdc49a5ec6b041b0efb733b2faccc069f7",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/verification-v7/slide-06-3d-runtime-test-170947.pptx",
+      "bytes": 9566393,
+      "sha256": "ebd05e60cf64cae6403ed57a5a6204516c9c2d4e98c3d519f0a9de8a331a1a21",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/verification-v7/slide-06-3d-runtime-test-171045.pptx",
+      "bytes": 9566390,
+      "sha256": "3b9df15604aba8c4abfaa1bad4ac1d829fbcd17074972c15b67b4bc2f69e3ddc",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/verification-v7/slide-06-3d-runtime-test.pptx",
+      "bytes": 9566409,
+      "sha256": "5d780e0be83a2335c8d7288cb31204af5a36dd9bcd18f15b4cd39f4d2a65024c",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/verification-v8/slide-06-choreography-180521.pptx",
+      "bytes": 33896,
+      "sha256": "816a7968c5cf57562a6355957ab6baa41a4f89cfd8328cfa61bf98bb39268957",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/verification-v8/slide-06-choreography-180635.pptx",
+      "bytes": 9683153,
+      "sha256": "82154d3968ae7c507d29a6efc6fa0d53c1c736ef04cea023ca5a4519b98a2ba5",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/verification-v8/slide-06-choreography-accepted-182434.pptx",
+      "bytes": 9683268,
+      "sha256": "0758bb1dc1b27a97a10dc991bda41a91426f3b19c512f40ca69ce961223a5e55",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/verification-v8/slide-06-choreography-final-182107.pptx",
+      "bytes": 9683202,
+      "sha256": "c968c9950ccad970877321d5fab72b67c2c440295bea32e050625a941a30e6a8",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260728/verification-v8/slide-06-choreography-scale-fixed-181805.pptx",
+      "bytes": 9683165,
+      "sha256": "44ca3eeff5cc12136a2ea5a0da7090dd270d7d6843cb19b4c9ae06b2b5ebbe53",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260802/betterpptx-authoring-director-accepted-talking-head-v3.pptx",
+      "bytes": 11082715,
+      "sha256": "20faf41f0a6fdb90ef0512a2a8a02ae8c968d226eb2ab3847b790ac502c5b0c3",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-authoring-excellence-20260802/director-v6-system-corrected.pptx",
+      "bytes": 11217223,
+      "sha256": "78f7021717a83d71f0c9dc5e07a308bd077c95fc816dd9d85ad72e3e86314efe",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-commercial-avatar-3min-narration-validated.pptx",
+      "bytes": 6213588,
+      "sha256": "bf73a7bd3f9eac0a85b48f581a70069f2306a629117bd2a3dd8a24dc576231f9",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-commercial-avatar-3min-narration.pptx",
+      "bytes": 6780358,
+      "sha256": "17fba58be4ba2e856bd850465e55237ad00bd6bae2d289519aefa0f29aba792d",
+      "privateVocabularyHits": [
+        {
+          "part": "ppt/slides/slide1.xml",
+          "scope": "visible-or-review-content",
+          "tokens": [
+            "liveportrait",
+            "musetalk"
+          ]
+        }
+      ],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-commercial-avatar-3min-square-cameo-validated.pptx",
+      "bytes": 5459770,
+      "sha256": "ad6a9920ebde02ebae9573ac0f0a15fc10127830600fc36d68de4100c0394d1e",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-commercial-avatar-3min-square-recording-validated.pptx",
+      "bytes": 5459828,
+      "sha256": "d827969142d92c447317ed826f7104662eae3fcf030ba1200691e4f78a30f4ca",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/native-square-cameo-reference.pptx",
+      "bytes": 15951,
+      "sha256": "6800d80396c1dc9b86a86d4098110d9488212059c6c48b3ea070876e4212e012",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/recording-import-preservation-test/commercial-avatar-recordstudio-ink-laser-proof.pptx",
+      "bytes": 15300452,
+      "sha256": "4e020a9249a0e772f10a182736ad3524a8f41ebcfaa9ff42feea8467e7fa94fe",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/recording-import-preservation-test/reference-import-preserved-verifier.pptx",
+      "bytes": 25622261,
+      "sha256": "d0f6ea7ea39c00682494302a28c0d3213fbf0896bd0e48959a223228bfe4fb38",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/recording-import-preservation-test/reference-import-preserved.pptx",
+      "bytes": 25622261,
+      "sha256": "3f50f5a57861e3c4f68751125ec0358076e19980ba605bde9f50976eaa09188f",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/recording-import-preservation-test/second-commercial/second-roundtrip.pptx",
+      "bytes": 15024170,
+      "sha256": "9a180a4aaf511ca757e672d6eb8eb59c611fdb8b97d7e82563885aac51570611",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/commercial-poc/recording-import-preservation-test/second/second-roundtrip.pptx",
+      "bytes": 25622261,
+      "sha256": "a2fd1f13cb3999df68fc558cc1d0392976b5ccafa74ee7949c265996dca372cc",
+      "privateVocabularyHits": [],
+      "privateOnly": true,
+      "deliveryEligible": false
+    }
+  ]
+}

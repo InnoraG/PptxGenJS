@@ -1,0 +1,573 @@
+﻿{
+    "schemaVersion":  "betterpptx.office-baseline-layout-resource.v1",
+    "generatedAt":  "2026-08-13T22:33:26.1199855Z",
+    "generator":  "tools/build-office-baseline-layout-resource.ps1",
+    "officeBuild":  "20228",
+    "powerPointPid":  34436,
+    "hostIsolation":  "new-powerpoint-process",
+    "resource":  "betterpptx-mcp/assets/templates/office-baseline-wide.pptx",
+    "master":  {
+                   "name":  "SlideMaster",
+                   "layoutCount":  11
+               },
+    "slideSize":  {
+                      "widthPoints":  960,
+                      "heightPoints":  540,
+                      "widthInches":  13.333,
+                      "heightInches":  7.5
+                  },
+    "layouts":  [
+                    {
+                        "index":  1,
+                        "name":  "Title Slide",
+                        "ribbonObserved":  true,
+                        "placeholderCount":  5,
+                        "placeholders":  [
+                                             {
+                                                 "name":  "Title 1",
+                                                 "type":  3,
+                                                 "left":  120,
+                                                 "top":  88.375,
+                                                 "width":  720,
+                                                 "height":  188
+                                             },
+                                             {
+                                                 "name":  "Subtitle 2",
+                                                 "type":  4,
+                                                 "left":  120,
+                                                 "top":  283.625,
+                                                 "width":  720,
+                                                 "height":  130.375
+                                             },
+                                             {
+                                                 "name":  "Date Placeholder 3",
+                                                 "type":  16,
+                                                 "left":  66,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Footer Placeholder 4",
+                                                 "type":  15,
+                                                 "left":  318,
+                                                 "top":  500.5,
+                                                 "width":  324,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Slide Number Placeholder 5",
+                                                 "type":  13,
+                                                 "left":  678,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             }
+                                         ]
+                    },
+                    {
+                        "index":  2,
+                        "name":  "Title and Content",
+                        "ribbonObserved":  true,
+                        "placeholderCount":  5,
+                        "placeholders":  [
+                                             {
+                                                 "name":  "Title 1",
+                                                 "type":  1,
+                                                 "left":  66,
+                                                 "top":  28.75,
+                                                 "width":  828,
+                                                 "height":  104.375
+                                             },
+                                             {
+                                                 "name":  "Content Placeholder 2",
+                                                 "type":  7,
+                                                 "left":  66,
+                                                 "top":  143.75,
+                                                 "width":  828,
+                                                 "height":  342.625
+                                             },
+                                             {
+                                                 "name":  "Date Placeholder 3",
+                                                 "type":  16,
+                                                 "left":  66,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Footer Placeholder 4",
+                                                 "type":  15,
+                                                 "left":  318,
+                                                 "top":  500.5,
+                                                 "width":  324,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Slide Number Placeholder 5",
+                                                 "type":  13,
+                                                 "left":  678,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             }
+                                         ]
+                    },
+                    {
+                        "index":  3,
+                        "name":  "Section Header",
+                        "ribbonObserved":  true,
+                        "placeholderCount":  5,
+                        "placeholders":  [
+                                             {
+                                                 "name":  "Title 1",
+                                                 "type":  1,
+                                                 "left":  65.5,
+                                                 "top":  134.625,
+                                                 "width":  828,
+                                                 "height":  224.625
+                                             },
+                                             {
+                                                 "name":  "Text Placeholder 2",
+                                                 "type":  2,
+                                                 "left":  65.5,
+                                                 "top":  361.375,
+                                                 "width":  828,
+                                                 "height":  118.125
+                                             },
+                                             {
+                                                 "name":  "Date Placeholder 3",
+                                                 "type":  16,
+                                                 "left":  66,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Footer Placeholder 4",
+                                                 "type":  15,
+                                                 "left":  318,
+                                                 "top":  500.5,
+                                                 "width":  324,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Slide Number Placeholder 5",
+                                                 "type":  13,
+                                                 "left":  678,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             }
+                                         ]
+                    },
+                    {
+                        "index":  4,
+                        "name":  "Two Content",
+                        "ribbonObserved":  true,
+                        "placeholderCount":  6,
+                        "placeholders":  [
+                                             {
+                                                 "name":  "Title 1",
+                                                 "type":  1,
+                                                 "left":  66,
+                                                 "top":  28.75,
+                                                 "width":  828,
+                                                 "height":  104.375
+                                             },
+                                             {
+                                                 "name":  "Content Placeholder 2",
+                                                 "type":  7,
+                                                 "left":  66,
+                                                 "top":  143.75,
+                                                 "width":  408,
+                                                 "height":  342.625
+                                             },
+                                             {
+                                                 "name":  "Content Placeholder 3",
+                                                 "type":  7,
+                                                 "left":  486,
+                                                 "top":  143.75,
+                                                 "width":  408,
+                                                 "height":  342.625
+                                             },
+                                             {
+                                                 "name":  "Date Placeholder 4",
+                                                 "type":  16,
+                                                 "left":  66,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Footer Placeholder 5",
+                                                 "type":  15,
+                                                 "left":  318,
+                                                 "top":  500.5,
+                                                 "width":  324,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Slide Number Placeholder 6",
+                                                 "type":  13,
+                                                 "left":  678,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             }
+                                         ]
+                    },
+                    {
+                        "index":  5,
+                        "name":  "Comparison",
+                        "ribbonObserved":  true,
+                        "placeholderCount":  8,
+                        "placeholders":  [
+                                             {
+                                                 "name":  "Title 1",
+                                                 "type":  1,
+                                                 "left":  66.125,
+                                                 "top":  28.75,
+                                                 "width":  828,
+                                                 "height":  104.375
+                                             },
+                                             {
+                                                 "name":  "Text Placeholder 2",
+                                                 "type":  2,
+                                                 "left":  66.125,
+                                                 "top":  132.375,
+                                                 "width":  406.125,
+                                                 "height":  64.875
+                                             },
+                                             {
+                                                 "name":  "Content Placeholder 3",
+                                                 "type":  7,
+                                                 "left":  66.125,
+                                                 "top":  197.25,
+                                                 "width":  406.125,
+                                                 "height":  290.125
+                                             },
+                                             {
+                                                 "name":  "Text Placeholder 4",
+                                                 "type":  2,
+                                                 "left":  486,
+                                                 "top":  132.375,
+                                                 "width":  408.125,
+                                                 "height":  64.875
+                                             },
+                                             {
+                                                 "name":  "Content Placeholder 5",
+                                                 "type":  7,
+                                                 "left":  486,
+                                                 "top":  197.25,
+                                                 "width":  408.125,
+                                                 "height":  290.125
+                                             },
+                                             {
+                                                 "name":  "Date Placeholder 6",
+                                                 "type":  16,
+                                                 "left":  66,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Footer Placeholder 7",
+                                                 "type":  15,
+                                                 "left":  318,
+                                                 "top":  500.5,
+                                                 "width":  324,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Slide Number Placeholder 8",
+                                                 "type":  13,
+                                                 "left":  678,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             }
+                                         ]
+                    },
+                    {
+                        "index":  6,
+                        "name":  "Title Only",
+                        "ribbonObserved":  true,
+                        "placeholderCount":  4,
+                        "placeholders":  [
+                                             {
+                                                 "name":  "Title 1",
+                                                 "type":  1,
+                                                 "left":  66,
+                                                 "top":  28.75,
+                                                 "width":  828,
+                                                 "height":  104.375
+                                             },
+                                             {
+                                                 "name":  "Date Placeholder 2",
+                                                 "type":  16,
+                                                 "left":  66,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Footer Placeholder 3",
+                                                 "type":  15,
+                                                 "left":  318,
+                                                 "top":  500.5,
+                                                 "width":  324,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Slide Number Placeholder 4",
+                                                 "type":  13,
+                                                 "left":  678,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             }
+                                         ]
+                    },
+                    {
+                        "index":  7,
+                        "name":  "Blank",
+                        "ribbonObserved":  true,
+                        "placeholderCount":  3,
+                        "placeholders":  [
+                                             {
+                                                 "name":  "Date Placeholder 1",
+                                                 "type":  16,
+                                                 "left":  66,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Footer Placeholder 2",
+                                                 "type":  15,
+                                                 "left":  318,
+                                                 "top":  500.5,
+                                                 "width":  324,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Slide Number Placeholder 3",
+                                                 "type":  13,
+                                                 "left":  678,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             }
+                                         ]
+                    },
+                    {
+                        "index":  8,
+                        "name":  "Content with Caption",
+                        "ribbonObserved":  true,
+                        "placeholderCount":  6,
+                        "placeholders":  [
+                                             {
+                                                 "name":  "Title 1",
+                                                 "type":  1,
+                                                 "left":  66.125,
+                                                 "top":  36,
+                                                 "width":  309.625,
+                                                 "height":  126
+                                             },
+                                             {
+                                                 "name":  "Content Placeholder 2",
+                                                 "type":  7,
+                                                 "left":  408.125,
+                                                 "top":  77.75,
+                                                 "width":  486,
+                                                 "height":  383.75
+                                             },
+                                             {
+                                                 "name":  "Text Placeholder 3",
+                                                 "type":  2,
+                                                 "left":  66.125,
+                                                 "top":  162,
+                                                 "width":  309.625,
+                                                 "height":  300.125
+                                             },
+                                             {
+                                                 "name":  "Date Placeholder 4",
+                                                 "type":  16,
+                                                 "left":  66,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Footer Placeholder 5",
+                                                 "type":  15,
+                                                 "left":  318,
+                                                 "top":  500.5,
+                                                 "width":  324,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Slide Number Placeholder 6",
+                                                 "type":  13,
+                                                 "left":  678,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             }
+                                         ]
+                    },
+                    {
+                        "index":  9,
+                        "name":  "Picture with Caption",
+                        "ribbonObserved":  true,
+                        "placeholderCount":  6,
+                        "placeholders":  [
+                                             {
+                                                 "name":  "Title 1",
+                                                 "type":  1,
+                                                 "left":  66.125,
+                                                 "top":  36,
+                                                 "width":  309.625,
+                                                 "height":  126
+                                             },
+                                             {
+                                                 "name":  "Picture Placeholder 2",
+                                                 "type":  18,
+                                                 "left":  408.125,
+                                                 "top":  77.75,
+                                                 "width":  486,
+                                                 "height":  383.75
+                                             },
+                                             {
+                                                 "name":  "Text Placeholder 3",
+                                                 "type":  2,
+                                                 "left":  66.125,
+                                                 "top":  162,
+                                                 "width":  309.625,
+                                                 "height":  300.125
+                                             },
+                                             {
+                                                 "name":  "Date Placeholder 4",
+                                                 "type":  16,
+                                                 "left":  66,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Footer Placeholder 5",
+                                                 "type":  15,
+                                                 "left":  318,
+                                                 "top":  500.5,
+                                                 "width":  324,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Slide Number Placeholder 6",
+                                                 "type":  13,
+                                                 "left":  678,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             }
+                                         ]
+                    },
+                    {
+                        "index":  10,
+                        "name":  "Title and Vertical Text",
+                        "ribbonObserved":  false,
+                        "placeholderCount":  5,
+                        "placeholders":  [
+                                             {
+                                                 "name":  "Title 1",
+                                                 "type":  1,
+                                                 "left":  66,
+                                                 "top":  28.75,
+                                                 "width":  828,
+                                                 "height":  104.375
+                                             },
+                                             {
+                                                 "name":  "Vertical Text Placeholder 2",
+                                                 "type":  6,
+                                                 "left":  66,
+                                                 "top":  143.75,
+                                                 "width":  828,
+                                                 "height":  342.625
+                                             },
+                                             {
+                                                 "name":  "Date Placeholder 3",
+                                                 "type":  16,
+                                                 "left":  66,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Footer Placeholder 4",
+                                                 "type":  15,
+                                                 "left":  318,
+                                                 "top":  500.5,
+                                                 "width":  324,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Slide Number Placeholder 5",
+                                                 "type":  13,
+                                                 "left":  678,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             }
+                                         ]
+                    },
+                    {
+                        "index":  11,
+                        "name":  "Vertical Title and Text",
+                        "ribbonObserved":  false,
+                        "placeholderCount":  5,
+                        "placeholders":  [
+                                             {
+                                                 "name":  "Vertical Title 1",
+                                                 "type":  5,
+                                                 "left":  687,
+                                                 "top":  28.75,
+                                                 "width":  207,
+                                                 "height":  457.625
+                                             },
+                                             {
+                                                 "name":  "Vertical Text Placeholder 2",
+                                                 "type":  6,
+                                                 "left":  66,
+                                                 "top":  28.75,
+                                                 "width":  609,
+                                                 "height":  457.625
+                                             },
+                                             {
+                                                 "name":  "Date Placeholder 3",
+                                                 "type":  16,
+                                                 "left":  66,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Footer Placeholder 4",
+                                                 "type":  15,
+                                                 "left":  318,
+                                                 "top":  500.5,
+                                                 "width":  324,
+                                                 "height":  28.75
+                                             },
+                                             {
+                                                 "name":  "Slide Number Placeholder 5",
+                                                 "type":  13,
+                                                 "left":  678,
+                                                 "top":  500.5,
+                                                 "width":  216,
+                                                 "height":  28.75
+                                             }
+                                         ]
+                    }
+                ]
+}

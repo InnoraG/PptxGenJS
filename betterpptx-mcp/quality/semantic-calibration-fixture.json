@@ -1,0 +1,27 @@
+{
+  "schemaVersion": "betterpptx.semantic-calibration-fixture.v1",
+  "kind": "owned-synthetic-contract-only",
+  "humanLabels": false,
+  "records": [
+    {"id":"c01","human":{"messageFit":5,"composition":4,"worldFit":5,"seriesCoherence":4},"judge":{"messageFit":5,"composition":4,"worldFit":5,"seriesCoherence":4}},
+    {"id":"c02","human":{"messageFit":4,"composition":5,"worldFit":4,"seriesCoherence":5},"judge":{"messageFit":4,"composition":5,"worldFit":4,"seriesCoherence":5}},
+    {"id":"c03","human":{"messageFit":3,"composition":4,"worldFit":3,"seriesCoherence":4},"judge":{"messageFit":3,"composition":4,"worldFit":3,"seriesCoherence":4}},
+    {"id":"c04","human":{"messageFit":2,"composition":3,"worldFit":2,"seriesCoherence":3},"judge":{"messageFit":2,"composition":3,"worldFit":2,"seriesCoherence":3}},
+    {"id":"c05","human":{"messageFit":1,"composition":2,"worldFit":1,"seriesCoherence":2},"judge":{"messageFit":1,"composition":2,"worldFit":1,"seriesCoherence":2}},
+    {"id":"c06","human":{"messageFit":5,"composition":5,"worldFit":4,"seriesCoherence":4},"judge":{"messageFit":5,"composition":5,"worldFit":4,"seriesCoherence":4}},
+    {"id":"c07","human":{"messageFit":4,"composition":4,"worldFit":5,"seriesCoherence":5},"judge":{"messageFit":4,"composition":4,"worldFit":5,"seriesCoherence":5}},
+    {"id":"c08","human":{"messageFit":3,"composition":3,"worldFit":4,"seriesCoherence":4},"judge":{"messageFit":3,"composition":3,"worldFit":4,"seriesCoherence":4}},
+    {"id":"c09","human":{"messageFit":2,"composition":2,"worldFit":3,"seriesCoherence":3},"judge":{"messageFit":2,"composition":2,"worldFit":3,"seriesCoherence":3}},
+    {"id":"c10","human":{"messageFit":1,"composition":1,"worldFit":2,"seriesCoherence":2},"judge":{"messageFit":1,"composition":1,"worldFit":2,"seriesCoherence":2}},
+    {"id":"c11","human":{"messageFit":5,"composition":4,"worldFit":4,"seriesCoherence":5},"judge":{"messageFit":5,"composition":4,"worldFit":4,"seriesCoherence":5}},
+    {"id":"c12","human":{"messageFit":4,"composition":5,"worldFit":5,"seriesCoherence":4},"judge":{"messageFit":4,"composition":5,"worldFit":5,"seriesCoherence":4}},
+    {"id":"c13","human":{"messageFit":3,"composition":4,"worldFit":4,"seriesCoherence":3},"judge":{"messageFit":3,"composition":4,"worldFit":4,"seriesCoherence":3}},
+    {"id":"c14","human":{"messageFit":2,"composition":3,"worldFit":3,"seriesCoherence":2},"judge":{"messageFit":2,"composition":3,"worldFit":3,"seriesCoherence":2}},
+    {"id":"c15","human":{"messageFit":1,"composition":2,"worldFit":2,"seriesCoherence":1},"judge":{"messageFit":1,"composition":2,"worldFit":2,"seriesCoherence":1}},
+    {"id":"c16","human":{"messageFit":5,"composition":5,"worldFit":5,"seriesCoherence":5},"judge":{"messageFit":5,"composition":5,"worldFit":5,"seriesCoherence":5}},
+    {"id":"c17","human":{"messageFit":4,"composition":4,"worldFit":4,"seriesCoherence":4},"judge":{"messageFit":4,"composition":4,"worldFit":4,"seriesCoherence":4}},
+    {"id":"c18","human":{"messageFit":3,"composition":3,"worldFit":3,"seriesCoherence":3},"judge":{"messageFit":3,"composition":3,"worldFit":3,"seriesCoherence":3}},
+    {"id":"c19","human":{"messageFit":2,"composition":2,"worldFit":2,"seriesCoherence":2},"judge":{"messageFit":2,"composition":2,"worldFit":2,"seriesCoherence":2}},
+    {"id":"c20","human":{"messageFit":1,"composition":1,"worldFit":1,"seriesCoherence":1},"judge":{"messageFit":1,"composition":1,"worldFit":1,"seriesCoherence":1}}
+  ]
+}

@@ -8,13 +8,16 @@ import * as fsSync from 'node:fs'
 import * as path from 'node:path'
 import * as crypto from 'node:crypto'
 import { fileURLToPath } from 'node:url'
+import { enrichVoiceWithProfile, genderCoverage, loadVoiceProfiles, normalizeRequiredGenders } from './voiceProfiles.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const SRC = path.resolve(process.env.BETTERPPTX_VOICE_MANIFEST_SOURCE || path.join(__dirname, 'voices', 'manifest.json'))
 const OUT_DIR = path.resolve(process.env.BETTERPPTX_VOICE_OUTPUT_DIR || path.join(__dirname, 'voices', 'runtime'))
 const OUT = path.join(OUT_DIR, 'runtime-manifest.json')
 const REQUIRE_LANGS_RAW = String(process.env.BETTERPPTX_REQUIRED_VOICE_LANGS || 'en,fr').trim()
+const REQUIRE_GENDERS_RAW = String(process.env.BETTERPPTX_REQUIRED_VOICE_GENDERS || '').trim()
 const INCLUDE_ATTRIBUTION = process.env.BETTERPPTX_ALLOW_ATTRIBUTION_VOICES === '1'
+const VOICE_PROFILES = loadVoiceProfiles()
 
 function sha256(buffer) {
 	return crypto.createHash('sha256').update(buffer).digest('hex')
@@ -37,24 +40,51 @@ function usable(v) {
 	return false
 }
 
-function requiredLanguages(selected) {
+function requiredLanguages(manifest, selected) {
 	if (!REQUIRE_LANGS_RAW) return []
 	if (REQUIRE_LANGS_RAW.toLowerCase() === 'approved') {
-		return [...new Set(selected.map(v => v.language).filter(Boolean))].sort()
+		return [...new Set(selected.map(v => v.locale || v.language).filter(Boolean))].sort()
+	}
+	if (REQUIRE_LANGS_RAW.toLowerCase() === 'all') {
+		return [...new Set((manifest.voices || []).map(v => v.locale || v.language).filter(Boolean))].sort()
 	}
 	return REQUIRE_LANGS_RAW.split(',').map(s => s.trim()).filter(Boolean)
 }
 
+function languageMatches(localeOrLanguage, required) {
+	const value = String(localeOrLanguage || '').toLowerCase().replace('-', '_')
+	const target = String(required || '').toLowerCase().replace('-', '_')
+	return value === target || value.startsWith(`${target}_`) || target === value.split('_')[0]
+}
+
+function assertGenderCoverage(selected, requiredLanguagesList, requiredGenders) {
+	if (!requiredGenders.length) return
+	const coverage = genderCoverage(selected, requiredGenders, VOICE_PROFILES)
+	const targetLocales = requiredLanguagesList.length
+		? [...new Set(selected.flatMap(voice => [voice.locale, voice.language]).filter(value => requiredLanguagesList.some(required => languageMatches(value, required))))]
+		: [...new Set(selected.map(voice => voice.locale || voice.language).filter(Boolean))]
+	const missing = coverage.localesMissingPair
+		.filter(row => targetLocales.some(target => languageMatches(row.locale, target)))
+		.map(row => `${row.locale} missing ${row.missingGenders.join(' and ')}`)
+	if (missing.length) {
+		throw new Error(`Required gender coverage failed: ${missing.join('; ')}. Add reviewed Piper voices/speaker profiles or a licensed provider voice before building the runtime.`)
+	}
+}
+
 async function main() {
 	const manifest = JSON.parse(await fs.readFile(SRC, 'utf8'))
-	const selected = (manifest.voices || []).filter(usable)
+	const selected = (manifest.voices || []).map(voice => enrichVoiceWithProfile(voice, VOICE_PROFILES)).filter(usable)
 	if (!selected.length) throw new Error(`No approved voices in ${SRC}. Set reviewStatus:"approved" on reviewed rows first.`)
-	const REQUIRE_LANGS = requiredLanguages(selected)
+	const REQUIRE_LANGS = requiredLanguages(manifest, selected)
+	const REQUIRE_GENDERS = REQUIRE_GENDERS_RAW ? normalizeRequiredGenders(REQUIRE_GENDERS_RAW) : []
+	if (REQUIRE_GENDERS_RAW && REQUIRE_GENDERS.length !== 2) throw new Error('BETTERPPTX_REQUIRED_VOICE_GENDERS must contain female,male when enabled.')
 	for (const lang of REQUIRE_LANGS) {
-		if (!selected.some(v => v.language === lang || String(v.locale || '').toLowerCase().startsWith(`${lang.toLowerCase()}_`))) {
+		if (!selected.some(v => languageMatches(v.locale, lang) || languageMatches(v.language, lang))) {
 			throw new Error(`Missing approved required voice for language: ${lang}`)
 		}
 	}
+	assertGenderCoverage(selected, REQUIRE_LANGS, REQUIRE_GENDERS)
+	const coverage = genderCoverage(selected, ['female', 'male'], VOICE_PROFILES)
 	await fs.mkdir(OUT_DIR, { recursive: true })
 	const selectedRuntimeFiles = new Set(selected.flatMap(voice => [`${voice.id}.onnx`, `${voice.id}.onnx.json`]))
 	for (const entry of await fs.readdir(OUT_DIR, { withFileTypes: true }).catch(() => [])) {
@@ -96,6 +126,8 @@ async function main() {
 		generatedAt: new Date().toISOString(),
 		sourceManifest: SRC,
 		requiredLanguages: REQUIRE_LANGS,
+		requiredGenders: REQUIRE_GENDERS,
+		genderCoverage: coverage,
 		voices: runtime,
 	}, null, 2))
 	console.log(OUT)

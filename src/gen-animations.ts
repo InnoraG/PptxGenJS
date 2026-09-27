@@ -24,8 +24,10 @@ import { buildSequenceAnimation } from './animations-builders/buildSequenceAnima
 import { ANIMATION_REGISTRY_MERGED } from './gen-animations-registry-merged'
 // Media animation support (interactiveSeq) - isolated module for zero regression risk
 import { genXmlTimingStructure } from './genXmlTimingStructure'
+import { generateNativeNarrationTiming, getNativeNarrationMediaSpids, hasNativeNarrationMedia, mergeRawTimingWithMediaAnimations } from './gen-animations-media'
 import { genXmlBuildList } from './gen-animations-buildlist'
 import { isModel3DAnimationEffect } from './animations-builders/data3DAnimationTemplates'
+import { assertNativeDescendantAnimationInspectable, nativeGroupIdentityPlan } from './gen-group-animation-targets'
 
 // Re-export for backwards compatibility
 export { genXmlBuildList } from './gen-animations-buildlist'
@@ -420,9 +422,19 @@ export function addAnimation(
 	const animations = Array.isArray(animation) ? animation : [animation]
 
 	animations.forEach(anim => {
+		// Semantic JSON clients may author explicit millisecond aliases. Collapse
+		// them at the native library boundary so every registry builder receives
+		// the same duration/delay carrier and no slider is silently dropped.
+		const normalizedAnimation = {
+			...anim,
+			...(anim.duration === undefined && anim.durationMs !== undefined ? { duration: anim.durationMs } : {}),
+			...(anim.delay === undefined && anim.delayMs !== undefined ? { delay: anim.delayMs } : {}),
+		}
+		delete (normalizedAnimation as any).durationMs
+		delete (normalizedAnimation as any).delayMs
 		slide._animations!.push({
 			target: target,
-			animation: anim,
+			animation: normalizedAnimation,
 			shapeId,
 			paragraphCount: paragraphCount || 1,
 		})
@@ -700,14 +712,58 @@ function getShapeIdsToSkipBldP(animations: any[]): Set<number> {
  */
 export function genXmlAnimations(slide: PresSlide): string {
 	resetAnimationId()
+	const descendantIds = new Map(nativeGroupIdentityPlan(slide).targets.map(entry => [entry.target, entry.shapeId]))
+	for (const record of slide._animations || []) {
+		const descendantId = descendantIds.get(record.target)
+		if (descendantId !== undefined) {
+			assertNativeDescendantAnimationInspectable(slide)
+			record.shapeId = descendantId
+		}
+	}
+	// Notes are stored in the slide object list so they can be emitted into the
+	// notes-slide package, but they are not shapes in the slide's p:spTree.  A
+	// narration/build pass can therefore leave an animation record pointing at
+	// the notes object position (for example spid 21) even though no matching
+	// p:cNvPr is serialized.  Passing that record through creates a dangling
+	// p:spTgt/bldP pair and PowerPoint reports the package as corrupted.  Keep
+	// the animation model intact for diagnostics, while excluding non-slide
+	// objects from the native timing tree.
+	const serializedShapeIds = new Set<number>()
+	;(slide._slideObjects || []).forEach((obj: any, index: number) => {
+		const type = String(obj?._type || '')
+		if (type === 'notes' || type === 'tablecell' || type === 'hyperlink') return
+		const explicitSpid = Number(obj?.options?.spid)
+		serializedShapeIds.add(Number.isFinite(explicitSpid) && explicitSpid > 0 ? explicitSpid : index + 2)
+	})
+	for (const id of descendantIds.values()) serializedShapeIds.add(id)
+	const serializedAnimations = (slide._animations || []).filter(anim => {
+		const target = (anim as any)?.target as ISlideObject | undefined
+		// A valid timing record must point at the same object instance that will
+		// be walked by the slide serializer.  This also drops stale auto-build
+		// records whose target was removed/replaced during late narration setup.
+		if (!target || (!slide._slideObjects.includes(target) && !descendantIds.has(target)) || !serializedShapeIds.has(Number(anim.shapeId))) return false
+		const targetType = String(target._type || '')
+		return targetType !== 'notes' && targetType !== 'tablecell'
+	})
 
 	// Check for raw timing XML passthrough first
 	if (slide._rawTimingXml) {
+		if (serializedAnimations.length > 0) {
+			const merged = mergeRawTimingWithMediaAnimations(slide._rawTimingXml, serializedAnimations as any, slide._slideObjects)
+			if (merged !== slide._rawTimingXml) {
+				console.log('[genXmlAnimations] Merged generated media timing into raw timing passthrough')
+				return merged
+			}
+		}
 		console.log('[genXmlAnimations] Using raw timing XML passthrough (unsupported animations)')
 		return slide._rawTimingXml
 	}
 
-	if (!slide._animations || slide._animations.length === 0) {
+	if (serializedAnimations.length === 0) {
+		if (hasNativeNarrationMedia(slide._slideObjects)) {
+			console.log('[genXmlAnimations] Generating native narration timing')
+			return generateNativeNarrationTiming(slide._slideObjects)
+		}
 		console.log('[genXmlAnimations] No animations on slide')
 		return ''
 	}
@@ -715,9 +771,56 @@ export function genXmlAnimations(slide: PresSlide): string {
 	console.log(`[genXmlAnimations] Processing ${slide._animations.length} animations`)
 
 	// STRUCTURAL PATH: Always use structural wrapper (only path)
-	console.log('[genXmlAnimations] Using STRUCTURAL click group assembly')
-	console.log('DEBUG: GEN-ANIMATIONS REBUILD CHECK ' + Date.now())
-	return generateSlideTimingStructuralWrapper(slide)
+	const narrationSpids = getNativeNarrationMediaSpids(slide._slideObjects)
+	if (narrationSpids.length > 0) {
+		const animations = serializedAnimations
+		const narrationSpidSet = new Set(narrationSpids)
+		const existingPlayTargets = new Set<number>()
+		const narrationPlayAnimations: typeof animations = []
+		const remainingAnimations: typeof animations = []
+		animations.forEach(anim => {
+			const effect = String((anim.animation as any)?.effect || '').toLowerCase()
+			const command = String((anim.animation as any)?.mediaCommand || '').toLowerCase()
+			const type = String((anim.animation as any)?.type || '').toLowerCase()
+			const targetSpid = Number((anim.animation as any)?.targetSpid || (anim.animation as any)?.spid || anim.shapeId)
+			const isPlay = type === 'media' && (effect === 'play' || effect === 'mediaplay' || command.startsWith('playfrom'))
+			if (isPlay && Number.isFinite(targetSpid) && narrationSpidSet.has(targetSpid)) {
+				existingPlayTargets.add(targetSpid)
+				// Narration owns the slide-start clock, independent of visual
+				// build order. Its authored delay is part of that clock (including
+				// segment gaps), not an inherited visual delay to discard.
+				narrationPlayAnimations.push(anim)
+			} else {
+				remainingAnimations.push(anim)
+			}
+		})
+		const syntheticNarrationAnimations = narrationSpids
+			.filter(spid => !existingPlayTargets.has(spid))
+			.map(spid => ({
+				target: (slide._slideObjects || []).find((obj, idx) => Number((obj.options as any)?.spid || idx + 2) === spid) as ISlideObject,
+				shapeId: spid,
+				paragraphCount: 1,
+				animation: {
+					type: 'media',
+					effect: 'mediaplay',
+					mediaCommand: 'playFrom(0.0)',
+					duration: 1,
+					delay: 0,
+					trigger: 'afterPrevious',
+				} as any,
+			}))
+		// Establish one auto-start bucket. Later narration clips retain their
+		// absolute delays rather than accumulating preceding clip durations.
+		const narrationTimeline: typeof animations = [...syntheticNarrationAnimations, ...narrationPlayAnimations].map((anim, index) => ({
+			...anim,
+			animation: { ...anim.animation, trigger: (index === 0 ? 'afterPrevious' : 'withPrevious') as AnimationProps['trigger'] },
+		}))
+		return generateSlideTimingStructuralWrapper({
+			...slide,
+			_animations: [...narrationTimeline, ...remainingAnimations],
+		} as PresSlide)
+	}
+	return generateSlideTimingStructuralWrapper({ ...slide, _animations: serializedAnimations })
 
 	// LEGACY CODE BELOW - NO LONGER REACHED
 	// Keeping temporarily for reference during transition

@@ -1,71 +1,19 @@
-import { createBillingLedgerStore } from './ledger-store.mjs'
-import { ingestDodoUsageEvents } from './dodo-client.mjs'
+import { BillingLedgerError, createBillingLedgerStore } from './ledger-store.mjs'
 
-const MAX_DODO_BATCH = 1000
+// x402 settlement and the PayRam onramp fund LEDGER-authoritative credits.
+// Payment settlements only ever post credits INTO the ledger;
+// there is no external usage-ingestion API to push events to. Queued usage events
+// are settled internally: the customer's durable available balance is debited by the
+// event amount and the event is marked settled in one store transaction, so the
+// debit that effectiveBalanceSnapshot was already anticipating (queued units are
+// subtracted from spendable balance) becomes permanent.
 
-function usageEventName() {
-	return process.env.BETTERPPTX_DODO_USAGE_EVENT_NAME || 'betterpptx.usage'
-}
-
-function stringValue(value) {
-	if (value === undefined || value === null) return null
-	if (typeof value === 'number') return Number.isFinite(value) ? String(value) : null
-	if (typeof value === 'boolean') return value ? 'true' : 'false'
-	const text = String(value)
-	return text.length > 500 ? text.slice(0, 500) : text
-}
-
-function metadataFrom(event = {}) {
-	const creditCost = Number(Number(event.amountCredits || event.amount || 0).toFixed(2))
-	const base = {
-		credit_cost: Number.isFinite(creditCost) ? creditCost : 0,
-		billing_mode: event.metadata?.billing_mode || event.metadata?.billingMode || 'checkpoint',
-		rate_card_version: event.metadata?.rate_card_version || event.metadata?.rateCardVersion || 'unknown',
-		session_hash: event.sessionHash,
-		deck_hash: event.deckHash,
-		operation_group: event.metadata?.operation_group || event.metadata?.operationGroup || 'operation',
-		tool_count: event.metadata?.tool_count,
-		slide_count: event.metadata?.slide_count || event.metadata?.slideCount,
-		final_object_count: event.metadata?.final_object_count || event.metadata?.finalObjectCount,
-		output_mb: event.metadata?.output_mb || event.metadata?.outputMb,
-		status: event.metadata?.status || 'success',
-		occurred_at: event.createdAt || event.committedAt || event.updatedAt,
-	}
-	const out = {}
-	for (const [key, value] of Object.entries(base)) {
-		if (key === 'credit_cost') {
-			out[key] = value
-			continue
-		}
-		const v = stringValue(value)
-		if (v !== null && key.length <= 100) out[key] = v
-	}
-	return out
-}
-
-function safeTimestamp(event = {}, now = new Date()) {
-	const raw = Date.parse(event.createdAt || event.committedAt || event.updatedAt || '')
-	if (!Number.isFinite(raw)) return now.toISOString()
-	const ageMs = now.getTime() - raw
-	if (ageMs < -4 * 60 * 1000 || ageMs > 55 * 60 * 1000) return now.toISOString()
-	return new Date(raw).toISOString()
-}
-
-export function formatDodoUsageEvent(event = {}, customer = {}, { now = new Date() } = {}) {
-	if (!event.eventId) throw new Error('Usage event is missing eventId.')
-	if (!customer.providerCustomerId) throw new Error('Billing customer is missing Dodo customer id.')
-	return {
-		event_id: event.eventId,
-		customer_id: customer.providerCustomerId,
-		event_name: usageEventName(),
-		timestamp: safeTimestamp(event, now),
-		metadata: metadataFrom(event),
-	}
-}
+const MAX_SETTLEMENT_BATCH = 1000
 
 function retryDelayMs(attemptCount) {
-	const base = Math.max(1000, Number(process.env.BETTERPPTX_DODO_USAGE_RETRY_BASE_MS || 30000))
-	const max = Math.max(base, Number(process.env.BETTERPPTX_DODO_USAGE_RETRY_MAX_MS || 30 * 60 * 1000))
+	const boundedDelay = (value, fallback) => Number.isFinite(Number(value)) && Number(value) > 0 ? Math.min(86400000, Number(value)) : fallback
+	const base = Math.max(1000, boundedDelay(process.env.BETTERPPTX_USAGE_RETRY_BASE_MS, 30000))
+	const max = Math.max(base, boundedDelay(process.env.BETTERPPTX_USAGE_RETRY_MAX_MS, 30 * 60 * 1000))
 	const exp = base * (2 ** Math.min(8, Math.max(0, Number(attemptCount) || 0)))
 	return Math.min(max, exp)
 }
@@ -76,56 +24,54 @@ function dueForRetry(event = {}, nowMs = Date.now()) {
 	return !Number.isFinite(due) || due <= nowMs
 }
 
-async function markBatchFailed(store, events, err) {
-	const now = Date.now()
-	const out = []
-	for (const event of events) {
-		const attempts = Math.max(0, Number(event.ingestAttemptCount) || 0) + 1
-		const nextRetryAt = new Date(now + retryDelayMs(attempts)).toISOString()
-		out.push(await store.markUsageEventFailed(event.eventId, {
-			lastIngestErrorCode: err?.code || 'DODO_USAGE_INGEST_FAILED',
-			lastIngestErrorMessage: String(err?.message || err).slice(0, 500),
-			nextRetryAt,
-		}))
-	}
-	return out
-}
-
-export async function flushQueuedUsageEvents({ store = createBillingLedgerStore(), limit = 100, ingest = ingestDodoUsageEvents, now = new Date() } = {}) {
-	const max = Math.max(1, Math.min(MAX_DODO_BATCH, Number(limit) || 100))
+export async function flushQueuedUsageEvents({ store = createBillingLedgerStore(), limit = 100, settle = undefined, now = new Date() } = {}) {
+	if (!(now instanceof Date) || !Number.isFinite(now.getTime())) throw new BillingLedgerError('BILLING_RECONCILER_TIME_INVALID', 'Reconciliation requires a valid time.')
+	const max = Math.max(1, Math.min(MAX_SETTLEMENT_BATCH, Math.floor(Number(limit) || 100)))
 	const queued = (await store.listQueuedUsageEvents({ limit: max * 2 })).filter(event => dueForRetry(event, now.getTime())).slice(0, max)
-	if (!queued.length) return { ok: true, attempted: 0, ingested: 0, skipped: 0, failed: 0 }
-	const formatted = []
-	const sourceEvents = []
-	const skipped = []
+	if (!queued.length) return { ok: true, provider: 'ledger_internal', attempted: 0, ingested: 0, settled: 0, skipped: 0, failed: 0 }
+	const marked = []
+	const failed = []
+	let skipped = 0
 	for (const event of queued) {
-		const customer = event.customerHash ? await store.getCustomer(event.customerHash) : null
-		if (!customer?.providerCustomerId) {
-			skipped.push(await store.markUsageEventFailed(event.eventId, {
-				lastIngestErrorCode: 'DODO_CUSTOMER_ID_MISSING',
-				lastIngestErrorMessage: 'Queued usage event has no linked Dodo customer id.',
-				nextRetryAt: new Date(now.getTime() + retryDelayMs(event.ingestAttemptCount || 0)).toISOString(),
-			}))
-			continue
+		try {
+			const result = settle
+				? await settle(event, store)
+				: await store.markUsageEventIngested(event.eventId, {
+					settledBy: 'ledger_internal',
+					settledAt: new Date().toISOString(),
+				}, { settleFromAvailableBalance: true })
+			if (result?.usageEvent?.eventId !== event.eventId || result?.usageEvent?.state !== 'ingested') {
+				throw new BillingLedgerError('BILLING_SETTLEMENT_UNCONFIRMED', 'Settlement did not return a durable settled usage event.')
+			}
+			if (result.idempotent) skipped++
+			else marked.push(result)
+		} catch (err) {
+			const attempts = Math.max(0, Number(event.ingestAttemptCount) || 0) + 1
+			try {
+				const failure = await store.markUsageEventFailed(event.eventId, {
+					lastIngestErrorCode: /^[A-Z0-9_]{1,80}$/.test(String(err?.code || '')) ? err.code : 'LEDGER_USAGE_SETTLEMENT_FAILED',
+					// Provider exceptions can contain credentials or response bodies.
+					lastIngestErrorMessage: 'Usage settlement failed; the balance remains held pending reconciliation.',
+					nextRetryAt: new Date(Math.min(8640000000000000, now.getTime() + retryDelayMs(attempts))).toISOString(),
+				})
+				if (failure?.usageEvent?.state === 'ingested') skipped++
+				else failed.push(failure)
+			} catch {
+				// Failure reporting is not allowed to abort the remaining bounded batch.
+				failed.push({ eventId: event.eventId, errorCode: 'LEDGER_USAGE_FAILURE_RECORDING_FAILED' })
+			}
 		}
-		formatted.push(formatDodoUsageEvent(event, customer, { now }))
-		sourceEvents.push(event)
 	}
-	if (!formatted.length) {
-		return { ok: false, attempted: queued.length, ingested: 0, skipped: skipped.length, failed: queued.length, skippedEvents: skipped }
-	}
-	try {
-		const response = await ingest(formatted)
-		const marked = []
-		for (const event of sourceEvents) {
-			marked.push(await store.markUsageEventIngested(event.eventId, {
-				providerIngestedAt: new Date().toISOString(),
-				providerIngestedCount: response.ingestedCount,
-			}))
-		}
-		return { ok: true, attempted: queued.length, ingested: marked.length, skipped: skipped.length, failed: 0, response, marked, skippedEvents: skipped }
-	} catch (err) {
-		const failed = await markBatchFailed(store, sourceEvents, err)
-		return { ok: false, attempted: queued.length, ingested: 0, skipped: skipped.length, failed: failed.length, errorCode: err?.code || 'DODO_USAGE_INGEST_FAILED', failedEvents: failed, skippedEvents: skipped }
+	return {
+		ok: failed.length === 0,
+		provider: 'ledger_internal',
+		attempted: queued.length,
+		ingested: marked.length,
+		settled: marked.length,
+		skipped,
+		failed: failed.length,
+		...(failed.length ? { errorCode: 'LEDGER_USAGE_SETTLEMENT_FAILED' } : {}),
+		marked,
+		failedEvents: failed,
 	}
 }

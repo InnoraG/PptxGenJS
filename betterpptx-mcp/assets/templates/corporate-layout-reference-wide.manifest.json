@@ -1,0 +1,133 @@
+﻿{
+    "GeneratedAt":  "2026-06-01T23:07:27.2144161+03:00",
+    "Generator":  "tools/build-layout-com-matrix.ps1",
+    "Deck":  "native-layout-com-exhaustive-reference.pptx",
+    "SlideSizePoints":  {
+                            "Width":  960,
+                            "Height":  540
+                        },
+    "SlideSizeInches":  {
+                            "Width":  13.333,
+                            "Height":  7.5
+                        },
+    "Policy":  {
+                   "Enforcement":  "strict",
+                   "DefaultLayout":  "CORP_TITLE_CONTENT_SAFE",
+                   "AllowedLayouts":  [
+                                          "CORP_TITLE_HERO_LOCKED",
+                                          "CORP_SECTION_DIVIDER_LOCKED",
+                                          "CORP_TITLE_CONTENT_SAFE",
+                                          "CORP_TWO_COLUMN_COMPARE",
+                                          "CORP_IMAGE_WITH_CAPTION",
+                                          "CORP_DASHBOARD_METRICS",
+                                          "CORP_QUOTE_STATEMENT",
+                                          "CORP_APPENDIX_DENSE"
+                                      ]
+               },
+    "Layouts":  [
+                    {
+                        "Index":  1,
+                        "Id":  "title-hero",
+                        "Name":  "CORP_TITLE_HERO_LOCKED",
+                        "Family":  "opening",
+                        "Purpose":  "Title slide with fixed corporate header/footer/logo and title/subtitle placeholders.",
+                        "PlaceholderCount":  3,
+                        "FixedObjectCount":  9,
+                        "HasHeader":  true,
+                        "HasFooter":  true,
+                        "HasLogo":  true,
+                        "AllowedForNewSlides":  true
+                    },
+                    {
+                        "Index":  2,
+                        "Id":  "section-divider",
+                        "Name":  "CORP_SECTION_DIVIDER_LOCKED",
+                        "Family":  "section",
+                        "Purpose":  "Section divider with left rail, fixed logo/header/footer, and centered title only.",
+                        "PlaceholderCount":  2,
+                        "FixedObjectCount":  9,
+                        "HasHeader":  true,
+                        "HasFooter":  true,
+                        "HasLogo":  true,
+                        "AllowedForNewSlides":  true
+                    },
+                    {
+                        "Index":  3,
+                        "Id":  "title-content",
+                        "Name":  "CORP_TITLE_CONTENT_SAFE",
+                        "Family":  "content",
+                        "Purpose":  "Standard title plus governed body placeholder under fixed header/footer.",
+                        "PlaceholderCount":  4,
+                        "FixedObjectCount":  8,
+                        "HasHeader":  true,
+                        "HasFooter":  true,
+                        "HasLogo":  true,
+                        "AllowedForNewSlides":  true
+                    },
+                    {
+                        "Index":  4,
+                        "Id":  "two-column",
+                        "Name":  "CORP_TWO_COLUMN_COMPARE",
+                        "Family":  "comparison",
+                        "Purpose":  "Two equal governed body areas for comparisons; fixed chrome is outside content.",
+                        "PlaceholderCount":  3,
+                        "FixedObjectCount":  9,
+                        "HasHeader":  true,
+                        "HasFooter":  true,
+                        "HasLogo":  true,
+                        "AllowedForNewSlides":  true
+                    },
+                    {
+                        "Index":  5,
+                        "Id":  "image-led",
+                        "Name":  "CORP_IMAGE_WITH_CAPTION",
+                        "Family":  "media",
+                        "Purpose":  "Large image placeholder with caption and fixed brand elements.",
+                        "PlaceholderCount":  3,
+                        "FixedObjectCount":  9,
+                        "HasHeader":  true,
+                        "HasFooter":  true,
+                        "HasLogo":  true,
+                        "AllowedForNewSlides":  true
+                    },
+                    {
+                        "Index":  6,
+                        "Id":  "dashboard",
+                        "Name":  "CORP_DASHBOARD_METRICS",
+                        "Family":  "dashboard",
+                        "Purpose":  "KPI dashboard layout with chart/table placeholders and fixed status chip zone.",
+                        "PlaceholderCount":  4,
+                        "FixedObjectCount":  9,
+                        "HasHeader":  true,
+                        "HasFooter":  true,
+                        "HasLogo":  true,
+                        "AllowedForNewSlides":  true
+                    },
+                    {
+                        "Index":  7,
+                        "Id":  "quote",
+                        "Name":  "CORP_QUOTE_STATEMENT",
+                        "Family":  "statement",
+                        "Purpose":  "Quote/statement layout with controlled attribution placeholder and fixed logo/footer.",
+                        "PlaceholderCount":  2,
+                        "FixedObjectCount":  10,
+                        "HasHeader":  true,
+                        "HasFooter":  true,
+                        "HasLogo":  true,
+                        "AllowedForNewSlides":  true
+                    },
+                    {
+                        "Index":  8,
+                        "Id":  "appendix",
+                        "Name":  "CORP_APPENDIX_DENSE",
+                        "Family":  "appendix",
+                        "Purpose":  "Dense appendix layout with smaller title, body, table, date/footer, and slide number placeholders.",
+                        "PlaceholderCount":  5,
+                        "FixedObjectCount":  8,
+                        "HasHeader":  true,
+                        "HasFooter":  true,
+                        "HasLogo":  true,
+                        "AllowedForNewSlides":  true
+                    }
+                ]
+}

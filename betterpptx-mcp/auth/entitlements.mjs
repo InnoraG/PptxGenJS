@@ -1,39 +1,30 @@
 import * as crypto from 'node:crypto'
 import { createEntitlementStore } from './entitlement-store.mjs'
-import {
-	dodoActivationNeedsCustomerMapping,
-	extractDodoBillingIds,
-	lookupDodoBillingIdsForLicenseKey,
-	resolveDodoBillingCustomerForActivation,
-} from '../billing/customer-map.mjs'
-import { hashCustomerId } from '../billing/ledger-store.mjs'
+import { createBillingLedgerStore, hashCustomerId } from '../billing/ledger-store.mjs'
+import { createInstallUsageStore } from './install-identity.mjs'
+import { isProductionBillingEnvironment } from '../billing/security-policy.mjs'
+import { digestOperationPayload } from '../storage/operation-store.mjs'
 
 const DEFAULT_PRICING_URL = 'https://betterpptx.com/pricing'
 
 export const FREE_TIER_POLICY = {
 	plan: 'free',
-	maxDecksPerDay: Number(process.env.BETTERPPTX_FREE_DECKS_PER_DAY || 3),
-	premiumPreviewSlides: Number(process.env.BETTERPPTX_FREE_PREVIEW_SLIDES || 2),
-	gateStartsAfterSlide: Number(process.env.BETTERPPTX_FREE_PREVIEW_SLIDES || 2),
-	previewFeatures: ['gradients', 'animations', 'transitions', '3D models', 'narration/TTS', 'Text3D', 'WordArt', 'charts', 'tables', 'SmartArt'],
-	organizedMorphGuidance: {
-		enforcement: 'gentle',
-		principle: 'Slides 1 and 2 should progress the user story normally. Morph is an accessory transition and formatting layer, not a requirement to duplicate slide content or add showcase-only objects.',
-		preferredObjectKinds: ['text boxes', 'shapes', 'images', 'WordArt', 'Text3D', '3D models/GLB', 'shape-built SmartArt'],
-		advice: 'Use stable objectName values for related existing objects that should morph between slide 1 and slide 2. Prefer text boxes, shapes, images, WordArt, Text3D, 3D models/GLB, and shape-built SmartArt only when they naturally serve the deck. For uploaded or existing decks, do not add banners, badges, 3D, WordArt, Text3D, SmartArt, charts, or decorative panels merely to satisfy preview coverage.',
-	},
-	premiumMorphPattern: {
-		slideCount: 2,
-		baseSlide: 1,
-		morphSlide: 2,
-		transition: { type: 'morph', option: 'byObject' },
-		description: 'Premium preview uses an organized Morph-by-object transition into slide 2 while preserving normal story progression; slide duplication is optional, not required.',
-	},
+	publicationLimit: Number(process.env.BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW || 3),
+	windowDays: Number(process.env.BETTERPPTX_FREE_PUBLICATION_WINDOW_DAYS || 30),
+	narrationPreparationLimit: Number(process.env.BETTERPPTX_FREE_NARRATION_PREPARATIONS_PER_WINDOW || 3),
+	identityMediaLimit: Number(process.env.BETTERPPTX_FREE_IDENTITY_MEDIA_PER_WINDOW || 3),
+	creativeFeatureGate: 'none',
+	genericServerImageGeneration: 'retired',
 }
+
+const FREE_WINDOW_MS = () => Math.max(1, FREE_TIER_POLICY.windowDays) * 24 * 60 * 60 * 1000
+const FREE_RESERVATION_LEASE_MS = () => Math.max(60_000, Number(process.env.BETTERPPTX_FREE_RESERVATION_LEASE_MS) || 30 * 60 * 1000)
 
 const sessionEntitlements = new Map()
 const sessionUsage = new Map()
 const entitlementStore = createEntitlementStore()
+let installUsageStore = null
+let installBillingStore = null
 
 async function loadEntitlementStore() {
 	return await entitlementStore.load()
@@ -54,11 +45,70 @@ export function getEntitlementStoreInfo() {
 }
 
 function sessionKey(context = {}) {
-	return String(context.sessionId || 'stdio-default')
+	return String(context.installHash || context.sessionId || 'stdio-default')
 }
 
 function todayKey() {
 	return new Date().toISOString().slice(0, 10)
+}
+
+function currentInstallUsageStore() {
+	if (!installUsageStore) installUsageStore = createInstallUsageStore()
+	return installUsageStore
+}
+
+function currentInstallBillingStore() {
+	if (!installBillingStore) installBillingStore = createBillingLedgerStore()
+	return installBillingStore
+}
+
+function installHydrationTtlMs() {
+	return Math.max(0, Number(process.env.BETTERPPTX_INSTALL_STATE_TTL_MS || 5000) || 0)
+}
+
+function isPayPerJobEnabled() {
+	return String(process.env.BETTERPPTX_BILLING_MODEL || '').trim().toLowerCase() === 'pay_per_job'
+}
+
+export async function hydrateInstallBillingContext(context = {}, { force = false } = {}) {
+	const installHash = String(context.installHash || '').trim()
+	if (!installHash) return context
+	const state = context.installState || {}
+	context.installState = state
+	const now = Date.now()
+	const date = todayKey()
+	if (!force && state.date === date && now - Number(state.hydratedAt || 0) <= installHydrationTtlMs()) return context
+	const usagePromise = currentInstallUsageStore().getDailyUsage(installHash, date)
+	if (isPayPerJobEnabled()) {
+		state.date = date
+		state.hydratedAt = now
+		state.usage = await usagePromise
+		state.billingEntitlement = {
+			plan: 'job-paid',
+			provider: 'x402_job_payment',
+			credits: 0,
+			billingStatus: 'not_applicable',
+		}
+		return context
+	}
+	const [customer, usage] = await Promise.all([
+		currentInstallBillingStore().getCustomer(installHash),
+		usagePromise,
+	])
+	const effectiveCredits = Math.max(0, Number(customer?.effectiveAvailableCredits) || 0)
+	state.date = date
+	state.hydratedAt = now
+	state.usage = usage
+	state.billingEntitlement = {
+		plan: effectiveCredits > 0 ? 'credits' : 'free',
+		provider: 'crypto_credits',
+		credits: effectiveCredits,
+		billingCustomerHash: installHash,
+		billingStatus: customer?.billingStatus || 'active',
+		lastKnownCreditBalance: Number(customer?.availableBalanceCredits || 0),
+		lastBalanceSyncedAt: customer?.updatedAt || null,
+	}
+	return context
 }
 
 function nextUtcMidnightIso() {
@@ -152,10 +202,12 @@ function parseCreditKeys() {
 }
 
 function providerFromKey(key, explicit = 'auto') {
+	// PAYRAM-EXCLUSIVE: payment/credits provider is PayRam; Polar remains the subscription-key
+	// issuer. 'dodo' is never accepted.
 	const requested = String(explicit || 'auto').toLowerCase()
-	if (requested === 'polar' || requested === 'dodo') return requested
+	if (requested === 'polar' || requested === 'payram') return requested
 	if (/polar/i.test(key)) return 'polar'
-	if (/dodo/i.test(key)) return 'dodo'
+	if (/payram/i.test(key)) return 'payram'
 	return process.env.BETTERPPTX_BILLING_PROVIDER || 'provider-neutral'
 }
 
@@ -186,7 +238,6 @@ function validateMockLicenseKey(key, provider) {
 			message: 'The activation key was rejected by the mock license provider.',
 		}
 	}
-	const mockDodoCustomerId = String(provider || '').toLowerCase() === 'dodo' ? String(process.env.BETTERPPTX_MOCK_DODO_CUSTOMER_ID || '').trim() : ''
 	return {
 		ok: true,
 		plan: String(match.plan).toLowerCase() === 'credits' ? 'credits' : 'premium',
@@ -194,14 +245,6 @@ function validateMockLicenseKey(key, provider) {
 		source: 'mock-provider',
 		credits: Math.max(0, Number(match.credits) || 0),
 		providerStatus: 'valid',
-		...(mockDodoCustomerId ? {
-			providerCustomerId: mockDodoCustomerId,
-			creditEntitlementId: process.env.BETTERPPTX_DODO_CREDIT_ENTITLEMENT_ID || null,
-			billingCustomerHash: hashCustomerId(mockDodoCustomerId),
-			billingStatus: 'active',
-			lastKnownCreditBalance: Number(process.env.BETTERPPTX_MOCK_DODO_CREDIT_BALANCE || 0),
-			lastBalanceSyncedAt: new Date().toISOString(),
-		} : {}),
 	}
 }
 
@@ -268,64 +311,16 @@ async function validatePolarLicenseKey(key, provider) {
 	}
 }
 
-async function validateDodoLicenseKey(key, provider) {
-	const shouldTry = provider === 'dodo' || process.env.BETTERPPTX_DODO_VALIDATE_URL || process.env.DODO_PAYMENTS_API_KEY || process.env.BETTERPPTX_DODO_API_KEY
-	if (!shouldTry) return null
-	const url = process.env.BETTERPPTX_DODO_VALIDATE_URL || 'https://api.dodopayments.com/licenses/validate'
-	const headers = {}
-	const token = process.env.DODO_PAYMENTS_API_KEY || process.env.BETTERPPTX_DODO_API_KEY
-	if (token) headers.Authorization = `Bearer ${token}`
-	const response = await fetchJson(url, {
-		headers,
-		body: { license_key: key },
-		timeoutMs: process.env.BETTERPPTX_LICENSE_VALIDATE_TIMEOUT_MS,
-	})
-	if (!response.ok) {
-		return {
-			ok: false,
-			code: response.status === 404 ? 'INVALID_ACTIVATION_KEY' : 'LICENSE_VALIDATION_FAILED',
-			message: response.status === 404
-				? 'The Dodo license key could not be found.'
-				: `Dodo license validation failed with HTTP ${response.status}.`,
-		}
-	}
-	const data = response.data || {}
-	if (data.valid === false) return { ok: false, code: 'LICENSE_REVOKED', message: 'Dodo reported this license key as invalid.' }
-	const localTestCustomerId = key === process.env.BETTERPPTX_VERIFY_ACTIVATION_KEY ? String(process.env.BETTERPPTX_DODO_TEST_CUSTOMER_ID || '').trim() : ''
-	const localTestLicenseId = key === process.env.BETTERPPTX_VERIFY_ACTIVATION_KEY ? String(process.env.BETTERPPTX_DODO_TEST_LICENSE_ID || '').trim() : ''
-	const fallbackLicenseId = data.license_key_id || data.id || localTestLicenseId || null
-	let billingIds = extractDodoBillingIds({ providerData: data, providerLicenseId: fallbackLicenseId })
-	if (!billingIds.providerCustomerId) {
-		const privateLookup = await lookupDodoBillingIdsForLicenseKey(key)
-		billingIds = {
-			...billingIds,
-			...Object.fromEntries(Object.entries(privateLookup.ids || {}).filter(([_name, value]) => value !== null && value !== undefined && value !== '')),
-		}
-	}
-	return {
-		ok: true,
-		plan: 'premium',
-		provider: 'dodo',
-		source: 'dodo-api',
-		credits: 0,
-		providerStatus: data.valid === true ? 'valid' : 'accepted',
-		...billingIds,
-		providerLicenseId: billingIds.providerLicenseId || fallbackLicenseId,
-		...(localTestCustomerId && !billingIds.providerCustomerId ? {
-			providerCustomerId: localTestCustomerId,
-			billingCustomerHash: hashCustomerId(localTestCustomerId),
-			creditEntitlementId: process.env.BETTERPPTX_DODO_CREDIT_ENTITLEMENT_ID || process.env.BETTERPPTX_DODO_TEST_CREDIT_ENTITLEMENT_ID || null,
-			lastKnownCreditBalance: null,
-		} : {}),
-		providerData: data,
-	}
-}
 
 async function validateActivationKey(key, provider) {
 	const mode = licenseValidationMode()
+	const production = isProductionBillingEnvironment()
+	if (production && (/^sk_test_/i.test(key) || mode === 'mock')) {
+		return { ok: false, code: 'INVALID_ACTIVATION_KEY', message: 'Development activation is not available in production.' }
+	}
 	if (mode !== 'no-cache') {
 		const cached = await cachedValidationForKey(key)
-		if (cached) return cached
+		if (cached && !(production && /mock|dev-accept/i.test(String(cached.source || cached.originalSource || '')))) return cached
 	}
 
 	if (mode === 'mock') {
@@ -343,11 +338,7 @@ async function validateActivationKey(key, provider) {
 	}
 
 	if (mode !== 'configured') {
-		const providerChecks = provider === 'polar'
-			? [validatePolarLicenseKey]
-			: provider === 'dodo'
-				? [validateDodoLicenseKey]
-				: [validatePolarLicenseKey, validateDodoLicenseKey]
+		const providerChecks = [validatePolarLicenseKey]   // PAYRAM-EXCLUSIVE: credits settle via the PayRam ledger; Polar issues subscription keys
 		for (const check of providerChecks) {
 			try {
 				const result = await check(key, provider)
@@ -360,50 +351,51 @@ async function validateActivationKey(key, provider) {
 				}
 			}
 		}
-		if (mode === 'auto') {
+		if (mode === 'auto' && !production) {
 			const mock = validateMockLicenseKey(key, provider)
 			if (mock) return mock
 		}
 	}
 
-	if (process.env.BETTERPPTX_DEV_ACCEPT_ANY_ACTIVATION_KEY === '1' && /^sk_(polar|dodo|test)_/i.test(key)) {
+	if (!production && process.env.BETTERPPTX_DEV_ACCEPT_ANY_ACTIVATION_KEY === '1' && /^sk_(polar|payram|test)_/i.test(key)) {
 		return { ok: true, plan: 'premium', provider, source: 'dev-accept-any-key', credits: 0, providerStatus: 'dev-valid' }
 	}
 	return {
 		ok: false,
 		code: 'INVALID_ACTIVATION_KEY',
-		message: 'The activation key could not be verified. After Polar or Dodo purchase, use the exact subscription or credit key returned by checkout.',
+		message: 'The activation key could not be verified. After a Polar subscription or PayRam credit purchase, use the exact key returned by checkout.',
 	}
 }
 
 export function explainPlan() {
 	return {
 		product: 'BetterPPTX',
-		billingProviders: ['polar', 'dodo'],
+		billingProviders: ['polar', 'payram'],
 		billingModel: 'hybrid subscription plus credit packs',
 		free: {
 			plan: 'free',
 			included: [
-				'two-slide premium preview',
-				'gradients, animations, transitions, 3D, and narration on slides 1-2',
-				'basic slide creation and basic edits beyond slide 2',
-				'organized Morph-by-object transition into slide 2',
+				'three complete downloadable native-editable presentations per rolling 30-day window',
+				'full authoring vocabulary with AI-owned geometry, style, timing, and composition',
+				'up to three measured narration preparations per rolling window',
+				'up to three consented custom talking-head generations per rolling window',
+				'up to three experimental custom rigged-3D persona generations per rolling window',
 				'option discovery',
 				'package validation',
 			],
 			limits: {
-				decksPerDay: FREE_TIER_POLICY.maxDecksPerDay,
-				premiumPreviewSlides: FREE_TIER_POLICY.premiumPreviewSlides,
-				premiumFeatureGateStartsAfterSlide: FREE_TIER_POLICY.gateStartsAfterSlide,
-				previewFeatures: FREE_TIER_POLICY.previewFeatures,
-				organizedMorphGuidance: FREE_TIER_POLICY.organizedMorphGuidance,
-				requiredSlide2Transition: FREE_TIER_POLICY.premiumMorphPattern.transition,
+				publicationsPerWindow: FREE_TIER_POLICY.publicationLimit,
+				windowDays: FREE_TIER_POLICY.windowDays,
+				narrationPreparationsPerWindow: FREE_TIER_POLICY.narrationPreparationLimit,
+				identityMediaGenerationsPerFamily: FREE_TIER_POLICY.identityMediaLimit,
+				creativeFeatureGate: FREE_TIER_POLICY.creativeFeatureGate,
+				genericServerImageGeneration: 'retired; upload or provide AI-client-generated imagery instead',
 			},
 		},
 		premium: {
 			plan: 'premium',
-			included: ['premium features beyond slide 2', 'existing PPTX editing with full-deck premium features', 'larger showcase decks', 'full-deck narration/motion/3D workflows', 'no free watermark policy'],
-			transitionPattern: FREE_TIER_POLICY.premiumMorphPattern,
+			included: ['additional publications beyond the rolling free allowance', 'existing PPTX editing with the same full authoring vocabulary', 'larger production volume', 'no free watermark policy'],
+			creativeFeatureGate: 'none',
 		},
 		starter: {
 			plan: 'BetterPPTX Starter',
@@ -422,20 +414,91 @@ export function explainPlan() {
 		},
 		activation: {
 			tool: 'betterpptx.auth.activate_key',
-			instruction: 'After Polar or Dodo checkout, paste the returned key in chat so the AI can call activate_key.',
+			instruction: 'After Polar (subscription) or PayRam (crypto credits) checkout, paste the returned key in chat so the AI can call activate_key.',
 		},
 		...publicPlanUrls(),
 	}
 }
 
+/**
+ * Canonical public workflow-stage boundary.  This deliberately describes
+ * entitlement separately from an estimate: a zero confirmation threshold is
+ * not permission to spend, and a free draft is not a downloadable artifact.
+ */
+export function workflowStageEntitlements(context = {}) {
+	const auth = getAuthState(context)
+	const payPerJob = isPayPerJobEnabled()
+	const designatedReleaseTest = !isProductionBillingEnvironment() && process.env.BETTERPPTX_RELEASE_TEST_ENTITLEMENT === '1'
+	const settledJob = auth.source === 'settled-bounded-job'
+	// BETTERPPTX_FORCE_PLAN/PREMIUM unlocks implementation coverage in a
+	// non-production process; it is not customer payment permission and must not
+	// be described as final-delivery authorization.
+	const activatedCustomerEntitlement = auth.authenticated === true && auth.source !== 'environment' && !payPerJob
+	const coveredDelivery = settledJob || designatedReleaseTest || activatedCustomerEntitlement
+	return {
+		schemaVersion: 'betterpptx.workflow-stage-entitlements.v1',
+		billingModel: payPerJob ? 'pay_per_job' : 'credit_compatibility',
+		currentAuthorization: {
+			status: coveredDelivery ? 'covered' : 'not-covered',
+			scope: settledJob ? 'one-settled-job' : designatedReleaseTest ? 'owner-authorized-release-test' : activatedCustomerEntitlement ? 'active-customer-entitlement' : 'free-drafting',
+			plan: auth.plan || 'free',
+		},
+		freePreviewMeaning: `Full authoring and up to ${FREE_TIER_POLICY.publicationLimit} genuinely downloadable PPTX publications per rolling ${FREE_TIER_POLICY.windowDays}-day identity window. Re-download and exact idempotent replay do not consume another publication.`,
+		stages: [
+			{ id: 'learning', mutates: false, chargeable: false, authorization: 'none', output: 'capability guidance and executable lessons' },
+			{ id: 'planning', mutates: false, chargeable: false, authorization: 'none', output: 'dry-run plan, quote, blockers, and expected deltas' },
+			{ id: 'draft-commit', mutates: true, chargeable: false, authorization: 'free-boundary-or-active-entitlement', output: 'durable editable draft handle; not a delivery promise' },
+			{ id: 'source-export', mutates: false, chargeable: false, authorization: 'artifact-owner', output: 'authored/effective/current semantic source where supported' },
+			{ id: 'package-audit', mutates: false, chargeable: false, authorization: 'artifact-owner', output: 'deterministic package/native/timing evidence; no perceptual approval' },
+			{ id: 'media-resolution', mutates: true, chargeable: 'conditional', authorization: 'secured-bounded-free-preparation-or-explicit-paid-entitlement', output: 'content-addressed prepared media; narration preparation, custom talking-head, and custom rigged-3D persona routes have separate bounded sponsored allowances' },
+			{ id: 'final-save', mutates: true, chargeable: 'conditional', authorization: coveredDelivery ? 'covered-by-current-authorization' : 'rolling-free-publication-or-fresh-paid-entitlement', output: 'downloadable PPTX when save verification passes' },
+			{ id: 'recovery', mutates: false, chargeable: false, authorization: 'original-artifact-or-operation-owner', output: 'existing operation result or reissued download within retention; no duplicate charge' },
+		],
+		principles: {
+			confirmationRequiredIsPermission: false,
+			oldQuoteIsBlankCheque: false,
+			higherMaterializedCostRequires: 'new quote or an already-authorized cap that covers the exact materialized inputs',
+			discoveryIsEntitlement: false,
+		},
+	}
+}
+
 function currentUsage(context = {}) {
+	if (context.installHash) {
+		const state = context.installState || {}
+		if (!state.usage || state.date !== todayKey()) {
+			state.date = todayKey()
+			state.usage = { installHash: context.installHash, date: state.date, savedDecks: 0 }
+		}
+		context.installState = state
+		return state.usage
+	}
 	const key = `${sessionKey(context)}:${todayKey()}`
 	if (!sessionUsage.has(key)) sessionUsage.set(key, { savedDecks: 0 })
 	return sessionUsage.get(key)
 }
 
 export function getAuthState(context = {}) {
-	if (process.env.BETTERPPTX_FORCE_PLAN === 'premium' || process.env.BETTERPPTX_PREMIUM === '1') {
+	// A paid job execution is an internal, server-created authorization context
+	// attached only after the x402 quote has settled.  It is not read from tool
+	// arguments and therefore cannot be self-asserted by a public caller.  It
+	// grants the already-paid job its premium execution path without creating a
+	// reusable customer entitlement or credit balance.
+	const paidJob = context.__paidJobAuthorization
+	if (paidJob?.paymentModel === 'one_payment_per_job' && paidJob.settled === true
+		&& paidJob.jobId && paidJob.quoteId) {
+		return {
+			authenticated: true,
+			plan: 'premium',
+			provider: 'x402_job_payment',
+			source: 'settled-bounded-job',
+			credits: null,
+			billingModel: 'pay_per_job',
+			jobId: String(paidJob.jobId),
+			quoteId: String(paidJob.quoteId),
+		}
+	}
+	if (!isProductionBillingEnvironment() && (process.env.BETTERPPTX_FORCE_PLAN === 'premium' || process.env.BETTERPPTX_PREMIUM === '1')) {
 		return { authenticated: true, plan: 'premium', source: 'environment', credits: null }
 	}
 	const entitlement = sessionEntitlements.get(sessionKey(context))
@@ -454,7 +517,7 @@ export function getAuthState(context = {}) {
 				...publicPlanUrls(),
 				activation: {
 					tool: 'betterpptx.auth.activate_key',
-					instruction: 'The cached license validation expired. Paste the Polar or Dodo key again so the AI can revalidate it.',
+					instruction: 'The cached license validation expired. Paste the Polar or PayRam key again so the AI can revalidate it.',
 				},
 				policy: FREE_TIER_POLICY,
 			}
@@ -475,16 +538,39 @@ export function getAuthState(context = {}) {
 			quota: quotaForPlan(entitlement.plan, usage, entitlement.credits),
 		}
 	}
+	const installEntitlement = context.installState?.billingEntitlement
+	if (installEntitlement && Number(installEntitlement.credits || 0) > 0) {
+		return {
+			authenticated: true,
+			plan: 'credits',
+			provider: 'crypto_credits',
+			source: 'anonymous-install-credits',
+			credits: Number(installEntitlement.credits || 0),
+			quota: quotaForPlan('credits', usage, installEntitlement.credits),
+		}
+	}
+	if (context.authenticated === true && context.installHash) {
+		return {
+			authenticated: true,
+			plan: 'free',
+			provider: context.authenticationBasis || 'verified-account',
+			source: 'verified-account-free',
+			credits: 0,
+			quota: quotaForPlan('free', usage, 0),
+			policy: FREE_TIER_POLICY,
+			...publicPlanUrls(),
+		}
+	}
 	return {
 		authenticated: false,
 		plan: 'free',
-		source: 'anonymous-session',
+		source: context.installHash ? 'anonymous-install' : 'anonymous-session',
 		credits: 0,
 		quota: quotaForPlan('free', usage, 0),
 		...publicPlanUrls(),
 		activation: {
 			tool: 'betterpptx.auth.activate_key',
-			instruction: 'Paste the Polar or Dodo key after checkout. The AI can call activate_key and retry the premium request.',
+			instruction: 'Paste the Polar or PayRam key after checkout. The AI can call activate_key and retry the premium request.',
 		},
 		policy: FREE_TIER_POLICY,
 	}
@@ -492,6 +578,8 @@ export function getAuthState(context = {}) {
 
 export function getBillingEntitlement(context = {}) {
 	const entitlement = sessionEntitlements.get(sessionKey(context))
+	const installEntitlement = context.installState?.billingEntitlement
+	if (!entitlement && installEntitlement) return { ...installEntitlement }
 	if (!entitlement) return null
 	return {
 		plan: entitlement.plan,
@@ -511,23 +599,13 @@ export function getBillingEntitlement(context = {}) {
 }
 
 function quotaForPlan(plan, usage, credits = 0) {
-	if (plan === 'premium') return { decksRemainingToday: null, premiumPreviewSlides: null, credits }
-	const savedDecksToday = Math.max(0, Number(usage?.savedDecks || 0))
-	const decksRemainingToday = Math.max(0, FREE_TIER_POLICY.maxDecksPerDay - savedDecksToday)
+	if (plan === 'premium') return { publicationsRemaining: null, windowDays: FREE_TIER_POLICY.windowDays, credits }
 	return {
-		maxDecksPerDay: FREE_TIER_POLICY.maxDecksPerDay,
-		savedDecksToday,
-		decksRemainingToday,
-		resetsAt: nextUtcMidnightIso(),
-		resetWindow: 'UTC calendar day',
-		premiumPreviewSlides: FREE_TIER_POLICY.premiumPreviewSlides,
-		gateStartsAfterSlide: FREE_TIER_POLICY.gateStartsAfterSlide,
+		publicationLimit: FREE_TIER_POLICY.publicationLimit,
+		windowDays: FREE_TIER_POLICY.windowDays,
+		usageStatus: 'resolved atomically when a value-producing operation is reserved',
 		credits,
-		aiGuidance: decksRemainingToday <= 0
-			? 'Free save quota is exhausted. Explain the limit and call betterpptx.billing.portal if the user wants to continue today.'
-			: decksRemainingToday === 1
-				? 'One free deck save remains today. Validate before saving and tell the user premium or credits avoid the daily cap.'
-				: 'Free saves remain today. Continue normally, but validate before deck.save.',
+		aiGuidance: 'Author freely. Before final save, BetterPPTX atomically reserves one of three rolling free publication slots; exact replay and re-download do not consume another slot.',
 	}
 }
 
@@ -540,16 +618,6 @@ export async function activateKey(args = {}, context = {}) {
 	const fingerprint = keyHash(key)
 	const previous = await getPersistedKeyState(fingerprint) || {}
 	let billingMapping = null
-	if (dodoActivationNeedsCustomerMapping(validation, previous)) {
-		billingMapping = await resolveDodoBillingCustomerForActivation({ validation, previous, keyFingerprint: fingerprint })
-		if (!billingMapping.ok) {
-			return entitlementFailure(billingMapping.code || 'BILLING_SETUP_INCOMPLETE', 'activation', billingMapping.message || 'Billing setup is incomplete.', {
-				provider: 'dodo',
-				retrySafe: true,
-				...(billingMapping.details ? { billing: billingMapping.details } : {}),
-			})
-		}
-	}
 	const cacheTtl = validation.source === 'validation-cache'
 		? Math.max(0, Date.parse(previous?.cacheExpiresAt || '') - Date.now())
 		: licenseCacheTtlMs()
@@ -631,24 +699,25 @@ function featureMetadata(feature) {
 		gradient: 'gradients',
 		animation: 'animations',
 		transition: 'transitions',
+		media: 'audio/video media',
 		model3d: '3D models',
 		narration: 'narration/TTS',
+		avatar: 'avatar narration video',
 		wordArt: 'WordArt',
 		text3D: 'Text3D',
-		duplicate: 'premium slide duplication',
+		duplicate: 'slide duplication',
 		open_existing: 'existing PPTX editing',
-		quota: 'free quota',
-		slide_limit: 'premium features beyond the two-slide preview',
-		preview_transition: 'slide 2 Morph transition',
+		quota: 'rolling publication/provider quota',
+		slide_limit: 'legacy slide-limit request (creative slide limits are deactivated)',
+		preview_transition: 'legacy preview-transition request (Morph is optional)',
 	}
-	const correctionOnly = feature === 'preview_transition'
 	return {
 		feature,
 		label: labels[feature] || feature,
-		requiredPlan: correctionOnly ? 'free preview authoring correction' : (feature === 'quota' || feature === 'slide_limit' ? 'credits or premium' : 'premium'),
+		requiredPlan: feature === 'quota' ? 'available rolling allowance or explicit paid entitlement' : 'provider-specific entitlement when applicable',
 		...publicPlanUrls(feature),
 		activationTool: 'betterpptx.auth.activate_key',
-		premiumMorphPattern: feature === 'transition' || feature === 'preview_transition' || feature === 'slide_limit' ? FREE_TIER_POLICY.premiumMorphPattern : undefined,
+		creativeFeatureGate: 'none',
 	}
 }
 
@@ -695,21 +764,46 @@ function hasGradient(value) {
 	return false
 }
 
+// Single traversal replacing one hasGradient walk plus four containsKey walks
+// per operation; feature priority is applied by the caller, so collecting all
+// flags in one pass returns identical results.
+function collectPremiumFeatureFlags(value, flags) {
+	if (!value || typeof value !== 'object') return flags
+	if (Array.isArray(value)) {
+		for (const item of value) collectPremiumFeatureFlags(item, flags)
+		return flags
+	}
+	for (const [key, child] of Object.entries(value)) {
+		if (!flags.gradient && (/^gradient/.test(key) || (key === 'type' && String(child).toLowerCase() === 'gradient'))) flags.gradient = true
+		if (!flags.wordArt && key === 'wordArt') flags.wordArt = true
+		if (!flags.text3D && key === 'text3D') flags.text3D = true
+		if (!flags.animation && (key === 'animation' || key === 'animations' || key === 'motionPath')) flags.animation = true
+		if (!flags.transition && (key === 'transition' || key === 'transitions' || key === 'variants')) flags.transition = true
+		collectPremiumFeatureFlags(child, flags)
+	}
+	return flags
+}
+
 function standalonePremiumFeature(name) {
 	if (name === 'betterpptx.narration.synthesize') return 'narration'
+	if (name === 'betterpptx.avatar.render_job' || name === 'betterpptx.slide.add_avatar_narration' || name === 'betterpptx.deck.add_avatar_narration') return 'avatar'
+	if (name === 'betterpptx.assets.generate_rigged3d') return 'model3d'
 	return null
 }
 
 function requestedPremiumFeature(name, args = {}) {
 	if (name === 'betterpptx.slide.add_model3d') return 'model3d'
+	if (name === 'betterpptx.slide.add_media') return 'media'
 	if (name === 'betterpptx.deck.add_narration' || name === 'betterpptx.slide.add_narration') return 'narration'
+	if (name === 'betterpptx.avatar.render_job' || name === 'betterpptx.slide.add_avatar_narration' || name === 'betterpptx.deck.add_avatar_narration') return 'avatar'
 	if (name === 'betterpptx.slide.animate_shapes') return 'animation'
 	if (name === 'betterpptx.deck.autoplay' || name === 'betterpptx.deck.set_transitions_all' || name === 'betterpptx.slide.set_transition') return 'transition'
-	if (hasGradient(args)) return 'gradient'
-	if (containsKey(args, new Set(['wordArt']))) return 'wordArt'
-	if (containsKey(args, new Set(['text3D']))) return 'text3D'
-	if (containsKey(args, new Set(['animation', 'animations', 'motionPath']))) return 'animation'
-	if (containsKey(args, new Set(['transition', 'transitions', 'variants']))) return 'transition'
+	const featureFlags = collectPremiumFeatureFlags(args, { gradient: false, wordArt: false, text3D: false, animation: false, transition: false })
+	if (featureFlags.gradient) return 'gradient'
+	if (featureFlags.wordArt) return 'wordArt'
+	if (featureFlags.text3D) return 'text3D'
+	if (featureFlags.animation) return 'animation'
+	if (featureFlags.transition) return 'transition'
 	if (name === 'betterpptx.deck.set_show_settings' && (args.showAnimation || args.showNarration)) return args.showNarration ? 'narration' : 'animation'
 	return null
 }
@@ -752,6 +846,11 @@ function collectOperationSlideIndexes(name, args = {}, helpers = {}) {
 			for (let i = 0; i < copies; i++) indexes.push(count + i)
 		}
 	}
+	if (name === 'betterpptx.slide.reorder') {
+		push(args.fromIndex)
+		push(args.toIndex)
+		if (Array.isArray(args.order)) args.order.forEach(push)
+	}
 	if (name === 'betterpptx.deck.add_narration' && Array.isArray(args.slides)) {
 		for (const item of args.slides) push(item?.slideIndex)
 	}
@@ -764,142 +863,169 @@ function collectOperationSlideIndexes(name, args = {}, helpers = {}) {
 	return [...new Set(indexes)].sort((a, b) => a - b)
 }
 
-function isPreviewSlideIndex(index) {
-	return index < FREE_TIER_POLICY.premiumPreviewSlides
-}
-
-function isMorphByObjectTransition(transition) {
-	if (!transition || typeof transition !== 'object') return false
-	const type = String(transition.type || transition.transition || '').toLowerCase()
-	const option = String(transition.option || transition.morphOption || 'byObject').toLowerCase()
-	return type === 'morph' && (option === 'byobject' || option === 'object')
-}
-
-function secondSlideTransitionFromDeck(args = {}, helpers = {}) {
-	if (!helpers.deckSlideTransition) return null
-	const transition = helpers.deckSlideTransition(args.deckId, 1)
-	return transition && typeof transition === 'object' ? transition : null
-}
-
-function previewTransitionFailure(received, extra = {}) {
-	return entitlementFailure(
-		'INVALID_PREMIUM_PREVIEW_TRANSITION',
-		'preview_transition',
-		'The free preview uses slides 1 and 2 as the premium showcase, so slide 2 must enter with an organized Morph-by-object transition.',
-		{
-			received: received || null,
-			requiredTransition: FREE_TIER_POLICY.premiumMorphPattern.transition,
-			suggestion: {
-				preferredWorkflow: 'Create slides 1 and 2 as normal story beats. Use Morph as an accessory transition into slide 2, and use stable objectName values only for related visual/accessory objects that should morph.',
-				doNotForce: 'Do not duplicate slide 1 just to satisfy the preview. Duplicate only when the user story naturally calls for the same scene evolving.',
-				morphFriendlyObjects: FREE_TIER_POLICY.organizedMorphGuidance.preferredObjectKinds,
-				transition: FREE_TIER_POLICY.premiumMorphPattern.transition,
-				authoringHints: [
-					'Use text boxes, shapes, images, WordArt, Text3D, 3D models/GLB, and shape-built SmartArt for the strongest Morph results.',
-					'Let new story content appear naturally; only matched visual objects need stable names across slide 1 and slide 2.',
-					'For 3D models, keep the same model asset for related objects and change position, size, camera/view, or rotation.',
-				],
-			},
-			freePolicy: FREE_TIER_POLICY,
-			...extra,
-		},
-	)
-}
-
-function validatePreviewMorphTransition(name, args = {}, helpers = {}) {
-	const count = deckSlideCount(args, helpers)
-	if (name === 'betterpptx.slide.add' && count === 1 && args.transition && !isMorphByObjectTransition(args.transition)) {
-		return previewTransitionFailure(args.transition, { operation: name, targetSlide: 2 })
-	}
-	if (name === 'betterpptx.slide.duplicate' && count === 1 && args.transition && !isMorphByObjectTransition(args.transition)) {
-		return previewTransitionFailure(args.transition, { operation: name, targetSlide: 2 })
-	}
-	if (name === 'betterpptx.deck.set_transitions_all' && (count ?? 0) >= 2) {
-		const variants = Array.isArray(args.variants) ? args.variants : []
-		const transition = variants.length ? variants[1 % variants.length] : args.transition
-		if (!isMorphByObjectTransition(transition)) return previewTransitionFailure(transition, { operation: name, targetSlide: 2 })
-	}
-	if (name === 'betterpptx.slide.set_transition' && slideIndex(args.slideIndex) === 1) {
-		if (!isMorphByObjectTransition(args.transition)) return previewTransitionFailure(args.transition, { operation: name, targetSlide: 2 })
-	}
-	if (name === 'betterpptx.slide.update' && slideIndex(args.slideIndex) === 1 && containsKey(args, new Set(['transition']))) {
-		const transition = args.patch && Object.prototype.hasOwnProperty.call(args.patch, 'transition') ? args.patch.transition : args.transition
-		if (!isMorphByObjectTransition(transition)) return previewTransitionFailure(transition, { operation: name, targetSlide: 2 })
-	}
-	if (name === 'betterpptx.deck.autoplay' && (count ?? 0) >= 2) {
-		const existing = secondSlideTransitionFromDeck(args, helpers)
-		const fallback = args.defaultTransition || null
-		const effective = existing || fallback
-		if (!isMorphByObjectTransition(effective)) return previewTransitionFailure(effective, { operation: name, targetSlide: 2 })
-	}
-	if (name === 'betterpptx.deck.save' && (count ?? 0) >= 2) {
-		const transition = secondSlideTransitionFromDeck(args, helpers)
-		if (!isMorphByObjectTransition(transition)) return previewTransitionFailure(transition, { operation: name, targetSlide: 2 })
-	}
-	return null
-}
-
 export function requireEntitlement(name, args = {}, context = {}, helpers = {}) {
 	if (name.startsWith('betterpptx.auth.') || name.startsWith('betterpptx.billing.')) return null
 	const state = getAuthState(context)
 	const hasCredits = state.plan === 'credits' && Number(state.credits || 0) > 0
 	if (state.plan === 'premium' || hasCredits) return null
-
-	const standaloneFeature = standalonePremiumFeature(name)
-	if (standaloneFeature) {
-		return entitlementFailure('REQUIRES_UPGRADE', standaloneFeature, `${featureMetadata(standaloneFeature).label} requires BetterPPTX Premium or credits.`, {
+	if (name === 'betterpptx.assets.generate_rigged3d' && (!Array.isArray(args.imageHandles) || args.imageHandles.length < 2)) {
+		return entitlementFailure('REQUIRES_PAID_ENTITLEMENT', 'model3d', 'The sponsored custom 3D persona route requires two to four authorized multiview body-image handles. Prompt-only or single-view generation is outside the free identity-media allowance.', {
 			currentPlan: state.plan,
-			freePolicy: FREE_TIER_POLICY,
-			note: standaloneFeature === 'narration'
-				? 'For the free two-slide preview, use slide.add_narration or deck.add_narration against slideIndex 0 or 1 so narration is tied to preview slides.'
-				: undefined,
+			sponsoredRoute: { imageHandles: { minItems: 2, maxItems: 4 }, experimentalConfirmed: true },
 		})
 	}
+	// Free authoring is capability-complete. Scarce value is controlled at the
+	// publication/provider boundary by the atomic rolling ledger below, not by
+	// rewriting the AI's slides, geometry, timing, or feature selection.
+	return null
+}
 
-	const indexes = collectOperationSlideIndexes(name, args, helpers)
-	const firstBlocked = indexes.find(index => !isPreviewSlideIndex(index))
-	if (firstBlocked !== undefined) {
-		if (name === 'betterpptx.slide.duplicate') {
-			return entitlementFailure('REQUIRES_UPGRADE', 'duplicate', `Free mode cannot duplicate slides into slide ${firstBlocked + 1} because duplication can carry premium objects beyond the two-slide preview. Add a new plain slide instead, or activate Premium.`, {
-				currentPlan: state.plan,
-				requestedSlide: firstBlocked + 1,
-				premiumPreviewSlides: FREE_TIER_POLICY.premiumPreviewSlides,
-				freePolicy: FREE_TIER_POLICY,
-			})
-		}
-		const feature = requestedPremiumFeature(name, args)
-		if (feature) {
-			return entitlementFailure('REQUIRES_UPGRADE', 'slide_limit', `${featureMetadata(feature).label} are premium beyond slide ${FREE_TIER_POLICY.premiumPreviewSlides}. Slide ${firstBlocked + 1} requires Premium or credits for that feature.`, {
-				currentPlan: state.plan,
-				requestedSlide: firstBlocked + 1,
-				requestedFeature: featureMetadata(feature),
-				premiumPreviewSlides: FREE_TIER_POLICY.premiumPreviewSlides,
-				freePolicy: FREE_TIER_POLICY,
-				suggestion: 'Keep slides beyond the preview to basic text, shapes, images, charts, and tables, or activate Premium for full-deck premium features.',
-			})
-		}
+function rollingIdentity(context = {}) {
+	return String(context.installHash || context.quotaIdentityHash || '').trim()
+}
+
+function freeValuePolicyForTool(name, args = {}, { purpose = 'execution' } = {}) {
+	if (name === 'betterpptx.deck.save') return {
+		category: 'deck-publication',
+		limit: FREE_TIER_POLICY.publicationLimit,
+		workflowStage: 'final-save',
+		accountingTool: 'betterpptx.deck.save',
+		reservationTiming: 'on-successful-save',
 	}
-
-	const transitionPolicy = validatePreviewMorphTransition(name, args, helpers)
-	if (transitionPolicy) return transitionPolicy
-
-	if (name === 'betterpptx.deck.save') {
-		if ((state.quota?.decksRemainingToday ?? 0) <= 0) {
-			return entitlementFailure('QUOTA_EXCEEDED', 'quota', 'The free daily deck quota is exhausted.', {
-				currentPlan: state.plan,
-				quota: state.quota,
-			})
-		}
+	// A spec estimate is the canonical quote for compiled authoring plus final
+	// save/delivery.  It therefore reports the same publication allowance as
+	// deck.save, while execution accounting remains attached only to deck.save.
+	// This distinction prevents read-only estimates or draft commits from
+	// reserving/consuming a publication slot.
+	if (purpose === 'estimate'
+		&& name === 'betterpptx.deck.generate_from_spec'
+		&& args?.spec && typeof args.spec === 'object' && !Array.isArray(args.spec)) return {
+		category: 'deck-publication',
+		limit: FREE_TIER_POLICY.publicationLimit,
+		workflowStage: 'final-save',
+		accountingTool: 'betterpptx.deck.save',
+		reservationTiming: 'on-successful-save',
+		classificationBasis: 'compiled-spec-plus-final-save-quote',
+	}
+	if (name === 'betterpptx.narration.synthesize') return {
+		category: 'narration-preparation',
+		limit: FREE_TIER_POLICY.narrationPreparationLimit,
+		workflowStage: 'media-resolution',
+		accountingTool: name,
+		reservationTiming: 'on-successful-preparation',
+	}
+	if (name === 'betterpptx.avatar.render_job') return {
+		category: 'talking-head-generation',
+		limit: FREE_TIER_POLICY.identityMediaLimit,
+		workflowStage: 'media-resolution',
+		accountingTool: name,
+		reservationTiming: 'on-provider-execution',
+	}
+	if (name === 'betterpptx.assets.generate_rigged3d' && Array.isArray(args.imageHandles) && args.imageHandles.length >= 2) return {
+		category: 'rigged3d-persona-generation',
+		limit: FREE_TIER_POLICY.identityMediaLimit,
+		workflowStage: 'media-resolution',
+		accountingTool: name,
+		reservationTiming: 'on-provider-execution',
 	}
 	return null
 }
 
+function freeValueError(code, message, details = {}) {
+	const error = new Error(message)
+	error.code = code
+	error.retryable = false
+	error.details = details
+	return error
+}
+
+export async function reserveFreeValue(name, args = {}, context = {}) {
+	const policy = freeValuePolicyForTool(name, args)
+	if (!policy) return null
+	if (process.env.BETTERPPTX_PUBLIC_BLACK_BOX !== '1' && process.env.BETTERPPTX_REQUIRE_FREE_VALUE_IDENTITY !== '1') return null
+	const auth = getAuthState(context)
+	const hasPaidEntitlement = (auth.plan === 'premium' || auth.plan === 'credits') && auth.source !== 'environment'
+	if (hasPaidEntitlement || auth.source === 'settled-bounded-job') return null
+	const identityHash = rollingIdentity(context)
+	if (!identityHash) {
+		throw freeValueError('FREE_VALUE_IDENTITY_REQUIRED', 'A secured installation or supported connector identity is required for the free publication and identity-media allowance.', {
+			category: policy.category,
+			resolution: 'Use the official BetterPPTX connector/installation identity, or activate a paid entitlement.',
+		})
+	}
+	const reservationId = String(args.idempotencyKey || args.idempotency_key || '').trim()
+	if (!reservationId) throw freeValueError('IDEMPOTENCY_KEY_REQUIRED', 'This free value-producing operation requires an idempotencyKey.')
+	// A key alone is not proof of an exact replay. The durable-operation ledger
+	// rejects key conflicts when enabled, but quota must also protect fallback
+	// execution (including different decks with independent replay caches).
+	// Only omit the top-level key aliases; identically named authored fields
+	// inside a spec remain part of the request. Do not adopt legacy unbound IDs.
+	const requestArgs = Object.fromEntries(Object.entries(args).filter(([key]) => key !== 'idempotencyKey' && key !== 'idempotency_key'))
+	const requestDigest = digestOperationPayload({ tool: name, idempotencyKey: reservationId, args: requestArgs })
+	const request = {
+		category: policy.category,
+		reservationId: `free-value.v2:${requestDigest}`,
+		limit: policy.limit,
+		windowMs: FREE_WINDOW_MS(),
+		leaseMs: FREE_RESERVATION_LEASE_MS(),
+	}
+	const result = await currentInstallUsageStore().reserveRollingUsage(identityHash, request)
+	if (!result.ok) {
+		throw freeValueError('FREE_VALUE_QUOTA_EXHAUSTED', `The free ${policy.category} allowance is exhausted for the current rolling window.`, {
+			...result,
+			paidAlternative: publicPlanUrls(policy.category),
+			noChargeOrArtifactCreated: true,
+		})
+	}
+	return { identityHash, request, status: result.status, snapshot: result }
+}
+
+export async function commitFreeValue(reservation, metadata = {}) {
+	if (!reservation) return null
+	return currentInstallUsageStore().commitRollingUsage(reservation.identityHash, {
+		...reservation.request,
+		metadata,
+	})
+}
+
+export async function releaseFreeValue(reservation) {
+	if (!reservation) return null
+	return currentInstallUsageStore().releaseRollingUsage(reservation.identityHash, reservation.request)
+}
+
+export async function getFreeValueStatus(name, args = {}, context = {}, options = {}) {
+	const policy = freeValuePolicyForTool(name, args, options)
+	if (!policy) return { eligible: false, reason: 'not-a-sponsored-value-route' }
+	const route = {
+		workflowStage: policy.workflowStage,
+		accountingTool: policy.accountingTool,
+		reservationTiming: policy.reservationTiming,
+		...(policy.classificationBasis ? { classificationBasis: policy.classificationBasis } : {}),
+	}
+	const auth = getAuthState(context)
+	const hasPaidEntitlement = (auth.plan === 'premium' || auth.plan === 'credits') && auth.source !== 'environment'
+	if (hasPaidEntitlement || auth.source === 'settled-bounded-job') return { eligible: false, reason: 'covered-by-paid-entitlement', category: policy.category, route }
+	const identityHash = rollingIdentity(context)
+	if (!identityHash) return { eligible: false, reason: 'secured-identity-required', category: policy.category, limit: policy.limit, windowDays: FREE_TIER_POLICY.windowDays, route }
+	const snapshot = await currentInstallUsageStore().getRollingUsage(identityHash, {
+		category: policy.category,
+		limit: policy.limit,
+		windowMs: FREE_WINDOW_MS(),
+	})
+	return {
+		eligible: snapshot.remaining > 0,
+		reason: snapshot.remaining > 0 ? 'bounded-free-allowance-available' : 'bounded-free-allowance-exhausted',
+		...snapshot,
+		route,
+	}
+}
+
 export async function recordSuccessfulUse(name, context = {}) {
+	// Rolling free-value accounting is committed transactionally by the engine.
+	// Keep this hook for legacy paid-credit accounting only.
 	if (name !== 'betterpptx.deck.save') return
 	const state = getAuthState(context)
-	if (state.plan === 'premium') return
-	const usage = currentUsage(context)
-	usage.savedDecks += 1
+	if (state.plan !== 'credits' || state.provider === 'crypto_credits') return
 	if (state.plan === 'credits') {
 		const entitlement = sessionEntitlements.get(sessionKey(context))
 		if (entitlement && entitlement.credits > 0) {

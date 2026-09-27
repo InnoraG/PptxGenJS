@@ -1,0 +1,199 @@
+{
+  "schema": "betterpptx.kimodo-presenter-motion-profile.v1",
+  "strategy": "standing-presenter-replacement",
+  "candidateGlbName": "default-presenter-kimodo-candidate.glb",
+  "generator": {
+    "provider": "nvidia-kimodo",
+    "model": "Kimodo-SOMA-RP-v1.1",
+    "modelRepository": "nvidia/Kimodo-SOMA-RP-v1.1",
+    "modelRevision": "6c9233af1180b8151e3c4703477104af5dce9dd5",
+    "codeRepository": "https://github.com/nv-tlabs/kimodo.git",
+    "codeRevision": "1aece8c124d73d255ceff5086d983b844c9f4e94",
+    "codeLicense": "Apache-2.0",
+    "modelLicense": "NVIDIA Open Model License",
+    "textEncoder": {
+      "baseRepository": "meta-llama/Meta-Llama-3-8B-Instruct",
+      "baseRevision": "8afb486c1db24fe5011ec46dfbe5b5dccdb575c2",
+      "baseLicense": "Meta Llama 3 Community License",
+      "accessPolicy": "official-gated-repository-only",
+      "mntpAdapterRepository": "McGill-NLP/LLM2Vec-Meta-Llama-3-8B-Instruct-mntp",
+      "mntpAdapterRevision": "31474e395ada192e8ed1586db6be79fb3b70c9c0",
+      "supervisedAdapterRepository": "McGill-NLP/LLM2Vec-Meta-Llama-3-8B-Instruct-mntp-supervised",
+      "supervisedAdapterRevision": "baa8ebf04a1c2500e61288e7dad65e8ae42601a7",
+      "unofficialMirrorFallbackForbidden": true
+    },
+    "skeleton": "SOMA77",
+    "fps": 30,
+    "standardTPoseBvh": true
+  },
+  "defaults": {
+    "candidateCount": 4,
+    "diffusionSteps": 100,
+    "canaryCandidateCount": 1,
+    "canaryDiffusionSteps": 20,
+    "constraintGuidance": [2.5, 4.0],
+    "textGuidance": [2.5, 2.5],
+    "cfgType": "separated",
+    "firstHeadingAngle": 0.0,
+    "rootMargin": 0.04,
+    "refineBestCandidate": true,
+    "postProcessing": true,
+    "minimumFootContactCoverage": 0.2,
+    "minimumPromotionScore": 0.72,
+    "maximumRestReturnError": 0.14,
+    "maximumLoopSeamError": 0.13,
+    "maximumPlateauDeviation": 0.075,
+    "maximumFootSkate": 0.10,
+    "heightBands": {
+      "low": [0.18, 0.48],
+      "mid": [0.46, 0.76],
+      "high": [0.74, 1.08]
+    }
+  },
+  "promotionPolicy": {
+    "initialState": "CANDIDATE_ONLY",
+    "requireAllKinematicGates": true,
+    "requireRetargetValidation": true,
+    "requirePowerPointOracleTimeline": true,
+    "requireG5DistributionRecord": true,
+    "requireOwnerReleaseApproval": true,
+    "automaticReplacementForbidden": true
+  },
+  "slots": [
+    {
+      "slot": 0,
+      "slug": "talk",
+      "seed": 84200,
+      "durationSeconds": 4.8,
+      "promptVariants": [
+        "A polished business presenter stands upright and speaks conversationally, using small alternating open-hand gestures near the torso. The feet remain planted, the hips stay at full standing height, the knees remain straight and relaxed, and the person never sits, crouches, walks, or spreads the arms into a T-pose. Start and finish in the same calm neutral standing pose.",
+        "A professional speaker delivers a short explanation while standing, with restrained natural hand beats at waist-to-chest height and subtle head engagement. Keep both feet fixed and the body fully upright; no chair, no sitting, no squatting, no walking, and no T-pose. Return completely to neutral.",
+        "An upright presenter talks to an audience with two or three gentle alternating hand gestures close to the body. Maintain a stable standing silhouette and planted feet throughout, never lower the hips, never sit or crouch, and end in the original relaxed pose."
+      ],
+      "plateaus": [],
+      "authoredTargets": [
+        { "frameMs": 120, "joints": {
+          "LeftHand": { "referenceJoint": "Hips", "offsetBodyHeights": [-0.22, 0.02, 0.08] },
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.22, 0.02, 0.08] }
+        } },
+        { "frameMs": 1200, "joints": {
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.27, 0.28, 0.18] }
+        } },
+        { "frameMs": 2350, "joints": {
+          "LeftHand": { "referenceJoint": "Hips", "offsetBodyHeights": [-0.27, 0.26, 0.18] }
+        } },
+        { "frameMs": 3450, "joints": {
+          "LeftHand": { "referenceJoint": "Hips", "offsetBodyHeights": [-0.34, 0.23, 0.16] },
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.34, 0.23, 0.16] }
+        } },
+        { "frameMs": 4650, "joints": {
+          "LeftHand": { "referenceJoint": "Hips", "offsetBodyHeights": [-0.22, 0.02, 0.08] },
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.22, 0.02, 0.08] }
+        } }
+      ],
+      "qualityGates": {
+        "restReturn": true,
+        "feetPlanted": true,
+        "inPlace": true,
+        "minimumHipHeightRatio": 0.43,
+        "maximumHipHeightRange": 0.12,
+        "maximumAuthoredTargetError": 0.34
+      }
+    },
+    {
+      "slot": 1,
+      "slug": "enumerate",
+      "seed": 84210,
+      "durationSeconds": 4.6,
+      "promptVariants": [
+        "A standing business presenter clearly enumerates three points with three distinct right-hand counting beats near chest height, then lowers the hand. The other arm stays relaxed, both feet remain planted, the hips stay fully upright, and the arms never form a T-pose. Start and finish neutral.",
+        "A professional presenter counts one, two, three using three deliberate hand beats or finger-count gestures close to the torso. Remain standing tall without stepping, sitting, squatting, or extending both arms sideways; return to a calm neutral pose.",
+        "An upright speaker lists three items with a clear sequence of three compact right-hand gestures. Keep the lower body still and fully standing, avoid a T-pose, and finish in the original relaxed stance."
+      ],
+      "plateaus": [],
+      "authoredTargets": [
+        { "frameMs": 120, "joints": {
+          "LeftHand": { "referenceJoint": "Hips", "offsetBodyHeights": [-0.22, 0.02, 0.08] },
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.22, 0.02, 0.08] }
+        } },
+        { "frameMs": 1050, "joints": {
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.22, 0.32, 0.20] }
+        } },
+        { "frameMs": 2150, "joints": {
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.28, 0.36, 0.22] }
+        } },
+        { "frameMs": 3250, "joints": {
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.34, 0.40, 0.20] }
+        } },
+        { "frameMs": 4450, "joints": {
+          "LeftHand": { "referenceJoint": "Hips", "offsetBodyHeights": [-0.22, 0.02, 0.08] },
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.22, 0.02, 0.08] }
+        } }
+      ],
+      "qualityGates": {
+        "restReturn": true,
+        "feetPlanted": true,
+        "inPlace": true,
+        "minimumHipHeightRatio": 0.43,
+        "maximumHipHeightRange": 0.12,
+        "maximumAuthoredTargetError": 0.34
+      }
+    },
+    {
+      "slot": 2,
+      "slug": "clap",
+      "seed": 84220,
+      "durationSeconds": 4.2,
+      "promptVariants": [
+        "A professional presenter remains standing tall and performs exactly three restrained claps at chest height, separating the hands clearly between contacts, then returns both arms to neutral. Both feet stay planted and the person never sits, crouches, walks, or enters a T-pose.",
+        "An upright business presenter gives three natural applause claps in front of the chest and settles back to a relaxed standing pose. Keep the hips at full height, feet fixed, and knees relaxed but not bent into a squat or seated pose.",
+        "A standing speaker performs two or three clear hand claps at chest level with visible separation between each contact, then lowers the hands. No chair, no sitting, no crouching, no stepping, and no T-pose."
+      ],
+      "plateaus": [],
+      "authoredTargets": [
+        { "frameMs": 120, "joints": {
+          "LeftHand": { "referenceJoint": "Hips", "offsetBodyHeights": [-0.22, 0.02, 0.08] },
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.22, 0.02, 0.08] }
+        } },
+        { "frameMs": 900, "joints": {
+          "LeftHand": { "referenceJoint": "Hips", "offsetBodyHeights": [-0.28, 0.34, 0.20] },
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.28, 0.34, 0.20] }
+        } },
+        { "frameMs": 1250, "joints": {
+          "LeftHand": { "referenceJoint": "Hips", "offsetBodyHeights": [-0.015, 0.34, 0.22] },
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.015, 0.34, 0.22] }
+        } },
+        { "frameMs": 1600, "joints": {
+          "LeftHand": { "referenceJoint": "Hips", "offsetBodyHeights": [-0.28, 0.34, 0.20] },
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.28, 0.34, 0.20] }
+        } },
+        { "frameMs": 1950, "joints": {
+          "LeftHand": { "referenceJoint": "Hips", "offsetBodyHeights": [-0.015, 0.34, 0.22] },
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.015, 0.34, 0.22] }
+        } },
+        { "frameMs": 2300, "joints": {
+          "LeftHand": { "referenceJoint": "Hips", "offsetBodyHeights": [-0.28, 0.34, 0.20] },
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.28, 0.34, 0.20] }
+        } },
+        { "frameMs": 2650, "joints": {
+          "LeftHand": { "referenceJoint": "Hips", "offsetBodyHeights": [-0.015, 0.34, 0.22] },
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.015, 0.34, 0.22] }
+        } },
+        { "frameMs": 4080, "joints": {
+          "LeftHand": { "referenceJoint": "Hips", "offsetBodyHeights": [-0.22, 0.02, 0.08] },
+          "RightHand": { "referenceJoint": "Hips", "offsetBodyHeights": [0.22, 0.02, 0.08] }
+        } }
+      ],
+      "qualityGates": {
+        "restReturn": true,
+        "feetPlanted": true,
+        "inPlace": true,
+        "minimumHipHeightRatio": 0.43,
+        "maximumHipHeightRange": 0.12,
+        "minimumHandContactCount": 2,
+        "maximumHandContactDistance": 0.14,
+        "maximumAuthoredTargetError": 0.34
+      }
+    }
+  ]
+}

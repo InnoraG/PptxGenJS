@@ -1,0 +1,13 @@
+{
+  "canonicalSkeletonVersion": "2",
+  "clipMap": {
+    "talk": 0,
+    "enumerate": 1,
+    "clap": 2
+  },
+  "clipNames": [
+    "00_talk",
+    "01_enumerate",
+    "02_clap"
+  ]
+}

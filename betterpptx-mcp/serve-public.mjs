@@ -25,6 +25,8 @@ import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { startBetterPptxHttp } from './server-http.mjs'
 import { setDownloadConfig } from './engine.mjs'
+import { publicToolList } from './blackbox.mjs'
+import { TOOLS } from './tools.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -76,6 +78,7 @@ HTTPS reverse proxy / named tunnel.
 
 function connectorBlock(publicMcpUrl, info) {
 	const codexHome = process.platform === 'win32' ? '%USERPROFILE%\\.codex\\config.toml' : '~/.codex/config.toml'
+	const toolCount = publicToolList(TOOLS).length
 	const authNote = info.authMode === 'bearer'
 		? 'Bearer header — NOT usable from the claude.ai / chatgpt.com web dialogs.'
 		: info.authMode === 'path' ? 'the secret is in the URL path; no header needed.'
@@ -86,7 +89,7 @@ function connectorBlock(publicMcpUrl, info) {
 ==========================================================================
   MCP URL :  ${publicMcpUrl}
   auth    :  ${info.authMode}  (${authNote})
-  tools   :  43 advertised (full betterpptx-mcp surface)
+  tools   :  ${toolCount} advertised (black-box product surface)
   files   :  every deck.save returns a public downloadUrl (served at /files/...)
              so ChatGPT / claude.ai users can click to download the .pptx.
 

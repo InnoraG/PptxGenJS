@@ -33,8 +33,8 @@ import {
 	ENABLE_ITERATE_ENGINE
 } from './gen-animations-engine-iterate'
 import { isModel3DAnimationEffect } from './animations-builders/data3DAnimationTemplates'
-// XML DOM utils removed - caused corruption
-// Using template literal approach instead
+import { resolveModel3DPresetActiveDuration } from './animations-builders/build3DModelAnimation'
+import { DOMParser } from '@xmldom/xmldom'
 
 const MEDIA_COMMAND_EFFECTS = new Set(['play', 'pause', 'togglepause', 'stop'])
 
@@ -43,6 +43,32 @@ function isBuildListNeutralAnimation(animationType: string, effect: string): boo
 		|| effect.startsWith('media')
 		|| MEDIA_COMMAND_EFFECTS.has(effect)
 		|| isModel3DAnimationEffect(effect)
+}
+
+/**
+ * Spin/scale/pulse builders own their target-specific defaults. Read the duration
+ * they actually emitted so relative scheduling cannot substitute 500ms for
+ * zero or for a native shape/paragraph default. This inspection never edits
+ * or reserializes effect XML, and leaves other effect families unchanged.
+ */
+function resolveNativeBoundedEffectDuration(entry: ResolvedAnimation): void {
+	const effect = String(entry.animation.effect || '').toLowerCase()
+	if (entry.animation.type !== 'emphasis' || (effect !== 'spin' && effect !== 'growshrink' && effect !== 'pulse')) return
+	// Pulse's fade owns the full grow-and-return span, whereas its scale child
+	// auto-reverses internally. Reading the scale's simple duration would halve it.
+	const tag = effect === 'pulse' ? 'p:animEffect' : effect === 'spin' ? 'p:animRot' : 'p:animScale'
+	const doc = new DOMParser().parseFromString(`<root xmlns:p="http://schemas.openxmlformats.org/presentationml/2006/main">${entry.effectXml}</root>`, 'application/xml')
+	const behaviors = doc.getElementsByTagName(tag)
+	if (!behaviors.length) throw new Error('Native transform timing has no matching behavior.')
+	let duration = 0
+	for (let index = 0; index < behaviors.length; index++) {
+		const timing = behaviors[index].getElementsByTagName('p:cBhvr')[0]?.getElementsByTagName('p:cTn')[0]
+		const authored = timing?.getAttribute('dur')
+		const value = authored === null || authored === undefined || authored === '' ? NaN : Number(authored)
+		if (!Number.isFinite(value) || value < 0) throw new Error('Native transform timing requires a finite nonnegative duration.')
+		duration = Math.max(duration, value)
+	}
+	entry.duration = duration
 }
 
 // ============================================================================
@@ -356,8 +382,25 @@ export function generateSlideTimingStructuralWrapper(slide: PresSlide): string {
 		}
 	}
 
+	// Resolve these tested effect durations once across every sequence path.
+	for (const entry of resolvedAnimations) {
+		resolveNativeBoundedEffectDuration(entry)
+		const model3DSpan = resolveModel3DPresetActiveDuration(entry.animation as unknown as Record<string, unknown>)
+		if (model3DSpan !== undefined) entry.duration = model3DSpan
+	}
+
 	// Step 2: Assemble into click groups
 	const { clickGroups } = assembleClickGroups(resolvedAnimations)
+	// An indefinitely repeating native preset has no finite end to schedule
+	// after. Concurrent work and a new click group are still valid, but never
+	// emit Infinity as an OOXML start delay or silently use one loop's duration.
+	if (resolvedAnimations.some(entry => entry.duration === Infinity)) {
+		for (const group of clickGroups) {
+			if (group.entries.some(entry => !Number.isFinite(entry.cumulativeDelay))) {
+				throw new Error('afterPrevious cannot follow an indefinitely repeating native 3D preset. Use a finite repeatCount, withPrevious, or a new onClick trigger.')
+			}
+		}
+	}
 
 	// Step 3: Generate structural timing XML (pass original animations for bldLst generation)
 	return generateStructuralTimingXmlFromGroups(clickGroups, animations, slide._slideObjects)

@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "betterpptx.preset-decomposition-matrix.schema.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "generatedFrom", "counts", "implementationSummary", "catalogRows", "optionSurfaces"],
+  "properties": {
+    "schemaVersion": { "const": "betterpptx.preset-decomposition-matrix.v1" },
+    "generatedFrom": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["includePlanned", "expectedCatalogRows", "catalogFingerprint"],
+      "properties": {
+        "includePlanned": { "const": true },
+        "expectedCatalogRows": { "type": "integer", "minimum": 1 },
+        "catalogFingerprint": { "type": "string", "minLength": 1 }
+      }
+    },
+    "counts": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["catalogRows", "optionSurfaces"],
+      "properties": {
+        "catalogRows": { "type": "integer", "minimum": 1 },
+        "optionSurfaces": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "implementationSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["denominatorMeaning", "sourceRowsClaimingImplementation", "publiclySelectableRows", "fullyImplementedForNewAuthoring", "partiallyImplementedForNewAuthoring", "preserveImportedOnly", "notApplicable", "notImplemented", "newAuthoringPathAtLeastPartial", "statusCounts"],
+      "properties": {
+        "denominatorMeaning": { "type": "string", "minLength": 1 },
+        "sourceRowsClaimingImplementation": { "type": "integer", "minimum": 0 },
+        "publiclySelectableRows": { "type": "integer", "minimum": 0 },
+        "fullyImplementedForNewAuthoring": { "type": "integer", "minimum": 0 },
+        "partiallyImplementedForNewAuthoring": { "type": "integer", "minimum": 0 },
+        "preserveImportedOnly": { "type": "integer", "minimum": 0 },
+        "notApplicable": { "type": "integer", "minimum": 0 },
+        "notImplemented": { "type": "integer", "minimum": 0 },
+        "newAuthoringPathAtLeastPartial": { "type": "integer", "minimum": 0 },
+        "statusCounts": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        }
+      }
+    },
+    "catalogRows": { "type": "array", "items": { "$ref": "#/$defs/truthRow" } },
+    "optionSurfaces": { "type": "array", "items": { "$ref": "#/$defs/truthRow" } }
+  },
+  "$defs": {
+    "reset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["component", "full", "nullBehavior"],
+      "properties": {
+        "component": { "type": "string" },
+        "full": { "type": "string" },
+        "nullBehavior": { "type": "string" }
+      }
+    },
+    "truthRow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "family", "label", "capabilityMode", "capabilityStatus", "componentOwnership", "overrideFields", "resetBehavior"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "family": { "type": "string", "minLength": 1 },
+        "label": { "type": "string", "minLength": 1 },
+        "capabilityMode": { "enum": ["discrete", "parameterized", "preset-plus-parameters", "preset-only", "preserve-only", "missing"] },
+        "capabilityStatus": { "enum": ["executable-exact-structured", "native-first-class-selector-plus-overrides", "structured-partial", "preset-only-incomplete", "preserve-imported-only", "byte-transform-operation", "host-command-not-persistent-style", "not-live-in-saved-package", "not-applicable", "missing"] },
+        "componentOwnership": { "type": "array", "items": { "type": "string" } },
+        "overrideFields": { "type": "array", "items": { "type": "string" } },
+        "resetBehavior": { "$ref": "#/$defs/reset" },
+        "applicability": { "type": "array", "items": { "type": "string" } },
+        "limitation": { "type": "string" }
+      }
+    }
+  }
+}

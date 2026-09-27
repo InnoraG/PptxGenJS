@@ -1,6 +1,6 @@
 {
 	"name": "betterpptx-mcp",
-	"version": "1.0.0",
+  "version": "1.10.44",
 	"type": "module",
 	"description": "Self-contained betterpptx-mcp MCP server for PPTX generation, editing, validation, charts, tables, media, animations, transitions, WordArt, Text3D, 3D models, and motion paths.",
 	"main": "./server.mjs",
@@ -10,12 +10,34 @@
 	},
 	"exports": {
 		".": "./server.mjs",
-		"./engine": "./engine.mjs",
 		"./tools": "./tools.mjs",
 		"./http": "./server-http.mjs"
 	},
 	"scripts": {
+		"verify:release-version": "node ./scripts/verify-release-version.mjs",
+		"verify:chatgpt-plugin": "node ./scripts/verify-chatgpt-plugin.mjs",
+		"prestart": "npm run verify:release-version",
 		"start": "node ./server.mjs",
-		"start:http": "node ./server-http.mjs"
+		"start:http": "node ./server-http.mjs",
+		"test:authoring-boundary": "node ./verify-mcp-json-spec-authoring-boundary-v1.mjs",
+		"test:authoring-live": "node ./verify-live-mcp-authoring-pipeline-v1.mjs",
+		"test:interaction-contract": "node ./verify-interaction-contract-v1.mjs",
+		"test:interaction-clipset": "node ./verify-authoring-clipset-v3.mjs",
+		"build:authoring-motion-catalog": "node ./build-authoring-motion-catalog.mjs",
+		"build:mena-presenter": "node ./assets/build-mena-presenter-roster.mjs",
+		"build:authoring-v3-motion-atlas": "node ./build-authoring-v3-motion-atlas.mjs",
+		"build:authoring-v3-motion-portfolio": "node ./build-authoring-v3-cold-ai-motion-portfolio.mjs",
+		"build:authoring-learning-gallery": "node ./build-authoring-learning-gallery.mjs",
+		"bind:animated-table-playback-evidence": "node ./bind-animated-table-playback-evidence.mjs",
+		"verify:live-animated-table-public": "node ./verify-live-animated-table-public-v1.mjs",
+		"audit:public-authoring-baseline": "node ./audit-public-authoring-baseline.mjs",
+		"test:authoring-augmentation": "node --test ./test/animated-table-synergy.test.mjs ./test/authoring-control-registry.test.mjs ./test/public-capability-discovery.test.mjs ./test/ai-authored-geometry.test.mjs ./test/ai-sovereign-authoring.test.mjs ./test/visual-reference-quote-replay.test.mjs ./test/wav-quality.test.mjs",
+		"audit:authoring-v3-sources": "node ./verify-authoring-v3-source-inventory.mjs && node ./verify-authoring-v3-source-availability.mjs",
+		"verify:kimodo-authoring-v3": "node ./verify-kimodo-authoring-v3-profile.mjs",
+		"test:authoring-v3-motion": "node ./verify-authoring-motion-catalog.mjs && node ./verify-authoring-motion-bundle.mjs && node ./verify-authoring-motion-spec-v1.mjs && node ./verify-public-authoring-motion-v1.mjs && node ./verify-public-semantic-authoring-v1.mjs && node --test ./test/authoring-capability-registry.test.mjs && node ./verify-authoring-motion-narration-sync.mjs"
+	},
+	"dependencies": {
+		"jose": "6.2.3",
+		"tesseract.js": "5.1.1"
 	}
 }

@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "betterpptx.avatar.commercial-promotion-preflight.v1",
+  "asOf": "2026-07-22",
+  "decision": "commercial-master-cleared-by-owner;-serving-promotion-pending",
+  "commercialPins": {
+    "livePortraitCommit": "9b294b3d0536135442ea73cb01e6cb3ca7029dd3",
+    "livePortraitModelRevision": "82a4fa6735ca58432b6ce39301b4b9ee066dea47",
+    "museTalkCommit": "0a89dec45a0192b824e3cf4daf96c239440c5ed8",
+    "museTalkModelRevision": "3ef28bc5cff08c90ad8178a25f1b570cd800170f",
+    "motionProfile": "low",
+    "motionRegion": "pose",
+    "motionMultiplier": 0.35,
+    "bboxShift": 0,
+    "parsingMode": "jaw"
+  },
+  "evidence": [
+    {
+      "kind": "mp4",
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-commercial-avatar-3min.mp4",
+      "sha256": "DC05F44F31E903898344214184F37AE1CB66C8EB53569CC60532C5A7C9E850A3",
+      "durationSeconds": 180,
+      "video": "H.264 yuv420p 512x640 25fps",
+      "audio": "AAC 22050Hz mono"
+    },
+    {
+      "kind": "pptx",
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-commercial-avatar-3min-narration-validated.pptx",
+      "sha256": "BF73A7BD3F9EAC0A85B48F581A70069F2306A629117BD2A3DD8A24DC576231F9",
+      "powerPointOpen": "PASS",
+      "packageValidation": "PASS",
+      "mediaCount": 1,
+      "autoplay": true,
+      "slideAdvanceAfterMs": 180000
+    },
+    {
+      "kind": "report",
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-commercial-avatar-3min-report.json",
+      "sha256": "5528ACD9CF93E7E80FCA0B64FC1A1EF5A49799698BE2893CA27464A85EBEE2A1"
+    },
+    {
+      "kind": "source",
+      "path": "betterpptx-mcp/deploy/avatar-worker/modal_avatar_commercial_eval.py",
+      "sha256": "4D87E2A1C512BC650068964F204C376CDF549733CBEF682B08DDC8392D3109ED"
+    },
+    {
+      "kind": "square-cameo-style-mp4",
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-commercial-avatar-3min-square.mp4",
+      "sha256": "FF87A7690A5A4A908820757A18284FFDA0ED6D1828BE77950B3646EC638C2004",
+      "durationSeconds": 180,
+      "geometry": "512x512"
+    },
+    {
+      "kind": "square-cameo-style-pptx",
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-commercial-avatar-3min-square-cameo-validated.pptx",
+      "sha256": "AD6A9920EBDE02EBAE9573AC0F0A15FC10127830600FC36D68DE4100C0394D1E",
+      "powerPointOpen": "PASS",
+      "packageValidation": "PASS",
+      "mediaFrame": "216pt x 216pt",
+      "autoplay": true,
+      "slideAdvanceAfterMs": 180000,
+      "featureBoundary": "square prerecorded avatar media; not literal live-camera Cameo"
+    },
+    {
+      "kind": "square-recording-structure-pptx",
+      "path": "betterpptx-mcp/outputs/commercial-poc/final-commercial-avatar-3min-square-recording-validated.pptx",
+      "sha256": "D827969142D92C447317ED826F7104662EAE3FCF030BA1200691E4F78A30F4CA",
+      "powerPointOpen": "PASS",
+      "packageValidation": "PASS",
+      "mediaMarker": "p15:isNarration=1",
+      "mediaFrame": "216pt x 216pt",
+      "autoplay": true,
+      "slideAdvanceAfterMs": 180000,
+      "featureBoundary": "native recorded-video/narration structure; no ink content part"
+    },
+    {
+      "kind": "engine-authoring-square-recording-pptx",
+      "path": "betterpptx-mcp/outputs/commercial-poc/engine-avatar-recording-structure-check.pptx",
+      "sha256": "870D06DA70AF117E066A2D1611C061E54085468B5FE7C7366261EAE5D5F56EEF",
+      "workflow": "betterpptx.avatar.attach_result -> betterpptx.deck.save",
+      "powerPointOpen": "PASS",
+      "packageValidation": "PASS",
+      "mediaMarker": "p15:isNarration=1",
+      "squareFrame": "216pt x 216pt",
+      "slideAdvanceAfterMs": 180000
+    }
+  ],
+  "currentRouting": {
+    "commercialServingRevision": null,
+    "resaleSafeRollbackRevision": "e3b56934",
+    "accounts": ["telcomgapp", "fluxworkerai"],
+    "routingChanged": false,
+    "training": false
+  },
+  "implementation": {
+    "status": "READY_TO_DEPLOY",
+    "appName": "betterpptx-avatar-commercial-production",
+    "source": "betterpptx-mcp/deploy/avatar-worker/modal_avatar_commercial_eval.py",
+    "lane": "upstream LivePortrait InsightFace alignment + MuseTalk BiSeNet parsing",
+    "endpoint": "authenticated multipart lipsync endpoint implemented; deployment and two-profile canaries remain open"
+  },
+  "promotionGates": {
+    "dedicatedAuthenticatedCommercialHttpWorker": "OPEN",
+    "ownerBearerSecretAndHealthProbe": "OPEN",
+    "rotationFailoverIdempotencyBillingCanary": "OPEN",
+    "freshServingRevisionSbomAndProvenance": "OPEN",
+    "resaleSafeRollbackPreserved": "PASS"
+  },
+  "safety": "No production credential-store entry was changed. The commercial artifact is not aliased to the resale-safe endpoint."
+}

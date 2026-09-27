@@ -1,3 +1,5 @@
+import { recordResourceUsage } from '../../billing/resource-meter.mjs'
+
 const DEFAULT_TIMEOUT_MS = Number(process.env.BETTERPPTX_TTS_TIMEOUT_MS || 300000)
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = DEFAULT_TIMEOUT_MS) {
@@ -12,9 +14,28 @@ async function fetchWithTimeout(url, options = {}, timeoutMs = DEFAULT_TIMEOUT_M
 
 export function createPiperHttpProvider() {
 	const base = String(process.env.BETTERPPTX_TTS_URL || 'http://127.0.0.1:5000').replace(/\/+$/, '')
+	// BETTERPPTX_TTS_URL historically accepted a service root whose synthesis
+	// endpoint was `/`.  Current Piper HTTP runtimes can instead expose an
+	// explicit route such as `/synthesize`.  Treat a configured non-root path as
+	// the exact synthesis endpoint so the adapter does not silently turn it into
+	// `/synthesize/` (which Flask correctly rejects with HTTP 404).
+	let synthUrl = `${base}/`
+	try {
+		const parsed = new URL(base)
+		if (parsed.pathname && parsed.pathname !== '/') synthUrl = base
+	} catch {}
 	return {
 		name: 'piper-http',
+		async probe(timeoutMs = 2500) {
+			try {
+				const res = await fetchWithTimeout(`${base}/voices`, { headers: { Accept: 'application/json' } }, timeoutMs)
+				return res.ok === true
+			} catch {
+				return false
+			}
+		},
 		async listVoices() {
+			recordResourceUsage({ externalCalls: 1 })
 			const res = await fetchWithTimeout(`${base}/voices`, { headers: { Accept: 'application/json' } }, 8000)
 			if (!res.ok) throw new Error(`Piper /voices failed: HTTP ${res.status}`)
 			return await res.json()
@@ -28,15 +49,35 @@ export function createPiperHttpProvider() {
 				noise_scale: req.noiseScale,
 				noise_w_scale: req.noiseWScale,
 			}
-			const res = await fetchWithTimeout(`${base}/`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json', Accept: 'audio/wav, application/json' },
-				body: JSON.stringify(body),
-			})
+			recordResourceUsage({ externalCalls: 1 })
+			let res
+			try {
+				res = await fetchWithTimeout(synthUrl, {
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json', Accept: 'audio/wav, application/json' },
+					body: JSON.stringify(body),
+				})
+			} catch (cause) {
+				const error = new Error('Narration synthesis is unavailable because the configured runtime did not respond. Check betterpptx.narration.voices and retry when synthesisRuntimeAvailable is true.')
+				error.code = cause?.name === 'AbortError' ? 'NARRATION_SYNTHESIS_RUNTIME_TIMEOUT' : 'NARRATION_SYNTHESIS_RUNTIME_UNAVAILABLE'
+				error.retryable = true
+				error.details = {
+					status: cause?.name === 'AbortError' ? 'runtime_timeout' : 'runtime_unavailable',
+					nextAction: { tool: 'betterpptx.narration.voices', request: {} },
+					retryable: true,
+				}
+				throw error
+			}
 			if (!res.ok) {
-				let detail = ''
-				try { detail = JSON.stringify(await res.json()) } catch { detail = await res.text().catch(() => '') }
-				throw new Error(`Piper synth failed: HTTP ${res.status}${detail ? ` ${detail}` : ''}`)
+				const error = new Error('Narration synthesis runtime rejected the preparation request.')
+				error.code = res.status >= 500 ? 'NARRATION_SYNTHESIS_RUNTIME_UNAVAILABLE' : 'NARRATION_SYNTHESIS_FAILED'
+				error.retryable = res.status >= 500
+				error.details = {
+					status: res.status >= 500 ? 'runtime_unavailable' : 'runtime_request_rejected',
+					nextAction: { tool: res.status >= 500 ? 'betterpptx.narration.voices' : 'betterpptx.narration.synthesize', request: {} },
+					retryable: res.status >= 500,
+				}
+				throw error
 			}
 			const buffer = Buffer.from(await res.arrayBuffer())
 			return {

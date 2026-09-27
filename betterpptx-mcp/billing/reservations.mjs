@@ -9,14 +9,22 @@ import {
 	toCreditUnits,
 } from './ledger-store.mjs'
 import { classifyBillingTool, isBillingDryRunEnabled } from './classifier.mjs'
-import { collectDeckBillingMetrics, estimateBillingForTool } from './estimator.mjs'
-import { currentRateCard, currentRateCardVersion } from './rate-card.mjs'
+import { estimateBillingForTool } from './estimator.mjs'
+import {
+	currentRateCard,
+	currentRateCardVersion,
+	roundCredits,
+} from './rate-card.mjs'
+import { buildPremiumPresentationQuote } from './premium-quote.mjs'
 import {
 	billingConfirmationRequired,
 	billingSetupIncomplete,
 	billingTemporarilyUnavailable,
 	insufficientCredits,
 } from './public-errors.mjs'
+import { recordBillingReservationTelemetry } from '../telemetry.mjs'
+import { recordResourceUsage } from './resource-meter.mjs'
+import { assertProductionBillingConfiguration, isProductionBillingEnvironment } from './security-policy.mjs'
 
 function shortHash(value) {
 	return crypto.createHash('sha256').update(JSON.stringify(value)).digest('hex').slice(0, 32)
@@ -31,9 +39,16 @@ function billingProvider() {
 }
 
 export function isBillingReservationEnforced() {
+	if (isProductionBillingEnvironment()) return true
 	if (process.env.BETTERPPTX_BILLING_ENFORCE === '0') return false
 	if (isBillingDryRunEnabled()) return false
-	return billingProvider() === 'dodo' || process.env.BETTERPPTX_BILLING_ENFORCE === '1'
+	// PAYRAM-EXCLUSIVE: 'payram' is the crypto-credits payment rail; 'dodo' is never accepted.
+	return billingProvider() === 'payram' || billingProvider() === 'crypto_credits' || process.env.BETTERPPTX_BILLING_ENFORCE === '1'
+}
+
+function isCryptoCreditsBilling(billingEntitlement = {}) {
+	const provider = String(billingEntitlement.provider || billingProvider()).trim().toLowerCase()
+	return provider === 'crypto_credits' || provider === 'payram'
 }
 
 function compactDefined(record) {
@@ -45,7 +60,9 @@ function idempotencyKey(args = {}) {
 }
 
 function sessionHashFor(context = {}) {
-	return hashSessionId(context.sessionId || 'stdio-default')
+	// Reconnects and sessionless request IDs must not create fresh spending
+	// identities for an otherwise identical operation.
+	return hashSessionId(context.installHash || context.billingCustomerHash || context.sessionId || 'stdio-default')
 }
 
 function deckHashFor(args = {}, result = {}) {
@@ -53,106 +70,34 @@ function deckHashFor(args = {}, result = {}) {
 	return deckId ? hashDeckId(deckId) : ''
 }
 
-function projectedCheckpointResult(entry = {}) {
-	const metrics = collectDeckBillingMetrics(entry, {})
-	const estimatedMb = Math.max(
-		0.25,
-		0.15 + metrics.slideCount * 0.08 + metrics.finalObjectCount * 0.015 + metrics.richObjectCount * 0.30,
-	)
+// PAYRAM-EXCLUSIVE (owner, 2026-07-02): PayRam is the ONLY payment provider — crypto-credit
+// top-ups SETTLE INTO the local ledger (push, via the PayRam settlement flow); there is no
+// external balance API to pull from. The old Dodo pull-refresh integration is gone for good.
+export async function refreshProviderBalanceForCustomer() {
 	return {
-		slideCount: metrics.slideCount,
-		bytes: Math.round(estimatedMb * 1048576),
+		ok: false,
+		code: 'PROVIDER_PULL_REFRESH_UNSUPPORTED',
+		provider: 'payram',
+		note: 'PayRam credit settlements post INTO the ledger (payram_settlement entries); balances are ledger-authoritative and cannot be pull-refreshed.',
 	}
-}
-
-function dodoApiToken() {
-	return process.env.DODO_PAYMENTS_API_KEY || process.env.BETTERPPTX_DODO_API_KEY || ''
-}
-
-function dodoApiBase() {
-	const configured = String(process.env.BETTERPPTX_DODO_API_BASE || '').trim().replace(/\/+$/, '')
-	if (configured) return configured
-	const environment = String(process.env.BETTERPPTX_DODO_ENVIRONMENT || '').toLowerCase()
-	if (environment === 'test') return 'https://test.dodopayments.com'
-	if (environment === 'live') return 'https://live.dodopayments.com'
-	return 'https://api.dodopayments.com'
-}
-
-function extractAvailableBalance(data) {
-	const candidates = [
-		data?.available_balance,
-		data?.availableBalance,
-		data?.balance,
-		data?.credits,
-		data?.amount,
-		data?.data?.available_balance,
-		data?.data?.availableBalance,
-		data?.data?.balance,
-	]
-	for (const candidate of candidates) {
-		if (candidate === undefined || candidate === null) continue
-		if (typeof candidate === 'object') {
-			const nested = extractAvailableBalance(candidate)
-			if (nested !== null) return nested
-			continue
-		}
-		const n = Number(candidate)
-		if (Number.isFinite(n)) return n
-	}
-	return null
-}
-
-export async function refreshDodoBalanceForCustomer({ store, billingEntitlement = {}, customerHash = '' } = {}) {
-	const ledger = storeOrDefault(store)
-	const providerCustomerId = billingEntitlement.providerCustomerId
-	const creditEntitlementId = billingEntitlement.creditEntitlementId || process.env.BETTERPPTX_DODO_CREDIT_ENTITLEMENT_ID
-	if (!providerCustomerId || !creditEntitlementId) {
-		return { ok: false, code: 'DODO_BALANCE_ID_MISSING' }
-	}
-	const token = dodoApiToken()
-	if (!token) return { ok: false, code: 'DODO_API_TOKEN_MISSING' }
-	const url = `${dodoApiBase()}/credit-entitlements/${encodeURIComponent(creditEntitlementId)}/balances/${encodeURIComponent(providerCustomerId)}`
-	let response
-	try {
-		response = await fetch(url, {
-			headers: {
-				Accept: 'application/json',
-				Authorization: `Bearer ${token}`,
-			},
-		})
-	} catch (err) {
-		return { ok: false, code: 'DODO_BALANCE_FETCH_FAILED', reason: String(err?.message || err) }
-	}
-	const raw = await response.text()
-	let data = null
-	try { data = raw ? JSON.parse(raw) : null } catch { data = { raw } }
-	if (!response.ok) return { ok: false, code: 'DODO_BALANCE_FETCH_HTTP_ERROR', status: response.status }
-	const balance = extractAvailableBalance(data)
-	if (balance === null) return { ok: false, code: 'DODO_BALANCE_SHAPE_UNKNOWN' }
-	const now = new Date().toISOString()
-	const hash = customerHash || billingEntitlement.billingCustomerHash
-	if (hash) {
-		await ledger.upsertCustomer(hash, compactDefined({
-			provider: 'dodo',
-			providerCustomerId,
-			creditEntitlementId,
-			lastKnownDodoAvailableBalanceCredits: balance,
-			lastBalanceSyncedAt: now,
-			billingStatus: billingEntitlement.billingStatus || 'active',
-		}))
-	}
-	return { ok: true, balanceCredits: balance, syncedAt: now }
 }
 
 export function effectiveBalanceSnapshot(customer = {}) {
-	const lastKnownUnits = Math.max(0, Math.round(Number(customer.lastKnownDodoAvailableBalanceUnits) || 0))
+	const availableUnits = Math.max(0, Math.round(Number(
+		// legacy ledgers may still carry the old provider-named field — read it, never write it
+		customer.availableBalanceUnits ?? customer.lastKnownProviderAvailableBalanceUnits ?? customer.lastKnownDodoAvailableBalanceUnits,
+	) || 0))
 	const pendingUnits = Math.max(0, Math.round(Number(customer.pendingReservedUnits) || 0))
-	const queuedUnits = Math.max(0, Math.round(Number(customer.durableQueuedUsageUnitsNotYetReflectedByDodo) || 0))
-	const effectiveAvailableUnits = Math.max(0, lastKnownUnits - pendingUnits - queuedUnits)
+	const queuedUnits = Math.max(0, Math.round(Number(
+		customer.queuedUsageUnits ?? customer.durableQueuedUsageUnitsNotYetSettled ?? customer.durableQueuedUsageUnitsNotYetReflectedByDodo,
+	) || 0))
+	const effectiveAvailableUnits = Math.max(0, availableUnits - pendingUnits - queuedUnits)
 	return {
-		lastKnownDodoAvailableCredits: fromCreditUnits(lastKnownUnits),
+		availableBalanceCredits: fromCreditUnits(availableUnits),
+		lastKnownProviderAvailableCredits: fromCreditUnits(availableUnits),
 		pendingReservedCredits: fromCreditUnits(pendingUnits),
-		queuedUsageCreditsNotYetReflectedByDodo: fromCreditUnits(queuedUnits),
+		queuedUsageCredits: fromCreditUnits(queuedUnits),
+		queuedUsageCreditsNotYetSettledByProvider: fromCreditUnits(queuedUnits),
 		effectiveAvailableCredits: fromCreditUnits(effectiveAvailableUnits),
 		effectiveAvailableUnits,
 	}
@@ -253,19 +198,57 @@ export async function queueUsageForReservation(args = {}) {
 	})
 }
 
-export async function preflightBillingReservation({ name, args = {}, context = {}, entry = null, billingEntitlement = null, store = null, refreshBalance = refreshDodoBalanceForCustomer } = {}) {
+export async function preflightBillingReservation({ name, args = {}, context = {}, entry = null, billingEntitlement = null, store = null, refreshBalance = refreshProviderBalanceForCustomer, verifyNoChargeReuse = null } = {}) {
 	const classification = classifyBillingTool(name)
 	if (!isBillingReservationEnforced()) return { active: false, reason: 'reservation-not-enforced', classification }
+	if (context.__freeValueAuthorization?.status === 'reserved' || context.__freeValueAuthorization?.status === 'committed') {
+		return {
+			active: false,
+			reason: 'bounded-free-value-entitlement',
+			category: context.__freeValueAuthorization.category,
+			classification,
+		}
+	}
+	// A settled x402 bounded job already paid for the complete execution unit.
+	// Do not create a second legacy ledger reservation inside that job.  The
+	// marker is attached by the server only after quote-bound settlement and is
+	// never accepted from public tool arguments.
+	const paidJob = context.__paidJobAuthorization
+	if (paidJob?.paymentModel === 'one_payment_per_job' && paidJob.settled === true && paidJob.jobId && paidJob.quoteId) {
+		return {
+			active: false,
+			reason: 'settled-bounded-job',
+			paymentModel: 'one_payment_per_job',
+			jobId: String(paidJob.jobId),
+			quoteId: String(paidJob.quoteId),
+			classification,
+		}
+	}
 	if (classification.category !== 'checkpoint' && classification.category !== 'heavy') return { active: false, reason: classification.category, classification }
-	if (!billingEntitlement?.billingCustomerHash || !billingEntitlement?.providerCustomerId) {
+	assertProductionBillingConfiguration()
+	if (!billingEntitlement) throw billingSetupIncomplete({ toolName: name, reason: 'verified-billing-identity-required' })
+	const cryptoCredits = isCryptoCreditsBilling(billingEntitlement)
+	if (!billingEntitlement?.billingCustomerHash || (!cryptoCredits && !billingEntitlement?.providerCustomerId)) {
 		throw billingSetupIncomplete({ toolName: name, billingCategory: classification.category })
 	}
 	const ledger = storeOrDefault(store)
 	const rateCard = currentRateCard()
-	const resultForEstimate = classification.category === 'checkpoint' ? projectedCheckpointResult(entry) : {}
-	const estimate = estimateBillingForTool({ name, args, result: resultForEstimate, entry, rateCard })
-	const amountCredits = Number(estimate.estimatedCredits || 0)
-	if (amountCredits <= 0) return { active: false, reason: 'zero-estimate', classification, estimate }
+	const premiumQuote = buildPremiumPresentationQuote({ toolName: name, args, entry, rateCard, deckId: args?.deckId || '' })
+	const estimate = premiumQuote.estimate
+	const calibrationMultiplier = premiumQuote.calibrationMultiplier
+	const estimatedCredits = Number(estimate.estimatedCredits || 0)
+	const amountCredits = premiumQuote.quoteCapCredits
+	if (!Number.isFinite(amountCredits) || !Number.isFinite(estimatedCredits) || amountCredits < 0) {
+		throw billingSetupIncomplete({ toolName: name, reason: 'invalid-cost-estimate' })
+	}
+	if (amountCredits === 0) {
+		// A client-supplied "prepared" flag is not proof that no synthesis will
+		// occur. The execution layer must validate the immutable reuse artifact.
+		if (typeof verifyNoChargeReuse === 'function' && await verifyNoChargeReuse() === true) {
+			return { active: false, reason: 'verified-no-charge-reuse', classification, estimate }
+		}
+		throw billingSetupIncomplete({ toolName: name, reason: 'unverified-zero-cost-operation' })
+	}
 	if (amountCredits > Number(rateCard.thresholds.hardBlockAboveWithoutExplicitOverride || Infinity) && args.billingOverride !== true) {
 		throw billingConfirmationRequired({
 			toolName: name,
@@ -292,28 +275,29 @@ export async function preflightBillingReservation({ name, args = {}, context = {
 		args,
 	})
 	const existingCustomer = await ledger.getCustomer(customerHash)
-	const seedEntitlementBalance = !existingCustomer?.lastBalanceSyncedAt && billingEntitlement.lastKnownCreditBalance !== null && billingEntitlement.lastKnownCreditBalance !== undefined
+	const seedEntitlementBalance = !cryptoCredits && !existingCustomer?.lastBalanceSyncedAt && billingEntitlement.lastKnownCreditBalance !== null && billingEntitlement.lastKnownCreditBalance !== undefined
 	await ledger.upsertCustomer(customerHash, compactDefined({
-		provider: 'dodo',
-		providerCustomerId: billingEntitlement.providerCustomerId,
+		provider: cryptoCredits ? 'crypto_credits' : (billingProvider() || 'ledger'),
+		providerCustomerId: cryptoCredits ? undefined : billingEntitlement.providerCustomerId,
 		providerProductId: billingEntitlement.providerProductId,
 		providerSubscriptionId: billingEntitlement.providerSubscriptionId,
 		providerPaymentId: billingEntitlement.providerPaymentId,
 		providerLicenseId: billingEntitlement.providerLicenseId,
-		creditEntitlementId: billingEntitlement.creditEntitlementId || process.env.BETTERPPTX_DODO_CREDIT_ENTITLEMENT_ID,
+		creditEntitlementId: cryptoCredits ? billingEntitlement.creditEntitlementId : (billingEntitlement.creditEntitlementId || process.env.BETTERPPTX_CREDIT_ENTITLEMENT_ID),
 		billingStatus: billingEntitlement.billingStatus || 'active',
-		lastKnownDodoAvailableBalanceCredits: seedEntitlementBalance ? billingEntitlement.lastKnownCreditBalance : undefined,
+		availableBalanceCredits: seedEntitlementBalance ? billingEntitlement.lastKnownCreditBalance : undefined,
+		lastKnownProviderAvailableBalanceCredits: seedEntitlementBalance ? billingEntitlement.lastKnownCreditBalance : undefined,
 		lastBalanceSyncedAt: seedEntitlementBalance ? billingEntitlement.lastBalanceSyncedAt : undefined,
 	}))
 	const queuedCap = Number(process.env.BETTERPPTX_BILLING_MAX_QUEUED_USAGE_CREDITS || 100)
 	if (Number.isFinite(queuedCap) && queuedCap > 0) {
 		const currentCustomer = await ledger.getCustomer(customerHash)
 		const balance = effectiveBalanceSnapshot(currentCustomer || {})
-		if (balance.queuedUsageCreditsNotYetReflectedByDodo >= queuedCap) {
+		if (balance.queuedUsageCreditsNotYetSettledByProvider >= queuedCap) {
 			throw billingTemporarilyUnavailable({
 				toolName: name,
 				reason: 'queued-usage-cap-exceeded',
-				queuedUsageCredits: balance.queuedUsageCreditsNotYetReflectedByDodo,
+				queuedUsageCredits: balance.queuedUsageCreditsNotYetSettledByProvider,
 				queuedUsageCapCredits: queuedCap,
 			})
 		}
@@ -331,28 +315,54 @@ export async function preflightBillingReservation({ name, args = {}, context = {
 			billingCategory: classification.category,
 			billingMode: estimate.classification.mode,
 			rateCardVersion: estimate.rateCardVersion,
-			estimatedCredits: amountCredits,
+			estimatedCredits,
+			quoteCapCredits: amountCredits,
+			calibrationMultiplier,
 			metrics: estimate.metrics,
+			pricingInputDigest: premiumQuote.pricingInputDigest,
+			projectedOutputBytes: premiumQuote.projectedOutputBytes,
+			priceUsdc: premiumQuote.priceUsdc,
+			amountAtomic: premiumQuote.amountAtomic,
 		},
 	}
 	try {
 		const reserved = await reserveCredits(reservationArgs)
-		return { active: true, ...reserved, amountCredits, operationId, sessionHash, deckHash, customerHash, estimate, classification, store: ledger }
+		assertFreshExecutionReservation(reserved, name)
+		return { active: true, ...reserved, amountCredits, operationId, sessionHash, deckHash, customerHash, estimate, premiumQuote, classification, entry, store: ledger }
 	} catch (err) {
-		if (err?.code !== 'INSUFFICIENT_CREDITS') throw err
+		if (err?.code !== 'INSUFFICIENT_CREDITS') {
+			recordBillingReservationTelemetry({ failed: true })
+			throw err
+		}
+		if (cryptoCredits) {
+			recordBillingReservationTelemetry({ failed: true })
+			throw insufficientCredits({
+				toolName: name,
+				requiredCredits: err.details?.requiredCredits ?? amountCredits,
+				availableCredits: err.details?.availableCredits ?? 0,
+				pendingCredits: err.details?.pendingCredits ?? 0,
+				balanceRefreshed: false,
+			})
+		}
 		const refreshed = await refreshBalance({ store: ledger, billingEntitlement, customerHash })
 		if (!refreshed?.ok) {
+			recordBillingReservationTelemetry({ failed: true })
 			throw billingTemporarilyUnavailable({
 				toolName: name,
 				estimatedCredits: amountCredits,
-				refreshCode: refreshed?.code || 'DODO_BALANCE_REFRESH_FAILED',
+				refreshCode: refreshed?.code || 'PROVIDER_BALANCE_REFRESH_FAILED',
 			})
 		}
 		try {
 			const reserved = await reserveCredits(reservationArgs)
-			return { active: true, ...reserved, amountCredits, operationId, sessionHash, deckHash, customerHash, estimate, classification, store: ledger, balanceRefreshed: true }
+			assertFreshExecutionReservation(reserved, name)
+			return { active: true, ...reserved, amountCredits, operationId, sessionHash, deckHash, customerHash, estimate, premiumQuote, classification, entry, store: ledger, balanceRefreshed: true }
 		} catch (retryErr) {
-			if (retryErr?.code !== 'INSUFFICIENT_CREDITS') throw retryErr
+			if (retryErr?.code !== 'INSUFFICIENT_CREDITS') {
+				recordBillingReservationTelemetry({ failed: true })
+				throw retryErr
+			}
+			recordBillingReservationTelemetry({ failed: true })
 			throw insufficientCredits({
 				toolName: name,
 				requiredCredits: retryErr.details?.requiredCredits ?? amountCredits,
@@ -364,9 +374,40 @@ export async function preflightBillingReservation({ name, args = {}, context = {
 	}
 }
 
+function assertFreshExecutionReservation(reserved, name) {
+	if (reserved?.idempotent || reserved?.reservation?.state !== 'reserved') {
+		throw billingTemporarilyUnavailable({
+			toolName: name,
+			reason: 'reservation-already-used',
+			reservationState: reserved?.reservation?.state || 'unknown',
+			recovery: 'Recover the original operation result with its original idempotency key. An existing reservation cannot authorize a second execution.',
+		})
+	}
+}
+
 export async function finalizeBillingReservation({ gate = null, name = '', args = {}, result = {}, store = null } = {}) {
 	if (!gate?.active || !gate.reservation) return { finalized: false, reason: 'no-active-reservation' }
 	const ledger = storeOrDefault(store || gate.store)
+	const actualEstimate = estimateBillingForTool({
+		name,
+		args,
+		result,
+		entry: gate.entry || null,
+		rateCard: currentRateCard(),
+	})
+	const quoteCapCredits = Number(gate.amountCredits ?? gate.reservation.amountCredits ?? 0)
+	const actualCredits = Number(actualEstimate.estimatedCredits || 0)
+	const committedCredits = roundCredits(Math.min(actualCredits, quoteCapCredits))
+	const overrunCredits = roundCredits(Math.max(0, actualCredits - quoteCapCredits))
+	if (committedCredits <= 0) {
+		const released = await releaseCredits({
+			store: ledger,
+			reservationId: gate.reservation.reservationId,
+			reason: 'zero-actual-cost',
+		})
+		if (!released?.idempotent) recordBillingReservationTelemetry({ releasedCredits: quoteCapCredits })
+		return released
+	}
 	const artifactHash = hashPayload({
 		toolName: name,
 		bytes: result?.bytes || result?.artifact?.bytes || null,
@@ -383,33 +424,62 @@ export async function finalizeBillingReservation({ gate = null, name = '', args 
 		checkpointId: gate.operationId,
 		operationGroup: name || 'operation',
 	})
-	return commitCredits({
+	const committed = await commitCredits({
 		store: ledger,
 		reservationId: gate.reservation.reservationId,
+		amountCredits: committedCredits,
+		metadata: {
+			estimatedCredits: Number(gate.estimate?.estimatedCredits || quoteCapCredits),
+			quoteCapCredits,
+			actualCredits,
+			committedCredits,
+			overrunCredits,
+			overrun: overrunCredits > 0,
+			rateCardVersion: actualEstimate.rateCardVersion,
+		},
 		usageEvent: {
 			eventId,
 			customerHash: gate.customerHash,
 			sessionHash: gate.sessionHash,
 			deckHash: gate.deckHash,
 			operationId: gate.operationId,
-			amountCredits: gate.amountCredits,
+			amountCredits: committedCredits,
 			metadata: {
 				operation_group: name || 'operation',
 				billing_mode: gate.classification?.mode || gate.reservation.mode || 'checkpoint',
 				rate_card_version: gate.estimate?.rateCardVersion || currentRateCardVersion(),
 				artifact_hash: artifactHash,
 				status: 'success',
+				estimated_credits: Number(gate.estimate?.estimatedCredits || quoteCapCredits),
+				quote_cap_credits: quoteCapCredits,
+				actual_credits: actualCredits,
+				committed_credits: committedCredits,
+				overrun_credits: overrunCredits,
+				overrun: overrunCredits > 0,
 			},
 		},
 	})
+	if (!committed?.idempotent) {
+		recordBillingReservationTelemetry({
+			overrunCredits,
+			releasedCredits: committed?.reservation?.releasedAmountCredits || 0,
+		})
+	}
+	return committed
 }
 
 export async function releaseBillingReservation({ gate = null, reason = 'tool-failed-before-value', store = null } = {}) {
 	if (!gate?.active || !gate.reservation) return { released: false, reason: 'no-active-reservation' }
 	const ledger = storeOrDefault(store || gate.store)
-	return releaseCredits({
+	const released = await releaseCredits({
 		store: ledger,
 		reservationId: gate.reservation.reservationId,
 		reason,
 	})
+	if (!released?.idempotent && released?.reservation?.state === 'released') {
+		recordBillingReservationTelemetry({
+			releasedCredits: released.reservation.amountCredits ?? gate.amountCredits ?? 0,
+		})
+	}
+	return released
 }

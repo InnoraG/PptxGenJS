@@ -1,0 +1,31 @@
+{
+  "schemaVersion": "betterpptx.avatar-production-talking-head-owner-decision.v1",
+  "recordedAt": "2026-08-14",
+  "status": "OWNER_DECISION_RECORDED",
+  "decision": "COMMERCIAL_ONLY_PRODUCTION_TALKING_HEAD",
+  "reviewer": "authorized project owner (thread approval)",
+  "ownerStatement": "The already paid and tested commercial talking-head line is fully closed and is the only production lane/path.",
+  "approvedEvidence": {
+    "reviewArtifact": "betterpptx-mcp/outputs/visualizations/avatar-lpmt-identity-review.html",
+    "reviewArtifactSha256": "52E193C827CC0385C03C97EC1ABA2C28AFB07CF71A99B6F0B7B5BCAF534BB8CC",
+    "scopedApproval": "betterpptx-mcp/outputs/AVATAR-OWNER-SCOPED-APPROVAL-CURRENT-2026-08-01.json",
+    "promotionReport": "betterpptx-mcp/outputs/commercial-promotion-20260727/commercial-promotion-report.json"
+  },
+  "productionInvariant": {
+    "singleLane": true,
+    "clientProviderSelection": false,
+    "alternateFallback": false,
+    "profileFrozenToReviewedCanary": true,
+    "privateResponseAttestationRequired": true,
+    "developmentFixturesRemainNonProduction": true
+  },
+  "implementationStatus": {
+    "localSourceAndDeploymentTemplates": "PASS",
+    "localRoutingContractChecks": "14/14 PASS",
+    "currentlyServingRevision": "betterpptx-mcp-staging-00085-7nm",
+    "currentlyServingRevisionStatus": "BLOCKED_OLD_IMAGE_MISSING_PRODUCTION_ONLY_PROFILE_PINS",
+    "freshImmutableBuildAndDeploymentRequired": true
+  },
+  "publicSurfaceRule": "Provider, pipeline, enhancement, timing, credential, and execution details remain private and must not appear in delivered decks, public tool results, filenames, or download metadata.",
+  "scopeBoundary": "This closes production talking-head lane/profile selection. It does not by itself close unrelated billing, provenance, deployment-revision, native-3D, or whole-product release gates."
+}

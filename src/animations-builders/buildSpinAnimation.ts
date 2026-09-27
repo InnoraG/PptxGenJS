@@ -41,9 +41,15 @@ export function buildSpinAnimation(ctx: AnimationBuildContext): string {
     const duration = animation.duration ?? defaultDuration;
     const delay = animation.delay ?? config.defaultDelay ?? 0
     
-    // Get rotation value from variant (direction parameter)
+    // Numeric public rotation wins, including zero. An explicit null resets
+    // that numeric override and must not revive the local legacy alias.
+    // Without a numeric override, retain the frozen direction-variant value.
     const variantKey = (animation.direction || 'full clockwise').toLowerCase();
-    const rotationValue = SPIN_VARIANTS[variantKey] ?? SPIN_VARIANTS['full clockwise'];
+    const variantRotation = SPIN_VARIANTS[variantKey] ?? SPIN_VARIANTS['full clockwise'];
+    const degrees = animation.rotation !== undefined ? animation.rotation : (animation as any).degrees;
+    const rotationValue = degrees != null
+        ? Math.round(degrees * 60000) * (animation.clockwise === false ? -1 : 1)
+        : animation.clockwise == null ? variantRotation : Math.abs(variantRotation) * (animation.clockwise === false ? -1 : 1);
     
     // Build target XML
     let targetXml = `<p:spTgt spid="${shapeId}"/>`;

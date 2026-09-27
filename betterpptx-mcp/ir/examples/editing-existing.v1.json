@@ -1,0 +1,124 @@
+{
+  "schemaVersion": "betterpptx.deck-spec.v1",
+  "title": "Customer Renewal Update",
+  "audience": "Account team",
+  "objective": "Update an existing renewal deck while preserving theme and layout intent.",
+  "layout": "LAYOUT_WIDE",
+  "authoringContract": {
+    "level": "deterministic",
+    "coordinateSystem": "inches",
+    "layerModel": "flat-object-array",
+    "objectIdentity": "stable-names-required",
+    "textPolicy": "Use shape only for geometry. Use textBox for standalone text and textShape for text inside a PowerPoint shape.",
+    "requires": ["slide.id", "content[].name", "slide.notes", "altText for visual proof", "validation before save"]
+  },
+  "styleIntent": {
+    "density": "sales-review",
+    "tone": "confident",
+    "visualSystem": "existing-template-preserving",
+    "avoid": ["layout drift", "theme replacement", "index-only edits"]
+  },
+  "theme": {
+    "name": "Use Existing Deck Theme",
+    "palette": ["111827", "0EA5E9", "22C55E", "F97316"],
+    "fontFace": "Aptos"
+  },
+  "sections": [
+    {
+      "id": "renewal",
+      "title": "Renewal",
+      "slideIds": ["renewal-summary", "commercial-options"]
+    }
+  ],
+  "assets": [
+    {
+      "name": "uploaded-reference",
+      "kind": "reference",
+      "handle": "asset_ref_uploaded_customer_renewal",
+      "intent": "Preserve master, theme, and editable object structure."
+    }
+  ],
+  "data": [
+    {
+      "name": "renewal-options",
+      "dataSource": "crm-renewal-model",
+      "provenance": "CRM renewal forecast exported 2026-06-04",
+      "verified": true,
+      "rows": [
+        ["Option", "Term", "ARR", "Risk"],
+        ["Base", "12 months", "$1.8M", "Low"],
+        ["Expansion", "24 months", "$2.4M", "Medium"]
+      ]
+    }
+  ],
+  "validation": {
+    "previewBeforeSave": true,
+    "validateBeforeSave": true,
+    "minDesignScore": 78,
+    "requireAccessibility": true
+  },
+  "slides": [
+    {
+      "id": "renewal-summary",
+      "title": "Renewal Summary",
+      "role": "edit-existing-slide",
+      "message": "The renewal is forecast-positive, but executive alignment is the gating action.",
+      "layoutIntent": "title-body-footer",
+      "content": [
+        {
+          "kind": "title",
+          "name": "existing-title-replacement",
+          "text": "Renewal Summary"
+        },
+        {
+          "kind": "body",
+          "name": "executive-alignment-bullets",
+          "items": [
+            {
+              "name": "sponsor-confirmed",
+              "text": "Economic sponsor confirmed renewal intent.",
+              "provenance": "Account notes 2026-06-01",
+              "verified": true
+            },
+            {
+              "name": "procurement-path",
+              "text": "Procurement path still needs legal date confirmation.",
+              "provenance": "CRM opportunity notes",
+              "verified": true
+            },
+            {
+              "name": "expansion-case",
+              "text": "Expansion case depends on analytics rollout timing.",
+              "provenance": "Customer success QBR notes",
+              "verified": true
+            }
+          ]
+        },
+        {
+          "kind": "callout",
+          "name": "footer-action",
+          "text": "Next action: align executive sponsor by June 14."
+        }
+      ],
+      "notes": "Preserve the uploaded deck theme and existing footer treatment."
+    },
+    {
+      "id": "commercial-options",
+      "title": "Commercial Options",
+      "role": "replace-table-data",
+      "message": "Two commercial options are ready for review.",
+      "layoutIntent": "title-body",
+      "content": [
+        {
+          "kind": "table-panel",
+          "name": "renewal-options-table",
+          "dataRef": "renewal-options",
+          "dataSource": "crm-renewal-model",
+          "provenance": "CRM renewal forecast exported 2026-06-04",
+          "verified": true
+        }
+      ],
+      "notes": "Use native table data and keep existing account-template styling."
+    }
+  ]
+}

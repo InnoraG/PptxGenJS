@@ -4,7 +4,8 @@
  * @since v4.0.0
  */
 
-import { Coord, ISlideObject, PresLayout, PresSlide } from './core-interfaces'
+import { AnimationProps, Coord, ISlideObject, PresLayout, PresSlide } from './core-interfaces'
+import { assertNativeDescendantAnimationInspectable, nativeGroupIdentityPlan } from './gen-group-animation-targets'
 import { validateGradientDirectionOption, validateText3DRotationOption, validateWordArtTransformOption } from './option-registry'
 
 // ============================================================================
@@ -52,10 +53,12 @@ export type ValidationIssueCode =
 	| 'NON_FINITE_NUMBER'
 	| 'INVALID_COORDINATE'
 	| 'INVALID_COLOR'
+	| 'INVALID_COLOR_TRANSFORM'
 	| 'INVALID_TRANSPARENCY'
 	| 'INVALID_OPACITY'
 	| 'INVALID_ROTATION'
 	| 'INVALID_MARGIN'
+	| 'INVALID_VALIGN'
 	| 'INVALID_LINE_WIDTH'
 	| 'INVALID_GRADIENT_STOP'
 	| 'INVALID_HYPERLINK'
@@ -76,6 +79,7 @@ export const REPAIR_RISK_ISSUE_CODES: ValidationIssueCode[] = [
 	'NON_FINITE_NUMBER',
 	'INVALID_COORDINATE',
 	'INVALID_COLOR',
+	'INVALID_COLOR_TRANSFORM',
 	'INVALID_TRANSPARENCY',
 	'INVALID_OPACITY',
 	'INVALID_ROTATION',
@@ -223,6 +227,10 @@ function isRenderableSlideObject(obj: ISlideObject | undefined): boolean {
 	return Boolean(kind && kind !== 'notes')
 }
 
+function isLineGeometry(obj: ISlideObject): boolean {
+	return (obj.type || obj._type) === 'connector' || obj.shape === 'line'
+}
+
 const PRESET_COLOR_NAMES = new Set([
 	'black',
 	'white',
@@ -274,6 +282,59 @@ function isDecimalLiteral(value: string): boolean {
 	return digitCount > 0
 }
 
+/**
+ * An off-stage starting frame is intentional only when native animation proves
+ * its complete return. Inspect current geometry and target identity each time;
+ * this rule requires no presenter metadata or cached authoring permission.
+ */
+function hasBoundedAutomaticEntry(slide: PresSlide, obj: ISlideObject, shapeId: number, bounds: ReturnType<typeof getElementBounds>, slideWidth: number, slideHeight: number, tolerance: number): boolean {
+	if (![bounds.x, bounds.y, bounds.w, bounds.h, slideWidth, slideHeight].every(Number.isFinite) || bounds.w <= 0 || bounds.h <= 0) return false
+	const records = (slide._animations || []).filter(record => record.target === obj)
+	type EntryAnimation = AnimationProps & { loop?: boolean; repeatDur?: unknown; rewind?: boolean }
+	const once = (animation: EntryAnimation): boolean => (animation.autoReverse === undefined || animation.autoReverse === false)
+		&& (animation.loop === undefined || animation.loop === false)
+		&& (animation.rewind === undefined || animation.rewind === false)
+		&& (animation.repeatCount === undefined || animation.repeatCount === 1)
+		&& animation.repeatDur === undefined
+	const timing = (animation: AnimationProps): { delay: number; duration: number } | null => {
+		const delay = animation.delay ?? animation.delayMs ?? 0
+		const duration = animation.duration ?? animation.durationMs
+		if (animation.trigger !== 'withPrevious' || !Number.isInteger(delay) || delay < 0 || !Number.isInteger(duration) || duration <= 0) return null
+		if (animation.delay !== undefined && animation.delayMs !== undefined && animation.delay !== animation.delayMs) return null
+		if (animation.duration !== undefined && animation.durationMs !== undefined && animation.duration !== animation.durationMs) return null
+		return { delay, duration }
+	}
+	for (const record of records) {
+		const motion = record.animation
+		const clock = timing(motion)
+		if (record.shapeId !== shapeId || motion.type !== 'motion' || !clock || !once(motion) || typeof motion.motionPathData !== 'string') continue
+		// A single straight segment cannot overshoot its destination. Complex,
+		// malformed, relative-origin or non-finite paths need ordinary bounds review.
+		const tokens = motion.motionPathData.trim().split(/\s+/)
+		if (tokens.length !== 7 || tokens[0] !== 'M' || tokens[3] !== 'L' || tokens[6] !== 'E') continue
+		if (![tokens[1], tokens[2], tokens[4], tokens[5]].every(isDecimalLiteral)) continue
+		const [startX, startY, dx, dy] = [tokens[1], tokens[2], tokens[4], tokens[5]].map(Number)
+		if (![startX, startY, dx, dy].every(Number.isFinite) || startX !== 0 || startY !== 0) continue
+		const x = bounds.x + dx * slideWidth, y = bounds.y + dy * slideHeight
+		if (x < -tolerance || y < -tolerance || x + bounds.w > slideWidth + tolerance || y + bounds.h > slideHeight + tolerance) continue
+		const entrance = records.some(candidate => {
+			const animation = candidate.animation, start = timing(animation)
+			return candidate.shapeId === shapeId && animation.type === 'entrance' && ['appear', 'fade'].includes(animation.effect)
+				&& animation.usesVisibility !== false && once(animation) && start?.delay === clock.delay
+		})
+		if (!entrance) continue
+		// A competing initial path could invalidate the endpoint. Later automatic
+		// travel is independent of the initial-entry proof and remains supported.
+		if (records.some(candidate => {
+			if (candidate === record || candidate.animation.type !== 'motion') return false
+			const other = timing(candidate.animation)
+			return candidate.shapeId !== shapeId || !other || other.delay < clock.delay + clock.duration
+		})) continue
+		return true
+	}
+	return false
+}
+
 function isValidHexColor(value: string): boolean {
 	const color = value.startsWith('#') ? value.slice(1) : value
 	if (color.length !== 6) return false
@@ -295,6 +356,12 @@ function isValidColorValue(value: unknown): boolean {
 		return isValidHexColor(color) || SCHEME_COLOR_NAMES_SET.has(normalized) || PRESET_COLOR_NAMES.has(normalized.toLowerCase())
 	}
 	if (value && typeof value === 'object') {
+		const structured = value as { color?: unknown; scheme?: unknown; preset?: unknown }
+		const base = structured.color ?? structured.scheme ?? structured.preset
+		if (typeof base === 'string') {
+			const normalized = base.trim().startsWith('#') ? base.trim().slice(1) : base.trim()
+			return isValidHexColor(base.trim()) || SCHEME_COLOR_NAMES_SET.has(normalized) || PRESET_COLOR_NAMES.has(normalized.toLowerCase())
+		}
 		const preset = (value as { preset?: unknown }).preset
 		return typeof preset === 'string' && PRESET_COLOR_NAMES.has(preset.trim().toLowerCase())
 	}
@@ -426,15 +493,25 @@ export class ValidationEngine {
 		const issues: ValidationIssue[] = []
 		const slideWidth = this.presLayout.width / 914400
 		const slideHeight = this.presLayout.height / 914400
+		// Native slide extents are integer EMUs. Independent edge coordinates can
+		// differ by one rounding unit without producing any visible overflow.
+		const edgeTolerance = 1 / 914400
 
 		slide._slideObjects?.forEach((obj, index) => {
 			if (!isRenderableSlideObject(obj)) return
 
 			const bounds = getElementBounds(obj, this.presLayout)
 			const shapeName = obj.options?.objectName || `Shape ${index + 1}`
+			const linear = isLineGeometry(obj)
+			const offLeft = bounds.right < -edgeTolerance || (!linear && bounds.right <= 0)
+			const offRight = bounds.x > slideWidth + edgeTolerance || (!linear && bounds.x >= slideWidth)
+			const offTop = bounds.bottom < -edgeTolerance || (!linear && bounds.bottom <= 0)
+			const offBottom = bounds.y > slideHeight + edgeTolerance || (!linear && bounds.y >= slideHeight)
+			if ((offLeft || offRight || offTop || offBottom)
+				&& hasBoundedAutomaticEntry(slide, obj, Number(obj.options?.spid ?? index + 2), bounds, slideWidth, slideHeight, edgeTolerance)) return
 
 			// Check if completely off-slide
-			if (bounds.right <= 0) {
+			if (offLeft) {
 				issues.push({
 					severity: 'error',
 					code: 'ELEMENT_OFF_SLIDE_LEFT',
@@ -446,7 +523,7 @@ export class ValidationEngine {
 					autoFixAvailable: true,
 					context: { bounds, slideWidth, slideHeight },
 				})
-			} else if (bounds.x >= slideWidth) {
+			} else if (offRight) {
 				issues.push({
 					severity: 'error',
 					code: 'ELEMENT_OFF_SLIDE_RIGHT',
@@ -460,7 +537,7 @@ export class ValidationEngine {
 				})
 			}
 
-			if (bounds.bottom <= 0) {
+			if (offTop) {
 				issues.push({
 					severity: 'error',
 					code: 'ELEMENT_OFF_SLIDE_TOP',
@@ -472,7 +549,7 @@ export class ValidationEngine {
 					autoFixAvailable: true,
 					context: { bounds, slideWidth, slideHeight },
 				})
-			} else if (bounds.y >= slideHeight) {
+			} else if (offBottom) {
 				issues.push({
 					severity: 'error',
 					code: 'ELEMENT_OFF_SLIDE_BOTTOM',
@@ -488,17 +565,13 @@ export class ValidationEngine {
 
 			// Check if partially off-slide (warning)
 			if (
-				bounds.x < 0 ||
-				bounds.y < 0 ||
-				bounds.right > slideWidth ||
-				bounds.bottom > slideHeight
+				bounds.x < -edgeTolerance ||
+				bounds.y < -edgeTolerance ||
+				bounds.right > slideWidth + edgeTolerance ||
+				bounds.bottom > slideHeight + edgeTolerance
 			) {
 				// Only warn if not already an error (completely off)
-				const isCompletelyOff =
-					bounds.right <= 0 ||
-					bounds.x >= slideWidth ||
-					bounds.bottom <= 0 ||
-					bounds.y >= slideHeight
+				const isCompletelyOff = offLeft || offRight || offTop || offBottom
 
 				if (!isCompletelyOff) {
 					issues.push({
@@ -532,9 +605,11 @@ export class ValidationEngine {
 
 			const bounds = getElementBounds(obj, this.presLayout)
 			const shapeName = obj.options?.objectName || `Shape ${index + 1}`
+			const nonzeroLine = isLineGeometry(obj) && (bounds.w > 0 || bounds.h > 0)
 
-			// Check for zero dimensions
-			if (bounds.w === 0) {
+			// A horizontal/vertical connector has one zero axis by definition.
+			// A point connector and zero-area non-line objects remain invalid.
+			if (bounds.w === 0 && !nonzeroLine) {
 				issues.push({
 					severity: 'error',
 					code: 'ZERO_WIDTH',
@@ -547,7 +622,7 @@ export class ValidationEngine {
 				})
 			}
 
-			if (bounds.h === 0) {
+			if (bounds.h === 0 && !nonzeroLine) {
 				issues.push({
 					severity: 'error',
 					code: 'ZERO_HEIGHT',
@@ -621,13 +696,43 @@ export class ValidationEngine {
 		}
 
 		const shapeCount = slide._slideObjects?.length || 0
+		// Explicit SPIDs are first-class in the native package (media, captions, and
+		// imported/native objects do not necessarily equal positional index + 2). Keep
+		// validation aligned with the actual object identity rather than rejecting a
+		// valid animation merely because its SPID is sparse.
+		const objectSpids = new Set((slide._slideObjects || []).map((obj, index) => Number((obj as unknown as { options?: { spid?: number } }).options?.spid ?? index + 2)))
+		const nativeChildren = nativeGroupIdentityPlan(slide).targets
 
 		animations.forEach((anim, index) => {
 			const shapeId = anim.shapeId
+			// Media animations may use an explicitly allocated SPID that is not
+			// represented by the imported slide object's positional index. The
+			// media target itself is authoritative in that case; ordinary shape
+			// animations continue through the positional integrity check below.
+			const target = (anim as unknown as { target?: ISlideObject }).target
+			if (target?._type === 'media' || (target && slide._slideObjects?.includes(target as unknown as PresSlide['_slideObjects'][number]))) return
+			const childMatches = target ? nativeChildren.filter(child => child.target === target) : []
+			if (childMatches.length) {
+				let invalidReason: string | undefined
+				if (childMatches.length > 1) invalidReason = 'The animation target occurs in more than one native group.'
+				else {
+					try { assertNativeDescendantAnimationInspectable(slide) }
+					catch { invalidReason = 'The native child animation cannot be verified while the slide contains opaque imported objects.' }
+				}
+				if (!invalidReason) return
+				issues.push({
+					severity: 'error', code: 'INVALID_ANIMATION_TARGET', message: invalidReason,
+					slideNumber: slideNum, suggestion: 'Use one unique native editable child target on an inspectable slide.',
+					autoFixAvailable: false, context: { shapeId },
+				})
+				return
+			}
 			const shapeIndex = shapeId - 2 // SPID = index + 2
 
-			// Check if animation targets a valid shape
-			if (shapeIndex < 0 || shapeIndex >= shapeCount) {
+			// A detached object reference cannot borrow a number now assigned to
+			// another object. Numeric-only legacy top-level records retain their
+			// existing check; live descendants use the same plan as serialization.
+			if (target || shapeIndex < 0 || shapeIndex >= shapeCount || !objectSpids.has(Number(shapeId))) {
 				issues.push({
 					severity: 'error',
 					code: 'ANIMATION_ON_MISSING_SHAPE',
@@ -734,7 +839,13 @@ export class ValidationEngine {
 			issues.push(...this.collectNonFiniteNumberIssues(obj.arrTabRows, slideNum, `${basePath}.tableRows`, shapeName, index))
 			issues.push(...this.collectNonFiniteNumberIssues(obj.animation, slideNum, `${basePath}.animation`, shapeName, index))
 
-			issues.push(...this.validateCommonOptionsRepairRisk(obj.options, slideNum, `${basePath}.options`, shapeName, index, obj.shape))
+			const marginContext = (obj.type || obj._type) === 'table' ? 'table' : 'text'
+			issues.push(...this.validateCommonOptionsRepairRisk(obj.options, slideNum, `${basePath}.options`, shapeName, index, obj.shape, marginContext))
+			// Pictures carry their click hyperlink at the slide-object level rather
+			// than inside options. Validate that package relationship source too.
+			if (obj.hyperlink !== undefined && obj.hyperlink !== null) {
+				issues.push(...this.validateHyperlinkRepairRisk(obj.hyperlink, slideNum, `${basePath}.hyperlink`, shapeName, index))
+			}
 
 			if (Array.isArray(obj.text)) {
 				obj.text.forEach((run, runIndex) => {
@@ -833,7 +944,8 @@ export class ValidationEngine {
 		path: string,
 		shapeName?: string,
 		shapeIndex?: number,
-		shape?: unknown
+		shape?: unknown,
+		marginContext: 'text' | 'table' = 'text'
 	): ValidationIssue[] {
 		if (!options || typeof options !== 'object') return []
 		const opts = options as Record<string, unknown>
@@ -843,7 +955,13 @@ export class ValidationEngine {
 		issues.push(...this.validateFillRepairRisk(opts.fill, slideNum, `${path}.fill`, shapeName, shapeIndex))
 		issues.push(...this.validateLineRepairRisk(opts.line, slideNum, `${path}.line`, shapeName, shapeIndex))
 		issues.push(...this.validateHyperlinkRepairRisk(opts.hyperlink, slideNum, `${path}.hyperlink`, shapeName, shapeIndex))
-		issues.push(...this.validateMarginRepairRisk(opts.margin, slideNum, `${path}.margin`, shapeName, shapeIndex))
+		const preserveImportedMarginPrecision = opts._nativeMinimal === true && typeof opts._rawBodyPrChildXml === 'string'
+		issues.push(...(marginContext === 'table'
+			? this.validateTableMarginRepairRisk(opts.margin, slideNum, `${path}.margin`, shapeName, shapeIndex)
+			: this.validateMarginRepairRisk(opts.margin, slideNum, `${path}.margin`, shapeName, shapeIndex, preserveImportedMarginPrecision)))
+		if (opts.valign !== undefined && opts.valign !== null && !['top', 'middle', 'bottom', 't', 'ctr', 'center', 'm', 'b'].includes(String(opts.valign).toLowerCase())) {
+			issues.push(this.repairIssue('INVALID_VALIGN', `${path}.valign must be top, middle, or bottom`, slideNum, `${path}.valign`, shapeName, shapeIndex, opts.valign))
+		}
 		issues.push(...this.validateShadowRepairRisk(opts.shadow, slideNum, `${path}.shadow`, shapeName, shapeIndex))
 		issues.push(...this.validateEffectRepairRisk(opts.glow, slideNum, `${path}.glow`, shapeName, shapeIndex))
 		issues.push(...this.validateEffectRepairRisk(opts.textGlow, slideNum, `${path}.textGlow`, shapeName, shapeIndex))
@@ -935,7 +1053,7 @@ export class ValidationEngine {
 			})
 		}
 		if (hasAuthoredValue(fillObj.gradientAngle) && !isFiniteNumberInRange(fillObj.gradientAngle, 0, 360)) {
-			issues.push(this.repairIssue('INVALID_ROTATION', `${path}.gradientAngle must be a finite number between 0 and 360 degrees`, slideNum, `${path}.gradientAngle`, shapeName, shapeIndex, fillObj.gradientAngle))
+			issues.push(this.repairIssue('INVALID_ROTATION', `${path}.gradientAngle must be a finite number from 0 through 360 degrees; 360 is normalized to 0`, slideNum, `${path}.gradientAngle`, shapeName, shapeIndex, fillObj.gradientAngle))
 		}
 		issues.push(...this.validateGradientRectRepairRisk(fillObj.fillToRect, slideNum, `${path}.fillToRect`, shapeName, shapeIndex))
 		issues.push(...this.validateGradientRectRepairRisk(fillObj.tileRect, slideNum, `${path}.tileRect`, shapeName, shapeIndex))
@@ -960,6 +1078,14 @@ export class ValidationEngine {
 		}
 		if (!isValidColorValue(stopObj.color)) {
 			issues.push(this.repairIssue('INVALID_COLOR', `${path}.color must be a 6-digit RGB, scheme color, or preset color`, slideNum, `${path}.color`, shapeName, shapeIndex, stopObj.color))
+		}
+		if (stopObj.color && typeof stopObj.color === 'object') {
+			const color = stopObj.color as Record<string, unknown>
+			for (const [key, minimum, maximum] of [['tint', 0, 1], ['shade', 0, 1], ['opacity', 0, 1], ['saturation', 0, 4], ['luminance', 0, 4], ['luminanceOffset', -1, 1] ] as const) {
+				if (hasAuthoredValue(color[key]) && !isFiniteNumberInRange(color[key], minimum, maximum)) {
+					issues.push(this.repairIssue('INVALID_COLOR_TRANSFORM', `${path}.color.${key} must be a finite value between ${minimum} and ${maximum}`, slideNum, `${path}.color.${key}`, shapeName, shapeIndex, color[key]))
+				}
+			}
 		}
 		if (hasAuthoredValue(stopObj.transparency) && !isFiniteNumberInRange(stopObj.transparency, 0, 100)) {
 			issues.push(this.repairIssue('INVALID_TRANSPARENCY', `${path}.transparency must be a finite percent between 0 and 100`, slideNum, `${path}.transparency`, shapeName, shapeIndex, stopObj.transparency))
@@ -1019,19 +1145,30 @@ export class ValidationEngine {
 		}
 		const link = hyperlink as Record<string, unknown>
 		const issues: ValidationIssue[] = []
+		const hasSlide = link.slide !== undefined && link.slide !== null
+		const hasUrl = link.url !== undefined && link.url !== null
+		if (hasSlide === hasUrl) {
+			issues.push(this.repairIssue('INVALID_HYPERLINK', `${path} must specify exactly one of slide or url`, slideNum, path, shapeName, shapeIndex, hyperlink))
+		}
 		if (hasAuthoredValue(link._rId) && !isPositiveInteger(link._rId)) {
 			issues.push(this.repairIssue('INVALID_HYPERLINK', `${path}._rId must be a positive integer`, slideNum, `${path}._rId`, shapeName, shapeIndex, link._rId))
 		}
-		if (hasAuthoredValue(link.slide) && !isPositiveInteger(link.slide)) {
-			issues.push(this.repairIssue('INVALID_HYPERLINK', `${path}.slide must be a positive slide number`, slideNum, `${path}.slide`, shapeName, shapeIndex, link.slide))
+		if (hasSlide && (!isPositiveInteger(link.slide) || Number(link.slide) > this.slides.length)) {
+			issues.push(this.repairIssue('INVALID_HYPERLINK', `${path}.slide must identify an existing slide from 1 to ${this.slides.length}`, slideNum, `${path}.slide`, shapeName, shapeIndex, link.slide))
 		}
-		if (hasAuthoredValue(link.url)) {
-			if (typeof link.url !== 'string' || !link.url.trim() || hasControlChars(link.url)) {
-				issues.push(this.repairIssue('INVALID_HYPERLINK', `${path}.url must be a non-empty string without control characters`, slideNum, `${path}.url`, shapeName, shapeIndex, link.url))
+		if (hasUrl) {
+			if (typeof link.url !== 'string' || link.url.length > 4096 || !/^(?:https:\/\/|mailto:|tel:)[^\s]+$/i.test(link.url.trim()) || hasControlChars(link.url)) {
+				issues.push(this.repairIssue('INVALID_HYPERLINK', `${path}.url must use https, mailto, or tel without whitespace or control characters`, slideNum, `${path}.url`, shapeName, shapeIndex, link.url))
 			}
 		}
-		if (hasAuthoredValue(link.tooltip) && (typeof link.tooltip !== 'string' || hasControlChars(link.tooltip))) {
-			issues.push(this.repairIssue('INVALID_HYPERLINK', `${path}.tooltip must be a string without control characters`, slideNum, `${path}.tooltip`, shapeName, shapeIndex, link.tooltip))
+		if (hasAuthoredValue(link.tooltip) && (typeof link.tooltip !== 'string' || link.tooltip.length > 1024 || hasControlChars(link.tooltip))) {
+			issues.push(this.repairIssue('INVALID_HYPERLINK', `${path}.tooltip must be a string of at most 1024 characters without control characters`, slideNum, `${path}.tooltip`, shapeName, shapeIndex, link.tooltip))
+		}
+		if (link.target !== undefined && link.target !== null) {
+			if (!hasUrl) issues.push(this.repairIssue('INVALID_HYPERLINK', `${path}.target is valid only with an external url`, slideNum, `${path}.target`, shapeName, shapeIndex, link.target))
+			else if (typeof link.target !== 'string' || !link.target.trim() || link.target.length > 255 || hasControlChars(link.target)) {
+				issues.push(this.repairIssue('INVALID_HYPERLINK', `${path}.target must be a non-empty string of at most 255 characters without control characters`, slideNum, `${path}.target`, shapeName, shapeIndex, link.target))
+			}
 		}
 		return issues
 	}
@@ -1041,13 +1178,33 @@ export class ValidationEngine {
 		slideNum: number,
 		path: string,
 		shapeName?: string,
+		shapeIndex?: number,
+		preserveImportedPrecision = false
+	): ValidationIssue[] {
+		if (margin === undefined || margin === null) return []
+		const isValidMarginNumber = (value: unknown) => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100 && (preserveImportedPrecision || Math.abs(value * 100 - Math.round(value * 100)) < 1e-9)
+		if (isValidMarginNumber(margin)) return []
+		if (Array.isArray(margin) && margin.length === 4 && margin.every(isValidMarginNumber)) return []
+		return [this.repairIssue('INVALID_MARGIN', `${path} must be a number or four-number array from 0 to 100 points at a 0.01-point step`, slideNum, path, shapeName, shapeIndex, margin)]
+	}
+
+	private validateTableMarginRepairRisk(
+		margin: unknown,
+		slideNum: number,
+		path: string,
+		shapeName?: string,
 		shapeIndex?: number
 	): ValidationIssue[] {
 		if (margin === undefined || margin === null) return []
-		const isValidMarginNumber = (value: unknown) => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 100
-		if (isValidMarginNumber(margin)) return []
-		if (Array.isArray(margin) && margin.length === 4 && margin.every(isValidMarginNumber)) return []
-		return [this.repairIssue('INVALID_MARGIN', `${path} must be a finite non-negative number or four-number array`, slideNum, path, shapeName, shapeIndex, margin)]
+		// Table cell insets accept fractional inches, unlike text-box point
+		// insets. The serializer also retains the legacy first-side >= 1 point
+		// convention. Neither path requires the text-box 0.01-point quantum.
+		// Keep the closed table contract's range and tuple shape; do not relax
+		// ordinary text/run margins or rewrite the authored table values.
+		const isValidTableMargin = (value: unknown) => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 56
+		if (isValidTableMargin(margin)) return []
+		if (Array.isArray(margin) && margin.length === 4 && margin.every(isValidTableMargin)) return []
+		return [this.repairIssue('INVALID_MARGIN', `${path} must be a finite number or four-number array from 0 to 56 for native table-cell insets`, slideNum, path, shapeName, shapeIndex, margin)]
 	}
 
 	private validateShadowRepairRisk(
@@ -1136,19 +1293,62 @@ export class ValidationEngine {
 		if (hasAuthoredValue(options.baseline) && !isFiniteNumberInRange(options.baseline, -100, 100)) {
 			issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.baseline must be a finite percent between -100 and 100`, slideNum, `${path}.baseline`, shapeName, shapeIndex, options.baseline))
 		}
-		for (const key of ['charSpacing', 'lineSpacing', 'paraSpaceAfter', 'paraSpaceBefore'] as const) {
+		if (hasAuthoredValue(options.fontFaceComplexScript) && (typeof options.fontFaceComplexScript !== 'string' || !options.fontFaceComplexScript.trim() || /[\u0000-\u001F\u007F]/.test(options.fontFaceComplexScript))) {
+			issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.fontFaceComplexScript must be a non-empty typeface without control characters`, slideNum, `${path}.fontFaceComplexScript`, shapeName, shapeIndex, options.fontFaceComplexScript))
+		}
+		for (const key of ['rtl', 'softBreakBefore'] as const) {
+			if (hasAuthoredValue(options[key]) && typeof options[key] !== 'boolean') issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.${key} must be boolean`, slideNum, `${path}.${key}`, shapeName, shapeIndex, options[key]))
+		}
+		if (hasAuthoredValue(options.field)) {
+			if (!options.field || typeof options.field !== 'object' || Array.isArray(options.field)) {
+				issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.field must be an object`, slideNum, `${path}.field`, shapeName, shapeIndex, options.field))
+			} else {
+				const field = options.field as Record<string, unknown>
+				if (typeof field.id !== 'string' || !/^\{[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}\}$/.test(field.id)) {
+					issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.field.id must be a braced GUID`, slideNum, `${path}.field.id`, shapeName, shapeIndex, field.id))
+				}
+				if (typeof field.type !== 'string' || !field.type.trim() || field.type.length > 128 || /[\u0000-\u001F\u007F]/.test(field.type)) {
+					issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.field.type must be a non-empty field token of at most 128 characters`, slideNum, `${path}.field.type`, shapeName, shapeIndex, field.type))
+				}
+			}
+		}
+		if (hasAuthoredValue(options.charSpacing) && !isFiniteNumberInRange(options.charSpacing, -100, 100)) {
+			issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.charSpacing must be a finite point value between -100 and 100`, slideNum, `${path}.charSpacing`, shapeName, shapeIndex, options.charSpacing))
+		}
+		for (const key of ['lineSpacing', 'paraSpaceAfter', 'paraSpaceBefore', 'indent', 'hanging'] as const) {
 			if (hasAuthoredValue(options[key]) && !isFiniteNumberInRange(options[key], 0, 400)) {
 				issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.${key} must be a finite non-negative point value`, slideNum, `${path}.${key}`, shapeName, shapeIndex, options[key]))
+			}
+			if (hasAuthoredValue(options[key]) && Math.abs(Number(options[key]) - Math.round(Number(options[key]) * 100) / 100) > 1e-9) {
+				issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.${key} must use a 0.01-point step`, slideNum, `${path}.${key}`, shapeName, shapeIndex, options[key]))
 			}
 		}
 		if (hasAuthoredValue(options.lineSpacingMultiple) && !isFiniteNumberInRange(options.lineSpacingMultiple, 0, 9.99)) {
 			issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.lineSpacingMultiple must be a finite value between 0 and 9.99`, slideNum, `${path}.lineSpacingMultiple`, shapeName, shapeIndex, options.lineSpacingMultiple))
 		}
+		if (hasAuthoredValue(options.indentLevel) && (!Number.isInteger(options.indentLevel) || Number(options.indentLevel) < 0 || Number(options.indentLevel) > 8)) {
+			issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.indentLevel must be an integer between 0 and 8`, slideNum, `${path}.indentLevel`, shapeName, shapeIndex, options.indentLevel))
+		}
+		if (hasAuthoredValue(options.tabStops)) {
+			if (!Array.isArray(options.tabStops) || options.tabStops.length > 32) issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.tabStops must be an array with at most 32 entries`, slideNum, `${path}.tabStops`, shapeName, shapeIndex, options.tabStops))
+			else options.tabStops.forEach((stop: unknown, index: number) => {
+				const entry = stop as Record<string, unknown>
+				if (!entry || typeof entry !== 'object' || !isFiniteNumberInRange(entry.position, 0, 100) || Math.abs(Number(entry.position) - Math.round(Number(entry.position) * 100) / 100) > 1e-9) issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.tabStops[${index}].position must be 0..100 inches at a 0.01 step`, slideNum, `${path}.tabStops[${index}].position`, shapeName, shapeIndex, entry?.position))
+				if (entry?.alignment !== undefined && !['l', 'r', 'ctr', 'dec'].includes(String(entry.alignment))) issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.tabStops[${index}].alignment must be l, r, ctr, or dec`, slideNum, `${path}.tabStops[${index}].alignment`, shapeName, shapeIndex, entry.alignment))
+			})
+		}
+		if (hasAuthoredValue(options.strike) && options.strike !== true && options.strike !== false && options.strike !== 'sngStrike' && options.strike !== 'dblStrike') issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.strike must be boolean, sngStrike, or dblStrike`, slideNum, `${path}.strike`, shapeName, shapeIndex, options.strike))
+		for (const key of ['superscript', 'subscript'] as const) if (hasAuthoredValue(options[key]) && typeof options[key] !== 'boolean') issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.${key} must be boolean`, slideNum, `${path}.${key}`, shapeName, shapeIndex, options[key]))
+		if (options.superscript === true && options.subscript === true) issues.push(this.repairIssue('INVALID_COORDINATE', `${path} cannot enable superscript and subscript together`, slideNum, path, shapeName, shapeIndex, { superscript: options.superscript, subscript: options.subscript }))
+		if (hasAuthoredValue(options.baseline) && (options.superscript === true || options.subscript === true)) issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.baseline cannot be combined with superscript or subscript`, slideNum, path, shapeName, shapeIndex, { baseline: options.baseline, superscript: options.superscript, subscript: options.subscript }))
 		if (options.bullet && typeof options.bullet === 'object') {
 			const bullet = options.bullet as Record<string, unknown>
 			for (const key of ['indent', 'marginPt', 'fontSize'] as const) {
 				if (hasAuthoredValue(bullet[key]) && !isFiniteNumberInRange(bullet[key], 0, 400)) {
 					issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.bullet.${key} must be a finite non-negative point value`, slideNum, `${path}.bullet.${key}`, shapeName, shapeIndex, bullet[key]))
+				}
+				if (hasAuthoredValue(bullet[key]) && Math.abs(Number(bullet[key]) - Math.round(Number(bullet[key]) * 100) / 100) > 1e-9) {
+					issues.push(this.repairIssue('INVALID_COORDINATE', `${path}.bullet.${key} must use a 0.01-point step`, slideNum, `${path}.bullet.${key}`, shapeName, shapeIndex, bullet[key]))
 				}
 			}
 			if (hasAuthoredValue(bullet.color) && !isValidColorValue(bullet.color)) {
@@ -1191,7 +1391,7 @@ export class ValidationEngine {
 			row.forEach((cell, cellIndex) => {
 				if (cell && typeof cell === 'object') {
 					const cellOptions = (cell as { options?: unknown }).options
-					issues.push(...this.validateCommonOptionsRepairRisk(cellOptions, slideNum, `${path}[${rowIndex}][${cellIndex}].options`, shapeName, shapeIndex))
+					issues.push(...this.validateCommonOptionsRepairRisk(cellOptions, slideNum, `${path}[${rowIndex}][${cellIndex}].options`, shapeName, shapeIndex, undefined, 'table'))
 				}
 			})
 		})
@@ -1288,7 +1488,10 @@ export class ValidationEngine {
 			const issue = validateText3DRotationOption(rawValue, `${label}.${key}`)
 			if (!issue) continue
 			issues.push({
-				severity: issue.code.endsWith('_NORMALIZED') ? 'warning' : 'error',
+				// Equivalent modulo-360 angles are legal authored values. Preserve the
+				// normalization as evidence, but never turn a lossless rewrite into a
+				// strict-validation blocker.
+				severity: issue.code === 'TEXT3D_ROTATION_NORMALIZED' ? 'info' : 'error',
 				code: issue.code as ValidationIssueCode,
 				message: issue.message,
 				slideNumber: slideNum,

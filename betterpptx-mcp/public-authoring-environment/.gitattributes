@@ -1,0 +1,4 @@
+* text=auto eol=lf
+*.mcpb binary
+*.plugin binary
+*.zip binary

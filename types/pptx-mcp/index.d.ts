@@ -1,0 +1,10 @@
+import { Server } from "@modelcontextprotocol/server";
+import { BetterPptxMcpRuntimeOptions, ToolDefinition } from './engine.js';
+export type { BetterPptxMcpRuntimeOptions, ToolDefinition } from './engine.js';
+export { BETTERPPTX_MCP_BRAND, callBetterPptxMcpTool, getBetterPptxMcpTools } from './engine.js';
+export declare const BETTERPPTX_MCP_MCP_TOOLS: ToolDefinition[];
+export declare const PPTXGENJS_MCP_TOOLS: ToolDefinition[];
+export declare function createBetterPptxMcpMcpServer(options?: BetterPptxMcpRuntimeOptions): Server;
+export declare function startBetterPptxMcpMcpServer(options?: BetterPptxMcpRuntimeOptions): Promise<void>;
+export declare function startPptxGenMcpServer(options?: BetterPptxMcpRuntimeOptions): Promise<void>;
+export declare function callPptxGenMcpTool(name: string, args?: any, options?: BetterPptxMcpRuntimeOptions): Promise<any>;

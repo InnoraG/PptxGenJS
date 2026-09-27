@@ -52,7 +52,9 @@ export function buildGrowShrinkAnimation(ctx: AnimationBuildContext): string {
     // All other targets (asOneObject, background) use 1000ms
     // This matches frozen reference behavior
     const isParagraph = target?.type === 'paragraph';
-    const duration = isParagraph ? (animation.duration || config.defaultDuration || 2000) : 1000;
+    // Preserve the frozen-reference defaults, but an explicit authored
+    // duration must win for any target (including shapes and 3D models).
+    const duration = animation.duration ?? (isParagraph ? (config.defaultDuration || 2000) : 1000);
     const delay = animation.delay ?? config.defaultDelay ?? 0
     
     // Build target XML based on sequence mode
@@ -67,11 +69,19 @@ export function buildGrowShrinkAnimation(ctx: AnimationBuildContext): string {
     // Generate ID for animScale element
     const scaleId = getNextAnimationId();
     
-    // Get scale values from variant (direction parameter)
+    // Public authoring uses a direct scale factor: 1.12 = 112%, 0.90 = 90%.
+    // The previous builder ignored `animation.scale` and silently fell back to
+    // "both larger" (150%), which made restrained emphasis unexpectedly huge.
+    const explicitScale = Number((animation as any).scale);
+    const explicitScaleX = Number((animation as any).scaleX);
+    const explicitScaleY = Number((animation as any).scaleY);
+    const hasExplicitScale = animation.scale != null && Number.isFinite(explicitScale) && explicitScale >= 0;
+    const hasExplicitScaleX = animation.scaleX != null && Number.isFinite(explicitScaleX) && explicitScaleX >= 0;
+    const hasExplicitScaleY = animation.scaleY != null && Number.isFinite(explicitScaleY) && explicitScaleY >= 0;
     const variantKey = (animation.direction || 'both larger').toLowerCase();
     const scaleValues = GROW_SHRINK_VARIANTS[variantKey] || GROW_SHRINK_VARIANTS['both larger'];
-    const byX = scaleValues.x;
-    const byY = scaleValues.y;
+    const byX = String(Math.round((hasExplicitScaleX ? explicitScaleX : hasExplicitScale ? explicitScale : Number(scaleValues.x) / 100000) * 100000));
+    const byY = String(Math.round((hasExplicitScaleY ? explicitScaleY : hasExplicitScale ? explicitScale : Number(scaleValues.y) / 100000) * 100000));
     
     // Build the animScale element
     const animScaleElement = `<p:animScale>

@@ -6,8 +6,10 @@ import {
 	effectiveBalanceSnapshot,
 	finalizeBillingReservation,
 	preflightBillingReservation,
+	refreshProviderBalanceForCustomer,
 	releaseBillingReservation,
 } from './billing/reservations.mjs'
+import { flushQueuedUsageEvents } from './billing/usage-events.mjs'
 
 function fail(message, details = {}) {
 	const err = new Error(message)
@@ -46,32 +48,48 @@ function fakeDeck({ slides = 3, plainObjects = 12, richObjects = 2 } = {}) {
 	return { pptx: { slides: out } }
 }
 
-function entitlement(providerCustomerId, credits = 30) {
+function entitlement(customerId) {
 	return {
-		provider: 'dodo',
-		providerCustomerId,
+		provider: 'payram',
 		creditEntitlementId: 'cde_verify_gate',
-		billingCustomerHash: hashCustomerId(providerCustomerId),
+		billingCustomerHash: hashCustomerId(customerId),
 		billingStatus: 'active',
-		lastKnownCreditBalance: credits,
-		lastBalanceSyncedAt: new Date().toISOString(),
 	}
 }
 
-process.env.BETTERPPTX_BILLING_PROVIDER = 'dodo'
+async function seedCredits(customerHash, credits, grantId) {
+	await store.creditCustomer({
+		customerHash,
+		eventId: grantId,
+		amountCredits: credits,
+		source: 'payram_settlement',
+		idempotencyKey: grantId,
+	})
+}
+
+process.env.BETTERPPTX_BILLING_PROVIDER = 'payram'
 process.env.BETTERPPTX_BILLING_DRY_RUN = '0'
 process.env.BETTERPPTX_BILLING_LEDGER_STORE = 'local'
 process.env.BETTERPPTX_REQUIRE_SHARED_STORES = '0'
-const verifyDir = path.resolve('outputs', 'billing-verify')
+const verifyDir = path.resolve('outputs', 'billing-verify', `reservation-gate-${Date.now()}-${process.pid}`)
 fs.mkdirSync(verifyDir, { recursive: true })
 process.env.BETTERPPTX_BILLING_LEDGER_FILE = path.join(verifyDir, 'billing-reservation-gate-ledger.json')
-try { fs.rmSync(process.env.BETTERPPTX_BILLING_LEDGER_FILE, { force: true }) } catch {}
 
 const store = createBillingLedgerStore()
 const context = { sessionId: 'session_verify_gate' }
 const entry = fakeDeck()
 
-const paid = entitlement('cus_verify_gate_success', 30)
+await expectBillingError('BILLING_SETUP_INCOMPLETE', () => preflightBillingReservation({
+	name: 'betterpptx.deck.save',
+	args: { deckId: 'deck_verify_gate_free', idempotencyKey: 'save-free' },
+	context: { sessionId: 'session_verify_gate_free' },
+	entry,
+	billingEntitlement: null,
+	store,
+}))
+
+const paid = entitlement('cus_verify_gate_success')
+await seedCredits(paid.billingCustomerHash, 30, 'grant_verify_gate_success')
 const gate = await preflightBillingReservation({
 	name: 'betterpptx.deck.save',
 	args: { deckId: 'deck_verify_gate_success', idempotencyKey: 'save-success' },
@@ -86,15 +104,15 @@ let customer = await store.getCustomer(paid.billingCustomerHash)
 let balance = effectiveBalanceSnapshot(customer)
 expect(balance.pendingReservedCredits === gate.amountCredits, 'Pending reservation should reduce effective balance.', { balance, gate })
 
-const replay = await preflightBillingReservation({
+const replay = await expectBillingError('BILLING_TEMPORARILY_UNAVAILABLE', () => preflightBillingReservation({
 	name: 'betterpptx.deck.save',
 	args: { deckId: 'deck_verify_gate_success', idempotencyKey: 'save-success' },
 	context,
 	entry,
 	billingEntitlement: paid,
 	store,
-})
-expect(replay.idempotent === true, 'Same idempotency key and args should replay the reservation idempotently.', { replay })
+}))
+expect(replay.details.reason === 'reservation-already-used', 'Reservation idempotency does not authorize executing the value-producing operation again.', { replay })
 customer = await store.getCustomer(paid.billingCustomerHash)
 balance = effectiveBalanceSnapshot(customer)
 expect(balance.pendingReservedCredits === gate.amountCredits, 'Idempotent reservation replay should not double reserve.', { balance, gate })
@@ -110,71 +128,55 @@ expect(finalized.reservation.state === 'committed', 'Successful save should comm
 customer = await store.getCustomer(paid.billingCustomerHash)
 balance = effectiveBalanceSnapshot(customer)
 expect(balance.pendingReservedCredits === 0, 'Committed reservation should clear pending credits.', { balance })
-expect(balance.queuedUsageCreditsNotYetReflectedByDodo === gate.amountCredits, 'Committed reservation should create queued usage debt.', { balance, gate })
+expect(balance.queuedUsageCreditsNotYetSettledByProvider === finalized.reservation.committedAmountCredits, 'Committed reservation should queue the actual charge, not the accepted cap.', { balance, gate, finalized })
+expect(finalized.reservation.committedAmountCredits <= gate.amountCredits, 'Committed reservation must not exceed the accepted cap.', { gate, finalized })
 const queued = await store.listQueuedUsageEvents({ limit: 10 })
 expect(queued.length === 1 && queued[0].state === 'queued', 'Committed reservation should queue one usage event.', { queued })
 
-const refreshPaid = entitlement('cus_verify_gate_refresh', 1)
+// PayRam settlement is ledger-internal: the queued charge becomes a durable debit,
+// and the customer's effective spendable balance is unchanged by settlement itself.
+const effectiveBeforeSettle = balance.effectiveAvailableCredits
+const availableBeforeSettle = balance.availableBalanceCredits
+const settled = await flushQueuedUsageEvents({ store, limit: 10 })
+expect(settled.ok === true && settled.settled === 1 && settled.provider === 'ledger_internal', 'Queued usage should settle internally against the ledger.', { settled })
+customer = await store.getCustomer(paid.billingCustomerHash)
+balance = effectiveBalanceSnapshot(customer)
+expect(balance.queuedUsageCreditsNotYetSettledByProvider === 0, 'Settlement should clear queued usage.', { balance })
+expect(balance.availableBalanceCredits === Number((availableBeforeSettle - finalized.reservation.committedAmountCredits).toFixed(2)), 'Settlement should durably debit the available balance by the committed charge.', { balance, finalized })
+expect(balance.effectiveAvailableCredits === effectiveBeforeSettle, 'Settlement must not change the effective spendable balance.', { balance, effectiveBeforeSettle })
+
+// Crypto balances are ledger-authoritative: insufficiency is immediate, no provider pull-refresh.
+const broke = entitlement('cus_verify_gate_broke')
 let refreshCalls = 0
-const refreshedGate = await preflightBillingReservation({
+const insufficientErr = await expectBillingError('INSUFFICIENT_CREDITS', () => preflightBillingReservation({
 	name: 'betterpptx.deck.save',
-	args: { deckId: 'deck_verify_gate_refresh', idempotencyKey: 'save-refresh' },
+	args: { deckId: 'deck_verify_gate_broke', idempotencyKey: 'save-broke' },
 	context,
 	entry,
-	billingEntitlement: refreshPaid,
+	billingEntitlement: broke,
 	store,
-	refreshBalance: async ({ store: ledger, billingEntitlement }) => {
+	refreshBalance: async () => {
 		refreshCalls += 1
-		await ledger.upsertCustomer(billingEntitlement.billingCustomerHash, {
-			providerCustomerId: billingEntitlement.providerCustomerId,
-			lastKnownDodoAvailableBalanceCredits: 50,
-			lastBalanceSyncedAt: new Date().toISOString(),
-		})
-		return { ok: true, balanceCredits: 50 }
-	},
-})
-expect(refreshedGate.active === true && refreshedGate.balanceRefreshed === true, 'Live balance refresh should allow a recent top-up before blocking.', { refreshedGate })
-expect(refreshCalls === 1, 'Balance refresh should run exactly once before retrying reservation.', { refreshCalls })
-
-const stillLow = entitlement('cus_verify_gate_low', 1)
-await expectBillingError('INSUFFICIENT_CREDITS', () => preflightBillingReservation({
-	name: 'betterpptx.deck.save',
-	args: { deckId: 'deck_verify_gate_low', idempotencyKey: 'save-low' },
-	context,
-	entry,
-	billingEntitlement: stillLow,
-	store,
-	refreshBalance: async ({ store: ledger, billingEntitlement }) => {
-		await ledger.upsertCustomer(billingEntitlement.billingCustomerHash, {
-			providerCustomerId: billingEntitlement.providerCustomerId,
-			lastKnownDodoAvailableBalanceCredits: 2,
-			lastBalanceSyncedAt: new Date().toISOString(),
-		})
-		return { ok: true, balanceCredits: 2 }
+		return { ok: true, balanceCredits: 999 }
 	},
 }))
+expect(refreshCalls === 0, 'Crypto-credit insufficiency must not attempt a provider balance refresh.', { refreshCalls })
+expect(insufficientErr?.details?.balanceRefreshed === false, 'Insufficiency error should report that no refresh happened.', { insufficientErr })
 
-const unavailable = entitlement('cus_verify_gate_unavailable', 1)
-await expectBillingError('BILLING_TEMPORARILY_UNAVAILABLE', () => preflightBillingReservation({
-	name: 'betterpptx.deck.save',
-	args: { deckId: 'deck_verify_gate_unavailable', idempotencyKey: 'save-unavailable' },
-	context,
-	entry,
-	billingEntitlement: unavailable,
-	store,
-	refreshBalance: async () => ({ ok: false, code: 'verify-refresh-down' }),
-}))
+const pullRefresh = await refreshProviderBalanceForCustomer()
+expect(pullRefresh.ok === false && pullRefresh.code === 'PROVIDER_PULL_REFRESH_UNSUPPORTED', 'PayRam must not offer a pull-based balance refresh.', { pullRefresh })
 
 await expectBillingError('BILLING_SETUP_INCOMPLETE', () => preflightBillingReservation({
 	name: 'betterpptx.deck.save',
 	args: { deckId: 'deck_verify_gate_missing', idempotencyKey: 'save-missing' },
 	context,
 	entry,
-	billingEntitlement: { provider: 'dodo' },
+	billingEntitlement: { provider: 'payram' },
 	store,
 }))
 
-const failPaid = entitlement('cus_verify_gate_release', 30)
+const failPaid = entitlement('cus_verify_gate_release')
+await seedCredits(failPaid.billingCustomerHash, 30, 'grant_verify_gate_release')
 const failGate = await preflightBillingReservation({
 	name: 'betterpptx.narration.synthesize',
 	args: { text: 'Narration '.repeat(500), idempotencyKey: 'tts-release' },
@@ -189,4 +191,4 @@ customer = await store.getCustomer(failPaid.billingCustomerHash)
 balance = effectiveBalanceSnapshot(customer)
 expect(balance.pendingReservedCredits === 0, 'Released reservation should restore pending balance.', { balance })
 
-console.log(`BILLING RESERVATION GATE: PASS reserved=${gate.amountCredits} refreshed=${refreshedGate.amountCredits} queued=${queued.length}`)
+console.log(`BILLING RESERVATION GATE: PASS reserved=${gate.amountCredits} settled=${settled.settled} queued=${queued.length}`)

@@ -4,6 +4,7 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
+import { DOMParser } from '@xmldom/xmldom'
 import {
 	SlideModel,
 	ShapeModel,
@@ -14,6 +15,7 @@ import {
 } from '../types.js'
 import { ExtractedData, SlideExtracted } from '../extractor/PptxExtractor.js'
 import { ShapeParser } from './ShapeParser.js'
+import type { SlideNavigationContext } from './ShapeParser.js'
 import { AnimationParser } from './AnimationParser.js'
 
 export class SlideParser {
@@ -34,7 +36,8 @@ export class SlideParser {
 		slideData: SlideExtracted,
 		extractedData: ExtractedData,
 		outputFolder: string,
-		relToMediaId?: Map<string, string>  // NEW: relationship ID → media ID mapping
+		relToMediaId?: Map<string, string>,  // NEW: relationship ID → media ID mapping
+		navigationContext?: SlideNavigationContext
 	): Promise<SlideModel> {
 		const xml = slideData.xml
 
@@ -42,7 +45,7 @@ export class SlideParser {
 		const background = this.parseBackground(xml)
 
 		// Parse shapes
-		const shapes = this.parseShapes(xml, slideData, slideNum, outputFolder, relToMediaId)
+		const shapes = this.parseShapes(xml, slideData, slideNum, outputFolder, relToMediaId, navigationContext)
 		this.warnings.push(...this.shapeParser.getWarnings())
 		this.shapeParser.clearWarnings()
 
@@ -56,14 +59,69 @@ export class SlideParser {
 
 		// Parse notes
 		const notes = this.parseNotes(slideData.notesXml)
+		const slideProperties = this.parseSlideProperties(xml)
 
 		return {
 			index: slideNum,
+			...slideProperties,
+			...(navigationContext?.sectionByPartNumber.get(slideNum)?.targetSectionId
+				? { sectionId: navigationContext.sectionByPartNumber.get(slideNum)!.targetSectionId }
+				: {}),
 			background,
 			shapes,
 			animations,
 			transition,
 			notes
+		}
+	}
+
+	private allElements(root: Document | Element | null | undefined, localName: string): Element[] {
+		if (!root) return []
+		const result: Element[] = []
+		if ((root as Element).localName === localName) result.push(root as Element)
+		const nodes = root.getElementsByTagName('*')
+		for (let index = 0; index < nodes.length; index++) {
+			const element = nodes.item(index)
+			if (element?.localName === localName) result.push(element)
+		}
+		return result
+	}
+
+	private directElements(root: Element | null | undefined): Element[] {
+		if (!root) return []
+		const result: Element[] = []
+		for (let index = 0; index < root.childNodes.length; index++) {
+			const node = root.childNodes.item(index)
+			if (node?.nodeType === 1) result.push(node as Element)
+		}
+		return result
+	}
+
+	private presentAttribute(element: Element | null | undefined, name: string): string | undefined {
+		return element?.hasAttribute(name) ? element.getAttribute(name) || '' : undefined
+	}
+
+	private ooxmlBoolean(value: string | undefined): boolean | undefined {
+		if (value === undefined) return undefined
+		const normalized = value.trim().toLowerCase()
+		if (['1', 'true', 'on', 'yes'].includes(normalized)) return true
+		if (['0', 'false', 'off', 'no'].includes(normalized)) return false
+		return undefined
+	}
+
+	private parseSlideProperties(xml: string): Pick<SlideModel, 'title' | 'name' | 'hidden' | 'showMasterShapes' | 'showMasterBackground' | 'showMasterPhAnim'> {
+		const document = new DOMParser().parseFromString(xml, 'application/xml')
+		const root = this.allElements(document, 'sld')[0]
+		const cSld = this.allElements(root, 'cSld')[0]
+		const nativeTitle = this.presentAttribute(cSld, 'name')?.trim()
+		const show = this.ooxmlBoolean(this.presentAttribute(root, 'show'))
+		const showMasterShapes = this.ooxmlBoolean(this.presentAttribute(root, 'showMasterSp'))
+		const showMasterPhAnim = this.ooxmlBoolean(this.presentAttribute(root, 'showMasterPhAnim'))
+		return {
+			...(nativeTitle ? { title: nativeTitle, name: nativeTitle } : {}),
+			...(show !== undefined ? { hidden: !show } : {}),
+			...(showMasterShapes !== undefined ? { showMasterShapes, showMasterBackground: showMasterShapes } : {}),
+			...(showMasterPhAnim !== undefined ? { showMasterPhAnim } : {})
 		}
 	}
 
@@ -136,9 +194,10 @@ export class SlideParser {
 		slideData: SlideExtracted,
 		slideNum: number,
 		outputFolder: string,
-		relToMediaId?: Map<string, string>
+		relToMediaId?: Map<string, string>,
+		navigationContext?: SlideNavigationContext
 	): ShapeModel[] {
-		return this.shapeParser.parseAll(xml, slideData, slideNum, outputFolder, relToMediaId)
+		return this.shapeParser.parseAll(xml, slideData, slideNum, outputFolder, relToMediaId, navigationContext)
 	}
 
 	/**
@@ -157,35 +216,31 @@ export class SlideParser {
 	 * Parse slide transition
 	 */
 	private parseTransition(xml: string): TransitionModel | undefined {
-		// Look for <p:transition> element
-		const transMatch = xml.match(/<p:transition\s*([^>]*)>([\s\S]*?)<\/p:transition>/)
-		if (!transMatch) return undefined
-
-		const attrs = this.parseAttributes(transMatch[1])
-		const content = transMatch[2]
-
-		// Get transition type from child element
-		const typeMatch = content.match(/<p:(\w+)(?:\s|\/|>)/)
-		const type = typeMatch ? typeMatch[1] : 'fade'
-
-		// Parse speed
-		let speed: 'slow' | 'medium' | 'fast' = 'medium'
-		if (attrs.spd === 'slow') speed = 'slow'
-		else if (attrs.spd === 'fast') speed = 'fast'
-
-		// Parse transition direction from child element
-		const dirMatch = content.match(/dir="([^"]+)"/)
-		const direction = dirMatch ? dirMatch[1] : undefined
-
-		// Parse auto-advance timing (advTm is in milliseconds)
-		const advanceAfter = attrs.advTm ? parseInt(attrs.advTm) : undefined
-
+		const document = new DOMParser().parseFromString(xml, 'application/xml')
+		const transition = this.allElements(document, 'transition')[0]
+		if (!transition) return undefined
+		const child = this.directElements(transition)[0]
+		if (!child) return undefined
+		const type = child.localName === 'pull' ? 'uncover' : child.localName
+		const rawSpeed = this.presentAttribute(transition, 'spd')
+		const speed = rawSpeed === 'med' ? 'medium' : (rawSpeed === 'slow' || rawSpeed === 'fast' ? rawSpeed : undefined)
+		const rawDirection = this.presentAttribute(child, 'dir')
+		const directionMap: Record<string, string> = { u: 'up', d: 'down', l: 'left', r: 'right' }
+		const direction = rawDirection ? (directionMap[rawDirection] || rawDirection) : undefined
+		const advanceOnClick = this.ooxmlBoolean(this.presentAttribute(transition, 'advClick'))
+		const rawAdvanceAfter = this.presentAttribute(transition, 'advTm')
+		const advanceAfterTime = rawAdvanceAfter === undefined ? undefined : Number(rawAdvanceAfter)
+		const throughBlack = this.ooxmlBoolean(this.presentAttribute(child, 'thruBlk'))
+		const splitDirection = type === 'split' && (rawDirection === 'in' || rawDirection === 'out') ? rawDirection : undefined
+		const splitOrient = type === 'split' ? this.presentAttribute(child, 'orient') : undefined
 		return {
 			type,
-			speed,
-			direction,
-			advanceOnClick: attrs.advClick !== '0',
-			advanceAfter
+			...(speed ? { speed } : {}),
+			...(splitOrient === 'horz' || splitOrient === 'vert' ? { direction: splitOrient } : (direction ? { direction } : {})),
+			...(advanceOnClick !== undefined ? { advanceOnClick } : {}),
+			...(Number.isFinite(advanceAfterTime) && Number(advanceAfterTime) >= 0 ? { advanceAfterTime: Number(advanceAfterTime) } : {}),
+			...(throughBlack !== undefined ? { throughBlack } : {}),
+			...(splitDirection ? { splitDirection } : {})
 		}
 	}
 
@@ -194,15 +249,16 @@ export class SlideParser {
 	 */
 	private parseNotes(notesXml?: string): string | undefined {
 		if (!notesXml) return undefined
-
-		// Extract text from notes
-		const textMatches = notesXml.matchAll(/<a:t>([^<]*)<\/a:t>/g)
-		const texts: string[] = []
-		for (const match of textMatches) {
-			texts.push(match[1])
-		}
-
-		return texts.length > 0 ? texts.join('\n') : undefined
+		const document = new DOMParser().parseFromString(notesXml, 'application/xml')
+		const bodyShape = this.allElements(document, 'sp').find(shape => {
+			const placeholder = this.allElements(shape, 'ph')[0]
+			return this.presentAttribute(placeholder, 'type') === 'body'
+		})
+		if (!bodyShape) return undefined
+		const paragraphs = this.allElements(bodyShape, 'p').map(paragraph =>
+			this.allElements(paragraph, 't').map(run => run.textContent || '').join('')
+		)
+		return paragraphs.join('\n')
 	}
 
 	/**

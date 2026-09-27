@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "betterpptx.implementation-gap-overrides.schema.v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "workUnits"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "schemaVersion": { "const": "betterpptx.implementation-gap-overrides.v1" },
+    "workUnits": {
+      "type": "object",
+      "additionalProperties": { "$ref": "#/$defs/workUnitOverride" }
+    }
+  },
+  "$defs": {
+    "stringArray": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "workUnitOverride": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "gapInventoryStatus": { "enum": ["pending", "complete"] },
+        "executionStatus": { "enum": ["ready_to_implement", "implementing", "blocked_external"] },
+        "missingFields": { "$ref": "#/$defs/stringArray" },
+        "missingContexts": { "$ref": "#/$defs/stringArray" },
+        "missingBehaviors": { "$ref": "#/$defs/stringArray" },
+        "missingCombinations": { "$ref": "#/$defs/stringArray" },
+        "ownerModules": { "$ref": "#/$defs/stringArray" },
+        "dependencies": { "$ref": "#/$defs/stringArray" },
+        "cheapChecks": { "$ref": "#/$defs/stringArray" },
+        "notes": { "type": "string" },
+        "blockedReason": { "type": "string" },
+        "retired": { "type": "boolean" }
+      }
+    }
+  }
+}

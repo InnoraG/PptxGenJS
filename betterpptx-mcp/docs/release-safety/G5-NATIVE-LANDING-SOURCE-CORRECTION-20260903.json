@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "betterpptx.g5-source-correction-authorization.v1",
+  "status": "APPROVED",
+  "recordedAt": "2026-09-03",
+  "authorizationKind": "task-authorized-source-correction",
+  "authorizationBasis": "The current presenter-performance task authorizes restoration of the approved Falling To Landing motion through a corrected character-independent native source and generic presenter retargeting, within the existing in-project rights and distribution boundary.",
+  "decisionScope": "The exact skeletal-only correction below may be selected server-side to construct embedded project presenters. This is a source-correction governance record, not independent owner visual acceptance of a generated presentation or authorization to promote production.",
+  "semanticCatalogSelectionAllowed": true,
+  "rawAssetDistributionAllowed": false,
+  "ownerVisualAcceptanceRecorded": false,
+  "productionPromotionAuthorized": false,
+  "assets": [
+    {
+      "id": "kinetic-landing-native-v1",
+      "path": "betterpptx-mcp/assets/kinetic-landing-native-v1.glb",
+      "sha256": "7b6b77cf73a34f300360da0fa880260dc46b7dff77f600cc64834e46fc275b9e",
+      "bytes": 149908,
+      "decision": "APPROVED",
+      "distributionBoundary": "Server-side skeletal-motion source used only to construct embedded project presenters; no standalone/raw library download, BVH/FBX redistribution, or reusable-source resale."
+    }
+  ],
+  "sourceLineage": {
+    "sourceTake": "Falling To Landing",
+    "existingGovernedAssetId": "kinetic-clips-pool",
+    "existingGovernedAssetSha256": "0b24cf525add356daf1acb9900e24e204874eaf036344547516071673bfe7876",
+    "existingLicenseRecord": "betterpptx-mcp/docs/release-safety/G5-ASSET-LICENSE-LEDGER.md",
+    "maintainedSourcePolicy": "betterpptx-mcp/deploy/model3d-worker/bake/kinetic-clips-map.json",
+    "sourcePolicyKeys": ["drop_to_landing", "superhero_landing"],
+    "privateRegistry": "betterpptx-mcp/assets/authoring-motion-source-registry.json",
+    "correction": "Preserve the source native axes before generic target-rig retargeting. Both maintained semantic entries designate Falling To Landing; no new take or character asset is introduced.",
+    "skeletalOnlyInspection": { "animationCount": 1, "meshCount": 0, "imageCount": 0 },
+    "oldFrozenAssetsAndDecisionsModified": false
+  },
+  "scopeExclusions": [
+    "raw or standalone motion-library download or resale",
+    "raw BVH/FBX redistribution",
+    "independent owner visual acceptance of a new generated artifact",
+    "public production promotion or deployment authorization",
+    "changes to this exact asset hash, path, or distribution boundary"
+  ],
+  "hashChangePolicy": "Any byte, hash, path, or distribution-boundary change requires a new authorization record. Earlier frozen owner decisions remain unchanged."
+}

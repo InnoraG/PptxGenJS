@@ -1,0 +1,31 @@
+{
+  "version": "img5-judge-candidates-v1",
+  "policy": "research-only-until-transitive-license-and-human-calibration-gates",
+  "publicExposure": false,
+  "candidates": [
+    {
+      "id": "qwen3-vl-8b-instruct",
+      "role": "primary-semantic-judge",
+      "repository": "Qwen/Qwen3-VL-8B-Instruct",
+      "revision": "0c351dd01ed87e9c1b53cbc748cba10e6187ff3b",
+      "license": "Apache-2.0",
+      "pipeline": "image-text-to-text",
+      "source": "https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct",
+      "licenseSource": "https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct/blob/main/LICENSE",
+      "status": "approved-research-probe",
+      "notes": "Owner-approved private research probe; exact runtime, CUDA/NVIDIA notice review and blind calibration remain fail-closed."
+    },
+    {
+      "id": "florence-2-large",
+      "role": "auxiliary-ocr-grounding",
+      "repository": "microsoft/Florence-2-large",
+      "revision": "21a599d414c4d928c9032694c424fb94458e3594",
+      "license": "MIT",
+      "pipeline": "image-text-to-text",
+      "source": "https://huggingface.co/microsoft/Florence-2-large",
+      "licenseSource": "https://huggingface.co/microsoft/Florence-2-large/blob/main/LICENSE",
+      "status": "candidate-not-approved",
+      "notes": "Auxiliary candidate only; no weights downloaded. It cannot replace a calibrated semantic judge by itself."
+    }
+  ]
+}

@@ -82,6 +82,7 @@ import { buildThreadAnimation } from './buildThreadAnimation';
 import { AnimationBuildContext } from './types';
 import { buildSimpleAnimation, buildDirectionalAnimation, buildEmphasisAnimation, build3ElementAnimation, buildExpandAnimation, build5ElementPatternA, build5ElementPatternB, build5ElementPatternC, build6ElementAnimation, build7PlusElementAnimation, CUSTOM_BUILDER_MAP } from '../gen-animations-builder';
 import { computeNodeType, AnimationTrigger, AnimationSequence } from '../animation-timing-orchestrator';
+import { lowerMotionPathToPowerPoint } from './motion-path-coordinate';
 
 /**
  * Build sequence animation (allAtOnce, byParagraph)
@@ -462,7 +463,7 @@ function buildMotionPathSequenceAnimation(ctx: AnimationBuildContext): string {
 	const duration = animation.duration || config.defaultDuration || 2000;
 
 	// Get path data from config
-	const pathData = config.pathData || 'M 0 0 L 0.25 0 Z';
+	const pathData = lowerMotionPathToPowerPoint(config.pathData || 'M 0 0 L 0.25 0 Z', (animation as any).motionPathCoordinateSpace || 'slide');
 
 	// Build target XML based on targeting mode
 	let targetXml = `<p:spTgt spid="${shapeId}"/>`;

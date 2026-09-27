@@ -1,0 +1,81 @@
+{
+  "schemaVersion": "betterpptx.authoring-motion-playback-proof.v1",
+  "status": "PASS",
+  "renderer": "native-powerpoint",
+  "source": {
+    "id": "kinetic-heavy-jump-native-v1",
+    "sha256": "95f5bd46043b9feceba309a6e6bf9b9cf7fcd1fa82af91b9d366961e03c010ef",
+    "sourceSlug": "heavy_jump",
+    "sourceProvider": "mixamo",
+    "durationMs": 933
+  },
+  "retarget": {
+    "rotationRetargetSpace": "global",
+    "channelPolicy": "root-motion",
+    "boneNamePolicy": "mixamo-suffix",
+    "rootMotionSpace": "world",
+    "rootMotionAnchor": "start",
+    "rootMotionAxes": "all",
+    "rootMotionMaxStatures": 1.602,
+    "rootMotionMaxHorizontalStatures": 1.606
+  },
+  "targets": [
+    {
+      "identity": "joe",
+      "targetGlbSha256": "9e4035eb9509b6fa047a6a6c28c6d550f8b293bec15a9bb87e2f943eae9cbcac",
+      "retargetRestProfileSha256": "2af414c0f4773bf4ddf7dd60ef0204bddb64ced204c21ce30bcb2664ed2a8f27",
+      "status": "PASS",
+      "evidence": {
+        "pptxSha256": "88fbbfcc4fded5e1bf223bc5928b6b298ef1fe4ee49406bbd3e19d31cb309db6",
+        "videoSha256": "fe519ef0d0d8c12a3fb586165acde794bdec99921d974dae8f3a9226a7744e8f"
+      },
+      "checks": {
+        "fullClipPlayback": true,
+        "noTPose": true,
+        "noExcessiveTorsion": true
+      },
+      "nativeProofTargetGlbSha256": "8d700e2bf24d68b3372787654548e9b42292dc8c5e22cbdf5b8a662f3148a482"
+    },
+    {
+      "identity": "louise",
+      "targetGlbSha256": "462c35353d0cda44a44a77e51946765713c9309ef2c4d8f94ce5cb0f74ae846e",
+      "retargetRestProfileSha256": "7eebad414224cd3718ffec6e6f1ef8003046722ece35ffde0344b72348907f43",
+      "status": "PASS",
+      "evidence": {
+        "pptxSha256": "97fc16bf676645a9a1080b32940d51c1939c10b8f9707a4049a5364ee3dc9897",
+        "videoSha256": "27069c087e773a6c9426812723e3f2ff891d41638012e35109d4540bf0b78da0"
+      },
+      "checks": {
+        "fullClipPlayback": true,
+        "noTPose": true,
+        "noExcessiveTorsion": true
+      },
+      "nativeProofTargetGlbSha256": "74ba97b0500b64dbfee80fcc20d27e4686bb5c342ec951e23c68f7e6f0b26274"
+    },
+    {
+      "identity": "pete",
+      "targetGlbSha256": "026cb2d30de10d144804776dc10dd16058a58c7f7979870752ad831c5e70cf6d",
+      "retargetRestProfileSha256": "2ef3ab02a6366221c6d28d5b8aebb2ab577bd48ffb0054f00c0a446970965e5b",
+      "status": "PASS",
+      "evidence": {
+        "pptxSha256": "21c0fa26ed93bc3b53afeb210482be46b97fd86a6e60b4439f288c6bbb68d49f",
+        "videoSha256": "074fe9d0a092138ffca27acd5e0d4673dd88959ee0c4b73373f5a32a180cc14e"
+      },
+      "checks": {
+        "fullClipPlayback": true,
+        "noTPose": true,
+        "noExcessiveTorsion": true
+      },
+      "nativeProofTargetGlbSha256": "abe84987051e40a08a769c12170697fab07dd69b50a14fe77dc5f234bf190a1e"
+    }
+  ],
+  "reviewScope": "Complete native PowerPoint playback proof across Joe, Louise and Pete. Source-derived independent pose gate passed before native playback; this is maintainer verification, not owner visual acceptance.",
+  "bindingCorrection": {
+    "kind": "base-presenter-glb-binding",
+    "recordedAt": "2026-09-04",
+    "reason": "The active Mixamo-only default presenter roster replaces the prior non-Mixamo contract slots. Exact Mixamo source bytes and retarget rest profiles remain unchanged; proof targets are rebound to the rebuilt all-Mixamo presenter GLBs.",
+    "sourceBytesUnchanged": true,
+    "correctionArtifact": "betterpptx-mcp/docs/release-safety/G5-KINETIC-NATIVE-PROOF-REBIND-20260904.json",
+    "rosterPolicy": "mixamo-only-v1"
+  }
+}

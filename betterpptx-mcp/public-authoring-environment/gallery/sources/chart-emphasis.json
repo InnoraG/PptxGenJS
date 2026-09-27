@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "betterpptx.deck-spec.v1",
+  "title": "Chart emphasis lesson",
+  "authoringContract": {
+    "workflow": "ai-sovereign-v1",
+    "creativeAuthority": "ai",
+    "directorMode": "off",
+    "verificationMode": "complete",
+    "geometryAuthority": "ai",
+    "placementPolicy": "ai-authored-geometry-v1",
+    "coordinateSystem": "inches"
+  },
+  "styleIntent": {
+    "artDirection": "editorial",
+    "mode": "dark"
+  },
+  "validation": {
+    "validateBeforeSave": true,
+    "requireAccessibility": true
+  },
+  "slides": [
+    {
+      "id": "evidence",
+      "title": "Adoption increased",
+      "content": [
+        {
+          "kind": "chart-panel",
+          "name": "adoption",
+          "chartType": "bar",
+          "rect": {
+            "x": 1,
+            "y": 1.5,
+            "w": 11.2,
+            "h": 4.8
+          },
+          "data": [
+            {
+              "name": "Adoption",
+              "labels": [
+                "Q1",
+                "Q2",
+                "Q3",
+                "Q4"
+              ],
+              "values": [
+                32,
+                44,
+                51,
+                74
+              ]
+            }
+          ],
+          "chartOptions": {
+            "chartColors": [
+              "64748B",
+              "64748B",
+              "64748B",
+              "22C55E"
+            ],
+            "showValue": true,
+            "showLegend": false
+          },
+          "verified": true,
+          "evidenceSource": "Synthetic teaching fixture; not empirical evidence.",
+          "summary": "Illustrative adoption rises from 32 to 74.",
+          "altText": "Illustrative bar chart with Q4 highlighted at 74."
+        }
+      ]
+    }
+  ]
+}

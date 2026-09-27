@@ -1,0 +1,4 @@
+.private/
+.test-private-*/
+.env
+*.log

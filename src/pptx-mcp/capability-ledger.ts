@@ -1,5 +1,5 @@
 import { ChartType, ShapeType, SHAPE_TYPE } from '../core-enums.js'
-import { CHART_PRESET_CATALOG } from './chart-presets.js'
+import { CHART_PRESET_CATALOG, CHART_STYLE_PRESET_CATALOG } from './chart-presets.js'
 import { TABLE_PRESET_CATALOG } from './table-presets.js'
 
 export type CoverageMode = 'native' | 'native-plus-preserve' | 'native-chart' | 'native-composite' | 'shape-built-chart' | 'preserve-only' | 'validate-only' | 'detect-and-reject'
@@ -295,7 +295,7 @@ const AUDIO_VOICE_FEATURES = [
 	'narration audio embedding',
 	'section voice cues',
 	'autoplay narration timing',
-	'fallback tone generation',
+	'real TTS narration generation',
 	'audio waveform visual fixture',
 	'audio play command',
 	'audio pause command',
@@ -327,6 +327,7 @@ const SHAPE_ICON_FEATURES = [
 ]
 const SMARTART_SHAPE_BUILT_TYPES = ['list diagrams', 'process diagrams', 'cycle diagrams', 'hierarchy/org diagrams', 'relationship diagrams', 'matrix diagrams', 'pyramid diagrams', 'picture diagrams', 'timeline diagrams', 'meet-the-team diagrams']
 const SMARTART_NATIVE_PRESERVATION_TYPES = ['picture SmartArt preservation', 'diagram data parts', 'diagram layout parts', 'diagram quick style parts', 'diagram colors parts', 'SmartArt relationships', 'SmartArt package preservation', 'SmartArt light/dark restyle stability']
+const SMARTART_RECOMMENDATION_FEATURES = ['intent-aware layout recommendation', 'executable layout/style/color opaque IDs', 'picture image-per-node applicability', 'hierarchy role applicability', 'native-to-shape fallback consequences']
 const ANIMATION_FEATURES = ['triggers onClick', 'triggers afterPrevious', 'triggers withPrevious', 'sequence asOneObject', 'sequence allAtOnce', 'sequence byParagraph', 'node clickEffect', 'node withEffect', 'node afterEffect', 'duration', 'delay', 'repeat', 'auto reverse', 'direction', 'color', 'scale', 'rotation', 'order', 'group IDs', 'paragraph targeting', 'animation groups']
 const INTERACTIVE_FEATURES = ['click actions', 'hover actions', 'macro actions preserved but not executed', 'run program actions preserved but not executed', 'jump to slide', 'URL action', 'jump to custom show', 'end show', 'play sound actions', 'action buttons', 'custom shows', 'slide zoom', 'section zoom', 'summary zoom', 'media triggers', 'media bookmarks']
 const ACCESSIBILITY_FEATURES = ['reading order', 'object sequence', 'cNvPr order', 'alt text', 'title metadata', 'description metadata', 'decorative flags', 'isDecorative', 'screen-reader-safe hidden graphics', 'screen-reader-safe decorative graphics']
@@ -409,6 +410,13 @@ export function buildCapabilityLedger(capabilities?: any, brand = 'betterpptx-mc
 			'betterpptx-mcp.chart.recommend',
 			preset.authoringMode === 'shape-built' ? ['chart-preset-catalog', 'shape-xml-or-preserve-only-policy'] : ['chart-preset-catalog', 'chart-xml', 'embedded-workbook']
 		)),
+		...CHART_STYLE_PRESET_CATALOG.map(preset => row(
+			'Charts Office Ribbon Style Presets',
+			`${preset.powerPointPreset} -> ${preset.id}`,
+			'native-chart',
+			'betterpptx-mcp.chart.add',
+			['chart-style-preset-catalog', 'chart-style-xml', 'chart-color-xml', 'powerpoint-com-ui-evidence']
+		)),
 		...rowsForValues('Media', MEDIA_FEATURES, 'native-plus-preserve', 'betterpptx-mcp.object.insert_media', ['media-rels', 'timing-xml', 'content-types']),
 		...rowsForValues('3D Models', MODEL3D_FEATURES, 'native-plus-preserve', 'betterpptx-mcp.object.insert_3d_asset', ['model3d-xml', 'media-rels', 'content-types']),
 		...rowsForValues('Audio Voice Narration', AUDIO_VOICE_FEATURES, 'native-plus-preserve', 'betterpptx-mcp.object.insert_media', ['media-rels', 'timing-xml', 'voice-artifact']),
@@ -416,6 +424,7 @@ export function buildCapabilityLedger(capabilities?: any, brand = 'betterpptx-mc
 		...rowsForValues('Shape Based Icons', SHAPE_ICON_FEATURES, 'native', 'betterpptx-mcp.presentation.create', ['shape-xml', 'icon-fixture']),
 		...rowsForValues('SmartArt Shape Built', SMARTART_SHAPE_BUILT_TYPES, 'native', 'betterpptx-mcp.object.insert_smartart', ['shape-xml', 'relationships', 'not-visually-blank']),
 		...rowsForValues('SmartArt Native Package Preservation', SMARTART_NATIVE_PRESERVATION_TYPES, 'preserve-only', 'betterpptx-mcp.object.insert_smartart', ['diagram-parts', 'diagram-rels', 'package-preservation']),
+		...rowsForValues('SmartArt AI Recommendations', SMARTART_RECOMMENDATION_FEATURES, 'native', 'betterpptx-mcp.smartart.catalog', ['smartart-recommendation-contract', 'layout-applicability', 'opaque-executable-ids']),
 		...rowsForValues('Transitions', TRANSITION_TYPES, 'native', 'betterpptx-mcp.slide.add_with_transition', ['transition-xml', 'package-xml']),
 		...rowsForValues('Morph Semantics', MORPH_OPTIONS, 'native', 'betterpptx-mcp.slide.add_with_transition', ['p159:morph', 'mc:AlternateContent', 'object-identity']),
 		...animationRows(capabilities),

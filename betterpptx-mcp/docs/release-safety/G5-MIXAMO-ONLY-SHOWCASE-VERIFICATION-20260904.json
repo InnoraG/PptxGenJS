@@ -1,0 +1,61 @@
+{
+  "schemaVersion": "betterpptx.g5.mixamo-only-showcase-verification.v1",
+  "verifiedAt": "2026-09-04",
+  "decision": "PASS_ACTIVE_MIXAMO_SHOWCASE",
+  "policy": {
+    "mode": "mixamo-only",
+    "activeProviders": ["mixamo"],
+    "quarantinedProviders": ["nvidia-kimodo"],
+    "catalogRows": 96,
+    "activeRows": 56,
+    "withheldRows": 40
+  },
+  "artifacts": {
+    "pptx": "outputs/kinetics96-story-20260904/The-Last-Light-56-Mixamo-Only-v1.pptx",
+    "manifest": "outputs/kinetics96-story-20260904/The-Last-Light-56-Mixamo-Only-v1.manifest.json",
+    "packageAudit": "outputs/kinetics96-story-20260904/The-Last-Light-56-Mixamo-Only-v1.package-audit.json",
+    "nativeProof": ".codex-tmp/kinetics96-story/qa/mixamo-only-v1-powerpoint/powerpoint-native-proof.json",
+    "nativeVideo": ".codex-tmp/kinetics96-story/qa/mixamo-only-v1-powerpoint/story-native-playback.mp4",
+    "observedCuts": ".codex-tmp/kinetics96-story/qa/mixamo-only-v1-observed-cuts.json",
+    "videoEvidence": ".codex-tmp/kinetics96-story/qa/mixamo-only-v1-video-evidence-observed/video-evidence.json"
+  },
+  "package": {
+    "status": "PASS",
+    "slides": 58,
+    "motionSlides": 56,
+    "distinctEmbeddedModels": 5,
+    "distinctSelectedModelClips": 56,
+    "xmlParts": 256,
+    "relationships": 428,
+    "pptxSha256": "42cd9b4d5274f37e81b78e05537ab82a0c81b26b681a65569b1b7d31475a3b90"
+  },
+  "powerPoint": {
+    "status": "PASS",
+    "openedWithoutRepair": true,
+    "sourceSlideReadback": 58,
+    "ppsxSlideReadback": 58,
+    "officeVersion": "16.0",
+    "officeBuild": "20326",
+    "video": {
+      "status": "PASS",
+      "resolution": "1920x1080",
+      "fps": 30,
+      "bytes": 158802742,
+      "sha256": "9ebbb0506b127a299c31e213172450e18c2d9f3e5bf2cf67ec5f2f387c286bf1"
+    }
+  },
+  "visualReview": {
+    "status": "PASS_SAMPLED_NATIVE_FRAMES",
+    "sampledMotionSlides": 56,
+    "observedCutBoundaries": 57,
+    "lowVariationCandidatesAfterObservedCuts": 0,
+    "targetedRiskSlides": [17, 32, 36, 37, 52, 57],
+    "targetedRiskResult": "motion visible, titles aligned, no abnormal head elevation or foot clipping observed",
+    "method": "native PowerPoint video, observed title-template cuts, six interior samples per motion, contact-sheet inspection"
+  },
+  "limitations": [
+    "This closes the active Mixamo-only showcase gate; it does not certify the quarantined Kimodo provider.",
+    "Six interior samples per motion do not replace frame-by-frame contact semantics review for every possible camera or avatar.",
+    "Production promotion remains owner-controlled."
+  ]
+}

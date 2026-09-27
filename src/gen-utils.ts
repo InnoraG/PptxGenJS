@@ -2,11 +2,11 @@
  * PptxGenJS: Utility Methods
  */
 
-import { EMU, REGEX_HEX_COLOR, DEF_FONT_COLOR, ONEPT, SchemeColor, SCHEME_COLORS } from './core-enums'
-import { PresLayout, TextGlowProps, TextReflectionProps, Text3DProps, PresSlide, ShapeFillProps, Color, ShapeLineProps, Coord, ShadowProps, GradientStopProps } from './core-interfaces'
-import { normalizeGradientDirection, normalizeScene3DRotationDegrees, normalizeWordArtTransform } from './option-registry'
+import { EMU, REGEX_HEX_COLOR, DEF_FONT_COLOR, ONEPT, SCHEME_COLORS } from './core-enums'
+import { PresLayout, TextGlowProps, TextReflectionProps, Text3DProps, PresSlide, SlideLayout, ShapeFillProps, Color, ShapeLineProps, Coord, ShadowProps, GradientStopProps, PictureStyleColorProps } from './core-interfaces'
+import { normalizeGradientDirection, normalizeScene3DRotationDegrees, normalizeWordArtAdjustments, normalizeWordArtTransform } from './option-registry'
 
-export { getOptionCatalog, normalizeGradientDirection, normalizeWordArtTransform } from './option-registry'
+export { getOptionCatalog, normalizeGradientDirection, normalizeWordArtAdjustments, normalizeWordArtTransform } from './option-registry'
 
 /**
  * Translates any type of `x`/`y`/`w`/`h` prop to EMU
@@ -104,6 +104,45 @@ export function convertRotationDegrees(d: number): number {
 
 const convertScene3DRotationDegrees = (d: number | undefined, label: string, prefix = 'options.text3D'): number => normalizeScene3DRotationDegrees(d, `${prefix}.${label}`)
 
+const TEXT_3D_KEYS = new Set(['bevel', 'bevelBottom', 'extrusion', 'extrusionColor', 'contourWidth', 'contourColor', 'material', 'lightRig', 'lightDirection', 'rotationX', 'rotationY', 'rotationZ', 'perspective'])
+const TEXT_3D_BEVELS = new Set(['angle', 'artDeco', 'circle', 'convex', 'coolSlant', 'cross', 'divot', 'hardEdge', 'relaxedInset', 'riblet', 'slope', 'softRound'])
+const TEXT_3D_MATERIALS = new Set(['clear', 'dkEdge', 'flat', 'legacyMatte', 'legacyMetal', 'legacyPlastic', 'legacyWireframe', 'matte', 'metal', 'plastic', 'powder', 'softEdge', 'softmetal', 'translucentPowder', 'warmMatte'])
+const TEXT_3D_LIGHT_RIGS = new Set(['balanced', 'brightRoom', 'chilly', 'contrasting', 'flat', 'flood', 'freezing', 'glow', 'harsh', 'legacyFlat1', 'legacyFlat2', 'legacyFlat3', 'legacyFlat4', 'legacyHarsh1', 'legacyHarsh2', 'legacyHarsh3', 'legacyHarsh4', 'legacyNormal1', 'legacyNormal2', 'legacyNormal3', 'legacyNormal4', 'morning', 'soft', 'sunrise', 'sunset', 'threePt', 'twoPt'])
+
+function assertText3DNumber(value: unknown, field: string, minimum: number, maximum: number): void {
+	if (value === undefined) return
+	if (typeof value !== 'number' || !Number.isFinite(value) || value < minimum || value > maximum) throw new Error(`${field} must be a finite number between ${minimum} and ${maximum}.`)
+}
+
+function assertText3DBevel(value: unknown, field: string): void {
+	if (value === undefined) return
+	if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${field} must be an object.`)
+	const bevel = value as Record<string, unknown>
+	for (const key of Object.keys(bevel)) if (!['type', 'width', 'height'].includes(key)) throw new Error(`${field}.${key} is not supported.`)
+	if (bevel.type !== undefined && (typeof bevel.type !== 'string' || !TEXT_3D_BEVELS.has(bevel.type))) throw new Error(`${field}.type is not a supported native bevel preset.`)
+	assertText3DNumber(bevel.width, `${field}.width`, 0, 1000)
+	assertText3DNumber(bevel.height, `${field}.height`, 0, 1000)
+}
+
+function assertText3DOptions(options: Text3DProps, field: string): void {
+	if (!options || typeof options !== 'object' || Array.isArray(options)) throw new Error(`${field} must be an object.`)
+	for (const key of Object.keys(options)) if (!TEXT_3D_KEYS.has(key)) throw new Error(`${field}.${key} is not supported.`)
+	assertText3DBevel(options.bevel, `${field}.bevel`)
+	assertText3DBevel(options.bevelBottom, `${field}.bevelBottom`)
+	assertText3DNumber(options.extrusion, `${field}.extrusion`, 0, 5000)
+	assertText3DNumber(options.contourWidth, `${field}.contourWidth`, 0, 1000)
+	assertText3DNumber(options.lightDirection, `${field}.lightDirection`, 0, 359)
+	assertText3DNumber(options.rotationX, `${field}.rotationX`, -360, 360)
+	assertText3DNumber(options.rotationY, `${field}.rotationY`, -360, 360)
+	assertText3DNumber(options.rotationZ, `${field}.rotationZ`, -360, 360)
+	assertText3DNumber(options.perspective, `${field}.perspective`, 0, 120)
+	for (const [key, value] of [['extrusionColor', options.extrusionColor], ['contourColor', options.contourColor]] as const) {
+		if (value !== undefined && (typeof value !== 'string' || !REGEX_HEX_COLOR.test(value))) throw new Error(`${field}.${key} must be a 6-digit RGB hex color.`)
+	}
+	if (options.material !== undefined && !TEXT_3D_MATERIALS.has(options.material)) throw new Error(`${field}.material is not a supported native material.`)
+	if (options.lightRig !== undefined && !TEXT_3D_LIGHT_RIGS.has(options.lightRig)) throw new Error(`${field}.lightRig is not a supported native light rig.`)
+}
+
 function normalizeOpacityValue(value: unknown, fallback: number, label: string): number {
 	if (value === undefined || value === null || value === '') return fallback
 	const raw = Number(value)
@@ -156,8 +195,40 @@ export function rgbToHex(r: number, g: number, b: number): string {
  * @param {string} innerElements - additional elements that adjust the color and are enclosed by the color element
  * @returns {string} XML string
  */
-export function createColorElement(colorStr: string | SCHEME_COLORS, innerElements?: string): string {
-	let colorVal = (colorStr || '').replace('#', '')
+
+/**
+ * Create a DrawingML colour element while preserving optional continuous
+ * transforms.  The structured form is shared by Picture Styles and gradient
+ * stops so authored tint/shade/saturation/luminance/opacity values never get
+ * reduced to a gallery colour token.
+ */
+export function createColorElement(colorStr: string | SCHEME_COLORS | PictureStyleColorProps, innerElements?: string): string {
+	if (colorStr && typeof colorStr === 'object') {
+		const structured = colorStr as PictureStyleColorProps
+		const base = structured.color ?? structured.scheme ?? structured.preset ?? DEF_FONT_COLOR
+		const transforms: string[] = []
+		const add = (tag: string, value: unknown, minimum: number, maximum: number) => {
+			if (value === undefined || value === null || value === '') return
+			const numeric = Number(value)
+			if (!Number.isFinite(numeric)) return
+			const clamped = Math.max(minimum, Math.min(maximum, numeric))
+			transforms.push(`<a:${tag} val="${Math.round(clamped * 100000)}"/>`)
+		}
+		add('tint', structured.tint, 0, 1)
+		add('shade', structured.shade, 0, 1)
+		add('satMod', structured.saturation, 0, 4)
+		add('lumMod', structured.luminance, 0, 4)
+		add('lumOff', structured.luminanceOffset, -1, 1)
+		add('alpha', structured.opacity, 0, 1)
+		const content = `${transforms.join('')}${innerElements || ''}`
+		return createColorElement(String(base), content)
+	}
+	let colorVal = String(colorStr || '').replace('#', '')
+	const schemeColors = new Set<string>([
+		'tx1', 'tx2', 'bg1', 'bg2', 'dk1', 'lt1', 'dk2', 'lt2',
+		'accent1', 'accent2', 'accent3', 'accent4', 'accent5', 'accent6',
+		'hlink', 'folHlink', 'phClr',
+	])
 
 	// Preset colors (PowerPoint named colors)
 	const presetColors = ['black', 'white', 'red', 'green', 'blue', 'yellow', 'cyan', 'magenta', 
@@ -172,19 +243,7 @@ export function createColorElement(colorStr: string | SCHEME_COLORS, innerElemen
 	}
 
 	// Check if it's a scheme color or hex
-	if (
-		!REGEX_HEX_COLOR.test(colorVal) &&
-		colorVal !== SchemeColor.background1 &&
-		colorVal !== SchemeColor.background2 &&
-		colorVal !== SchemeColor.text1 &&
-		colorVal !== SchemeColor.text2 &&
-		colorVal !== SchemeColor.accent1 &&
-		colorVal !== SchemeColor.accent2 &&
-		colorVal !== SchemeColor.accent3 &&
-		colorVal !== SchemeColor.accent4 &&
-		colorVal !== SchemeColor.accent5 &&
-		colorVal !== SchemeColor.accent6
-	) {
+	if (!REGEX_HEX_COLOR.test(colorVal) && !schemeColors.has(colorVal)) {
 		console.warn(`"${colorVal}" is not a valid scheme color, preset color, or hex RGB! "${DEF_FONT_COLOR}" used instead. Only provide 6-digit RGB, 'pptx.SchemeColor' values, or preset color names!`)
 		colorVal = DEF_FONT_COLOR
 	}
@@ -205,6 +264,10 @@ export function createColorElement(colorStr: string | SCHEME_COLORS, innerElemen
 export function createGlowElement(options: TextGlowProps, defaults: TextGlowProps): string {
 	let strXml = ''
 	const opts = { ...defaults, ...options }
+	// PowerPoint treats a zero-radius glow as a neutral/no-op setting and
+	// drops the effect node when the file is saved.  Match that native
+	// serialization boundary instead of emitting an empty visual effect.
+	if (opts.size <= 0) return strXml
 	const size = Math.round(opts.size * ONEPT)
 	const color = opts.color
 	const opacity = opacityToOoxmlAlpha(opts.opacity, defaults.opacity ?? 0.75, 'options.glow.opacity')
@@ -214,6 +277,17 @@ export function createGlowElement(options: TextGlowProps, defaults: TextGlowProp
 	strXml += '</a:glow>'
 
 	return strXml
+}
+
+/**
+ * Returns whether a glow has a non-neutral radius after applying defaults.
+ * This is shared by XML callers so a zero-radius glow does not leave an
+ * otherwise-empty effectLst wrapper behind.
+ */
+export function hasGlowElement(options: TextGlowProps | undefined, defaults: TextGlowProps): boolean {
+	if (!options) return false
+	const size = options.size ?? defaults.size
+	return size > 0
 }
 
 /**
@@ -258,7 +332,15 @@ export function createShadowElement(options: ShadowProps): string {
 		colorXml = `<a:srgbClr val="${color.toUpperCase()}"><a:alpha val="${opacity}"/></a:srgbClr>`
 	}
 
-	let strXml = `<a:${type}Shdw blurRad="${blur}" dist="${offset}" dir="${angle}" rotWithShape="${rotShape}">`
+	// The outer-shadow carrier exposes the same transform sliders as the
+	// Picture Format effect dialog: scale, skew, alignment, and rotation. Keep
+	// them on the native text-run shadow instead of silently collapsing those
+	// authored values to the basic blur/distance/angle subset. Inner shadows do
+	// not define these transform attributes in the OOXML schema.
+	const transformAttrs = type === 'outer'
+		? ` sx="${Math.round((options.scaleX ?? 1) * 100000)}" sy="${Math.round((options.scaleY ?? 1) * 100000)}" kx="${Math.round((options.skewX ?? 0) * 60000)}" ky="${Math.round((options.skewY ?? 0) * 60000)}" algn="bl"`
+		: ''
+	let strXml = `<a:${type}Shdw${transformAttrs} blurRad="${blur}" dist="${offset}" dir="${angle}" rotWithShape="${rotShape}">`
 	strXml += colorXml
 	strXml += `</a:${type}Shdw>`
 
@@ -291,6 +373,7 @@ export function createReflectionElement(options: TextReflectionProps): string {
  * @returns {string} XML string for <a:scene3d> and <a:sp3d>
  */
 export function create3DElements(options: Text3DProps): string {
+	assertText3DOptions(options, 'options.effect3D')
 	let strXml = ''
 
 	// Scene 3D (camera and lighting setup)
@@ -298,21 +381,23 @@ export function create3DElements(options: Text3DProps): string {
 	const lightDir = convertScene3DRotationDegrees(options.lightDirection, 'lightDirection', 'options.effect3D')
 	
 	// Check if rotation is specified - if so, use perspective camera with rotation
-	const hasRotation = options.rotationX || options.rotationY || options.rotationZ
+	const hasRotation = options.rotationX !== undefined || options.rotationY !== undefined || options.rotationZ !== undefined
+	const hasPerspective = options.perspective !== undefined && options.perspective !== 0
 	
 	strXml += '<a:scene3d>'
 	
-	if (hasRotation) {
-		// Use perspective camera with rotation for 3D visibility
-		// Rotation values: PowerPoint uses 60000ths of a degree
-		const rotX = convertScene3DRotationDegrees(options.rotationX, 'rotationX', 'options.effect3D')
-		const rotY = convertScene3DRotationDegrees(options.rotationY, 'rotationY', 'options.effect3D')
-		const rotZ = convertScene3DRotationDegrees(options.rotationZ, 'rotationZ', 'options.effect3D')
+	if (hasRotation || hasPerspective) {
+		// PowerPoint's public X/Y/Z controls map to the DrawingML camera tuple as
+		// lon=-X, lat=Y, rev=-Z. Keep that conversion here so callers use the
+		// familiar UI axes while the package receives PowerPoint's native axes.
+		const cameraLat = convertScene3DRotationDegrees(options.rotationY, 'rotationY', 'options.effect3D')
+		const cameraLon = convertScene3DRotationDegrees(-(options.rotationX ?? 0), 'rotationX', 'options.effect3D')
+		const cameraRev = convertScene3DRotationDegrees(-(options.rotationZ ?? 0), 'rotationZ', 'options.effect3D')
 		const fov = Math.round((options.perspective ?? 45) * 60000)
 		
 		// Use perspectiveFront camera preset with rotation
 		strXml += `<a:camera prst="perspectiveFront" fov="${fov}">`
-		strXml += `<a:rot lat="${rotX}" lon="${rotY}" rev="${rotZ}"/>`
+		if (hasRotation) strXml += `<a:rot lat="${cameraLat}" lon="${cameraLon}" rev="${cameraRev}"/>`
 		strXml += '</a:camera>'
 	} else {
 		// Default orthographic camera (flat view)
@@ -325,9 +410,11 @@ export function create3DElements(options: Text3DProps): string {
 
 	// Shape 3D (bevel, extrusion, material)
 	// Note: Don't add default material - PowerPoint removes it when saving
-	strXml += '<a:sp3d'
-	if (options.material) strXml += ` prstMaterial="${options.material}"`
-	strXml += '>'
+	const sp3dAttrs: string[] = []
+	if (options.extrusion != null) sp3dAttrs.push(`extrusionH="${Math.round(options.extrusion * ONEPT)}"`)
+	if (options.contourWidth != null) sp3dAttrs.push(`contourW="${Math.round(options.contourWidth * ONEPT)}"`)
+	if (options.material) sp3dAttrs.push(`prstMaterial="${options.material}"`)
+	strXml += `<a:sp3d${sp3dAttrs.length ? ` ${sp3dAttrs.join(' ')}` : ''}>`
 
 	// Top bevel
 	if (options.bevel) {
@@ -350,18 +437,10 @@ export function create3DElements(options: Text3DProps): string {
 	}
 
 	// Extrusion (depth)
-	if (options.extrusion) {
-		const extrusionDepth = Math.round(options.extrusion * ONEPT)
-		strXml += `<a:extrusionClr><a:srgbClr val="${options.extrusionColor ?? '000000'}"/></a:extrusionClr>`
-		strXml = strXml.replace('<a:sp3d', `<a:sp3d extrusionH="${extrusionDepth}"`)
-	}
+	if (options.extrusionColor != null) strXml += `<a:extrusionClr><a:srgbClr val="${options.extrusionColor}"/></a:extrusionClr>`
 
 	// Contour
-	if (options.contourWidth) {
-		const contourW = Math.round(options.contourWidth * ONEPT)
-		strXml += `<a:contourClr><a:srgbClr val="${options.contourColor ?? '000000'}"/></a:contourClr>`
-		strXml = strXml.replace(/<a:sp3d ([^>]*)>/, `<a:sp3d contourW="${contourW}" $1>`)
-	}
+	if (options.contourColor != null) strXml += `<a:contourClr><a:srgbClr val="${options.contourColor}"/></a:contourClr>`
 
 	strXml += '</a:sp3d>'
 
@@ -377,61 +456,77 @@ export function create3DElements(options: Text3DProps): string {
  */
 export function createText3DElements(options: Text3DProps): string {
 	if (!options) return ''
+	assertText3DOptions(options, 'options.text3D')
 
 	let strXml = ''
 
 	// Scene 3D with camera and light rig for text rotation
-	const rotX = options.rotationX != null ? convertScene3DRotationDegrees(options.rotationX, 'rotationX') : 0
-	const rotY = options.rotationY != null ? convertScene3DRotationDegrees(options.rotationY, 'rotationY') : 0
-	const rotZ = options.rotationZ != null ? convertScene3DRotationDegrees(options.rotationZ, 'rotationZ') : 0
+	const cameraLat = options.rotationY != null ? convertScene3DRotationDegrees(options.rotationY, 'rotationY') : 0
+	const cameraLon = options.rotationX != null ? convertScene3DRotationDegrees(-options.rotationX, 'rotationX') : 0
+	const cameraRev = options.rotationZ != null ? convertScene3DRotationDegrees(-options.rotationZ, 'rotationZ') : 0
+	const lightDirection = options.lightDirection != null ? convertScene3DRotationDegrees(options.lightDirection, 'lightDirection') : 0
 	const perspective = options.perspective != null ? Math.round(options.perspective * 60000) : 0
 	const lightRig = options.lightRig || 'threePt'
 	const material = options.material || 'warmMatte'
 
 	// Add scene3d if there's any 3D configuration
-	const hasRotation = rotX !== 0 || rotY !== 0 || rotZ !== 0
+	const hasRotation = cameraLat !== 0 || cameraLon !== 0 || cameraRev !== 0
 	const hasBevel = options.bevel != null
+	const hasBottomBevel = options.bevelBottom != null
 	const hasExtrusion = options.extrusion != null
+	const hasText3DFormat = hasBevel || hasBottomBevel || hasExtrusion || options.extrusionColor != null || options.contourWidth != null || options.contourColor != null || options.material != null || options.lightRig != null
 
-	if (hasRotation || hasBevel || hasExtrusion || perspective !== 0) {
+	if (hasRotation || hasText3DFormat || lightDirection !== 0 || perspective !== 0) {
 		strXml += '<a:scene3d>'
-		strXml += '<a:camera prst="orthographicFront"'
+		strXml += `<a:camera prst="${perspective !== 0 ? 'perspectiveFront' : 'orthographicFront'}"`
 		if (perspective !== 0) {
 			strXml += ` fov="${perspective}"`
 		}
 		strXml += '>'
 		if (hasRotation) {
-			strXml += `<a:rot lat="${rotX}" lon="${rotY}" rev="${rotZ}"/>`
+			strXml += `<a:rot lat="${cameraLat}" lon="${cameraLon}" rev="${cameraRev}"/>`
 		}
 		strXml += '</a:camera>'
-		strXml += `<a:lightRig rig="${lightRig}" dir="t"/>`
+		strXml += `<a:lightRig rig="${lightRig}" dir="t">`
+		if (lightDirection !== 0) strXml += `<a:rot lat="0" lon="0" rev="${lightDirection}"/>`
+		strXml += '</a:lightRig>'
 		strXml += '</a:scene3d>'
 
 		// Text 3D properties (sp3d inside bodyPr for text-specific effects)
 		// Note: Don't add default material - PowerPoint removes it when saving
-		strXml += '<a:sp3d'
-		if (options.material) strXml += ` prstMaterial="${options.material}"`
-		strXml += '>'
+		const sp3dAttrs: string[] = []
+		if (hasExtrusion) sp3dAttrs.push(`extrusionH="${Math.round(options.extrusion * ONEPT)}"`)
+		if (options.contourWidth != null) sp3dAttrs.push(`contourW="${Math.round(options.contourWidth * ONEPT)}"`)
+		if (options.material) sp3dAttrs.push(`prstMaterial="${options.material}"`)
+		strXml += `<a:sp3d${sp3dAttrs.length ? ` ${sp3dAttrs.join(' ')}` : ''}>`
 
 		// Top bevel for text
 		if (hasBevel) {
-			const bevelW = Math.round((options.bevel.width || 6) * ONEPT)
-			const bevelH = Math.round((options.bevel.height || 6) * ONEPT)
+			const bevelW = Math.round((options.bevel.width ?? 6) * ONEPT)
+			const bevelH = Math.round((options.bevel.height ?? 6) * ONEPT)
 			strXml += `<a:bevelT w="${bevelW}" h="${bevelH}"`
 			// Note: Don't add default prst - PowerPoint removes it when saving
 			if (options.bevel.type) strXml += ` prst="${options.bevel.type}"`
 			strXml += '/>'
 		}
 
-		// Extrusion for text depth
-		if (hasExtrusion) {
-			const extrusionDepth = Math.round(options.extrusion * ONEPT)
-			// Update sp3d opening tag to include extrusion height
-			strXml = strXml.replace('<a:sp3d', `<a:sp3d extrusionH="${extrusionDepth}"`)
-			if (options.extrusionColor) {
-				strXml += `<a:extrusionClr><a:srgbClr val="${options.extrusionColor}"/></a:extrusionClr>`
-			}
+		// Bottom bevel is a separate PowerPoint 3-D Format control. Keep it
+		// independent from the top bevel so a typed edit does not collapse the
+		// two native DrawingML leaves into one preset approximation.
+		if (options.bevelBottom) {
+			const bevelW = Math.round((options.bevelBottom.width ?? 6) * ONEPT)
+			const bevelH = Math.round((options.bevelBottom.height ?? 6) * ONEPT)
+			strXml += `<a:bevelB w="${bevelW}" h="${bevelH}"`
+			if (options.bevelBottom.type) strXml += ` prst="${options.bevelBottom.type}"`
+			strXml += '/>'
 		}
+
+		// Extrusion for text depth
+		if (options.extrusionColor != null) strXml += `<a:extrusionClr><a:srgbClr val="${options.extrusionColor}"/></a:extrusionClr>`
+
+		// Contour is another independent 3-D Format control. Serialize both the
+		// measured width and its authored color when present.
+		if (options.contourColor != null) strXml += `<a:contourClr><a:srgbClr val="${options.contourColor}"/></a:contourClr>`
 
 		strXml += '</a:sp3d>'
 	}
@@ -480,7 +575,13 @@ export function genXmlGradientFill(props: ShapeFillProps): string {
 		}
 
 		strXml += `<a:gs pos="${pos}">`
-		strXml += createColorElement(stop.color, innerElements)
+		// A legacy stop-level transparency is the authoritative alpha control.
+		// Do not emit a second alpha child when a structured colour also carries
+		// opacity; PowerPoint keeps only one effective alpha transform.
+		const color = stop.transparency != null && stop.color && typeof stop.color === 'object'
+			? { ...(stop.color as PictureStyleColorProps), opacity: undefined }
+			: stop.color
+		strXml += createColorElement(color, innerElements)
 		strXml += '</a:gs>'
 	}
 	strXml += '</a:gsLst>'
@@ -490,8 +591,12 @@ export function genXmlGradientFill(props: ShapeFillProps): string {
 
 	if (direction === 'linear') {
 		// Linear gradient: angle in 60000ths of a degree
-		const angle = props.gradientAngle || 0
-		const ang = Math.round(angle * 60000)
+		// DrawingML ST_PositiveFixedAngle is max-exclusive at 360 degrees.
+		// Normalize defensively here as this serializer is also used outside the
+		// public validation boundary (for example, by direct library callers).
+		const authoredAngle = Number(props.gradientAngle ?? 0)
+		const angle = Number.isFinite(authoredAngle) ? ((authoredAngle % 360) + 360) % 360 : 0
+		const ang = Math.min(21599999, Math.round(angle * 60000))
 		strXml += `<a:lin ang="${ang}" scaled="0"/>`
 	} else {
 		// Path gradient: circle, rect, or shape
@@ -609,6 +714,40 @@ function genXmlGradientPreset(preset: string, rotWithShape?: boolean): string {
 	return strXmlLinear
 }
 
+const BLIP_ALIGN = new Set(['tl', 't', 'tr', 'l', 'ctr', 'r', 'bl', 'b', 'br'])
+const BLIP_FLIP = new Set(['none', 'x', 'y', 'xy'])
+
+function genXmlBlipFill(props: ShapeFillProps): string {
+	const rid = Number(props._blipRid)
+	if (!Number.isFinite(rid) || rid < 1) return '<a:noFill/>'
+	const tex = props.texture || {}
+	const placement = tex.placement || {}
+	const rotate = placement.rotateWithShape ?? tex.rotateWithShape
+	const rotAttr = rotate === false ? '0' : '1'
+	const transparency = Number(tex.transparency ?? props.transparency ?? 0)
+	const alpha = Number.isFinite(transparency) && transparency > 0
+		? `<a:alpha val="${Math.round((100 - (transparency <= 1 ? transparency * 100 : transparency)) * 1000)}"/>`
+		: ''
+	const mode = String(placement.mode || (tex.tile === false || props.type === 'picture' ? 'stretch' : 'tile')).toLowerCase()
+	let placementXml = '<a:stretch><a:fillRect/></a:stretch>'
+	if (mode !== 'stretch') {
+		const scaleX = Number(placement.scaleX ?? tex.scaleX ?? 1)
+		const scaleY = Number(placement.scaleY ?? tex.scaleY ?? 1)
+		const sx = Math.round((Number.isFinite(scaleX) ? scaleX : 1) * 100000)
+		const sy = Math.round((Number.isFinite(scaleY) ? scaleY : 1) * 100000)
+		const offsetX = Number(placement.offsetX ?? tex.offsetX ?? 0)
+		const offsetY = Number(placement.offsetY ?? tex.offsetY ?? 0)
+		const tx = inch2Emu(Number.isFinite(offsetX) ? offsetX : 0)
+		const ty = inch2Emu(Number.isFinite(offsetY) ? offsetY : 0)
+		const alignRaw = String(placement.alignment || tex.alignment || 'ctr').toLowerCase()
+		const algn = BLIP_ALIGN.has(alignRaw) ? alignRaw : 'ctr'
+		const flipRaw = String(placement.flip || tex.flip || 'none').toLowerCase()
+		const flip = BLIP_FLIP.has(flipRaw) ? flipRaw : 'none'
+		placementXml = `<a:tile tx="${tx}" ty="${ty}" sx="${sx}" sy="${sy}" flip="${flip}" algn="${algn}"/>`
+	}
+	return `<a:blipFill rotWithShape="${rotAttr}"><a:blip r:embed="rId${rid}">${alpha}</a:blip>${placementXml}</a:blipFill>`
+}
+
 /**
  * Create color selection
  * @param {Color | ShapeFillProps | ShapeLineProps} props fill props
@@ -637,6 +776,18 @@ export function genXmlColorSelection(props: Color | ShapeFillProps | ShapeLinePr
 			case 'gradient':
 				outText += genXmlGradientFill(props as ShapeFillProps)
 				break
+			case 'pattern': {
+				const pattern = (props as ShapeFillProps).pattern || {}
+				const preset = String(pattern.preset || 'pct20')
+				const fg = String(pattern.foreground || colorVal || 'FFFFFF').replace('#', '')
+				const bg = String(pattern.background || '000000').replace('#', '')
+				outText += `<a:pattFill prst="${preset}"><a:fgClr>${createColorElement(fg)}</a:fgClr><a:bgClr>${createColorElement(bg)}</a:bgClr></a:pattFill>`
+				break
+			}
+			case 'texture':
+			case 'picture':
+				outText += genXmlBlipFill(props as ShapeFillProps)
+				break
 			case 'none':
 				outText += '<a:noFill/>'
 				break
@@ -651,12 +802,12 @@ export function genXmlColorSelection(props: Color | ShapeFillProps | ShapeLinePr
 
 /**
  * Get a new rel ID (rId) for charts, media, etc.
- * @param {PresSlide} target - the slide to use
+ * @param {PresSlide|SlideLayout} target - the slide or layout to use
  * @returns {number} count of all current rels plus 1 for the caller to use as its "rId"
  */
-export function getNewRelId(target: PresSlide): number {
-	const rawRels = Array.isArray((target as PresSlide & { _rawRels?: Array<{ id?: string }> })._rawRels)
-		? (target as PresSlide & { _rawRels: Array<{ id?: string }> })._rawRels
+export function getNewRelId(target: PresSlide | SlideLayout): number {
+	const rawRels = Array.isArray((target as (PresSlide | SlideLayout) & { _rawRels?: Array<{ id?: string }> })._rawRels)
+		? (target as (PresSlide | SlideLayout) & { _rawRels: Array<{ id?: string }> })._rawRels
 		: []
 	const rawMax = rawRels.reduce((maxId, rel) => {
 		const id = rel?.id || ''
@@ -683,8 +834,10 @@ export function correctShadowOptions(ShadowProps: ShadowProps): ShadowProps | un
 
 	// OPT: `type`
 	if (ShadowProps.type !== 'outer' && ShadowProps.type !== 'inner' && ShadowProps.type !== 'none') {
-		console.warn('Warning: shadow.type options are `outer`, `inner` or `none`.')
-		ShadowProps.type = 'outer'
+		const alias = String(ShadowProps.type || '').toLowerCase()
+		if (alias.includes('inner')) ShadowProps.type = 'inner'
+		else if (alias === 'none') ShadowProps.type = 'none'
+		else ShadowProps.type = 'outer'
 	}
 
 	// OPT: `angle`

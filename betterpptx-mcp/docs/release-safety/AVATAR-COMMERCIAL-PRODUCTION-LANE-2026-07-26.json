@@ -1,0 +1,55 @@
+{
+  "schemaVersion": "betterpptx.avatar-commercial-production-lane.v1",
+  "decision": "OWNER_APPROVED_FINAL_PRODUCTION_TARGET",
+  "status": "SERVING_PROMOTED_IN_STAGING",
+  "productionLane": "upstream LivePortrait InsightFace alignment -> MuseTalk BiSeNet parsing -> PowerPoint-native MP4",
+  "postProcessing": {
+    "serving": false,
+    "description": "The promoted worker normalizes the upstream LP/MT result to H.264/AAC MP4. CodeFormer restoration, RVM alpha extraction, and the FFmpeg foreground/matte compositor are isolated evaluation-only stages and are not invoked by the serving route.",
+    "evaluationArtifact": "betterpptx-mcp/outputs/commercial-eval/commercial-enhancement-final-report.json",
+    "alphaDelivery": "not part of the current Cloud Run serving route"
+  },
+  "ownerApproved": true,
+  "publicRoutingAllowed": false,
+  "talkingHeadInputContract": {
+    "selfieRequiredPerGeneration": true,
+    "appearanceContinuity": "caller-supplies-the-same-image-file-in-each-new-generation-request",
+    "avatarState": "no-persistent-avatar-or-persona",
+    "defaultPersona": false,
+    "noSelfieBehavior": "voice-only narration",
+    "bodyViewFallbackMayFeedLivePortrait": false
+  },
+  "customerImageProcessing": "allowed only through the existing consent and input-quality gates",
+  "resaleSafeRollbackLane": "YuNet -> LivePortrait -> MediaPipe Face Landmarker -> MuseTalk",
+  "commercialPins": {
+    "livePortraitCommit": "9b294b3d0536135442ea73cb01e6cb3ca7029dd3",
+    "livePortraitModelRevision": "82a4fa6735ca58432b6ce39301b4b9ee066dea47",
+    "museTalkCommit": "0a89dec45a0192b824e3cf4daf96c239440c5ed8",
+    "museTalkModelRevision": "3ef28bc5cff08c90ad8178a25f1b570cd800170f",
+    "motionProfile": "low/pose-only",
+    "bboxShift": 0,
+    "parsingMode": "jaw"
+  },
+  "implementation": {
+    "source": "betterpptx-mcp/deploy/avatar-worker/modal_avatar_commercial_eval.py",
+    "appName": "betterpptx-avatar-commercial-production",
+    "authenticatedMultipartEndpoint": true,
+    "metrologyHeaders": true,
+    "cloudRunService": "betterpptx-mcp-staging",
+    "cloudRunRegion": "us-central1",
+    "cloudRunRevision": "betterpptx-mcp-staging-00083-b4h",
+    "trafficPercent": 100,
+    "quotaMode": "unbounded-metered",
+    "estimatedGpuSecondsPerRequest": 120,
+    "modalProfiles": ["telcomgapp", "betterpptx-fluxworkerai"],
+    "promotionReport": "betterpptx-mcp/outputs/commercial-promotion-20260726/commercial-promotion-report.json"
+  },
+  "remainingPromotionGates": [
+    "final provider billing reconciliation and owner approval",
+    "one-time LP/MT identity-quality acceptance",
+    "Meshy -> Mixamo native 3D production clearance",
+    "preserve YuNet/MediaPipe endpoint as rollback"
+  ],
+  "training": false,
+  "noBiometricIdentitySystem": true
+}

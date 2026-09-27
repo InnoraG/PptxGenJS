@@ -1,0 +1,977 @@
+{
+  "schemaVersion": "betterpptx.default-presenter-mena-build.v1",
+  "status": "RESEARCH_ONLY_OWNER_GATED",
+  "audienceFocus": "youth-and-young-adult-topics",
+  "motionContract": {
+    "path": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\default-presenter-motion-contract.json",
+    "sha256": "8bfb5a71554f07fd088260fa92e9e23bc734b00e59f8985222b9ea5223db6c66"
+  },
+  "source": {
+    "path": "D:\\PptxGenJS_Claude\\research-demos\\2026-07-18-meshy-avatar\\production-hybrid-proof.glb",
+    "bytes": 15299028,
+    "sha256": "a330dc0c2048444259a93506f0115dabab14632cd28bf8b4effe3fa9917bedac",
+    "meshes": 2,
+    "skins": 1,
+    "joints": 65,
+    "images": 1,
+    "textures": 1
+  },
+  "output": {
+    "path": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\default-presenter-mena.glb",
+    "bytes": 9059392,
+    "sha256": "2253cfc9b2b0811c13fd73e05da1dc91cee98e17a8151441030cf2c88e278c8a",
+    "meshes": 2,
+    "skins": 1,
+    "joints": 65,
+    "images": 1,
+    "textures": 1,
+    "animationTargetPaths": [
+      {
+        "rotation": 22
+      },
+      {
+        "translation": 1,
+        "rotation": 65
+      },
+      {
+        "rotation": 22
+      },
+      {
+        "rotation": 22
+      },
+      {
+        "rotation": 22
+      },
+      {
+        "rotation": 22
+      },
+      {
+        "rotation": 22
+      },
+      {
+        "translation": 1,
+        "rotation": 65
+      },
+      {
+        "rotation": 22
+      },
+      {
+        "rotation": 22
+      },
+      {
+        "rotation": 22
+      },
+      {
+        "rotation": 22
+      },
+      {
+        "rotation": 22
+      },
+      {
+        "rotation": 22
+      },
+      {
+        "rotation": 22
+      },
+      {
+        "rotation": 22
+      },
+      {
+        "rotation": 22
+      },
+      {
+        "rotation": 22
+      }
+    ]
+  },
+  "geometry": {
+    "before": {
+      "primitives": 2,
+      "vertices": 117223,
+      "triangles": 215356,
+      "maxPrimitiveVertices": 65535,
+      "indexComponentTypes": [
+        5123
+      ],
+      "modes": [
+        4
+      ]
+    },
+    "after": {
+      "primitives": 2,
+      "vertices": 34622,
+      "triangles": 53831,
+      "maxPrimitiveVertices": 19376,
+      "indexComponentTypes": [
+        5123
+      ],
+      "modes": [
+        4
+      ]
+    },
+    "simplifier": {
+      "ratio": 0.25,
+      "error": 1
+    },
+    "textureOptimization": {
+      "maxTextureSize": 512,
+      "beforeBytes": 11074436,
+      "afterBytes": 9059436,
+      "reductionPercent": 18.2,
+      "beforeSha256": "5a1bfb86f69b22613c1cf052ed94a39bd86a0265270dbf11758ca171befd477d",
+      "afterSha256": "7ed21969d9a9d47324d8873627502d0b7e00c2f400993a1c36c4a49445d9d371",
+      "beforeCounts": {
+        "meshes": 2,
+        "nodes": 77,
+        "skins": 1,
+        "animations": 18,
+        "accessors": 4376,
+        "bufferViews": 6,
+        "textures": 1,
+        "images": 1
+      },
+      "afterCounts": {
+        "meshes": 2,
+        "nodes": 77,
+        "skins": 1,
+        "animations": 18,
+        "accessors": 4376,
+        "bufferViews": 6,
+        "textures": 1,
+        "images": 1
+      },
+      "payloadPreserved": true,
+      "texturePrune": {
+        "removedTextures": 0,
+        "removedImages": 0,
+        "retainedTextureCount": 1,
+        "retainedImageCount": 1
+      },
+      "images": [
+        {
+          "name": "texture_0",
+          "mimeType": "image/png",
+          "beforeBytes": 2473440,
+          "afterBytes": 458447,
+          "beforeSize": [
+            2048,
+            2048
+          ],
+          "afterSize": [
+            512,
+            512
+          ]
+        }
+      ]
+    },
+    "canonicalBoneNamesChanged": 43,
+    "canonicalBoneCount": 65
+  },
+  "motion": {
+    "nativeRetargetValidation": [
+      {
+        "motionId": "talk",
+        "sourceSlug": "talk",
+        "rotationRetargetSpace": "global",
+        "rotationReference": "rest",
+        "sourceReferenceTimeSeconds": null,
+        "sampledTimes": 309,
+        "sourceSampledTimes": 309,
+        "boundaryBlendMs": 0,
+        "maxParityErrorDegrees": 0.0000034150945850063755,
+        "status": "PASS"
+      },
+      {
+        "motionId": "enumerate",
+        "sourceSlug": "enumerate",
+        "rotationRetargetSpace": "global",
+        "rotationReference": "rest",
+        "sourceReferenceTimeSeconds": null,
+        "sampledTimes": 200,
+        "sourceSampledTimes": 200,
+        "boundaryBlendMs": 0,
+        "maxParityErrorDegrees": 0.0000034150945850063755,
+        "status": "PASS"
+      }
+    ],
+    "report": [
+      {
+        "motionId": "idle",
+        "sourceSlug": "idle",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "talk",
+        "sourceSlug": "talk",
+        "rootMotionScale": 0.9015404193208612,
+        "rootMotionAnchor": "start",
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "rootMotionSpace": "world",
+        "rootMotionWorld": {
+          "schemaVersion": "world-root-displacement-v1",
+          "axes": "all",
+          "sourceParentRotation": [
+            0.7071067811865475,
+            0,
+            0,
+            0.7071067811865475
+          ],
+          "sourceParentUniformScale": 0.009999999776482582,
+          "targetParentRotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "targetParentUniformScale": 1,
+          "sourceConstructionStature": 1.5385886266188575,
+          "targetConstructionStature": 1.3870998356042727,
+          "automaticWorldStatureRatio": 0.9015404193208612,
+          "requestedWorldScale": 0.9015404193208612,
+          "sourceLocalAnchor": [
+            -4.478960990905762,
+            -1.1587140560150146,
+            -96.72459411621094
+          ],
+          "targetLocalAnchor": [
+            0.0007053472218103707,
+            0.9771439433097839,
+            0.02989756502211094
+          ],
+          "anchor": "start",
+          "sourceKeyCount": 309,
+          "firstTimeSeconds": 0,
+          "lastTimeSeconds": 10.266666412353516,
+          "sourceTimeValuesUnchanged": true,
+          "nonRootTranslationsPreserved": true,
+          "scalesPreserved": true,
+          "maxDisplacementStatures": 0.35,
+          "maxHorizontalStatures": 0.5,
+          "displacementScale": 1,
+          "horizontalScale": 1,
+          "maximumSourceWorldDisplacement": 0.07055950588826747,
+          "maximumTargetWorldDisplacement": 0.06361224652558142,
+          "targetHorizontalWorldRange": 0.07094993814391741
+        },
+        "status": "ok policy=root-motion basis=global ref=rest ch=66 skip=0 filtered=0 rot=65 trans=1 scale=0 preserveTrans=64 preserveScale=65"
+      },
+      {
+        "motionId": "greet",
+        "sourceSlug": "greet",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "point",
+        "sourceSlug": "point",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "emphasize",
+        "sourceSlug": "emphasize",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "magnitude",
+        "sourceSlug": "magnitude",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "contrast",
+        "sourceSlug": "contrast",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "enumerate",
+        "sourceSlug": "enumerate",
+        "rootMotionScale": 0.9015404193208612,
+        "rootMotionAnchor": "start",
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "rootMotionSpace": "world",
+        "rootMotionWorld": {
+          "schemaVersion": "world-root-displacement-v1",
+          "axes": "all",
+          "sourceParentRotation": [
+            0.7071067811865475,
+            0,
+            0,
+            0.7071067811865475
+          ],
+          "sourceParentUniformScale": 0.009999999776482582,
+          "targetParentRotation": [
+            0,
+            0,
+            0,
+            1
+          ],
+          "targetParentUniformScale": 1,
+          "sourceConstructionStature": 1.5385886266188575,
+          "targetConstructionStature": 1.3870998356042727,
+          "automaticWorldStatureRatio": 0.9015404193208612,
+          "requestedWorldScale": 0.9015404193208612,
+          "sourceLocalAnchor": [
+            -0.24905270338058472,
+            -0.041375502943992615,
+            -97.30323791503906
+          ],
+          "targetLocalAnchor": [
+            0.0007053472218103707,
+            0.9771439433097839,
+            0.02989756502211094
+          ],
+          "anchor": "start",
+          "sourceKeyCount": 200,
+          "firstTimeSeconds": 0,
+          "lastTimeSeconds": 6.633333206176758,
+          "sourceTimeValuesUnchanged": true,
+          "nonRootTranslationsPreserved": true,
+          "scalesPreserved": true,
+          "maxDisplacementStatures": 0.35,
+          "maxHorizontalStatures": 0.5,
+          "displacementScale": 1,
+          "horizontalScale": 1,
+          "maximumSourceWorldDisplacement": 0.1707413248730912,
+          "maximumTargetWorldDisplacement": 0.15393020562148602,
+          "targetHorizontalWorldRange": 0.14112813492875603
+        },
+        "status": "ok policy=root-motion basis=global ref=rest ch=66 skip=0 filtered=0 rot=65 trans=1 scale=0 preserveTrans=64 preserveScale=65"
+      },
+      {
+        "motionId": "ask",
+        "sourceSlug": "ask",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "present",
+        "sourceSlug": "present",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "agree",
+        "sourceSlug": "agree",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "bow",
+        "sourceSlug": "bow",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "think",
+        "sourceSlug": "think",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "disagree",
+        "sourceSlug": "disagree",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "happy",
+        "sourceSlug": "happy",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "surprise",
+        "sourceSlug": "surprise",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "walk",
+        "sourceSlug": "walk",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      },
+      {
+        "motionId": "clap",
+        "sourceSlug": "clap",
+        "rootMotionScale": 1.3777930090714108,
+        "rootMotionAnchor": null,
+        "rootMotionHorizontalScale": 1,
+        "rootMotionDisplacementScale": 1,
+        "status": "ok policy=rotation-only basis=local ref=rest ch=22 skip=0 filtered=0 rot=22 trans=0 scale=0 preserveTrans=0 preserveScale=0"
+      }
+    ],
+    "boneNameMatching": [
+      {
+        "motionId": "talk",
+        "policy": "mixamo-suffix",
+        "sourceJoints": 65,
+        "renamedSourceNodes": 43,
+        "aliases": [
+          {
+            "from": "mixamorig:HeadTop_End",
+            "to": "mixamorig7:HeadTop_End"
+          },
+          {
+            "from": "mixamorig:LeftHandThumb4",
+            "to": "mixamorig7:LeftHandThumb4"
+          },
+          {
+            "from": "mixamorig:LeftHandThumb3",
+            "to": "mixamorig7:LeftHandThumb3"
+          },
+          {
+            "from": "mixamorig:LeftHandThumb2",
+            "to": "mixamorig7:LeftHandThumb2"
+          },
+          {
+            "from": "mixamorig:LeftHandThumb1",
+            "to": "mixamorig7:LeftHandThumb1"
+          },
+          {
+            "from": "mixamorig:LeftHandIndex4",
+            "to": "mixamorig7:LeftHandIndex4"
+          },
+          {
+            "from": "mixamorig:LeftHandIndex3",
+            "to": "mixamorig7:LeftHandIndex3"
+          },
+          {
+            "from": "mixamorig:LeftHandIndex2",
+            "to": "mixamorig7:LeftHandIndex2"
+          },
+          {
+            "from": "mixamorig:LeftHandIndex1",
+            "to": "mixamorig7:LeftHandIndex1"
+          },
+          {
+            "from": "mixamorig:LeftHandMiddle4",
+            "to": "mixamorig7:LeftHandMiddle4"
+          },
+          {
+            "from": "mixamorig:LeftHandMiddle3",
+            "to": "mixamorig7:LeftHandMiddle3"
+          },
+          {
+            "from": "mixamorig:LeftHandMiddle2",
+            "to": "mixamorig7:LeftHandMiddle2"
+          },
+          {
+            "from": "mixamorig:LeftHandMiddle1",
+            "to": "mixamorig7:LeftHandMiddle1"
+          },
+          {
+            "from": "mixamorig:LeftHandRing4",
+            "to": "mixamorig7:LeftHandRing4"
+          },
+          {
+            "from": "mixamorig:LeftHandRing3",
+            "to": "mixamorig7:LeftHandRing3"
+          },
+          {
+            "from": "mixamorig:LeftHandRing2",
+            "to": "mixamorig7:LeftHandRing2"
+          },
+          {
+            "from": "mixamorig:LeftHandRing1",
+            "to": "mixamorig7:LeftHandRing1"
+          },
+          {
+            "from": "mixamorig:LeftHandPinky4",
+            "to": "mixamorig7:LeftHandPinky4"
+          },
+          {
+            "from": "mixamorig:LeftHandPinky3",
+            "to": "mixamorig7:LeftHandPinky3"
+          },
+          {
+            "from": "mixamorig:LeftHandPinky2",
+            "to": "mixamorig7:LeftHandPinky2"
+          },
+          {
+            "from": "mixamorig:LeftHandPinky1",
+            "to": "mixamorig7:LeftHandPinky1"
+          },
+          {
+            "from": "mixamorig:RightHandThumb4",
+            "to": "mixamorig7:RightHandThumb4"
+          },
+          {
+            "from": "mixamorig:RightHandThumb3",
+            "to": "mixamorig7:RightHandThumb3"
+          },
+          {
+            "from": "mixamorig:RightHandThumb2",
+            "to": "mixamorig7:RightHandThumb2"
+          },
+          {
+            "from": "mixamorig:RightHandThumb1",
+            "to": "mixamorig7:RightHandThumb1"
+          },
+          {
+            "from": "mixamorig:RightHandIndex4",
+            "to": "mixamorig7:RightHandIndex4"
+          },
+          {
+            "from": "mixamorig:RightHandIndex3",
+            "to": "mixamorig7:RightHandIndex3"
+          },
+          {
+            "from": "mixamorig:RightHandIndex2",
+            "to": "mixamorig7:RightHandIndex2"
+          },
+          {
+            "from": "mixamorig:RightHandIndex1",
+            "to": "mixamorig7:RightHandIndex1"
+          },
+          {
+            "from": "mixamorig:RightHandMiddle4",
+            "to": "mixamorig7:RightHandMiddle4"
+          },
+          {
+            "from": "mixamorig:RightHandMiddle3",
+            "to": "mixamorig7:RightHandMiddle3"
+          },
+          {
+            "from": "mixamorig:RightHandMiddle2",
+            "to": "mixamorig7:RightHandMiddle2"
+          },
+          {
+            "from": "mixamorig:RightHandMiddle1",
+            "to": "mixamorig7:RightHandMiddle1"
+          },
+          {
+            "from": "mixamorig:RightHandRing4",
+            "to": "mixamorig7:RightHandRing4"
+          },
+          {
+            "from": "mixamorig:RightHandRing3",
+            "to": "mixamorig7:RightHandRing3"
+          },
+          {
+            "from": "mixamorig:RightHandRing2",
+            "to": "mixamorig7:RightHandRing2"
+          },
+          {
+            "from": "mixamorig:RightHandRing1",
+            "to": "mixamorig7:RightHandRing1"
+          },
+          {
+            "from": "mixamorig:RightHandPinky4",
+            "to": "mixamorig7:RightHandPinky4"
+          },
+          {
+            "from": "mixamorig:RightHandPinky3",
+            "to": "mixamorig7:RightHandPinky3"
+          },
+          {
+            "from": "mixamorig:RightHandPinky2",
+            "to": "mixamorig7:RightHandPinky2"
+          },
+          {
+            "from": "mixamorig:RightHandPinky1",
+            "to": "mixamorig7:RightHandPinky1"
+          },
+          {
+            "from": "mixamorig:LeftToe_End",
+            "to": "mixamorig7:LeftToe_End"
+          },
+          {
+            "from": "mixamorig:RightToe_End",
+            "to": "mixamorig7:RightToe_End"
+          }
+        ],
+        "sourceBinaryExact": true,
+        "targetUntouched": true
+      },
+      {
+        "motionId": "enumerate",
+        "policy": "mixamo-suffix",
+        "sourceJoints": 65,
+        "renamedSourceNodes": 43,
+        "aliases": [
+          {
+            "from": "mixamorig:HeadTop_End",
+            "to": "mixamorig7:HeadTop_End"
+          },
+          {
+            "from": "mixamorig:LeftHandThumb4",
+            "to": "mixamorig7:LeftHandThumb4"
+          },
+          {
+            "from": "mixamorig:LeftHandThumb3",
+            "to": "mixamorig7:LeftHandThumb3"
+          },
+          {
+            "from": "mixamorig:LeftHandThumb2",
+            "to": "mixamorig7:LeftHandThumb2"
+          },
+          {
+            "from": "mixamorig:LeftHandThumb1",
+            "to": "mixamorig7:LeftHandThumb1"
+          },
+          {
+            "from": "mixamorig:LeftHandIndex4",
+            "to": "mixamorig7:LeftHandIndex4"
+          },
+          {
+            "from": "mixamorig:LeftHandIndex3",
+            "to": "mixamorig7:LeftHandIndex3"
+          },
+          {
+            "from": "mixamorig:LeftHandIndex2",
+            "to": "mixamorig7:LeftHandIndex2"
+          },
+          {
+            "from": "mixamorig:LeftHandIndex1",
+            "to": "mixamorig7:LeftHandIndex1"
+          },
+          {
+            "from": "mixamorig:LeftHandMiddle4",
+            "to": "mixamorig7:LeftHandMiddle4"
+          },
+          {
+            "from": "mixamorig:LeftHandMiddle3",
+            "to": "mixamorig7:LeftHandMiddle3"
+          },
+          {
+            "from": "mixamorig:LeftHandMiddle2",
+            "to": "mixamorig7:LeftHandMiddle2"
+          },
+          {
+            "from": "mixamorig:LeftHandMiddle1",
+            "to": "mixamorig7:LeftHandMiddle1"
+          },
+          {
+            "from": "mixamorig:LeftHandRing4",
+            "to": "mixamorig7:LeftHandRing4"
+          },
+          {
+            "from": "mixamorig:LeftHandRing3",
+            "to": "mixamorig7:LeftHandRing3"
+          },
+          {
+            "from": "mixamorig:LeftHandRing2",
+            "to": "mixamorig7:LeftHandRing2"
+          },
+          {
+            "from": "mixamorig:LeftHandRing1",
+            "to": "mixamorig7:LeftHandRing1"
+          },
+          {
+            "from": "mixamorig:LeftHandPinky4",
+            "to": "mixamorig7:LeftHandPinky4"
+          },
+          {
+            "from": "mixamorig:LeftHandPinky3",
+            "to": "mixamorig7:LeftHandPinky3"
+          },
+          {
+            "from": "mixamorig:LeftHandPinky2",
+            "to": "mixamorig7:LeftHandPinky2"
+          },
+          {
+            "from": "mixamorig:LeftHandPinky1",
+            "to": "mixamorig7:LeftHandPinky1"
+          },
+          {
+            "from": "mixamorig:RightHandThumb4",
+            "to": "mixamorig7:RightHandThumb4"
+          },
+          {
+            "from": "mixamorig:RightHandThumb3",
+            "to": "mixamorig7:RightHandThumb3"
+          },
+          {
+            "from": "mixamorig:RightHandThumb2",
+            "to": "mixamorig7:RightHandThumb2"
+          },
+          {
+            "from": "mixamorig:RightHandThumb1",
+            "to": "mixamorig7:RightHandThumb1"
+          },
+          {
+            "from": "mixamorig:RightHandIndex4",
+            "to": "mixamorig7:RightHandIndex4"
+          },
+          {
+            "from": "mixamorig:RightHandIndex3",
+            "to": "mixamorig7:RightHandIndex3"
+          },
+          {
+            "from": "mixamorig:RightHandIndex2",
+            "to": "mixamorig7:RightHandIndex2"
+          },
+          {
+            "from": "mixamorig:RightHandIndex1",
+            "to": "mixamorig7:RightHandIndex1"
+          },
+          {
+            "from": "mixamorig:RightHandMiddle4",
+            "to": "mixamorig7:RightHandMiddle4"
+          },
+          {
+            "from": "mixamorig:RightHandMiddle3",
+            "to": "mixamorig7:RightHandMiddle3"
+          },
+          {
+            "from": "mixamorig:RightHandMiddle2",
+            "to": "mixamorig7:RightHandMiddle2"
+          },
+          {
+            "from": "mixamorig:RightHandMiddle1",
+            "to": "mixamorig7:RightHandMiddle1"
+          },
+          {
+            "from": "mixamorig:RightHandRing4",
+            "to": "mixamorig7:RightHandRing4"
+          },
+          {
+            "from": "mixamorig:RightHandRing3",
+            "to": "mixamorig7:RightHandRing3"
+          },
+          {
+            "from": "mixamorig:RightHandRing2",
+            "to": "mixamorig7:RightHandRing2"
+          },
+          {
+            "from": "mixamorig:RightHandRing1",
+            "to": "mixamorig7:RightHandRing1"
+          },
+          {
+            "from": "mixamorig:RightHandPinky4",
+            "to": "mixamorig7:RightHandPinky4"
+          },
+          {
+            "from": "mixamorig:RightHandPinky3",
+            "to": "mixamorig7:RightHandPinky3"
+          },
+          {
+            "from": "mixamorig:RightHandPinky2",
+            "to": "mixamorig7:RightHandPinky2"
+          },
+          {
+            "from": "mixamorig:RightHandPinky1",
+            "to": "mixamorig7:RightHandPinky1"
+          },
+          {
+            "from": "mixamorig:LeftToe_End",
+            "to": "mixamorig7:LeftToe_End"
+          },
+          {
+            "from": "mixamorig:RightToe_End",
+            "to": "mixamorig7:RightToe_End"
+          }
+        ],
+        "sourceBinaryExact": true,
+        "targetUntouched": true
+      }
+    ]
+  },
+  "staticPose": {
+    "clipName": "source-base-pose",
+    "clipIndex": null,
+    "sampleTimeMs": null,
+    "changedNodeChannels": 0,
+    "powerPointStaticPose": {
+      "armDrop": {
+        "left": 0.45131443281328976,
+        "right": 0.4527247190818511
+      },
+      "armDropRatio": {
+        "left": 1.349426708419377,
+        "right": 1.3536434535951312
+      },
+      "torsoHeight": 0.33444901453145803,
+      "minimumArmDrop": 0.45131443281328976,
+      "minimumArmDropRatio": 1.349426708419377,
+      "requiredMinimumArmDropRatio": 0.35
+    }
+  },
+  "contacts": [
+    {
+      "animId": 0,
+      "clipName": "00_idle",
+      "contactMs": 3602,
+      "durationMs": 9958
+    },
+    {
+      "animId": 1,
+      "clipName": "01_talk",
+      "contactMs": 4333,
+      "durationMs": 10267,
+      "contactPolicy": "rotation-peak"
+    },
+    {
+      "animId": 2,
+      "clipName": "02_greet",
+      "contactMs": 507,
+      "durationMs": 542
+    },
+    {
+      "animId": 3,
+      "clipName": "03_point",
+      "contactMs": 926,
+      "durationMs": 3625
+    },
+    {
+      "animId": 4,
+      "clipName": "04_emphasize",
+      "contactMs": 2050,
+      "durationMs": 5200
+    },
+    {
+      "animId": 5,
+      "clipName": "05_magnitude",
+      "contactMs": 3302,
+      "durationMs": 6208
+    },
+    {
+      "animId": 6,
+      "clipName": "06_contrast",
+      "contactMs": 681,
+      "durationMs": 2000
+    },
+    {
+      "animId": 7,
+      "clipName": "07_enumerate",
+      "contactMs": 4567,
+      "durationMs": 6633,
+      "contactPolicy": "rotation-peak"
+    },
+    {
+      "animId": 8,
+      "clipName": "08_ask",
+      "contactMs": 723,
+      "durationMs": 2000
+    },
+    {
+      "animId": 9,
+      "clipName": "09_present",
+      "contactMs": 2726,
+      "durationMs": 5125
+    },
+    {
+      "animId": 10,
+      "clipName": "10_agree",
+      "contactMs": 521,
+      "durationMs": 1750
+    },
+    {
+      "animId": 11,
+      "clipName": "11_bow",
+      "contactMs": 995,
+      "durationMs": 2750
+    },
+    {
+      "animId": 12,
+      "clipName": "12_think",
+      "contactMs": 1628,
+      "durationMs": 4250
+    },
+    {
+      "animId": 13,
+      "clipName": "13_disagree",
+      "contactMs": 819,
+      "durationMs": 1833
+    },
+    {
+      "animId": 14,
+      "clipName": "14_happy",
+      "contactMs": 693,
+      "durationMs": 1917
+    },
+    {
+      "animId": 15,
+      "clipName": "15_surprise",
+      "contactMs": 1702,
+      "durationMs": 4000
+    },
+    {
+      "animId": 16,
+      "clipName": "16_walk",
+      "contactMs": 798,
+      "durationMs": 1042
+    },
+    {
+      "animId": 17,
+      "clipName": "17_clap",
+      "contactMs": 1250,
+      "durationMs": 4200
+    }
+  ],
+  "materials": [
+    {
+      "name": "Material_1",
+      "metallicFactor": 0,
+      "roughnessFactor": 1,
+      "hasMetallicRoughnessTexture": false,
+      "hasSpecularExtension": false,
+      "hasSpecularTexture": false,
+      "specularFactor": null,
+      "specularColorFactor": null,
+      "alphaMode": "OPAQUE"
+    }
+  ],
+  "poster": {
+    "path": "D:\\PptxGenJS_Claude\\betterpptx-mcp\\assets\\default-presenter-mena.png",
+    "bytes": 114208,
+    "sha256": "752f8259a40f33bbe779e7b21615d567272c83632b677542b0281e490dd4f207"
+  },
+  "releaseBoundary": {
+    "ownerApprovalRequired": true,
+    "liveMeshyCanaryRequired": true,
+    "approvedForAutomaticSelection": false
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "betterpptx.image-edit-worker-canary-evidence.v1",
+  "recordedAt": "2026-07-17",
+  "referencePolicy": {
+    "kind": "owned-synthetic",
+    "humanOrCustomerInputUsed": false,
+    "trainingUsed": false,
+    "consentedHumanAssetSentToCloud": false
+  },
+  "pricingBasis": {
+    "gpuType": "L40S",
+    "usdPerGpuSecond": 0.000542,
+    "source": "https://modal.com/pricing",
+    "excludes": ["cpu", "memory", "persistent-volume", "network"]
+  },
+  "artifacts": [
+    {
+      "role": "composition-reference",
+      "path": "fixtures/synthetic-reference.png",
+      "sha256": "02e7e8323b417a1135e68779174c4a757fc224037640f5cb0d602d8fd47c1379"
+    },
+    {
+      "role": "style-reference",
+      "path": "fixtures/synthetic-style-reference.png",
+      "sha256": "1cf4dde4f71afa0599db5e7a78b54e594a7c417311aa6fd2687947ee0fff4c59"
+    },
+    {
+      "role": "single-reference-output",
+      "path": "canary-output.png",
+      "sha256": "487d43446866e69491d75c4468f1ed3071689c72b8c985175ef97f8719352b28"
+    },
+    {
+      "role": "cached-cold-output",
+      "path": "canary-benchmark-cached-cold.png",
+      "sha256": "487d43446866e69491d75c4468f1ed3071689c72b8c985175ef97f8719352b28"
+    },
+    {
+      "role": "warm-output",
+      "path": "canary-benchmark-warm.png",
+      "sha256": "487d43446866e69491d75c4468f1ed3071689c72b8c985175ef97f8719352b28"
+    },
+    {
+      "role": "multi-reference-output",
+      "path": "canary-multi-reference.png",
+      "sha256": "1b1eccd41fc574b1995c3388922e291df4f6f795d1112a577c5bb048f43641c5"
+    }
+  ],
+  "runs": {
+    "singleReference": {
+      "responses": 1,
+      "distinctOutputs": 1,
+      "inferenceSeconds": 4.739,
+      "gpuSeconds": 81.257,
+      "peakMemoryMeasured": false,
+      "visualRubric": {
+        "rightFocalOrb": "PASS",
+        "lowerWave": "PASS",
+        "quietUpperLeft": "PASS",
+        "requestedPaletteAndMedium": "PASS",
+        "noReadableText": "PASS"
+      }
+    },
+    "coldWarmDeterminism": {
+      "responses": 2,
+      "distinctOutputs": 1,
+      "reportPath": "canary-benchmark.json",
+      "gpuSeconds": 18.421,
+      "identicalOutputDigest": true,
+      "peakMemoryMeasured": false
+    },
+    "multiReference": {
+      "responses": 1,
+      "distinctOutputs": 1,
+      "reportPath": "canary-multi-reference.json",
+      "inferenceSeconds": 5.573,
+      "gpuSeconds": 14.967,
+      "peakMemoryMeasured": false,
+      "visualRubric": {
+        "reference1RightFocalCircle": "PASS",
+        "reference1LowerWave": "PASS",
+        "reference1QuietUpperLeft": "PASS",
+        "reference2PaperMaterial": "PASS",
+        "reference2ForestCoralGoldPalette": "PASS",
+        "noReadableTextOrIdentity": "PASS"
+      }
+    }
+  },
+  "economics": {
+    "totalResponses": 4,
+    "acceptedResponses": 4,
+    "distinctAcceptedOutputDigests": 2,
+    "totalGpuSeconds": 114.645,
+    "totalGpuPortionUsd": 0.06213759,
+    "gpuPortionPerAcceptedResponseUsd": 0.0155343975,
+    "gpuPortionPerDistinctAcceptedVisualUsd": 0.031068795
+  },
+  "limitations": [
+    "Two distinct positive synthetic visuals are not a representative quality corpus.",
+    "Peak allocated and reserved GPU memory were not instrumented for these historical runs.",
+    "Visual rubric scores are explicit inspection results, not an independent calibrated judge.",
+    "CPU, memory, volume and network charges are not included."
+  ]
+}

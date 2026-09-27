@@ -1,0 +1,14 @@
+{
+  "_comment": "intent -> CMU source clip + frame window (30fps after import), from the presenter-clip-baking-recipe shortlist. The .bvh files are NOT in git (staged at /opt/mocap from a private bucket at image-build time; cgspeed Motionbuilder-friendly release; bake-in-only, never redistributed — NSF ack in NOTICES.md). Frame windows are STARTING guesses; the owner curates them after previewing each clip. `synthesized:true` = hand-keyed, zero CMU provenance.",
+  "clips": {
+    "greet":     { "bvh": "141_16.bvh", "start": 1,   "end": 240, "note": "wave hello (alt 13_26)" },
+    "point":     { "bvh": "13_27.bvh",  "start": 1,   "end": 180, "note": "direct/point" },
+    "enumerate": { "synthesized": true, "note": "3 hand-keyed beats — no CMU provenance" },
+    "emphasize": { "bvh": "18_09.bvh",  "start": 100, "end": 190, "note": "downbeat window of conversation gestures" },
+    "contrast":  { "bvh": "18_08.bvh",  "start": 1,   "end": 240, "note": "two-hand alternate" },
+    "ask":       { "bvh": "111_25.bvh", "start": 1,   "end": 200, "note": "shrug/open hands" },
+    "magnitude": { "bvh": "18_09.bvh",  "start": 200, "end": 290, "note": "wide-arms window" },
+    "talk":      { "bvh": "18_09.bvh",  "start": 1,   "end": 360, "note": "conversation gestures, loopable" },
+    "bow":       { "bvh": "111_02.bvh", "start": 1,   "end": 240, "note": "bow (alt 113_02)" }
+  }
+}

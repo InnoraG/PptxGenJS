@@ -1,0 +1,18 @@
+{
+  "schema": "betterpptx.g1.powerpoint-reopen-evidence.v1",
+  "measuredAt": "2026-08-15T16:11:31.9616458Z",
+  "application": "Microsoft PowerPoint COM 16.0",
+  "isolation": "aborted if any pre-existing PowerPoint process was present",
+  "files": [
+    {
+      "path": "betterpptx-mcp/outputs/g1-native-recordstudio-evolved-20260814/g1-evolved-native-recordstudio-review-20260814-notes-only.pptx",
+      "bytes": 23207270,
+      "sha256": "dbbecd52e780f0b3cdbb9cd80d93c21a719758df96c96eecd7305f2b27c510d0",
+      "status": "PASS",
+      "slides": 6,
+      "repaired": false,
+      "readOnly": true
+    }
+  ],
+  "pass": true
+}

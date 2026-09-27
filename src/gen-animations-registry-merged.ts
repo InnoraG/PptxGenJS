@@ -77,6 +77,20 @@ export const ANIMATION_REGISTRY_MERGED: Record<string, AnimationConfig> = {
 		customTemplate: 'buildLeaveAnimation'
 	},
 
+	// Plays a rigged model's selected embedded ("Scene") animation clip. presetID 100
+	// (emphasis) targets the timing tree's embeddedN channel, which safely selects and
+	// plays the requested clip without emitting the repair-unsafe model3d scene extension.
+	// Auto-attached by the deck compiler when a model3d block sets `scene`.
+	'playscene': {
+		presetId: 100,
+		name: 'Play Scene',
+		presetClass: 'emph',
+		category: 'emphasis',
+		defaultDuration: 2000,
+		templateGenerator: 'custom',
+		customTemplate: 'buildPlaySceneAnimation'
+	},
+
 	// ========================================================================
 	// ENTRANCE ANIMATIONS (52) - Hand-crafted quality for common ones
 	// ========================================================================

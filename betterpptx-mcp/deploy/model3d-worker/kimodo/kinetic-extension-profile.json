@@ -1,0 +1,259 @@
+{
+  "schema": "betterpptx.kimodo-presenter-motion-profile.v1",
+  "strategy": "kinetic-extension-source-completion",
+  "candidateGlbName": "kinetic-extension-kimodo-candidate.glb",
+  "generator": {
+    "provider": "nvidia-kimodo",
+    "model": "Kimodo-SOMA-RP-v1.1",
+    "modelRepository": "nvidia/Kimodo-SOMA-RP-v1.1",
+    "modelRevision": "6c9233af1180b8151e3c4703477104af5dce9dd5",
+    "codeRepository": "https://github.com/nv-tlabs/kimodo.git",
+    "codeRevision": "1aece8c124d73d255ceff5086d983b844c9f4e94",
+    "codeLicense": "Apache-2.0",
+    "modelLicense": "NVIDIA Open Model License",
+    "textEncoder": {
+      "baseRepository": "meta-llama/Meta-Llama-3-8B-Instruct",
+      "baseRevision": "8afb486c1db24fe5011ec46dfbe5b5dccdb575c2",
+      "baseLicense": "Meta Llama 3 Community License",
+      "accessPolicy": "official-gated-repository-only",
+      "mntpAdapterRepository": "McGill-NLP/LLM2Vec-Meta-Llama-3-8B-Instruct-mntp",
+      "mntpAdapterRevision": "31474e395ada192e8ed1586db6be79fb3b70c9c0",
+      "supervisedAdapterRepository": "McGill-NLP/LLM2Vec-Meta-Llama-3-8B-Instruct-mntp-supervised",
+      "supervisedAdapterRevision": "baa8ebf04a1c2500e61288e7dad65e8ae42601a7",
+      "unofficialMirrorFallbackForbidden": true
+    },
+    "skeleton": "SOMA77",
+    "fps": 30,
+    "standardTPoseBvh": true
+  },
+  "defaults": {
+    "candidateCount": 4,
+    "diffusionSteps": 100,
+    "canaryCandidateCount": 1,
+    "canaryDiffusionSteps": 20,
+    "constraintGuidance": [2.5, 4.0],
+    "textGuidance": [2.5, 2.5],
+    "cfgType": "separated",
+    "firstHeadingAngle": 0.0,
+    "rootMargin": 0.04,
+    "refineBestCandidate": true,
+    "postProcessing": true,
+    "minimumFootContactCoverage": 0.2,
+    "minimumPromotionScore": 0.72,
+    "maximumRestReturnError": 0.16,
+    "maximumLoopSeamError": 0.15,
+    "maximumPlateauDeviation": 0.08,
+    "maximumFootSkate": 0.12,
+    "heightBands": {
+      "low": [0.18, 0.48],
+      "mid": [0.46, 0.76],
+      "high": [0.74, 1.08]
+    }
+  },
+  "promotionPolicy": {
+    "initialState": "CANDIDATE_ONLY",
+    "requireAllKinematicGates": true,
+    "requireRetargetValidation": true,
+    "requirePowerPointOracleTimeline": true,
+    "requireG5DistributionRecord": true,
+    "requireOwnerReleaseApproval": true,
+    "automaticReplacementForbidden": true
+  },
+  "slots": [
+    {
+      "slot": 0,
+      "slug": "apex_glide",
+      "seed": 95100,
+      "durationSeconds": 3.6,
+      "promptVariants": [
+        "A dynamic person is suspended at the apex of a controlled forward glide, arms balancing naturally and legs trailing, then settles toward a stable airborne pose. Keep the motion centered with no T-pose and no violent limb twisting.",
+        "A cinematic airborne presenter glides smoothly over an invisible chart peak, body extended but anatomically relaxed, hands open, shoulders stable, and movement centered in place.",
+        "A person makes a slow controlled mid-air apex glide, subtly adjusting arms and legs for balance without spinning or crossing limbs unnaturally."
+      ],
+      "plateaus": [],
+      "qualityGates": { "inPlace": true }
+    },
+    {
+      "slot": 1,
+      "slug": "corkscrew_descent",
+      "seed": 95110,
+      "durationSeconds": 3.8,
+      "promptVariants": [
+        "An athletic person performs one controlled corkscrew descent, rotating through the torso while lowering smoothly, with arms close enough to avoid a T-pose and wrists aligned naturally.",
+        "A cinematic performer spirals downward through one clean turn, maintaining coherent shoulders, elbows, knees, and hands throughout the descent.",
+        "A person executes a compact aerial screw-dive motion with a smooth beginning and finish, avoiding hyperextended joints and abrupt reversals."
+      ],
+      "plateaus": [],
+      "qualityGates": { "inPlace": true }
+    },
+    {
+      "slot": 2,
+      "slug": "walk_away",
+      "seed": 95120,
+      "durationSeconds": 4.2,
+      "promptVariants": [
+        "A professional person turns slightly and walks away from the viewer with four natural confident steps, upright posture, relaxed arms, and a clear forward travel path.",
+        "A presenter calmly exits by walking away into the distance, keeping a natural gait and stable hips without running or looking back.",
+        "An upright person takes several measured steps away from the audience, arms swinging naturally and feet contacting the ground cleanly."
+      ],
+      "plateaus": [],
+      "qualityGates": { "travelBand": "far" }
+    },
+    {
+      "slot": 3,
+      "slug": "shockwave_impact",
+      "seed": 95130,
+      "durationSeconds": 3.2,
+      "promptVariants": [
+        "A powerful standing performer braces, drives both open hands outward to release an imaginary shockwave, holds the impact for a moment, then returns to a controlled neutral stance.",
+        "An upright presenter creates one strong outward impact gesture from the chest with planted feet, stable shoulders, aligned wrists, and a clean return.",
+        "A person performs a centered shockwave blast gesture, expanding the arms forcefully but never entering a T-pose or twisting the elbows and hands unnaturally."
+      ],
+      "plateaus": [],
+      "qualityGates": { "restReturn": true, "feetPlanted": true, "inPlace": true }
+    },
+    {
+      "slot": 4,
+      "slug": "backhand_swat",
+      "seed": 95140,
+      "durationSeconds": 2.8,
+      "promptVariants": [
+        "A standing person makes one decisive right-handed backhand swat across the body at chest height, wrist aligned with the forearm, then returns to neutral with planted feet.",
+        "A professional presenter dismisses an object with a compact backhand sweep, keeping the elbow and shoulder anatomically stable and the opposite arm relaxed.",
+        "An upright person performs one controlled backhand slap gesture at forty-five degrees, with no stepping, no T-pose, and a clean return."
+      ],
+      "plateaus": [],
+      "qualityGates": { "restReturn": true, "feetPlanted": true, "inPlace": true }
+    },
+    {
+      "slot": 5,
+      "slug": "snap_organize",
+      "seed": 95150,
+      "durationSeconds": 3.2,
+      "promptVariants": [
+        "A business presenter brings both hands together for one crisp clap-like organizing cue at chest height, separates them naturally, and returns to a relaxed upright pose.",
+        "A standing presenter makes one precise clap or finger-snap organizing gesture in front of the torso, with aligned wrists, stable elbows, and planted feet.",
+        "An upright person gives a single compact hands-together cue as if snapping scattered data into order, then lowers both arms smoothly."
+      ],
+      "plateaus": [],
+      "qualityGates": { "restReturn": true, "feetPlanted": true, "inPlace": true, "minimumHandContactCount": 1, "maximumHandContactDistance": 0.15 }
+    },
+    {
+      "slot": 6,
+      "slug": "run_slash",
+      "seed": 95160,
+      "durationSeconds": 3.4,
+      "promptVariants": [
+        "An athletic person runs in place for two strides and finishes with one controlled diagonal right-arm slash, keeping the empty hand open and all joints anatomically aligned.",
+        "A dynamic performer combines a short centered run with a decisive diagonal swipe across an imaginary screen, avoiding weapon pantomime, T-poses, and wrist inversion.",
+        "A person performs a compact run-and-slash presentation move, with coherent foot rhythm, stable shoulders, and one clean sweeping finish."
+      ],
+      "plateaus": [],
+      "qualityGates": { "travelBand": "far" }
+    },
+    {
+      "slot": 7,
+      "slug": "walking",
+      "seed": 95170,
+      "durationSeconds": 4.0,
+      "promptVariants": [
+        "A person walks naturally in place for a clean loop, upright and relaxed, with symmetrical steps, modest arm swing, and no start or end T-pose.",
+        "A professional presenter performs a steady in-place walking cycle suitable for crossing a slide along a separate motion path.",
+        "An upright person walks in place at a moderate pace, maintaining stable hips, natural knees, and clean foot rhythm."
+      ],
+      "plateaus": [],
+      "qualityGates": { "loopable": true, "inPlace": true }
+    },
+    {
+      "slot": 8,
+      "slug": "sprint_to_stop",
+      "seed": 95180,
+      "durationSeconds": 3.6,
+      "promptVariants": [
+        "An athletic person sprints in place for several quick strides, brakes hard into a balanced upright stop, and holds the final stance without joint twisting.",
+        "A dynamic presenter performs a centered sprint cycle followed by a clear controlled deceleration and stable finish.",
+        "A person runs rapidly in place then plants both feet and stops decisively, keeping shoulders, knees, and ankles coherent."
+      ],
+      "plateaus": [],
+      "qualityGates": { "travelBand": "far" }
+    },
+    {
+      "slot": 9,
+      "slug": "knee_slide",
+      "seed": 95190,
+      "durationSeconds": 3.6,
+      "promptVariants": [
+        "An athletic person drops into a controlled forward knee slide, travels clearly across the ground, keeps the torso balanced and hands natural, then stabilizes safely.",
+        "A performer makes a celebratory traveling knee slide with anatomically aligned hips, knees, ankles, shoulders, and wrists.",
+        "A person executes one smooth knee slide along a forward path, avoiding spins, falls, crossed limbs, and abrupt pose changes."
+      ],
+      "plateaus": [],
+      "qualityGates": { "travelBand": "far" }
+    },
+    {
+      "slot": 10,
+      "slug": "tug_pull",
+      "seed": 95200,
+      "durationSeconds": 3.8,
+      "promptVariants": [
+        "A strong person grips an imaginary rope with both hands and performs two heavy backward tugging pulls, stepping back slightly while keeping wrists and elbows naturally aligned.",
+        "A presenter leans back and pulls an invisible heavy object toward the body with both hands, showing clear resistance and coherent joint motion.",
+        "An upright worker performs a powerful two-handed tug-of-war pull with a stable stance and a clean controlled finish."
+      ],
+      "plateaus": [],
+      "qualityGates": { "travelBand": "near" }
+    },
+    {
+      "slot": 11,
+      "slug": "push_away",
+      "seed": 95210,
+      "durationSeconds": 3.4,
+      "promptVariants": [
+        "A standing person plants both palms forward and pushes an imaginary large object away, stepping through the resistance with aligned wrists, elbows, and shoulders.",
+        "A professional presenter makes one strong two-handed push-away motion, traveling slightly forward and finishing in a balanced stance.",
+        "An upright person pushes space away with both open hands, maintaining anatomical arm alignment and avoiding a T-pose."
+      ],
+      "plateaus": [],
+      "qualityGates": { "travelBand": "near" }
+    },
+    {
+      "slot": 12,
+      "slug": "screen_wipe",
+      "seed": 95220,
+      "durationSeconds": 3.2,
+      "promptVariants": [
+        "A standing presenter makes one smooth right-hand horizontal screen-wipe gesture from left to right at chest height, wrist aligned, then returns to neutral.",
+        "A professional person cleans across an imaginary glass screen with one broad controlled hand sweep while keeping the feet planted and the opposite arm relaxed.",
+        "An upright presenter performs a clear horizontal reveal gesture across the body with stable shoulder, elbow, and hand orientation."
+      ],
+      "plateaus": [],
+      "qualityGates": { "restReturn": true, "feetPlanted": true, "inPlace": true }
+    },
+    {
+      "slot": 13,
+      "slug": "meditate_float",
+      "seed": 95230,
+      "durationSeconds": 4.6,
+      "promptVariants": [
+        "A calm person floats in a stable cross-legged meditation pose, hands resting naturally near the knees, with a subtle slow breathing drift and no limb twisting.",
+        "A serene performer levitates while meditating cross-legged, maintaining symmetrical relaxed arms, aligned wrists, and a smooth loop.",
+        "A person holds a centered floating meditation posture with gentle vertical drift, calm shoulders, and anatomically coherent folded legs."
+      ],
+      "plateaus": [],
+      "qualityGates": { "loopable": true, "inPlace": true, "lowEnergy": true }
+    },
+    {
+      "slot": 14,
+      "slug": "trip_recovery",
+      "seed": 95240,
+      "durationSeconds": 4.0,
+      "promptVariants": [
+        "A walking person catches a toe, stumbles forward for two steps, regains balance without falling, and finishes upright and composed.",
+        "A professional presenter experiences a brief trip, makes a believable recovery step, then returns to a proud stable stance with coherent joints.",
+        "A person loses balance momentarily, uses the arms naturally to recover, and ends fully upright without collapsing or twisting the hands and shoulders."
+      ],
+      "plateaus": [],
+      "qualityGates": { "restReturn": true }
+    }
+  ]
+}

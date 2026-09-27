@@ -1,0 +1,44 @@
+{
+  "schemaVersion": "betterpptx.avatar-commercial-eval-boundary.v1",
+  "status": "ISOLATED_EVALUATION_ONLY",
+  "publicRoutingAllowed": false,
+  "productionUseAllowed": false,
+  "customerDataAllowed": false,
+  "ownerConsentedFixtureOnly": true,
+  "appName": "betterpptx-avatar-commercial-eval",
+  "evaluationApps": [
+    "betterpptx-avatar-commercial-eval",
+    "betterpptx-avatar-commercial-enhancement-eval"
+  ],
+  "components": [
+    {
+      "id": "liveportrait-upstream-insightface-models",
+      "qualityPurpose": "Reproduce the original LivePortrait detection and alignment path",
+      "currentCommercialStatus": "CONTRACT_REQUIRED",
+      "evidence": "https://github.com/KlingAIResearch/LivePortrait/blob/main/LICENSE",
+      "commercialContact": "https://insightface.ai/"
+    },
+    {
+      "id": "musetalk-upstream-bisenet-face-parser",
+      "qualityPurpose": "Reproduce MuseTalk's original face parsing and feathered compositor",
+      "currentCommercialStatus": "PROVENANCE_AND_DATASET_RIGHTS_REVIEW_REQUIRED",
+      "evidence": "https://github.com/TMElyralab/MuseTalk#disclaimerlicense",
+      "upstreamWeightSource": "MuseTalk official download instructions"
+    },
+    {
+      "id": "codeformer-restoration",
+      "qualityPurpose": "Sharpen face, teeth and eyes after MuseTalk",
+      "currentCommercialStatus": "CONTRACT_REQUIRED",
+      "evidence": "https://github.com/sczhou/CodeFormer/blob/master/LICENSE",
+      "commercialContact": "CodeFormer/S-Lab contributors"
+    },
+    {
+      "id": "robust-video-matting",
+      "qualityPurpose": "Temporally coherent foreground and alpha estimation",
+      "currentCommercialStatus": "GPL_AND_CHECKPOINT_LINEAGE_REVIEW_REQUIRED",
+      "evidence": "https://github.com/PeterL1n/RobustVideoMatting",
+      "commercialContact": "Robust Video Matting contributors"
+    }
+  ],
+  "promotionRule": "No component, image, endpoint, output, secret, or route from this lane may be promoted until every CONTRACT_REQUIRED or REVIEW_REQUIRED entry is replaced by written commercial clearance and a new immutable production SBOM passes."
+}

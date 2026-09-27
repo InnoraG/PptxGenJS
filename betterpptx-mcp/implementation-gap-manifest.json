@@ -1,0 +1,89 @@
+{
+  "$schema": "./implementation-gap-manifest.schema.json",
+  "schemaVersion": "betterpptx.implementation-gap-manifest.v1",
+  "generatedFrom": {
+    "matrixPath": "betterpptx-mcp/preset-decomposition-matrix.json",
+    "matrixSha256": "9c9407d5ba9d29c7df4deb33e53d2ec2e760d257f0a4530775b94de72933504b",
+    "catalogFingerprint": "betterpptx-catalog-765255bb9623f27411a2faa2",
+    "overridesPath": "betterpptx-mcp/implementation-gap-overrides.json",
+    "overridesSha256": "cb96a840d25f942d3bb5b64764558aba5bfc2d06e4a7e34d80903dacbcbc1304"
+  },
+  "policy": {
+    "unitOfWork": "A shared contract signature that can promote many catalog rows together; never a single slider unless it is genuinely unique.",
+    "selection": "Lowest wave order first, then highest row fan-out, while skipping explicit external blockers.",
+    "implementationPromotion": "Derived only from the live source catalog. Manual overrides may describe gaps and ownership but cannot promote a row to full.",
+    "certificationSeparation": "Implementation closure and formal Office/public/visual certification are independent counters.",
+    "expensiveProofCadence": "Cheap deterministic checks during construction; one consolidated expensive proof at a coherent family checkpoint and final certification after implementation closure."
+  },
+  "summary": {
+    "catalogRows": 2258,
+    "applicableNewAuthoringRows": 2100,
+    "fullyImplementedRows": 2100,
+    "partialRows": 0,
+    "missingRows": 0,
+    "remainingImplementationRows": 0,
+    "preserveImportedOnlyRows": 61,
+    "notLiveRows": 30,
+    "hostCommandRows": 51,
+    "byteTransformRows": 0,
+    "notApplicableRows": 16,
+    "workUnits": 0,
+    "gapInventoriesComplete": 0,
+    "readyOrImplementingUnits": 0,
+    "blockedUnits": 0,
+    "formalCertification": "76/2258"
+  },
+  "waves": [
+    {
+      "id": "A-shared-native-formatting",
+      "order": 1,
+      "label": "Shared formatting: fill, line, effects, picture, 3-D, text, WordArt, and connector formatting",
+      "workUnits": 0,
+      "remainingRows": 0
+    },
+    {
+      "id": "B-foundation-text-theme-layout",
+      "order": 2,
+      "label": "Foundation, text, theme, master, layout, placeholder, and inheritance",
+      "workUnits": 0,
+      "remainingRows": 0
+    },
+    {
+      "id": "C-structured-data-diagrams",
+      "order": 3,
+      "label": "Charts, tables, SmartArt, equations, connectors, and structural editing",
+      "workUnits": 0,
+      "remainingRows": 0
+    },
+    {
+      "id": "D-media-model3d",
+      "order": 4,
+      "label": "Images, media, accessibility, playback, models, cameras, lighting, and viewport",
+      "workUnits": 0,
+      "remainingRows": 0
+    },
+    {
+      "id": "E-motion-transition-morph",
+      "order": 5,
+      "label": "Transitions, object animation, Morph, timing, and playback behavior",
+      "workUnits": 0,
+      "remainingRows": 0
+    },
+    {
+      "id": "F-semantic-art-direction",
+      "order": 6,
+      "label": "Art-direction worlds and semantic design systems",
+      "workUnits": 0,
+      "remainingRows": 0
+    },
+    {
+      "id": "G-presenter-motion-assets",
+      "order": 7,
+      "label": "Presenter motion assets and their native editable selection surface",
+      "workUnits": 0,
+      "remainingRows": 0
+    }
+  ],
+  "workUnits": [],
+  "nextWorkUnit": null
+}

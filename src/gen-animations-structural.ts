@@ -267,7 +267,11 @@ export function assembleClickGroups(animations: ResolvedAnimation[]): ClickGroup
 
 		if (trigger === 'onClick' || currentGroup === null) {
 			console.log(`  -> Creating NEW group (onClick or first animation)`);
-			const isClickTriggered = (trigger === 'onClick' || (currentGroup === null && trigger !== 'afterPrevious'))
+			// An explicit withPrevious on the first animation means "with slide
+			// start", not "wait for a user click". PowerPoint represents that as
+			// the first auto group guarded by mainSeq onBegin, the same structural
+			// route used by a first afterPrevious effect. Only onClick is click-gated.
+			const isClickTriggered = trigger === 'onClick'
 
 			currentGroup = {
 				groupId: groupIdCounter++,

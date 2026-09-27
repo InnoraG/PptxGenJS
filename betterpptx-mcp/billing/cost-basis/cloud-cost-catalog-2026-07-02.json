@@ -1,0 +1,38 @@
+{
+  "schemaVersion": "betterpptx.cloud-cost-catalog.v1",
+  "currency": "USD",
+  "region": "us-central1",
+  "effectiveAt": "2026-06-18T00:00:00.000Z",
+  "retrievedAt": "2026-07-02T19:36:58.424Z",
+  "cloudRunBillingMode": "request_based",
+  "cpuAlwaysAllocated": false,
+  "source": {
+    "type": "reviewed-price-source",
+    "reference": "https://cloud.google.com/run/pricing (request-based, us-central1, reviewed 2026-06-18) + Modal A10G avatar basis (owner-directed 2026-06-28) + Modal L40S GPU $1.95/hr=0.000542/s (model3dGen+imageGen) & CPU-core ~0.0000375/s (Baker) \u2014 PUBLISHED Modal on-demand rates, owner-directed 2026-07-09; reconcile against  actuals."
+  },
+  "cloudRun": {
+    "vcpuUsdPerSecond": 2.4e-05,
+    "gibUsdPerSecond": 2.5e-06,
+    "requestUsdPerMillion": 0.4
+  },
+  "gcs": {
+    "classAUsdPer1000": 0.005,
+    "classBUsdPer1000": 0.0004,
+    "storageUsdPerGibMonth": 0.02,
+    "egressUsdPerGib": 0.12
+  },
+  "firestore": {
+    "readUsdPer100k": 0.03,
+    "writeUsdPer100k": 0.09,
+    "deleteUsdPer100k": 0.01
+  },
+  "external": {
+    "ttsUsdPerMillionCharacters": 0,
+    "avatarUsdPerGpuSecond": 0.000306,
+    "otherUsdPerCall": 0,
+    "model3dGenUsdPerGpuSecond": 0.000542,
+    "imageGenUsdPerGpuSecond": 0.000542,
+    "semanticJudgeUsdPerGpuSecond": 0.000542,
+    "model3dGenBakeUsdPerCpuSecond": 3.75e-05
+  }
+}

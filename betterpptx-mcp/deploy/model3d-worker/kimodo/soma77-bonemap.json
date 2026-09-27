@@ -1,0 +1,29 @@
+{
+  "schema": "betterpptx.soma77-canonical-bonemap.v1",
+  "sourceSkeleton": "SOMA77",
+  "targetSkeleton": "betterpptx-canonical-mixamorig-v2",
+  "map": {
+    "mixamorig:Hips": "Hips",
+    "mixamorig:Spine": "Spine1",
+    "mixamorig:Spine1": "Spine2",
+    "mixamorig:Spine2": "Chest",
+    "mixamorig:Neck": "Neck2",
+    "mixamorig:Head": "Head",
+    "mixamorig:LeftShoulder": "LeftShoulder",
+    "mixamorig:LeftArm": "LeftArm",
+    "mixamorig:LeftForeArm": "LeftForeArm",
+    "mixamorig:LeftHand": "LeftHand",
+    "mixamorig:RightShoulder": "RightShoulder",
+    "mixamorig:RightArm": "RightArm",
+    "mixamorig:RightForeArm": "RightForeArm",
+    "mixamorig:RightHand": "RightHand",
+    "mixamorig:LeftUpLeg": "LeftLeg",
+    "mixamorig:LeftLeg": "LeftShin",
+    "mixamorig:LeftFoot": "LeftFoot",
+    "mixamorig:LeftToeBase": "LeftToeBase",
+    "mixamorig:RightUpLeg": "RightLeg",
+    "mixamorig:RightLeg": "RightShin",
+    "mixamorig:RightFoot": "RightFoot",
+    "mixamorig:RightToeBase": "RightToeBase"
+  }
+}

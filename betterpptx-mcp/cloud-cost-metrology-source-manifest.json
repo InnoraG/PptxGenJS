@@ -1,0 +1,102 @@
+{
+  "schemaVersion": "betterpptx.cloud-cost-source-manifest.v1",
+  "generatedFor": "zero-payment-cloud-run-cost-metrology",
+  "generatedAt": "2026-06-18T00:00:00.000Z",
+  "expectedRemote": "https://github.com/betterpptx/betterpptx-mcp.git",
+  "matrixGradeRule": "Every file in requiredFiles must be isolated into one reviewed git ref before build-mcp-metrology-from-git.ps1 is used for matrix-grade Cloud Run testing.",
+  "requiredFiles": [
+    {
+      "path": "deploy/gcp/deploy-mcp-metrology.ps1",
+      "role": "private Cloud Run metrology deploy wrapper"
+    },
+    {
+      "path": "deploy/gcp/build-mcp-metrology-from-git.ps1",
+      "role": "git-source Cloud Build helper"
+    },
+    {
+      "path": "deploy/gcp/reviewed-cloud-prices-us-central1.json",
+      "role": "reviewed fallback price catalog input"
+    },
+    {
+      "path": "betterpptx-mcp/cloud-cost-metrology-source-manifest.json",
+      "role": "reviewable source isolation manifest"
+    },
+    {
+      "path": "betterpptx-mcp/verify-cloud-cost-source-manifest.mjs",
+      "role": "source manifest verifier"
+    },
+    {
+      "path": "betterpptx-mcp/run-cloud-cost-metrology-suite.mjs",
+      "role": "canonical zero-payment W0/W3-smoke and workload driver"
+    },
+    {
+      "path": "betterpptx-mcp/logger.mjs",
+      "role": "live Cloud Run resource-measurement emitter for metrology tool calls"
+    },
+    {
+      "path": "betterpptx-mcp/run-cost-metrology-harness.mjs",
+      "role": "L1 resource rows to cost rows and matrix feature rows"
+    },
+    {
+      "path": "betterpptx-mcp/reconcile-cost-metrology.mjs",
+      "role": "L1/L2/L3 reconciliation and overhead allocation"
+    },
+    {
+      "path": "betterpptx-mcp/export-cloud-run-metrology-logs.mjs",
+      "role": "L1 Cloud Logging exporter"
+    },
+    {
+      "path": "betterpptx-mcp/export-cloud-monitoring-summary.mjs",
+      "role": "L2 Cloud Monitoring exporter"
+    },
+    {
+      "path": "betterpptx-mcp/export-bigquery-billing-summary.mjs",
+      "role": "L3 detailed billing export summarizer"
+    },
+    {
+      "path": "betterpptx-mcp/export-cloud-run-deploy-metadata.mjs",
+      "role": "Cloud Build and Cloud Run deploy evidence exporter"
+    },
+    {
+      "path": "betterpptx-mcp/export-git-provenance.mjs",
+      "role": "preflight git provenance exporter"
+    },
+    {
+      "path": "betterpptx-mcp/fetch-cloud-cost-catalog.mjs",
+      "role": "reviewed Cloud cost catalog snapshot builder"
+    },
+    {
+      "path": "betterpptx-mcp/preview-runtime-rate-card.mjs",
+      "role": "runtime rate-card preview"
+    },
+    {
+      "path": "betterpptx-mcp/verify-zero-payment-cloud-cost-harness.mjs",
+      "role": "zero-payment and deploy guard verifier"
+    },
+    {
+      "path": "betterpptx-mcp/verify-cloud-cost-pipeline.mjs",
+      "role": "offline end-to-end metrology pipeline verifier"
+    },
+    {
+      "path": "betterpptx-mcp/billing/cost-model.mjs",
+      "role": "Cloud cost model and billing-mode branch"
+    },
+    {
+      "path": "betterpptx-mcp/billing/charging-matrix.mjs",
+      "role": "measured matrix adoption and runtime conversion"
+    },
+    {
+      "path": "tools/build-charging-matrix.mjs",
+      "role": "measured matrix builder"
+    },
+    {
+      "path": "plans/zero-payment-cloud-run-cost-metrology-executor-plan-2026-06-18.md",
+      "role": "executor plan and acceptance criteria"
+    }
+  ],
+  "requiredVerificationCommands": [
+    "node betterpptx-mcp/verify-cloud-cost-source-manifest.mjs",
+    "node betterpptx-mcp/verify-zero-payment-cloud-cost-harness.mjs",
+    "node betterpptx-mcp/verify-cloud-cost-pipeline.mjs"
+  ]
+}

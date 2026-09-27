@@ -1,31 +1,68 @@
 # syntax=docker/dockerfile:1
 
-FROM node:20-bookworm-slim AS builder
+FROM node:22-bookworm-slim AS builder
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci
+ARG BUILD_DIST=0
+RUN if [ "$BUILD_DIST" = "1" ]; then npm ci; else npm ci --omit=dev; fi
+# The MCP has its own locked runtime dependencies (including the JWT verifier
+# and OCR engine). Install them explicitly; root transitive dependencies are
+# not a supported substitute for the service package contract.
+COPY betterpptx-mcp/package.json betterpptx-mcp/package-lock.json ./betterpptx-mcp/
+RUN npm ci --omit=dev --prefix ./betterpptx-mcp
 COPY . .
-ARG BUILD_DIST=1
-RUN rm -rf dist src/bld \
-    && if [ "$BUILD_DIST" = "1" ]; then npx gulp ship; fi
-RUN npm prune --omit=dev
+# COMMITTED-DIST contract (owner-decided 2026-07-14): dist is built LOCALLY on the dev host
+# (`gulp ship`), committed, and this image MIRRORS it exactly — no in-cloud rebuild. BUILD_DIST=1
+# remains available only as a manual escape hatch for maintainer experiments.
+RUN if [ "$BUILD_DIST" = "1" ]; then \
+      rm -rf dist src/bld && npx gulp ship; \
+    else \
+      test -f dist/pptxgen.es.js; \
+    fi
+RUN if [ "$BUILD_DIST" = "1" ]; then npm prune --omit=dev; fi
 
-FROM node:20-bookworm-slim AS runtime
+FROM node:22-bookworm-slim AS runtime
 ENV NODE_ENV=production \
     BETTERPPTX_PORT=3344 \
     BETTERPPTX_HOST=0.0.0.0 \
     BETTERPPTX_IMPORT_DIST_DIRECT=0 \
     BETTERPPTX_RUNTIME_DIR=/app/.betterpptx-runtime \
-    BETTERPPTX_TTS_URL=http://piper-tts:5000 \
+    BETTERPPTX_TTS_URL=http://127.0.0.1:5000 \
     BETTERPPTX_VOICES_MANIFEST=/voices/runtime-manifest.json \
     BETTERPPTX_OUT_DIR=/out \
-    BETTERPPTX_NARRATION_MODE=production
+    BETTERPPTX_NARRATION_MODE=production \
+    BETTERPPTX_FFMPEG_PATH=/usr/bin/ffmpeg \
+    BETTERPPTX_FFPROBE_PATH=/usr/bin/ffprobe \
+    BETTERPPTX_AVATAR_PROVIDER=disabled \
+    BETTERPPTX_AVATAR_MAX_CONCURRENCY=1 \
+    BETTERPPTX_AVATAR_MAX_SECONDS=120 \
+    BETTERPPTX_AVATAR_CACHE_DIR=/out/avatar-cache
 WORKDIR /app
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates ffmpeg \
+    && ffmpeg -version >/dev/null \
+    && ffprobe -version >/dev/null \
+    && rm -rf /var/lib/apt/lists/*
+ARG BETTERPPTX_BUILD_SOURCE_DIGEST
+ARG BETTERPPTX_SOURCE_REVISION
+ENV BETTERPPTX_BUILD_SOURCE_DIGEST=${BETTERPPTX_BUILD_SOURCE_DIGEST}
+LABEL org.opencontainers.image.revision=${BETTERPPTX_SOURCE_REVISION}
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/betterpptx-mcp ./betterpptx-mcp
+COPY --from=builder /app/PPTX_ULTIMATE_DECYPHER_TOOL.mjs ./PPTX_ULTIMATE_DECYPHER_TOOL.mjs
 COPY --from=builder /app/package.json ./package.json
-RUN useradd -u 10001 -m appuser && mkdir -p /out && chown -R appuser /out /app
+RUN if find /app/betterpptx-mcp -type f \( -name '*.zip' -o -name '*.pptx' -o -name '*.pptm' -o -name '*.ppsx' -o -name '*.fbx' -o -name '*.bvh' \) -print -quit | grep -q .; then \
+      echo "Refusing to ship test, customer, or source-only media in the runtime image." >&2; exit 1; \
+    fi \
+    && test ! -e /app/betterpptx-mcp/test \
+    && test ! -e /app/betterpptx-mcp/evidence \
+    && test ! -e /app/betterpptx-mcp/evaluation \
+    && test ! -e /app/betterpptx-mcp/chatgpt-plugin \
+    && node -e "const {createRequire}=require('node:module');const r=createRequire('/app/betterpptx-mcp/server.mjs');r.resolve('jose');r.resolve('tesseract.js')"
+RUN useradd -u 10001 -m appuser \
+    && mkdir -p /out /app/.betterpptx-runtime \
+    && chown -R appuser:appuser /out /app/.betterpptx-runtime
 USER appuser
 EXPOSE 3344
 HEALTHCHECK --interval=15s --timeout=3s --start-period=20s --retries=3 \

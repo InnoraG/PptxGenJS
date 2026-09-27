@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "betterpptx.g5.mena-persona-research-registration.v1",
+  "recordedAt": "2026-09-04",
+  "status": "RESEARCH_ONLY_OWNER_GATED",
+  "persona": {
+    "id": "mena",
+    "role": "explicit fourth native-3D presenter identity",
+    "audienceFocus": "youth-and-young-adult-topics",
+    "automaticSelection": false
+  },
+  "source": {
+    "kind": "supplied-meshy-glb",
+    "path": "Meshy_AI_Casual_Denim_Look_biped/Meshy_AI_Casual_Denim_Look_biped_Character_output.glb",
+    "bytes": 16204008,
+    "sha256": "494385b469fe026b41a521422ec70a0c3f2d4a7cea8280b3f8dbc02166fe4e4a",
+    "requestedPose": "a-pose"
+  },
+  "hybrid": {
+    "path": "betterpptx-mcp/assets/default-presenter-mena.glb",
+    "derivedFrom": "research-demos/2026-07-18-meshy-avatar/production-hybrid-proof.glb",
+    "bytes": 8951088,
+    "sha256": "63fbb0b9e7a6257b43340907c8c2bd1753d5a8224c760b586f1699971a0391c3",
+    "meshyVisiblePayload": true,
+    "mixamoPowerPointSkeleton": true,
+    "jointCount": 65,
+    "animationCount": 18,
+    "meshCount": 2,
+    "textureCount": 1,
+    "powerPointStaticPoseSafe": true,
+    "staticPoseProfile": "source-base-pose",
+    "geometryVertices": 34622,
+    "geometryTriangles": 53831,
+    "textureMaxSize": 512,
+    "canonicalBoneNames": true
+  },
+  "poster": {
+    "path": "betterpptx-mcp/assets/default-presenter-mena.png",
+    "bytes": 114208,
+    "sha256": "752f8259a40f33bbe779e7b21615d567272c83632b677542b0281e490dd4f207"
+  },
+  "releaseBoundary": {
+    "ownerApprovalRequired": true,
+    "liveMeshyCanaryRequired": true,
+    "approvedForAutomaticSelection": false,
+    "commercialRelease": "blocked-until-owner-gated-Meshy-and-Mixamo-clearance"
+  }
+}

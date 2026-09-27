@@ -5,6 +5,7 @@
 import { ISlideObject, Model3DProps } from './core-interfaces'
 import { CRLF } from './core-enums'
 import { encodeXmlEntities, createShadowElement, convertRotationDegrees } from './gen-utils'
+import { genXmlCNvPr } from './gen-accessibility'
 
 const MODEL3D_RATIONAL_DENOMINATOR = 1000000
 const MODEL3D_DEGREE_UNIT = 60000
@@ -110,7 +111,11 @@ function normalizeRot(value: unknown): { ax?: number; ay?: number; az?: number }
 		record.ax !== undefined || record.ay !== undefined || record.az !== undefined ||
 		record.x !== undefined || record.y !== undefined || record.z !== undefined
 
-	if (!hasRotation) return { ...DEFAULT_ROT }
+	// An explicitly supplied empty object represents PowerPoint's native
+	// Default View (`<am3d:rot/>`). An omitted rotation retains the legacy
+	// generated-model default. This distinction is required for exact Ribbon
+	// view replay without changing existing callers.
+	if (!hasRotation) return value && typeof value === 'object' ? {} : { ...DEFAULT_ROT }
 
 	const rot: { ax?: number; ay?: number; az?: number } = {}
 	if (record.ax !== undefined || record.x !== undefined) rot.ax = normalizeAngleValue(record.ax !== undefined ? record.ax : record.x, 0, record.ax !== undefined)
@@ -140,7 +145,10 @@ function normalizeIlluminance(value: unknown, fallback = 0.5): number {
 }
 
 function normalizePointLights(value: unknown): Array<{ color: { r: number; g: number; b: number }; intensity: number; pos: { x: number; y: number; z: number } }> {
-	const source = Array.isArray(value) && value.length > 0 ? value : DEFAULT_PT_LIGHTS
+	// An omitted point-light list uses PowerPoint's native defaults. An explicit
+	// empty list is a deliberate zero-light scene and must remain empty rather
+	// than silently expanding back to the three defaults.
+	const source = Array.isArray(value) ? value : DEFAULT_PT_LIGHTS
 	return source.map((light, idx) => {
 		const defaults = DEFAULT_PT_LIGHTS[idx] || DEFAULT_PT_LIGHTS[0]
 		const record = asRecord(light)
@@ -165,7 +173,7 @@ export function genXmlModel3D(slideItemObj: ISlideObject, idx: number, slideNum:
 	const options = slideItemObj.options as Model3DProps
 	const creationId = `{${generateGUID()}}`
 	const shapeId = options.spid || idx + 2
-	const objectName = encodeXmlEntities(options.objectName || `3D Model ${idx + 1}`)
+	const objectName = options.objectName || `3D Model ${idx + 1}`
 
 	// Position and size (convert from inches to EMU)
 	const x = Math.round((Number(options.x) || 0) * 914400)
@@ -188,13 +196,12 @@ export function genXmlModel3D(slideItemObj: ISlideObject, idx: number, slideNum:
 	xml += `  <mc:Choice xmlns:am3d="http://schemas.microsoft.com/office/drawing/2017/model3d" Requires="am3d">${CRLF}`
 	xml += `<p:graphicFrame>${CRLF}`
 	xml += `  <p:nvGraphicFramePr>${CRLF}`
-	xml += `    <p:cNvPr id="${shapeId}" name="${objectName}">${CRLF}`
-	xml += `      <a:extLst>${CRLF}`
-	xml += `        <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">${CRLF}`
-	xml += `          <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="${creationId}"/>${CRLF}`
-	xml += `        </a:ext>${CRLF}`
-	xml += `      </a:extLst>${CRLF}`
-	xml += `    </p:cNvPr>${CRLF}`
+	xml += `    ${genXmlCNvPr({
+		id: shapeId,
+		name: objectName,
+		options,
+		extensionChildren: `<a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="${creationId}"/></a:ext>`,
+	})}${CRLF}`
 	xml += `    <p:cNvGraphicFramePr>${CRLF}`
 	xml += `      <a:graphicFrameLocks noChangeAspect="1"/>${CRLF}`
 	xml += `    </p:cNvGraphicFramePr>${CRLF}`
@@ -207,8 +214,15 @@ export function genXmlModel3D(slideItemObj: ISlideObject, idx: number, slideNum:
 	xml += `    </p:nvPr>${CRLF}`
 	xml += `  </p:nvGraphicFramePr>${CRLF}`
 
-	// Transform (position and size)
-	xml += `  <p:xfrm>${CRLF}`
+	// Transform (position, size, and the common 2-D frame rotation). The
+	// model's am3d:trans rotation is a separate 3-D pose surface; options.rotate
+	// is the PowerPoint Format Shape rotation of the graphic frame itself.
+	const frameTransformAttrs = [
+		options.flipH ? ' flipH="1"' : '',
+		(options as any).flipV ? ' flipV="1"' : '',
+		options.rotate ? ` rot="${convertRotationDegrees(options.rotate)}"` : '',
+	].join('')
+	xml += `  <p:xfrm${frameTransformAttrs}>${CRLF}`
 	xml += `    <a:off x="${x}" y="${y}"/>${CRLF}`
 	xml += `    <a:ext cx="${cx}" cy="${cy}"/>${CRLF}`
 	xml += `  </p:xfrm>${CRLF}`
@@ -267,6 +281,18 @@ export function genXmlModel3D(slideItemObj: ISlideObject, idx: number, slideNum:
 }
 
 /**
+ * The Office-2018 model3d "Scene" selection extension (am3d:extLst → a3danim:embedAnim + posterFrame) is
+ * intentionally NOT emitted. PowerPoint REJECTS a deck carrying it as 0x80070570 corruption — even with a
+ * preceding am3d:raster — verified by COM round-trip (fox animId 0 AND 1). The embedded clip is instead
+ * SELECTED + played by the playScene timing animation's `embedded{animId+1}` channel
+ * (build3DModelAnimation.ts / autoScenePlayAnimation), which PowerPoint honors and round-trips cleanly.
+ * Kept as a documented no-op so the call site and the reasoning stay in place.
+ */
+function genModel3DSceneExtLst(_options: Model3DProps): string {
+	return ''
+}
+
+/**
  * Generate the am3d:model3d element
  */
 function genModel3DElement(glbRid: string, rasterRid: string | undefined, cx: number, cy: number, options: Model3DProps): string {
@@ -316,6 +342,7 @@ function genModel3DElement(glbRid: string, rasterRid: string | undefined, cx: nu
 	const preTrans = normalizeVector(trans.preTrans, DEFAULT_PRE_TRANS)
 	const scale = normalizeScale(trans.scale)
 	const rot = normalizeRot(trans.rot)
+	const hasExplicitRot = Object.prototype.hasOwnProperty.call(trans, 'rot')
 	const postTrans = normalizeVector(trans.postTrans, DEFAULT_POST_TRANS)
 
 	xml += `            <am3d:trans>${CRLF}`
@@ -332,6 +359,7 @@ function genModel3DElement(glbRid: string, rasterRid: string | undefined, cx: nu
 		rot.az !== undefined ? `az="${rot.az}"` : '',
 	].filter(Boolean).join(' ')
 	if (rotAttrs) xml += `              <am3d:rot ${rotAttrs}/>${CRLF}`
+	else if (hasExplicitRot) xml += `              <am3d:rot/>${CRLF}`
 	xml += `              <am3d:postTrans dx="${postTrans.dx}" dy="${postTrans.dy}" dz="${postTrans.dz}"/>${CRLF}`
 	xml += `            </am3d:trans>${CRLF}`
 
@@ -340,6 +368,10 @@ function genModel3DElement(glbRid: string, rasterRid: string | undefined, cx: nu
 		xml += `              <am3d:blip r:embed="${rasterRid}"/>${CRLF}`
 		xml += `            </am3d:raster>${CRLF}`
 	}
+
+	// Keep the repair-unsafe Office scene extension absent. Embedded clip selection is
+	// carried by the slide timing tree's `embeddedN` channel instead.
+	xml += genModel3DSceneExtLst(options)
 
 	// Viewport
 	const objViewport = roundedNumber(options.objViewport, 2867650)
@@ -389,16 +421,14 @@ function genFallbackPic(
 	options: Model3DProps
 ): string {
 	let xml = ''
-
 	xml += `    <p:pic>${CRLF}`
 	xml += `      <p:nvPicPr>${CRLF}`
-	xml += `        <p:cNvPr id="${shapeId}" name="${objectName}">${CRLF}`
-	xml += `          <a:extLst>${CRLF}`
-	xml += `            <a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}">${CRLF}`
-	xml += `              <a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="${creationId}"/>${CRLF}`
-	xml += `            </a:ext>${CRLF}`
-	xml += `          </a:extLst>${CRLF}`
-	xml += `        </p:cNvPr>${CRLF}`
+	xml += `        ${genXmlCNvPr({
+		id: shapeId,
+		name: objectName,
+		options,
+		extensionChildren: `<a:ext uri="{FF2B5EF4-FFF2-40B4-BE49-F238E27FC236}"><a16:creationId xmlns:a16="http://schemas.microsoft.com/office/drawing/2014/main" id="${creationId}"/></a:ext>`,
+	})}${CRLF}`
 	xml += `        <p:cNvPicPr>${CRLF}`
 	xml += `          <a:picLocks noGrp="1" noRot="1" noChangeAspect="1" noMove="1" noResize="1" noEditPoints="1" noAdjustHandles="1" noChangeArrowheads="1" noChangeShapeType="1" noCrop="1"/>${CRLF}`
 	xml += `        </p:cNvPicPr>${CRLF}`

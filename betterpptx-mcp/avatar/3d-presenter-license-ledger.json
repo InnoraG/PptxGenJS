@@ -1,0 +1,73 @@
+{
+  "schemaVersion": "betterpptx.3d-presenter-license-ledger.v1",
+  "asOf": "2026-07-19",
+  "productScope": "PowerPoint-native 3D model presenter only; narration video and talking-head workers are excluded",
+  "status": "blocked-owner-review",
+  "runtimePins": {
+    "status": "recorded-not-cleared",
+    "workerSourceDigest": "BB0289920DB32049DB5BA85AFE5CB8B50C7AED66AD899302142D37B78BF0CF12",
+    "sourceFileCount": 85,
+    "embeddedDirectories": ["nvdiffrast_stub", "nvdiffrast_drtk", "canonical", "bake", "mocap"],
+    "git": {
+      "DRTK_GIT_REF": "01f9d76f26af04836b813c71c979af64e67741e2",
+      "TRELLIS_GIT_REF": "75fbf0183001ed9876c8dbb35de6b68552ee08bd",
+      "UNIRIG_GIT_REF": "6793c6640ff01c8fb389f3993434124bb43d2933"
+    },
+    "huggingFace": {
+      "TRELLIS_MODEL_REVISION": "af44b45f2e35a493886929c6d786e563ec68364d",
+      "TRELLIS_SS_DECODER_REVISION": "25e0d31ffbebe4b5a97464dd851910efc3002d96",
+      "DINOV3_MODEL_REVISION": "ea8dc2863c51be0a264bab82070e3e8836b02d51",
+      "BIREFNET_MODEL_REVISION": "e2bf8e4460fc8fa32bba5ea4d94b3233d367b0e4",
+      "UNIRIG_MODEL_REVISION": "36842e2b5947e9e60f89275b83208c8e74071c63"
+    },
+    "ownerObligation": "Confirm each upstream/model license, attribution, commercial-use scope, and immutable deployed image digest before production release."
+  },
+  "entries": [
+    {
+      "id": "meshy-generated-personalized-asset",
+      "component": "Meshy 6 Multi-Image to 3D plus Meshy humanoid rigging",
+      "license": "Meshy account terms",
+      "commercialStatus": "conditional-on-account-plan-and-input-rights",
+      "reviewStatus": "owner-action-required",
+      "evidence": "https://help.meshy.ai/en/articles/9992001-can-i-use-my-generated-assets-for-commercial-projects",
+      "obligation": "Record the production Meshy account plan, asset ownership/attribution decision, and image-input rights before a customer asset is released."
+    },
+    {
+      "id": "meshy-input-privacy-and-consent",
+      "component": "User-supplied full-body reference images",
+      "license": "user consent and product privacy policy",
+      "commercialStatus": "policy-required",
+      "reviewStatus": "owner-action-required",
+      "evidence": "https://help.meshy.ai/en/articles/15724182-is-meshy-safe-and-private-data-and-training-faq",
+      "obligation": "Capture consent, tenant scope, retention/deletion choice, and permission to generate a likeness before submission."
+    },
+    {
+      "id": "mixamo-animation-library",
+      "component": "Frozen 65-joint Mixamo-compatible skeleton and 18-clip performer library",
+      "license": "owner-supplied Mixamo distribution review",
+      "commercialStatus": "not-yet-cleared",
+      "reviewStatus": "owner-action-required",
+      "evidence": "owner-supplied-license-packet-required",
+      "obligation": "Attach the approved Mixamo/Adobe distribution decision for the derived animation library."
+    },
+    {
+      "id": "joe-louise-fallback-presenters",
+      "component": "Joe and Louise built-in presenter assets",
+      "license": "project provenance ledger",
+      "commercialStatus": "in-project-until-owner-approved",
+      "reviewStatus": "owner-action-required",
+      "evidence": "betterpptx-mcp/assets/default-presenter-roster.mjs",
+      "obligation": "Approve the exact GLB/poster hashes and distribution rights for both fallback identities."
+    },
+    {
+      "id": "meshy-static-poster",
+      "component": "Meshy-specific 640×640 fallback poster",
+      "license": "inherits Meshy generated-asset decision",
+      "commercialStatus": "conditional",
+      "reviewStatus": "inherits-meshy-review",
+      "evidence": "research-demos/2026-07-18-meshy-avatar/visual-artifacts/meshy-poster/poster-info.json",
+      "obligation": "Do not release the poster independently of the approved Meshy asset/account decision."
+    }
+  ],
+  "releaseRule": "A native 3D personalized presenter may run in premium development mode, but public/production release requires every entry to be explicitly cleared and the live Meshy account canary to pass."
+}

@@ -1,0 +1,250 @@
+{
+  "schemaVersion": "betterpptx-public-casebook-index.v1",
+  "releaseState": "development",
+  "organization": "communication-problem",
+  "truth": {
+    "acceptedCaseCount": 0,
+    "developmentCandidateCount": 4,
+    "status": "planned-evidence-lanes-with-withheld-candidates",
+    "claim": "No rendered case is accepted in this development index."
+  },
+  "acceptanceContract": {
+    "requiredBindings": [
+      "originalBriefSha256",
+      "presentationSha256",
+      "powerPointRenderSetSha256",
+      "publicManifestSha256",
+      "independentReviewSha256"
+    ],
+    "requiredTeachingFields": [
+      "brief",
+      "authorialChoices",
+      "visibleOutcome",
+      "transferableLesson"
+    ],
+    "prohibitedContent": [
+      "credentials",
+      "deck-specific hidden answers",
+      "implementation details",
+      "private diagnostics",
+      "sealed prompt content"
+    ]
+  },
+  "communicationProblems": [
+    {
+      "id": "bounded-revision-with-preservation",
+      "state": "planned-evidence-needed",
+      "question": "How can an AI change one requested message while preserving inherited design, native objects, notes, timing, and unrelated content?",
+      "acceptedCaseIds": [],
+      "requiredProof": [
+        "exact semantic target readback",
+        "before-and-after preservation evidence",
+        "full-slide PowerPoint renders",
+        "blind review of requested and unintended change"
+      ]
+    },
+    {
+      "id": "data-heavy-executive-decision",
+      "state": "planned-evidence-needed",
+      "question": "How can dense quantitative evidence lead to one clear executive decision without losing exact values?",
+      "acceptedCaseIds": [],
+      "requiredProof": [
+        "native evidence objects",
+        "claim-to-data trace",
+        "full-slide PowerPoint renders",
+        "blind decision-readability review"
+      ]
+    },
+    {
+      "id": "high-stakes-public-trust",
+      "state": "planned-evidence-needed",
+      "question": "How can a presentation be restrained, legible, source-honest, and emotionally appropriate when trust matters more than spectacle?",
+      "acceptedCaseIds": [],
+      "requiredProof": [
+        "claim and uncertainty trace",
+        "accessibility evidence",
+        "full-slide PowerPoint renders",
+        "blind tone and trust review"
+      ]
+    },
+    {
+      "id": "motion-narration-and-native-3d-presenter",
+      "state": "planned-evidence-needed",
+      "question": "How can narration, native motion, an editable presenter, and a complete static reading share one coherent clock?",
+      "acceptedCaseIds": [],
+      "requiredProof": [
+        "frozen timing evidence",
+        "exact motion-selector readback",
+        "static and reduced-motion reading",
+        "PowerPoint playback review"
+      ]
+    },
+    {
+      "id": "premium-image-led-narrative",
+      "state": "planned-evidence-needed",
+      "question": "How can a coherent visual narrative carry emotion and meaning while typography and crops remain intentional and readable?",
+      "acceptedCaseIds": [],
+      "requiredProof": [
+        "asset authority and semantic choice trace",
+        "cross-slide visual continuity",
+        "full-slide PowerPoint renders",
+        "blind art-direction review"
+      ]
+    },
+    {
+      "id": "technical-or-scientific-explanation",
+      "state": "planned-evidence-needed",
+      "question": "How can native diagrams, equations, connectors, and three-dimensional media teach a complex mechanism without oversimplifying it?",
+      "acceptedCaseIds": [],
+      "requiredProof": [
+        "topology and equation choice trace",
+        "native editability evidence",
+        "full-slide PowerPoint renders",
+        "blind comprehension and accessibility review"
+      ]
+    }
+  ],
+  "developmentCandidates": [
+    {
+      "id": "data-decision-development-candidate-v13",
+      "communicationProblemId": "data-heavy-executive-decision",
+      "state": "withheld-development-candidate",
+      "summary": "An all-native development candidate received a passing independent review before the public release boundary.",
+      "evidence": {
+        "originalBriefSha256": "ee314814721945005a0a54a48b2d78f3c26d779812106b45ca12c8f367e9661e",
+        "semanticSpecSha256": "e7988ce2a20318df390491631e3446bdd63de59b6223bdea668afb70f9967e7d",
+        "planSha256": "3acdde28b4bf0a6ce71d7cf0453a88608cb909860271ce6f1a492c231b78986f",
+        "powerPointRenderSetSha256": "808cf8d518194ded96bca67fa4d66af2394913cb4be9f722639244d5079562b9",
+        "preReviewSha256": "08e992c5aea0d6d549483066a62f5b9ca4a81d684c7c59c6b761a75f229f64cf",
+        "independentReviewSha256": "bee374e88b7d45b55721f70757dc9583444d55006be51f30e4f64f4c600d7ae1",
+        "currentPublicManifestSha256": null
+      },
+      "review": {
+        "kind": "independent",
+        "scoreOutOf100": 94,
+        "result": "pass"
+      },
+      "releaseState": {
+        "saveCount": 0,
+        "firstSaveEvidence": "absent"
+      },
+      "limitations": [
+        "The candidate was created against an older public teaching surface.",
+        "No public release save occurred.",
+        "The current teaching-release manifest is not bound."
+      ],
+      "transferableLesson": "Independent visual review can strengthen pre-release judgment, but it cannot substitute for a current-public lifecycle replay and first-save proof.",
+      "promotionRequirement": "fresh-current-public-replay-and-complete-acceptance-bindings"
+    },
+    {
+      "id": "image-led-development-candidate-v16",
+      "communicationProblemId": "premium-image-led-narrative",
+      "state": "withheld-development-candidate",
+      "summary": "A seven-slide image-led development candidate passed local package and visual checks; only a bounded slide subset is eligible for future public teaching review.",
+      "publicSafeSlideNumbers": [
+        2,
+        3,
+        4,
+        5,
+        7
+      ],
+      "evidence": {
+        "originalBriefSha256": "19d915709631a17cb59c3d40ed6a0192912612d243f6b682701847205803dfec",
+        "semanticSpecSha256": "09dcb77c844c509ba8c757b2bc5545dc6dfec3656242718f3338cd8b45d0e2bf",
+        "planSha256": "d2dcab0fe21cf0a001b08c60a286dc17e02966ed211ac501412b158391dca814",
+        "presentationSha256": "a8f199d0f2a2ff78294dc755a413fab0568aa18772e2da3d7e868feccc1e4eee",
+        "visualReviewSha256": "3dd784d27ca29cf00ffc878be4aafb74de59c7724fcd45128f9000be90faecf9",
+        "powerPointCheckSha256": "8217a9918d144953229ddba2981c4933fef298015b78840bfa0e6d196dfe6f63",
+        "powerPointRenderSetSha256": null,
+        "independentReviewSha256": null,
+        "currentPublicManifestSha256": null
+      },
+      "review": {
+        "kind": "development-only",
+        "result": "local-checks-pass"
+      },
+      "releaseState": {
+        "firstSaveEvidence": "not-eligible"
+      },
+      "limitations": [
+        "Usage-right evidence is incomplete.",
+        "No independent review is bound.",
+        "No complete render-set hash or current teaching-release manifest is bound.",
+        "Only the listed slides may be considered in a future sanitized review."
+      ],
+      "transferableLesson": "Cross-slide visual continuity becomes public teaching evidence only when usage rights, complete renders, and current-public replay are all bound.",
+      "promotionRequirement": "fresh-current-public-replay-rights-closure-and-complete-acceptance-bindings"
+    },
+    {
+      "id": "motion-native3d-development-calibration",
+      "communicationProblemId": "motion-narration-and-native-3d-presenter",
+      "state": "withheld-development-candidate",
+      "summary": "A saved calibration candidate passed its local first-save gate; only a bounded slide subset is eligible for future public teaching review.",
+      "publicSafeSlideNumbers": [
+        2,
+        3,
+        5,
+        6
+      ],
+      "evidence": {
+        "originalBriefSha256": "5c3fb81c65b1062cbf716a2be220449acb17d425733adddef079230653b2a0df",
+        "semanticSpecSha256": "b702709c7117a080ac2e694e8c5256b5f2e449bb787d335900b4d047667f2053",
+        "planSha256": "ad0653e2d91acdb91e806ae948adc04009634a8c3864a39360f635d24d9eab2b",
+        "presentationSha256": "f7eddc5a53cc9e757068733d93e6af8d3b89255bf74c6dd5effa839e4b10fd2e",
+        "powerPointRenderSetSha256": "f7a9b5af8aab1d50c5c88f613af78f4f07a35fcc9ae9c2e0d513cb8338ec8f1e",
+        "preReviewSha256": "5092187071599315f9d0fe16619eb5a1533ac84d453a96b8eb484f12c4f7ce19",
+        "visualReviewSha256": "a3b05e617b85b7384cdaae9903c13fc53dc6a689381aecf41a87b12612d7d223",
+        "independentReviewSha256": null,
+        "currentPublicManifestSha256": null
+      },
+      "review": {
+        "kind": "development-only",
+        "result": "calibration-pass"
+      },
+      "releaseState": {
+        "saveCount": 1,
+        "firstSaveEvidence": "calibration-pass-not-public-certification"
+      },
+      "limitations": [
+        "The candidate is not bound to the current public teaching release.",
+        "No independent review is bound.",
+        "Identity, asset-origin, and audio material are excluded from public teaching use.",
+        "Only the listed slides may be considered in a future sanitized review."
+      ],
+      "transferableLesson": "A timed native presentation needs a complete static reading and independent current-public review before motion evidence becomes reusable teaching.",
+      "promotionRequirement": "fresh-current-public-replay-independent-review-and-complete-acceptance-bindings"
+    },
+    {
+      "id": "public-trust-development-candidate-v10",
+      "communicationProblemId": "high-stakes-public-trust",
+      "state": "withheld-development-candidate",
+      "summary": "An all-native public-trust development candidate received a passing independent review before the public release boundary.",
+      "evidence": {
+        "originalBriefSha256": "5a124950a76c1f9a2ba463fd7027d013d6207f3cb3505022b6228528f43f45a7",
+        "semanticSpecSha256": "7d38a18b81b8a1fb8ce790a038c459d19b59fa7634e92283689ee48749314fc3",
+        "planSha256": "c94a0b2a2cb44940520c3614f65fdbbc29f077869dfe1184b6212bd53505041c",
+        "powerPointRenderSetSha256": "1d8573c8464e7e2f2c33a54f53bfe5dcd7215f35337f1178a31289287b1670df",
+        "preReviewSha256": "1567b039744ee74c2e19cd7d42a41bee5584072bd927cb67f8799ecb741f9dc0",
+        "independentReviewSha256": "185748931f96c03101415c2dca041788fb98a56277b3c679724913014e33d1f0",
+        "currentPublicManifestSha256": null
+      },
+      "review": {
+        "kind": "independent",
+        "scoreOutOf100": 92,
+        "result": "pass"
+      },
+      "releaseState": {
+        "saveCount": 0,
+        "firstSaveEvidence": "absent"
+      },
+      "limitations": [
+        "The candidate was created against an older public teaching surface.",
+        "No public release save occurred.",
+        "The current teaching-release manifest is not bound."
+      ],
+      "transferableLesson": "Independent review can verify restraint and readability before release, but acceptance still requires a current-public replay and complete first-save evidence.",
+      "promotionRequirement": "fresh-current-public-replay-and-complete-acceptance-bindings"
+    }
+  ],
+  "acceptedCases": []
+}

@@ -1,0 +1,20 @@
+{
+  "schemaVersion": "betterpptx.private-direct-engine-script-manifest.v1",
+  "purpose": "Historical/private evidence scripts that call the internal engine directly; none are product-generation or release-safety entry points.",
+  "transport": "internal-engine-only",
+  "productionUse": false,
+  "scripts": [
+    { "path": "betterpptx-mcp/test/build-final-authoring-excellence-quick-reference.mjs", "class": "historical-rebuild" },
+    { "path": "betterpptx-mcp/test/build-final-authoring-excellence-regenerated-timing.mjs", "class": "historical-rebuild" },
+    { "path": "betterpptx-mcp/test/build_authoring_excellence_avatar_demo.mjs", "class": "historical-rebuild" },
+    { "path": "betterpptx-mcp/test/build_ink_laser_avatar_regression.mjs", "class": "historical-regression" },
+    { "path": "betterpptx-mcp/test/diagnose_imported_video_replacement.mjs", "class": "historical-diagnostic" },
+    { "path": "betterpptx-mcp/test/experiment-authoring-avatar-media-variants.mjs", "class": "historical-experiment" },
+    { "path": "betterpptx-mcp/test/experiment-authoring-no3d-runtime.mjs", "class": "historical-experiment" },
+    { "path": "betterpptx-mcp/test/experiment-authoring-text-only.mjs", "class": "historical-experiment" },
+    { "path": "betterpptx-mcp/test/experiment-authoring-volume-clock.mjs", "class": "historical-experiment" },
+    { "path": "betterpptx-mcp/test/reframe-quick-record-round.mjs", "class": "historical-rebuild" },
+    { "path": "betterpptx-mcp/test/verify-recording-annotation-roundtrip.mjs", "class": "historical-roundtrip" },
+    { "path": "betterpptx-mcp/test/verify_ink_laser_avatar_preservation.mjs", "class": "historical-regression" }
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "schema": "betterpptx.g4-live-deployment-preflight.v1",
+  "status": "BLOCKED_EXTERNAL_BILLING",
+  "measuredAt": "2026-08-15T16:41:37Z",
+  "mutationPerformed": false,
+  "rawSecretsPrinted": false,
+  "source": {
+    "commit": "d3d40d8cb9d336396dac49d64ae5f782fc97f0b9",
+    "gitTreeClean": true,
+    "changedPathCount": 0,
+    "ship": "PASS"
+  },
+  "cloudContext": {
+    "authenticatedActiveAccountCount": 1,
+    "projectConfigured": true,
+    "projectFingerprint": "46f4e3d59685",
+    "billingEnabled": false
+  },
+  "liveService": {
+    "service": "betterpptx-mcp-staging",
+    "region": "us-central1",
+    "ready": true,
+    "activeRevision": "betterpptx-mcp-staging-00085-7nm",
+    "trafficPercent": 100,
+    "immutableImageDigest": "sha256:981a8a587f183ceb3f20bdaf85e38026efd7e166b829beddee9a3d2876d0e90c",
+    "credentialBundleSecretMounted": true,
+    "productionTalkingHeadOnlyVerified": false,
+    "missingRequiredRuntimeSettings": [
+      "BETTERPPTX_AVATAR_PRODUCTION_ONLY",
+      "BETTERPPTX_AVATAR_PRODUCTION_MOTION_PROFILE",
+      "BETTERPPTX_AVATAR_PRODUCTION_MOUTH_PROFILE"
+    ]
+  },
+  "imageDelivery": {
+    "artifactRegistryAccessible": false,
+    "blockerCode": "BILLING_DISABLED",
+    "cleanShaImageBuilt": false,
+    "cleanShaImagePushed": false,
+    "cleanShaRevisionDeployed": false,
+    "localDockerDaemonAvailable": false
+  },
+  "completedChecks": [
+    "clean-reviewed-source-sha",
+    "authenticated-staging-project",
+    "live-service-ready",
+    "active-revision-at-100-percent-traffic",
+    "immutable-current-image-digest",
+    "secret-manager-credential-volume-mounted",
+    "no-raw-secret-output"
+  ],
+  "blockingChecks": [
+    "owner-enable-project-billing",
+    "build-and-push-clean-sha-image",
+    "deploy-clean-sha-revision",
+    "apply-and-verify-production-only-runtime-settings",
+    "rotate-secret-manager-backed-credentials-with-canary",
+    "exercise-and-audit-rollback-break-glass",
+    "record-final-no-raw-secret-audit"
+  ],
+  "interpretation": "This is a read-only preflight, not G4 closure evidence. Billing is an owner-controlled financial setting and was not changed. No live service, secret, route, or traffic mutation was attempted."
+}

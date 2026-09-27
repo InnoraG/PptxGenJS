@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "betterpptx.authoring-motion-playback-proof.v1",
+  "status": "PASS",
+  "renderer": "native-powerpoint",
+  "source": {
+    "id": "ordinary-talk-native-v1",
+    "sha256": "1029ba9997a6da3ed0f8ef933600ad67fc6aa6ff9540ecb94ac17b259a7ebd78",
+    "sourceSlug": "talk",
+    "sourceProvider": "mixamo",
+    "durationMs": 10267
+  },
+  "retarget": {
+    "rotationRetargetSpace": "global",
+    "channelPolicy": "root-motion",
+    "boneNamePolicy": "mixamo-suffix",
+    "rootMotionSpace": "world",
+    "rootMotionAnchor": "start",
+    "rootMotionMaxStatures": 0.35,
+    "rootMotionMaxHorizontalStatures": 0.5
+  },
+  "targets": [
+    {
+      "identity": "joe",
+      "targetGlbSha256": "9e4035eb9509b6fa047a6a6c28c6d550f8b293bec15a9bb87e2f943eae9cbcac",
+      "retargetRestProfileSha256": "2af414c0f4773bf4ddf7dd60ef0204bddb64ced204c21ce30bcb2664ed2a8f27",
+      "evidence": {
+        "pptxSha256": "15865fe6d3e0ef5855612c814cb3caee0bd9533faff6361f67aeb9d0fa9a926f",
+        "videoSha256": "0fc19ca094eec55d2c420837ab706d6fa0730e92fb5a66fb73db02e8fbc5f131"
+      },
+      "checks": {
+        "fullClipPlayback": true,
+        "noTPose": true,
+        "noExcessiveTorsion": true
+      },
+      "status": "PASS"
+    },
+    {
+      "identity": "louise",
+      "targetGlbSha256": "462c35353d0cda44a44a77e51946765713c9309ef2c4d8f94ce5cb0f74ae846e",
+      "retargetRestProfileSha256": "7eebad414224cd3718ffec6e6f1ef8003046722ece35ffde0344b72348907f43",
+      "evidence": {
+        "pptxSha256": "15865fe6d3e0ef5855612c814cb3caee0bd9533faff6361f67aeb9d0fa9a926f",
+        "videoSha256": "0fc19ca094eec55d2c420837ab706d6fa0730e92fb5a66fb73db02e8fbc5f131"
+      },
+      "checks": {
+        "fullClipPlayback": true,
+        "noTPose": true,
+        "noExcessiveTorsion": true
+      },
+      "status": "PASS"
+    },
+    {
+      "identity": "pete",
+      "targetGlbSha256": "026cb2d30de10d144804776dc10dd16058a58c7f7979870752ad831c5e70cf6d",
+      "retargetRestProfileSha256": "2ef3ab02a6366221c6d28d5b8aebb2ab577bd48ffb0054f00c0a446970965e5b",
+      "evidence": {
+        "pptxSha256": "15865fe6d3e0ef5855612c814cb3caee0bd9533faff6361f67aeb9d0fa9a926f",
+        "videoSha256": "0fc19ca094eec55d2c420837ab706d6fa0730e92fb5a66fb73db02e8fbc5f131"
+      },
+      "checks": {
+        "fullClipPlayback": true,
+        "noTPose": true,
+        "noExcessiveTorsion": true
+      },
+      "status": "PASS"
+    }
+  ],
+  "reviewScope": "One complete native PowerPoint cycle per Talk and Enumerate on each rebuilt Joe, Louise and Pete default presenter. Read-only Open2007, repair disabled, automatic scene timing and native CreateVideo were verified. Maintainer evidence; not owner acceptance or perfect foot-contact/loop certification."
+}

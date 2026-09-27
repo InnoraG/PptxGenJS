@@ -9,6 +9,7 @@ import { spawn } from 'node:child_process'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 import JSZip from 'jszip'
 import { DOMParser } from '@xmldom/xmldom'
+import { validatePackageMetadataLeaksFromZip } from './quality/package-metadata.mjs'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(here, '..')
@@ -45,30 +46,6 @@ function listDecks(opts) {
 	return result
 }
 
-const forbiddenText = [
-	/C:\\/i,
-	/\/Users\//i,
-	/\/home\//i,
-	/\bMyDoc\b/i,
-	/\bPptxGenJS\b/i,
-	/\bbetterpptx-mcp\b/i,
-	/\bCloud Run\b/i,
-	/\bGCP\b/i,
-	/\bGoogle Cloud\b/i,
-	/\bFirestore\b/i,
-	/\bSecret Manager\b/i,
-	/\bArtifact Registry\b/i,
-	/\bDodo\b/i,
-	/\bSvix\b/i,
-	/\bDocker\b/i,
-	/\bcloudbuild\b/i,
-	/\bservice account\b/i,
-	/\bus-central1\b/i,
-	/\bBearer\s+[A-Za-z0-9._-]+/i,
-	/\bwhsec_[A-Za-z0-9_=-]+/i,
-	/\bsk_(?:live|test)_[A-Za-z0-9_=-]+/i,
-]
-
 function makeParser(errors) {
 	return new DOMParser({
 		errorHandler: {
@@ -88,7 +65,6 @@ async function verifyStaticPackage(pptxPath) {
 	const parser = makeParser(errors)
 	let slideCount = 0
 	let danglingRels = 0
-	let forbiddenMatches = 0
 	let duplicateContentTypeOverrides = 0
 	let sharedChartRelationshipTargets = 0
 	const chartTargetSlides = new Map()
@@ -111,12 +87,10 @@ async function verifyStaticPackage(pptxPath) {
 		if (/\.(xml|rels)$/i.test(name)) {
 			const xml = await file.async('string')
 			parser.parseFromString(xml, 'text/xml')
-			for (const pattern of forbiddenText) {
-				if (pattern.test(xml)) forbiddenMatches += 1
-			}
 		}
 		if (/ppt\/slides\/slide\d+\.xml$/i.test(name)) slideCount += 1
 	}
+	const metadataLeak = await validatePackageMetadataLeaksFromZip(zip)
 
 	for (const name of names) {
 		const match = name.match(/^ppt\/slides\/(slide\d+)\.xml$/i)
@@ -143,11 +117,11 @@ async function verifyStaticPackage(pptxPath) {
 	if (slideCount < 1) issues.push('no slides found')
 	if (errors.length) issues.push(`xml parse issues: ${errors.length}`)
 	if (danglingRels) issues.push(`dangling slide relationships: ${danglingRels}`)
-	if (forbiddenMatches) issues.push(`forbidden disclosure text matches: ${forbiddenMatches}`)
+	if (!metadataLeak.ok) issues.push(`metadata/relationship disclosure matches: ${metadataLeak.issueCount}`)
 	if (duplicateContentTypeOverrides) issues.push(`duplicate content type overrides: ${duplicateContentTypeOverrides}`)
 	if (sharedChartRelationshipTargets) issues.push(`shared chart relationship targets: ${sharedChartRelationshipTargets}`)
 
-	return { ok: issues.length === 0, bytes: buf.length, slideCount, xmlIssues: errors.length, danglingRels, forbiddenMatches, duplicateContentTypeOverrides, sharedChartRelationshipTargets, issues }
+	return { ok: issues.length === 0, bytes: buf.length, slideCount, xmlIssues: errors.length, danglingRels, forbiddenMatches: metadataLeak.issueCount, metadataLeak, duplicateContentTypeOverrides, sharedChartRelationshipTargets, issues }
 }
 
 function resolveDecypherIndex(explicitPath) {

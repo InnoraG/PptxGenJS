@@ -25,8 +25,10 @@ import type { AssetCatalogItem } from './assets.js'
 import { PROCEDURAL_ASSET_KINDS, generateProceduralAsset } from './procedural-assets.js'
 import { PROCEDURAL_GEOMETRY_KINDS, generateProceduralGeometry } from './procedural-geometry.js'
 import { composeDynamicRecipe, listRecipes, normalizeFeatureBudget, prepareGenerativeSpec, recipeById, recommendRecipes } from './recipes.js'
-import { CHART_PRESET_CATALOG, chartPresetById, recommendChartPresets } from './chart-presets.js'
-import { POWERPOINT_TABLE_STYLE_OPTIONS, TABLE_PRESET_CATALOG, recommendTablePresets, tablePresetById } from './table-presets.js'
+import { CHART_PRESET_CATALOG, CHART_STYLE_PRESET_CATALOG, chartPresetById, chartStylePresetById, chartStyleCoverageByType, listChartStylePresets, listChartGalleryUiPresets, recommendChartPresets, chartGalleryTilePresetById, publicChartGalleryTilePreset, publicChartStylePreset, normalizeNativeChartType } from './chart-presets.js'
+import { chartTreatmentPresetById, listPublicChartTreatmentPresets, publicChartTreatmentPreset } from './chart-treatment-runtime.js'
+import { resolveChartPlan } from './chart-plan.js'
+import { POWERPOINT_TABLE_STYLE_OPTIONS, TABLE_PRESET_CATALOG, recommendTablePresets, tablePresetById, listPowerPointTableStyles, tableStyleByNativeId } from './table-presets.js'
 import { ReferenceGate, listReferenceTargets, publicReferenceTarget, referenceTargetById } from './reference-targets.js'
 
 export { BETTERPPTX_MCP_BRAND }
@@ -147,8 +149,22 @@ const publicTools: ToolDefinition[] = [
 				chartIntent: { type: 'string', description: 'Specific chart intent such as trend, comparison, distribution, funnel, geography, or dashboard.' },
 				dataShape: { type: 'string', description: 'Known data shape such as categorical, time-series, x/y, hierarchy, distribution, bridge, or matrix.' },
 				category: { type: 'string', description: 'Optional PowerPoint picker category or tag filter.' },
+				chartType: { type: 'string', description: 'Optional runtime chart family; filters Office style presets to compatible families.' },
 				authoringMode: { type: 'string', enum: ['native', 'native-composite', 'shape-built'] },
 				chartPresetId: { type: 'string', enum: CHART_PRESET_CATALOG.map(preset => preset.id) },
+				chartStylePresetId: { type: 'string', enum: CHART_STYLE_PRESET_CATALOG.map(preset => preset.id), description: 'Optional exact Office Chart Design style/color state from the captured gallery catalog.' },
+				chartGalleryTilePresetId: { type: 'string', description: 'Opaque, chart-type-specific Ribbon tile id returned by this tool. Pass it into a chart object to replay the captured native state.' },
+				chartTreatmentPresetId: { type: 'string', description: 'Opaque treatment-bundle id returned by this tool. Pass it into a chart object to apply a governed formatting, layout, axis, label, or family-specific treatment.' },
+				chartTreatmentPresetIds: { type: 'array', items: { type: 'string' }, description: 'Optional ordered treatment-bundle ids. They are merged only when their chart-family applicability is compatible.' },
+				includeStylePresets: { type: 'boolean', default: false, description: 'Include the complete captured Office style/color catalog in the response.' },
+				styleLimit: { type: 'number', default: 49, description: 'Maximum number of Office style/color variants to return when includeStylePresets is true.' },
+				requireRibbonEvidence: { type: 'boolean', default: false, description: 'Only return style presets with type-specific Ribbon UI evidence; package-only states remain excluded until captured.' },
+				requireGalleryKind: { type: 'string', enum: ['styles', 'colors', 'layouts'], description: 'Optional per-kind UI evidence gate for styles, colors, or Quick Layout captures.' },
+				includeGalleryTilePresets: { type: 'boolean', default: false, description: 'Include exact type-specific Ribbon tile evidence with screenshots and readback IDs.' },
+				galleryTileLimit: { type: 'number', default: 200, description: 'Maximum number of Ribbon tile evidence records to return.' },
+				includeTreatmentPresets: { type: 'boolean', default: false, description: 'Include frozen, provenance-backed chart formatting and layout treatment bundles.' },
+				treatmentLimit: { type: 'number', default: 24, description: 'Maximum number of treatment bundles to return.' },
+				treatmentOptionSet: { type: 'string', description: 'Optional treatment family such as format, axes, 3d, pie, or legend-bottom.' },
 				limit: { type: 'number', default: 8 },
 				format: { type: 'string', enum: ['summary', 'full'], default: 'summary' },
 				visualQuality: { type: 'string', enum: ['standard', 'premium', 'cinematic', 'reference'], default: 'premium' },
@@ -491,14 +507,13 @@ const publicTools: ToolDefinition[] = [
 	{
 		name: 'betterpptx-mcp.narration.generate',
 		title: 'Generate narration audio',
-		description: 'Generate a WAV narration artifact from text for embedding in a deck. The response reports whether speech synthesis succeeded or an explicit tone fallback was used.',
+		description: 'Generate a real TTS WAV narration artifact from text for embedding as native PowerPoint audio narration. If speech synthesis is unavailable, the request fails instead of generating synthetic placeholder audio.',
 		inputSchema: {
 			type: 'object',
 			required: ['text'],
 			properties: {
 				text: { type: 'string' },
 				outputName: { type: 'string', default: 'narration.wav' },
-				fallbackToneFrequency: { type: 'number', default: 440 },
 			},
 		},
 	},
@@ -872,57 +887,35 @@ function contentTypeFor(filePath: string): string {
 	return 'application/octet-stream'
 }
 
-function writeToneWav(filePath: string, seconds = 1.4, frequency = 440): void {
-	const sampleRate = 22050
-	const samples = Math.max(1, Math.floor(sampleRate * seconds))
-	const data = Buffer.alloc(samples * 2)
-	for (let i = 0; i < samples; i++) {
-		const envelope = Math.min(1, i / (sampleRate * 0.08), (samples - i) / (sampleRate * 0.1))
-		const value = Math.round(Math.sin((2 * Math.PI * frequency * i) / sampleRate) * 10000 * Math.max(0, envelope))
-		data.writeInt16LE(value, i * 2)
-	}
-	const header = Buffer.alloc(44)
-	header.write('RIFF', 0)
-	header.writeUInt32LE(36 + data.length, 4)
-	header.write('WAVE', 8)
-	header.write('fmt ', 12)
-	header.writeUInt32LE(16, 16)
-	header.writeUInt16LE(1, 20)
-	header.writeUInt16LE(1, 22)
-	header.writeUInt32LE(sampleRate, 24)
-	header.writeUInt32LE(sampleRate * 2, 28)
-	header.writeUInt16LE(2, 32)
-	header.writeUInt16LE(16, 34)
-	header.write('data', 36)
-	header.writeUInt32LE(data.length, 40)
-	fs.writeFileSync(filePath, Buffer.concat([header, data]))
-}
-
-function writeSpeechOrToneWav(filePath: string, text: string, toneFrequency: number): boolean {
-	if (process.platform === 'win32') {
-		const scriptPath = `${filePath}.speech.ps1`
-		const script = [
-			'param([string]$Text,[string]$OutPath)',
-			"$ErrorActionPreference='Stop'",
-			'Add-Type -AssemblyName System.Speech',
-			'$synth=New-Object System.Speech.Synthesis.SpeechSynthesizer',
-			'$synth.Rate=-1',
-			'$synth.Volume=92',
-			'$synth.SetOutputToWaveFile([IO.Path]::GetFullPath($OutPath))',
-			'$synth.Speak($Text)',
-			'$synth.Dispose()',
-		].join('\n')
-		fs.writeFileSync(scriptPath, script)
+function writeSpeechWav(filePath: string, text: string): void {
+	if (process.platform !== 'win32') throw new Error('Real TTS narration requires an available speech synthesis provider.')
+	const scriptPath = `${filePath}.speech.ps1`
+	const script = [
+		'param([string]$Text,[string]$OutPath)',
+		"$ErrorActionPreference='Stop'",
+		'Add-Type -AssemblyName System.Speech',
+		'$synth=New-Object System.Speech.Synthesis.SpeechSynthesizer',
+		'$synth.Rate=-1',
+		'$synth.Volume=92',
+		'$synth.SetOutputToWaveFile([IO.Path]::GetFullPath($OutPath))',
+		'$synth.Speak($Text)',
+		'$synth.Dispose()',
+	].join('\n')
+	fs.writeFileSync(scriptPath, script)
+	try {
 		const proc = spawnSync('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-File', scriptPath, '-Text', text, '-OutPath', filePath], {
 			encoding: 'utf8',
 			timeout: 15000,
 			windowsHide: true,
 		})
+		if (proc.status !== 0) {
+			const detail = proc.stderr?.trim() || proc.stdout?.trim() || `exit code ${proc.status}`
+			throw new Error(`Real TTS narration failed: ${detail}`)
+		}
+		if (!fs.existsSync(filePath) || fs.statSync(filePath).size <= 1024) throw new Error('Real TTS narration produced no usable audio.')
+	} finally {
 		fs.rmSync(scriptPath, { force: true })
-		if (proc.status === 0 && fs.existsSync(filePath) && fs.statSync(filePath).size > 1024) return false
 	}
-	writeToneWav(filePath, 1.35, toneFrequency)
-	return true
 }
 
 function findCapabilitiesPath(): string | null {
@@ -996,6 +989,7 @@ function buildCapabilityChunks(capabilities: any): any[] {
 	pushObjectChunks(chunks, 'mcp_tools', getBetterPptxMcpTools({ developerTools: false }))
 	pushObjectChunks(chunks, 'betterpptx-mcp_recipes', listRecipes())
 	pushObjectChunks(chunks, 'chart_presets', CHART_PRESET_CATALOG)
+	pushObjectChunks(chunks, 'chart_style_presets', CHART_STYLE_PRESET_CATALOG.map(publicChartStylePreset))
 	pushObjectChunks(chunks, 'betterpptx-mcp_reference_targets', listReferenceTargets().map(publicReferenceTarget))
 	pushObjectChunks(chunks, 'coverage_matrix', publicCapabilities.coverage_matrix || publicCapabilities.coverageMatrix)
 	pushObjectChunks(chunks, 'feature_groups', publicCapabilities.featureGroups)
@@ -1149,7 +1143,6 @@ function publicChartPreset(preset: any, full = false): any {
 		id: preset.id,
 		title: preset.title,
 		powerPointCategory: preset.powerPointCategory,
-		powerPointPreset: preset.powerPointPreset,
 		authoringMode: preset.authoringMode,
 		chartType: preset.chartType,
 		chartTypes: preset.chartTypes,
@@ -1158,26 +1151,28 @@ function publicChartPreset(preset: any, full = false): any {
 		requiredFields: preset.requiredFields,
 		useWhen: preset.useWhen,
 		avoidWhen: preset.avoidWhen,
-		optionDefaults: preset.optionDefaults,
 		fidelityNote: preset.fidelityNote,
 	}
 	return full ? { ...base, tags: preset.tags, sampleData: preset.sampleData } : base
 }
 
 function publicTablePreset(preset: any, full = false): any {
+	const nativeId = preset?.tableStyleOptions?.tableStyleId
+	const nativeStyle = nativeId ? tableStyleByNativeId(nativeId) : undefined
+	const tableStyleOptions = { ...(preset.tableStyleOptions || {}) }
+	delete tableStyleOptions.tableStyleId
+	if (nativeStyle) tableStyleOptions.tableStylePresetId = nativeStyle.publicId
 	const base = {
 		id: preset.id,
 		title: preset.title,
 		powerPointCategory: preset.powerPointCategory,
-		powerPointPreset: preset.powerPointPreset,
 		authoringMode: preset.authoringMode,
 		tableIntent: preset.tableIntent,
 		dataShape: preset.dataShape,
 		requiredStructure: preset.requiredStructure,
 		useWhen: preset.useWhen,
 		avoidWhen: preset.avoidWhen,
-		tableStyleOptions: preset.tableStyleOptions,
-		optionDefaults: preset.optionDefaults,
+		tableStyleOptions,
 		cellStyleRecipe: preset.cellStyleRecipe,
 		layoutGuardrails: preset.layoutGuardrails,
 		fidelityNote: preset.fidelityNote,
@@ -1197,19 +1192,53 @@ function chartRecommend(args: any): any {
 			selectionReason: item.selectionReason,
 			preset: publicChartPreset(item.preset, format === 'full'),
 		}))
+	const preferredPreset = recommended[0]?.preset as any
+	const preferredExecutablePlan = preferredPreset && ['native', 'native-composite'].includes(preferredPreset.authoringMode)
+		? {
+			chartPresetId: preferredPreset.id,
+			...(preferredPreset.chartType ? { chartType: preferredPreset.chartType } : {}),
+		}
+		: null
 	return {
 		brand: BETTERPPTX_MCP_BRAND,
 		query,
 		chartIntent: args?.chartIntent || null,
+		chartType: args?.chartType || null,
 		dataShape: args?.dataShape || null,
 		featureBudget,
-		nativeChartTypes: ['area', 'bar', 'bar3D', 'bubble', 'bubble3D', 'doughnut', 'line', 'pie', 'radar', 'scatter', 'treemap', 'sunburst', 'histogram', 'pareto', 'boxWhisker', 'waterfall', 'funnel', 'regionMap'],
+		nativeChartTypes: ['area', 'bar', 'bar3D', 'bubble', 'bubble3D', 'doughnut', 'line', 'pie', 'radar', 'scatter', 'treemap', 'sunburst', 'histogram', 'pareto', 'boxWhisker', 'waterfall', 'funnel', 'regionMap', 'combo'],
 		pickerCategoryPolicy: {
 			native: ['Column via bar + barDir=col', 'Bar', 'Line', 'Pie', 'Doughnut', 'Area', 'X Y (Scatter)', 'Bubble', 'Radar', 'Combo from supported native base types', 'Treemap', 'Sunburst', 'Histogram', 'Pareto', 'Box & Whisker', 'Waterfall', 'Funnel', 'Filled Map / regionMap'],
 			shapeBuiltOrPreserveOnly: ['Stock', 'Surface'],
 			rule: 'Use preset.chartType as addChart chartType when authoringMode is native. ChartEx picker families are native-editable for new authoring; exact imported ChartEx stays passthrough until the first update_chart edit promotes it to native editable ChartEx.',
 		},
 		presets: recommended,
+		...(preferredExecutablePlan ? { executableChartPlan: preferredExecutablePlan } : {}),
+		...(args?.includeStylePresets ? { stylePresets: listChartStylePresets({ limit: args?.styleLimit || 49, chartType: args?.chartType, requireRibbonEvidence: args?.requireRibbonEvidence === true, requireGalleryKind: args?.requireGalleryKind }).map(publicChartStylePreset) } : {}),
+		...(args?.includeGalleryTilePresets ? { galleryTilePresets: listChartGalleryUiPresets({ limit: args?.galleryTileLimit || 200, chartType: args?.chartType, galleryKind: args?.requireGalleryKind }).map(publicChartGalleryTilePreset) } : {}),
+		...(args?.includeTreatmentPresets ? { treatmentPresets: listPublicChartTreatmentPresets({ limit: args?.treatmentLimit || 24, chartType: args?.chartType, optionSet: args?.treatmentOptionSet }) } : {}),
+		chartGalleryCoverage: chartStyleCoverageByType(args?.chartType),
+		...(args?.chartStylePresetId && chartStylePresetById(String(args.chartStylePresetId)) ? {
+			selectedStylePreset: publicChartStylePreset(chartStylePresetById(String(args.chartStylePresetId))!),
+			executableChartPlan: { ...(args?.chartType ? { chartType: args.chartType } : {}), ...(args?.chartPresetId ? { chartPresetId: args.chartPresetId } : {}), chartStylePresetId: String(args.chartStylePresetId) },
+		} : {}),
+		...(args?.chartGalleryTilePresetId ? (() => {
+			const tile = chartGalleryTilePresetById(String(args.chartGalleryTilePresetId), { chartType: args?.chartType, galleryKind: args?.requireGalleryKind })
+			return tile ? { selectedGalleryTilePreset: publicChartGalleryTilePreset(tile), executableChartPlan: { chartType: tile.chartType, chartGalleryTilePresetId: tile.id } } : {}
+		})() : {}),
+		...(args?.chartTreatmentPresetId || Array.isArray(args?.chartTreatmentPresetIds) ? (() => {
+			const ids = [...(Array.isArray(args?.chartTreatmentPresetIds) ? args.chartTreatmentPresetIds : []), ...(args?.chartTreatmentPresetId ? [args.chartTreatmentPresetId] : [])].map(String)
+			const selected = ids.map(id => chartTreatmentPresetById(id)).filter(Boolean) as NonNullable<ReturnType<typeof chartTreatmentPresetById>>[]
+			return selected.length === ids.length ? {
+				selectedTreatmentPresets: selected.map(publicChartTreatmentPreset),
+				executableChartPlan: {
+					...(args?.chartType ? { chartType: args.chartType } : {}),
+					...(args?.chartPresetId ? { chartPresetId: args.chartPresetId } : {}),
+					...(args?.chartStylePresetId ? { chartStylePresetId: args.chartStylePresetId } : {}),
+					...(ids.length === 1 ? { chartTreatmentPresetId: ids[0] } : { chartTreatmentPresetIds: ids }),
+				},
+			} : {}
+		})() : {}),
 		relatedRecipes: recommendRecipes(query || 'charts', featureBudget)
 			.filter(recipe => recipe.category === 'charts' || recipe.featureHighlights.includes('shape-built-chart'))
 			.slice(0, 4),
@@ -1235,10 +1264,24 @@ function tableRecommend(args: any): any {
 		dataShape: args?.dataShape || null,
 		featureBudget,
 		ribbonOptions: POWERPOINT_TABLE_STYLE_OPTIONS,
+		...(args?.includeNativeStyles ? {
+			nativeStyles: listPowerPointTableStyles({
+				limit: args?.nativeStyleLimit || 74,
+				family: args?.themeMode || args?.family,
+				query: args?.styleQuery,
+			}).map(style => ({
+				id: style.publicId,
+				name: style.name,
+				family: style.family,
+				accent: style.accent,
+				tileIndex: style.tileIndex,
+				editable: style.editable,
+			})),
+		} : {}),
 		authoringPolicy: {
-			native: 'Use tableStyleId plus Header Row, Total Row, First/Last Column, and Banded Rows/Columns when a native PowerPoint table style is known.',
-			visualAdapted: 'For the most beautiful generated tables, apply preset.optionDefaults to slide.add_table options and apply preset.cellStyleRecipe to header, body, banded, total, first-column, last-column, and semantic cells.',
-			layoutPreflight: 'Before drawing, apply preset.layoutGuardrails: reserve slide safe area, compute table width from colW, reject or revise side panels that push the visual group past the safe right edge, and keep every table/label inside the safe area including shadow padding.',
+			native: 'Use an opaque native table-style choice plus Header Row, Total Row, First/Last Column, and Banded Rows/Columns when a native table style is appropriate.',
+			visualAdapted: 'For visual-adapted tables, follow the semantic visual recipe selected by the authoring engine.',
+			layoutPreflight: 'Before drawing, let the engine reserve safe area, compute table width, and keep every table and label inside the safe canvas.',
 			overlays: 'Overlay chips, labels, or callouts must be cell-anchored from table x/y/colW/rowH. If the overlay cannot be tied to a specific cell or merged span, put the text inside the table cell instead.',
 			preserveOnly: 'Exact unfamiliar PowerPoint table style IDs and custom tableStyles.xml definitions should be preserved from imported/reference decks rather than guessed.',
 		},
@@ -1275,7 +1318,21 @@ function queryCapabilities(args: any): any {
 		query,
 		format,
 		source: findCapabilitiesPath() ? 'packaged-capabilities' : null,
-		counts: capabilities.counts,
+		counts: {
+			...capabilities.counts,
+			chartPresets: CHART_PRESET_CATALOG.length,
+			chartStylePresets: CHART_STYLE_PRESET_CATALOG.length,
+			chartGalleryUiTiles: listChartGalleryUiPresets({ limit: 2000 }).length,
+		},
+		chartPlanContract: {
+			version: 'betterpptx.chart-plan.v1',
+			selectionField: 'chartGalleryTilePresetId',
+			styleResourceField: 'chartStylePresetId',
+			treatmentField: 'chartTreatmentPresetId or chartTreatmentPresetIds',
+			applicability: 'chartType is validated against the selected opaque tile or treatment before generation',
+			blackBox: 'opaque ids and safe metadata only; package paths and raw XML remain internal',
+		},
+		chartGalleryCoverage: chartStyleCoverageByType(),
 		ledgerSummary: ledger.summary,
 		semanticHash: ledgerSemanticHash(ledger),
 		publicTools: getBetterPptxMcpTools({ developerTools: false }).map(tool => tool.name),
@@ -1753,6 +1810,7 @@ await deck.writeFile('${title.replace(/[^a-z0-9]+/gi, '-').toLowerCase() || 'pre
 }
 
 async function buildFocusedFeatureDeck(toolName: string, args: any, outputPath: string, sourcePath: string): Promise<{ features: string[]; slideCount: number }> {
+	ensureDir(path.dirname(sourcePath))
 	const pptx = await createBaseDeck(`${BETTERPPTX_MCP_BRAND} ${toolName}`)
 	const slide = pptx.addSlide()
 	slide.background = { color: '071018' }
@@ -1820,9 +1878,10 @@ async function buildFocusedFeatureDeck(toolName: string, args: any, outputPath: 
 			})
 			slide.addText(`${preset.title}: ${preset.shapeBuiltVisual}`, { x: 1.25, y: 4.72, w: 5.2, h: 0.3, fontSize: 12, bold: true, color: 'F7FAFC', margin: 0, fit: 'shrink' })
 		} else {
-			const chartType = (preset?.chartType || chartSpec.chartType || 'bar') as any
+			const chartType = (chartSpec.chartType || preset?.chartType || 'bar') as any
 			const data = chartSpec.data || preset?.sampleData || [{ name: 'Series', labels: ['A', 'B', 'C'], values: [4, 7, 5] }]
-			slide.addChart(chartType, data as any, { x: 1.0, y: 1.55, w: 5.8, h: 3.0, showLegend: true, showTitle: true, title: preset?.title || 'Chart preset', ...(preset?.optionDefaults || {}) } as any)
+			const chartPlan = await resolveChartPlan({ ...chartSpec, chartType }, repoRoot())
+			slide.addChart(chartType, data as any, { x: 1.0, y: 1.55, w: 5.8, h: 3.0, showLegend: true, showTitle: true, title: preset?.title || 'Chart preset', ...(preset?.optionDefaults || {}), ...chartPlan.plan } as any)
 		}
 		if (preset) {
 			slide.addText(`Suggested preset: ${preset.powerPointCategory} / ${preset.powerPointPreset} (${preset.authoringMode})`, { x: 1.0, y: 5.05, w: 8.8, h: 0.26, fontSize: 10, color: '9FB2C3', margin: 0 })
@@ -1951,8 +2010,7 @@ async function narrationGenerateJob(args: any, options: BetterPptxMcpRuntimeOpti
 		let outputName = path.basename(String(args?.outputName || 'narration.wav'))
 		if (!outputName.toLowerCase().endsWith('.wav')) outputName += '.wav'
 		const outputPath = path.join(manifest.jobDir, outputName)
-		const frequency = Number.isFinite(Number(args?.fallbackToneFrequency)) ? Number(args.fallbackToneFrequency) : 440
-		const fallbackUsed = writeSpeechOrToneWav(outputPath, text.slice(0, 8000), frequency)
+		writeSpeechWav(outputPath, text.slice(0, 8000))
 		const artifact = addArtifact(manifest, outputPath, 'narration-audio', 'audio/wav', 'Generated narration WAV asset', options)
 		jsonArtifact(manifest, 'summary.json', {
 			brand: BETTERPPTX_MCP_BRAND,
@@ -1961,10 +2019,9 @@ async function narrationGenerateJob(args: any, options: BetterPptxMcpRuntimeOpti
 			uri: artifact.uri,
 			mimeType: artifact.mimeType,
 			bytes: artifact.bytes,
-			fallbackUsed,
-			ttsAvailable: !fallbackUsed,
+			ttsAvailable: true,
 			textCharacters: text.length,
-			usage: 'Embed this artifact as narration/media audio, then run presentation validation and narration validation when available.',
+			usage: 'Embed this artifact as native audio narration, then run presentation validation and narration validation when available.',
 		}, 'summary', 'Narration generation summary', options)
 		return toolResponse(successJobResponse(manifest, options))
 	} catch (error) {
@@ -2340,6 +2397,7 @@ async function inspectPptxFeatureSignals(pptxPath: string): Promise<any> {
 		totalChartParts: chartFiles.length + chartExFiles.length,
 		mediaParts: mediaParts.length,
 		model3dParts: model3dParts.length,
+		nativeNarrationAudio: count('<p:audio isNarration="1"') + count('<audio isNarration="1"'),
 		timingNodes: count('<p:cTn') + count('<p:anim') + count('<p:cmd'),
 		animationNodes: count('<p:anim'),
 		motionNodes: count('<p:animMotion'),
@@ -2665,6 +2723,7 @@ async function validateAutoplayPlayback(pptxPath: string, playback: any): Promis
 	let timingSlides = 0
 	let contentTimedSlides = 0
 	let mediaCommandCount = 0
+	let nativeNarrationCount = 0
 	let onClickConditionCount = 0
 	let prstTxWarpCount = 0
 	let scene3dCount = 0
@@ -2714,6 +2773,8 @@ async function validateAutoplayPlayback(pptxPath: string, playback: any): Promis
 		if (timingNodes) timingSlides += 1
 		const countTags = (names: string[]) => names.reduce((sum, name) => sum + doc.getElementsByTagName(name).length, 0)
 		const cmdNodes = countTags(['p:cmd', 'cmd'])
+		nativeNarrationCount += xml.split('<p:audio isNarration="1"').length - 1
+		nativeNarrationCount += xml.split('<audio isNarration="1"').length - 1
 		const contentTimingCount = countTags([
 			'p:animEffect', 'animEffect',
 			'p:animClr', 'animClr',
@@ -2736,10 +2797,12 @@ async function validateAutoplayPlayback(pptxPath: string, playback: any): Promis
 	const hasMp3 = mediaFiles.some(name => name.toLowerCase().endsWith('.mp3'))
 	const hasWav = mediaFiles.some(name => name.toLowerCase().endsWith('.wav'))
 	const hasGlb = mediaFiles.some(name => name.toLowerCase().endsWith('.glb'))
+	const hasNativeAudioNarration = nativeNarrationCount > 0
 	if (isUltimate) {
 		if (!hasMp4) issues.push('Missing embedded sample MP4 media')
 		if (!hasMp3) issues.push('Missing embedded sample MP3 media')
 		if (!hasWav) issues.push('Missing embedded narration WAV media')
+		if (!hasNativeAudioNarration) issues.push('Missing native PowerPoint audio narration timing')
 		if (!hasGlb) issues.push('Missing embedded native GLB 3D model')
 		if (mediaCommandCount < 3) issues.push('Expected timed media play/pause/stop commands were not found')
 	}
@@ -2749,6 +2812,7 @@ async function validateAutoplayPlayback(pptxPath: string, playback: any): Promis
 	}
 	if (focus === 'voice-lab') {
 		if (!hasWav) issues.push('Voice lab is missing embedded narration WAV media')
+		if (!hasNativeAudioNarration) issues.push('Voice lab is missing native PowerPoint audio narration timing')
 	}
 	if (focus === 'media-3d-lab') {
 		if (!hasMp4) issues.push('Media/3D lab is missing embedded sample MP4 media')
@@ -2822,7 +2886,7 @@ async function validateAutoplayPlayback(pptxPath: string, playback: any): Promis
 			byKind: liveDynamicsByKind,
 			clickDrivenDynamics: clickDrivenDynamics.length,
 		},
-		media: { hasMp4, hasMp3, hasWav, hasGlb },
+		media: { hasMp4, hasMp3, hasWav, hasGlb, nativeNarrationCount },
 		wordArtAnd3D: { prstTxWarpCount, scene3dCount, sp3dCount, bevelCount, extrusionCount },
 		shapeBuiltPresetCounts,
 		charts: chartValidation,
@@ -2946,6 +3010,17 @@ async function getArtifact(args: any, options: BetterPptxMcpRuntimeOptions): Pro
 
 export async function callBetterPptxMcpTool(name: string, args: any = {}, options: BetterPptxMcpRuntimeOptions = {}): Promise<any> {
 	try {
+		// Product-facing aliases keep the public route aligned with the
+		// betterpptx.* contract while the maintained implementation continues to
+		// use its backward-compatible betterpptx-mcp.* names internally.
+		const publicAliases: Record<string, string> = {
+			'betterpptx.deck.generate_from_spec': 'betterpptx-mcp.presentation.create',
+			'betterpptx.deck.validate': 'betterpptx-mcp.presentation.validate',
+			'betterpptx.chart.recommend': 'betterpptx-mcp.chart.recommend',
+			'betterpptx.chart.add': 'betterpptx-mcp.chart.add',
+			'betterpptx.capabilities.query': 'betterpptx-mcp.capabilities.query',
+		}
+		name = publicAliases[name] || (name.startsWith('betterpptx.') ? name.replace(/^betterpptx\./, 'betterpptx-mcp.') : name)
 		if (name.startsWith('pptx.')) {
 			return errorResult('BRAND_BLOCKED', `Public MCP tools are branded betterpptx-mcp.*. Use ${name.replace(/^pptx\./, 'betterpptx-mcp.')}.`)
 		}
@@ -2961,6 +3036,17 @@ export async function callBetterPptxMcpTool(name: string, args: any = {}, option
 		}
 		if (name === 'betterpptx-mcp.chart.recommend') {
 			if (args?.chartPresetId && !chartPresetById(String(args.chartPresetId))) return errorResult('NOT_FOUND', `Chart preset not found: ${args.chartPresetId}`)
+			if (args?.chartStylePresetId && !chartStylePresetById(String(args.chartStylePresetId))) return errorResult('NOT_FOUND', `Chart style preset not found: ${args.chartStylePresetId}`)
+			if (args?.chartGalleryTilePresetId && !chartGalleryTilePresetById(String(args.chartGalleryTilePresetId), { chartType: args?.chartType, galleryKind: args?.requireGalleryKind })) return errorResult('NOT_FOUND', `Chart gallery tile preset not found or not applicable: ${args.chartGalleryTilePresetId}`)
+			const treatmentIds = [...(Array.isArray(args?.chartTreatmentPresetIds) ? args.chartTreatmentPresetIds : []), ...(args?.chartTreatmentPresetId ? [args.chartTreatmentPresetId] : [])].map(String)
+			if (args?.chartGalleryTilePresetId && (args?.chartStylePresetId || treatmentIds.length || args?.chartGalleryVariant != null || args?.chartStyleId != null || args?.chartStyleModernId != null || args?.chartColorStyleId != null || args?.chartLayoutPresetId)) return errorResult('INCOMPATIBLE_CAPABILITY', 'An exact Ribbon tile already contains its captured style, color, and layout state; choose the tile alone or choose native style/treatment fields separately.')
+			for (const id of treatmentIds) {
+				const treatment = chartTreatmentPresetById(id)
+				if (!treatment) return errorResult('NOT_FOUND', `Chart treatment preset not found: ${id}`)
+				const requestedType = args?.chartType ? normalizeNativeChartType(args.chartType) || String(args.chartType) : null
+				const treatmentType = normalizeNativeChartType(treatment.preset.semanticType)
+				if (requestedType && treatmentType && treatmentType !== requestedType) return errorResult('INCOMPATIBLE_CAPABILITY', `Chart treatment ${id} is not applicable to ${requestedType}`)
+			}
 			return toolResponse(chartRecommend(args))
 		}
 		if (name === 'betterpptx-mcp.table.recommend') {

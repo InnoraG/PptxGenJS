@@ -1,0 +1,31 @@
+{
+  "canonicalSkeletonVersion": "2",
+  "_comment": "FROZEN SLOT CONTRACT — presenter gesture clip order and zero-based animation IDs must agree across the library bake, worker validation and presenter director. PowerPoint playScene selects embedded{animId+1}; this bank retains exactly 18 ordered clips and idle at slot 0. Changing these indices requires a skeleton-version change and cache invalidation. Current per-motion source provenance, channel counts and retarget policies are governed separately by default-presenter-motion-contract.json; historical bake notes do not define the current shipped motion source.",
+  "intents": ["idle", "talk", "greet", "point", "emphasize", "magnitude", "contrast", "enumerate", "ask", "present", "agree", "bow", "think", "disagree", "happy", "surprise", "walk", "clap"],
+  "clipMap": {
+    "idle": 0,
+    "talk": 1,
+    "greet": 2,
+    "point": 3,
+    "emphasize": 4,
+    "magnitude": 5,
+    "contrast": 6,
+    "enumerate": 7,
+    "ask": 8,
+    "present": 9,
+    "agree": 10,
+    "bow": 11,
+    "think": 12,
+    "disagree": 13,
+    "happy": 14,
+    "surprise": 15,
+    "walk": 16,
+    "clap": 17
+  },
+  "clipNames": ["00_idle", "01_talk", "02_greet", "03_point", "04_emphasize", "05_magnitude", "06_contrast", "07_enumerate", "08_ask", "09_present", "10_agree", "11_bow", "12_think", "13_disagree", "14_happy", "15_surprise", "16_walk", "17_clap"],
+  "posterAnimId": 0,
+  "synthesized": [],
+  "_synthesizedNote": "No current slot is declared hand-keyed by this index contract. Resolve each delivered source and any semantic alias from default-presenter-motion-contract.json; the old hand-keyed enumerate research note is not current provenance.",
+  "ceilingNote": "PowerPoint 365 (16.0.x) plays exactly 18 embedded 3D animations/model (embedded1..18 / animId 0..17); 19th+ silently static. This library is at that cap. To add a clip, one must be removed. Re-measure on new PP versions via research-demos/2026-07-10-pp-clip-ceiling.",
+  "motionSource": "Governed per-motion sources are recorded in default-presenter-motion-contract.json. Only the approved baked skeletal tracks belong in the delivered GLB; original source motion files remain build-time inputs, not public presentation assets."
+}

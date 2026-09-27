@@ -18,10 +18,12 @@ export interface ExtractedData {
 	relationships: Map<string, RelationshipEntry[]>
 	/** Theme XML if present */
 	themeXml?: string
+	/** All physical theme parts retained privately for relationship-based selection. */
+	themes: Map<number, PackageXmlPart>
 	/** Slide layouts */
-	slideLayouts: Map<number, string>
+	slideLayouts: Map<number, PackageXmlPart>
 	/** Slide masters */
-	slideMasters: Map<number, string>
+	slideMasters: Map<number, PackageXmlPart>
 	/** Media files extracted */
 	mediaFiles: MediaFileEntry[]
 	/** Raw ZIP for passthrough access */
@@ -32,6 +34,13 @@ export interface SlideExtracted {
 	xml: string
 	relationships: RelationshipEntry[]
 	notesXml?: string
+}
+
+/** Private package carrier. Its path/relationship IDs never enter PresentationModel. */
+export interface PackageXmlPart {
+	partName: string
+	xml: string
+	relationships: RelationshipEntry[]
 }
 
 export interface ContentTypeEntry {
@@ -81,6 +90,9 @@ export class PptxExtractor {
 
 		// Extract theme
 		const themeXml = await this.getFileContent(zip, 'ppt/theme/theme1.xml')
+		const themes = await this.extractNumberedXmlParts(zip, 'ppt/theme', 'theme')
+		const slideLayouts = await this.extractNumberedXmlParts(zip, 'ppt/slideLayouts', 'slideLayout')
+		const slideMasters = await this.extractNumberedXmlParts(zip, 'ppt/slideMasters', 'slideMaster')
 
 		// Extract media files
 		const mediaFiles = await this.extractMedia(zip, outputFolder)
@@ -100,11 +112,45 @@ export class PptxExtractor {
 			slides,
 			relationships,
 			themeXml,
-			slideLayouts: new Map(),
-			slideMasters: new Map(),
+			themes,
+			slideLayouts,
+			slideMasters,
 			mediaFiles,
 			zip
 		}
+	}
+
+	/**
+	 * Retain numbered structural XML parts and their relationships privately.
+	 * Public semantic names are assigned later, after the selected graph is known.
+	 */
+	private async extractNumberedXmlParts(
+		zip: JSZip,
+		folder: string,
+		baseName: string
+	): Promise<Map<number, PackageXmlPart>> {
+		const entries: Array<{ index: number; partName: string }> = []
+		zip.forEach(relativePath => {
+			const normalizedFolder = `${folder}/`
+			if (!relativePath.startsWith(normalizedFolder) || !relativePath.endsWith('.xml')) return
+			const fileName = path.posix.basename(relativePath)
+			const match = fileName.match(new RegExp(`^${baseName}(\\d+)\\.xml$`))
+			if (match) entries.push({ index: Number(match[1]), partName: relativePath })
+		})
+		entries.sort((left, right) => left.index - right.index)
+
+		const result = new Map<number, PackageXmlPart>()
+		for (const entry of entries) {
+			const xml = await this.getFileContent(zip, entry.partName)
+			if (!xml) continue
+			const relsPath = `${path.posix.dirname(entry.partName)}/_rels/${path.posix.basename(entry.partName)}.rels`
+			result.set(entry.index, {
+				partName: entry.partName,
+				xml,
+				relationships: await this.parseRelationships(zip, relsPath)
+			})
+		}
+		return result
 	}
 
 	/**
@@ -200,8 +246,15 @@ export class PptxExtractor {
 				const relsPath = slideFile.replace('slides/', 'slides/_rels/').replace('.xml', '.xml.rels')
 				const relationships = await this.parseRelationships(zip, relsPath)
 
-				// Try to get notes
-				const notesPath = `ppt/notesSlides/notesSlide${slideNum}.xml`
+				// Resolve notes by relationship. Notes part numbers are independent of
+				// slide part numbers and must never be guessed from the filename.
+				const notesRelationship = relationships.find(rel => rel.type.endsWith('/notesSlide') && rel.targetMode !== 'External')
+				const normalizedTarget = notesRelationship?.target?.split('\\').join('/')
+				const notesPath = normalizedTarget
+					? (normalizedTarget.startsWith('/')
+						? normalizedTarget.slice(1)
+						: path.posix.normalize(path.posix.join(path.posix.dirname(slideFile), normalizedTarget)))
+					: ''
 				const notesXml = await this.getFileContent(zip, notesPath)
 
 				slides.set(slideNum, {

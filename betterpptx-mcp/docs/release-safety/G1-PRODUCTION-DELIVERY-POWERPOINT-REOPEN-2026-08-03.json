@@ -1,0 +1,26 @@
+{
+  "schema": "betterpptx.g1.powerpoint-reopen-evidence.v1",
+  "measuredAt": "2026-08-03T16:55:05.8019420Z",
+  "application": "Microsoft PowerPoint COM",
+  "files": [
+    {
+      "path": "betterpptx-mcp/outputs/g1-regenerated-20260803/avatar-delivery-square-sanitized-mcp-regenerated-20260803.pptx",
+      "status": "PASS",
+      "slides": 1,
+      "repaired": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/g1-regenerated-20260803/avatar-delivery-sanitized-mcp-regenerated-20260803.pptx",
+      "status": "PASS",
+      "slides": 1,
+      "repaired": false
+    },
+    {
+      "path": "betterpptx-mcp/outputs/g1-regenerated-20260803/avatar-delivery-narration-sanitized-mcp-regenerated-20260803.pptx",
+      "status": "PASS",
+      "slides": 1,
+      "repaired": false
+    }
+  ],
+  "pass": true
+}

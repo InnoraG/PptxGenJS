@@ -21,6 +21,7 @@ import {
 } from './core-enums'
 import { IChartOptsLib, ISlideRelChart, ShadowProps, IChartPropsTitle, OptsChartGridLine, IOptsChartData, ChartLineCap } from './core-interfaces'
 import { createColorElement, genXmlColorSelection, convertRotationDegrees, encodeXmlEntities, getUuid, valToPts } from './gen-utils'
+import { getChartStylePresetForNativeGallery } from './chart-presets'
 import JSZip from 'jszip'
 
 const CHARTEX_LAYOUT_BY_TYPE: Record<string, string> = {
@@ -37,6 +38,14 @@ const CHARTEX_LAYOUT_BY_TYPE: Record<string, string> = {
 const DEFAULT_CHARTEX_STYLE_XML = '<cs:chartStyle xmlns:cs="http://schemas.microsoft.com/office/drawing/2012/chartStyle" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" id="2"><cs:axisTitle><cs:lnRef idx="0"/><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:defRPr sz="1000" b="1" kern="1200"/></cs:axisTitle><cs:categoryAxis><cs:lnRef idx="1"><a:schemeClr val="tx1"/></cs:lnRef><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr><cs:defRPr sz="1000" kern="1200"/></cs:categoryAxis><cs:chartArea mods="allowNoFillOverride allowNoLineOverride"><cs:lnRef idx="1"><a:schemeClr val="tx1"><a:tint val="75000"/></a:schemeClr></cs:lnRef><cs:fillRef idx="1"><a:schemeClr val="bg1"/></cs:fillRef><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr><cs:defRPr sz="1000" kern="1200"/></cs:chartArea><cs:dataLabel><cs:lnRef idx="0"/><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:defRPr sz="1000" kern="1200"/></cs:dataLabel><cs:dataLabelCallout><cs:lnRef idx="0"/><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="dk1"/></cs:fontRef><cs:spPr><a:solidFill><a:schemeClr val="lt1"/></a:solidFill><a:ln><a:solidFill><a:schemeClr val="dk1"><a:lumMod val="65000"/><a:lumOff val="35000"/></a:schemeClr></a:solidFill></a:ln></cs:spPr><cs:defRPr sz="1000" kern="1200"/></cs:dataLabelCallout><cs:dataPoint><cs:lnRef idx="0"/><cs:fillRef idx="1"><cs:styleClr val="auto"/></cs:fillRef><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef></cs:dataPoint><cs:dataPoint3D><cs:lnRef idx="0"/><cs:fillRef idx="1"><cs:styleClr val="auto"/></cs:fillRef><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef></cs:dataPoint3D><cs:dataPointLine><cs:lnRef idx="1"><cs:styleClr val="auto"/></cs:lnRef><cs:lineWidthScale>3</cs:lineWidthScale><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln cap="rnd"><a:round/></a:ln></cs:spPr></cs:dataPointLine><cs:dataPointMarker><cs:lnRef idx="1"><cs:styleClr val="auto"/></cs:lnRef><cs:fillRef idx="1"><cs:styleClr val="auto"/></cs:fillRef><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr></cs:dataPointMarker><cs:dataPointMarkerLayout/><cs:dataPointWireframe><cs:lnRef idx="1"><cs:styleClr val="auto"/></cs:lnRef><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr></cs:dataPointWireframe><cs:dataTable><cs:lnRef idx="1"><a:schemeClr val="tx1"><a:tint val="75000"/></a:schemeClr></cs:lnRef><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr><cs:defRPr sz="1000" kern="1200"/></cs:dataTable><cs:downBar><cs:lnRef idx="1"><a:schemeClr val="tx1"/></cs:lnRef><cs:fillRef idx="1"><a:schemeClr val="dk1"><a:tint val="95000"/></a:schemeClr></cs:fillRef><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr></cs:downBar><cs:dropLine><cs:lnRef idx="1"><a:schemeClr val="tx1"/></cs:lnRef><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr></cs:dropLine><cs:errorBar><cs:lnRef idx="1"><a:schemeClr val="tx1"/></cs:lnRef><cs:fillRef idx="1"><a:schemeClr val="tx1"/></cs:fillRef><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr></cs:errorBar><cs:floor><cs:lnRef idx="1"><a:schemeClr val="tx1"><a:tint val="75000"/></a:schemeClr></cs:lnRef><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr></cs:floor><cs:gridlineMajor><cs:lnRef idx="1"><a:schemeClr val="tx1"/></cs:lnRef><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr></cs:gridlineMajor><cs:gridlineMinor><cs:lnRef idx="1"><a:schemeClr val="tx1"><a:tint val="50000"/></a:schemeClr></cs:lnRef><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr></cs:gridlineMinor><cs:hiLoLine><cs:lnRef idx="1"><a:schemeClr val="tx1"/></cs:lnRef><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr></cs:hiLoLine><cs:leaderLine><cs:lnRef idx="1"><a:schemeClr val="tx1"/></cs:lnRef><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr></cs:leaderLine><cs:legend><cs:lnRef idx="0"/><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:defRPr sz="1000" kern="1200"/></cs:legend><cs:plotArea mods="allowNoFillOverride allowNoLineOverride"><cs:lnRef idx="0"/><cs:fillRef idx="1"><a:schemeClr val="bg1"/></cs:fillRef><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef></cs:plotArea><cs:plotArea3D><cs:lnRef idx="0"/><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef></cs:plotArea3D><cs:seriesAxis><cs:lnRef idx="1"><a:schemeClr val="tx1"/></cs:lnRef><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr><cs:defRPr sz="1000" kern="1200"/></cs:seriesAxis><cs:seriesLine><cs:lnRef idx="1"><a:schemeClr val="tx1"/></cs:lnRef><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr></cs:seriesLine><cs:title><cs:lnRef idx="0"/><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:defRPr sz="1000" b="1" kern="1200"/></cs:title><cs:trendline><cs:lnRef idx="1"><a:schemeClr val="tx1"/></cs:lnRef><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln cap="rnd"><a:round/></a:ln></cs:spPr></cs:trendline><cs:trendlineLabel><cs:lnRef idx="0"/><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:defRPr sz="1000" kern="1200"/></cs:trendlineLabel><cs:upBar><cs:lnRef idx="1"><a:schemeClr val="tx1"/></cs:lnRef><cs:fillRef idx="1"><a:schemeClr val="dk1"><a:tint val="5000"/></a:schemeClr></cs:fillRef><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr></cs:upBar><cs:valueAxis><cs:lnRef idx="1"><a:schemeClr val="tx1"/></cs:lnRef><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef><cs:spPr><a:ln><a:round/></a:ln></cs:spPr><cs:defRPr sz="1000" kern="1200"/></cs:valueAxis><cs:wall><cs:lnRef idx="0"/><cs:fillRef idx="0"/><cs:effectRef idx="0"/><cs:fontRef idx="minor"><a:schemeClr val="tx1"/></cs:fontRef></cs:wall></cs:chartStyle>'
 
 const DEFAULT_CHARTEX_COLORS_XML = '<cs:colorStyle xmlns:cs="http://schemas.microsoft.com/office/drawing/2012/chartStyle" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" meth="cycle" id="10"><a:schemeClr val="accent1"/><a:schemeClr val="accent2"/><a:schemeClr val="accent3"/><a:schemeClr val="accent4"/><a:schemeClr val="accent5"/><a:schemeClr val="accent6"/><cs:variation/><cs:variation><a:lumMod val="60000"/></cs:variation><cs:variation><a:lumMod val="80000"/><a:lumOff val="20000"/></cs:variation><cs:variation><a:lumMod val="80000"/></cs:variation><cs:variation><a:lumMod val="60000"/><a:lumOff val="40000"/></cs:variation><cs:variation><a:lumMod val="50000"/></cs:variation><cs:variation><a:lumMod val="70000"/><a:lumOff val="30000"/></cs:variation><cs:variation><a:lumMod val="70000"/></cs:variation><cs:variation><a:lumMod val="50000"/><a:lumOff val="50000"/></cs:variation></cs:colorStyle>'
+function makeChartExColorsXml(colors?: string[]): string {
+	const palette = Array.isArray(colors)
+		? colors.filter(color => typeof color === 'string' && color.length === 6)
+		: []
+	if (!palette.length) return DEFAULT_CHARTEX_COLORS_XML
+	const entries = palette.map(color => `<a:srgbClr val="${encodeXmlEntities(color)}"/>`).join('')
+	return `<cs:colorStyle xmlns:cs="http://schemas.microsoft.com/office/drawing/2012/chartStyle" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" meth="cycle" id="10">${entries}<cs:variation/><cs:variation><a:lumMod val="60000"/></cs:variation><cs:variation><a:lumMod val="80000"/><a:lumOff val="20000"/></cs:variation><cs:variation><a:lumMod val="80000"/></cs:variation><cs:variation><a:lumMod val="60000"/><a:lumOff val="40000"/></cs:variation></cs:colorStyle>`
+}
 
 function isChartExRel(chartObject: ISlideRelChart): boolean {
 	return chartObject.chartFamily === 'chartEx' || !!(chartObject.opts as any)._chartEx
@@ -81,6 +90,36 @@ function chartExDataXml(item: IOptsChartData, dataId: number, layoutId: string):
 	return xml
 }
 
+function chartExPointStyleXml(item: IOptsChartData, colors: unknown[]): string {
+	const values = Array.isArray(item.values) && item.values.length ? item.values : [0]
+	const palette = (Array.isArray(colors)
+		? colors.filter(color => {
+			if (typeof color !== 'string' || color.length !== 6) return false
+			for (const character of color) if (!'0123456789abcdefABCDEF'.includes(character)) return false
+			return true
+		})
+		: []) as string[]
+	if (!palette.length) return ''
+	let xml = ''
+	for (let index = 0; index < values.length; index++) {
+		const color = palette[index % palette.length]
+		xml += `<cx:dataPt idx="${index}"><cx:spPr><a:solidFill><a:srgbClr val="${encodeXmlEntities(color)}"/></a:solidFill></cx:spPr></cx:dataPt>`
+	}
+	return xml
+}
+
+function chartExTitleXml(opts: IChartOptsLib): string {
+	if (!opts.showTitle) return ''
+	const title = encodeXmlEntities(String(opts.title || 'Chart Title'))
+	const align = opts.titleAlign === 'left' ? 'l' : opts.titleAlign === 'right' ? 'r' : 'ctr'
+	const sizeAttr = opts.titleFontSize ? ` sz="${Math.round(opts.titleFontSize * 100)}"` : ''
+	const boldAttr = opts.titleBold ? ' b="1"' : ''
+	const rotate = opts.titleRotate ? ` rot="${convertRotationDegrees(opts.titleRotate)}"` : ''
+	const color = createColorElement(opts.titleColor || DEF_FONT_COLOR)
+	const fontFace = encodeXmlEntities(opts.titleFontFace || 'Arial')
+	return `<cx:title pos="t" align="${align}" overlay="0"><cx:tx><cx:rich><a:bodyPr${rotate}/><a:lstStyle/><a:p><a:r><a:rPr lang="en-US"${sizeAttr}${boldAttr}><a:solidFill>${color}</a:solidFill><a:latin typeface="${fontFace}"/></a:rPr><a:t>${title}</a:t></a:r><a:endParaRPr lang="en-US"${sizeAttr}${boldAttr}/></a:p></cx:rich></cx:tx></cx:title>`
+}
+
 export function makeXmlChartEx(chartObject: ISlideRelChart): string {
 	const chartType = String(chartObject.type || (chartObject.opts as any)._type || '')
 	const primaryLayoutId = (chartObject.opts as any).chartExLayoutId || CHARTEX_LAYOUT_BY_TYPE[chartType] || chartType || 'clusteredColumn'
@@ -89,14 +128,17 @@ export function makeXmlChartEx(chartObject: ISlideRelChart): string {
 	xml += '<cx:chartSpace xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:cx="http://schemas.microsoft.com/office/drawing/2014/chartex">'
 	xml += '<cx:chartData>'
 	data.forEach((item, index) => { xml += chartExDataXml(item, index, primaryLayoutId) })
-	xml += '</cx:chartData><cx:chart><cx:plotArea><cx:plotAreaRegion>'
-	data.forEach((_item, index) => {
+	xml += `</cx:chartData><cx:chart>${chartExTitleXml(chartObject.opts)}<cx:plotArea><cx:plotAreaRegion>`
+	data.forEach((item, index) => {
 		xml += `<cx:series layoutId="${encodeXmlEntities(primaryLayoutId)}" uniqueId="{${getUuid('xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx').toUpperCase()}}">`
 		xml += `<cx:dataId val="${index}" />`
 		if (chartType === CHART_TYPE.HISTOGRAM) xml += '<cx:layoutPr><cx:binning intervalClosed="r" /></cx:layoutPr>'
 		else if (chartType === CHART_TYPE.BOX_WHISKER) xml += '<cx:layoutPr><cx:statistics quartileMethod="exclusive" /></cx:layoutPr>'
 		else if (chartType === CHART_TYPE.WATERFALL) xml += '<cx:layoutPr />'
-		else if (chartType === CHART_TYPE.TREEMAP || chartType === CHART_TYPE.SUNBURST) xml += '<cx:layoutPr />'
+		else if (chartType === CHART_TYPE.TREEMAP || chartType === CHART_TYPE.SUNBURST) {
+			xml += '<cx:layoutPr />'
+			xml += chartExPointStyleXml(item, (chartObject.opts as any).chartColors)
+		}
 		xml += '</cx:series>'
 	})
 	if (chartType === CHART_TYPE.PARETO) {
@@ -121,10 +163,23 @@ export function makeXmlChartEx(chartObject: ISlideRelChart): string {
 export async function createExcelWorksheet (chartObject: ISlideRelChart, zip: JSZip): Promise<string> {
 	if (isChartExRel(chartObject)) {
 		const rawOpts = chartObject.opts as any
+		// ChartEx gallery captures are executable package states, not merely
+		// style/color hints.  When the resolver supplies the captured ChartEx
+		// payload, preserve its family-specific geometry/data metadata (for
+		// example geoCache for Filled Map) exactly as we do for legacy charts.
+		// The generated slide remains a native editable ChartEx object; the
+		// slide-level compatibility fallback is handled by gen-xml.ts.
+		if (rawOpts._rawChartXml && rawOpts._rawChartRelsXml) {
+			if (rawOpts._rawChartStyleXml && rawOpts._rawChartStyleName) zip.file(`ppt/charts/${rawOpts._rawChartStyleName}`, rawOpts._rawChartStyleXml)
+			if (rawOpts._rawChartColorsXml && rawOpts._rawChartColorsName) zip.file(`ppt/charts/${rawOpts._rawChartColorsName}`, rawOpts._rawChartColorsXml)
+			zip.file(`ppt/charts/${chartObject.fileName}`, rawOpts._rawChartXml)
+			zip.file(`ppt/charts/_rels/${chartObject.fileName}.rels`, rawOpts._rawChartRelsXml)
+			return ''
+		}
 		const styleName = rawOpts._rawChartStyleName || `style${chartObject.globalId}.xml`
 		const colorsName = rawOpts._rawChartColorsName || `colors${chartObject.globalId}.xml`
 		const styleXml = rawOpts._rawChartStyleXml || DEFAULT_CHARTEX_STYLE_XML
-		const colorsXml = rawOpts._rawChartColorsXml || DEFAULT_CHARTEX_COLORS_XML
+		const colorsXml = rawOpts._rawChartColorsXml || makeChartExColorsXml(rawOpts.chartColors)
 		zip.file(`ppt/charts/${chartObject.fileName}`, makeXmlChartEx(chartObject))
 		zip.file(`ppt/charts/${styleName}`, styleXml)
 		zip.file(`ppt/charts/${colorsName}`, colorsXml)
@@ -646,11 +701,28 @@ export async function createExcelWorksheet (chartObject: ISlideRelChart, zip: JS
 				zip.file(`ppt/embeddings/Microsoft_Excel_Worksheet${chartObject.globalId}.xlsx`, content, { base64: true })
 
 				// 2: Create the chart.xml and rel files
+				const nativeStyleName = rawOpts._rawChartStyleXml && rawOpts._rawChartStyleName
+					? String(rawOpts._rawChartStyleName)
+					: null
+				const nativeColorName = rawOpts._rawChartColorsXml && rawOpts._rawChartColorsName
+					? String(rawOpts._rawChartColorsName)
+					: null
+				if (nativeStyleName) zip.file(`ppt/charts/${nativeStyleName}`, rawOpts._rawChartStyleXml)
+				if (nativeColorName) zip.file(`ppt/charts/${nativeColorName}`, rawOpts._rawChartColorsXml)
+				let nextNativeRelationshipId = 2
+				const nativeStyleRelationship = nativeStyleName
+					? `<Relationship Id="rId${nextNativeRelationshipId++}" Type="http://schemas.microsoft.com/office/2011/relationships/chartStyle" Target="${encodeXmlEntities(nativeStyleName)}"/>`
+					: ''
+				const nativeColorRelationship = nativeColorName
+					? `<Relationship Id="rId${nextNativeRelationshipId++}" Type="http://schemas.microsoft.com/office/2011/relationships/chartColorStyle" Target="${encodeXmlEntities(nativeColorName)}"/>`
+					: ''
 				zip.file(
 					'ppt/charts/_rels/' + chartObject.fileName + '.rels',
 					'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>' +
 					'<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
 					`<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/package" Target="../embeddings/Microsoft_Excel_Worksheet${chartObject.globalId}.xlsx"/>` +
+					nativeStyleRelationship +
+					nativeColorRelationship +
 					'</Relationships>'
 				)
 				zip.file(`ppt/charts/${chartObject.fileName}`, makeXmlCharts(chartObject))
@@ -674,13 +746,25 @@ export function makeXmlCharts (rel: ISlideRelChart): string {
 	let strXml = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>'
 	let usesSecondaryValAxis = false
 	let usesSecondaryCatAxis = false
+	const usesSeriesAxis = rel.opts._type === CHART_TYPE.BAR3D
+		|| (Array.isArray(rel.opts._type) && rel.opts._type.some(type => type.type === CHART_TYPE.BAR3D))
 
 	// STEP 1: Create chart
 	{
 		// CHARTSPACE: BEGIN vvv
 		strXml +=
-            '<c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">'
+			'<c:chartSpace xmlns:c="http://schemas.openxmlformats.org/drawingml/2006/chart" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" xmlns:c14="http://schemas.microsoft.com/office/drawing/2007/8/2/chart">'
 		strXml += '<c:date1904 val="0"/>' // ppt defaults to 1904 dates, excel to 1900
+		const fallbackStyleId = Number.isInteger((rel.opts as any).chartStyleId) ? (rel.opts as any).chartStyleId : undefined
+		const modernStyleId = Number.isInteger((rel.opts as any).chartStyleModernId) ? (rel.opts as any).chartStyleModernId : undefined
+		if (Number.isInteger(modernStyleId) && modernStyleId >= 101 && modernStyleId <= 148) {
+			const fallback = Number.isInteger(fallbackStyleId) && fallbackStyleId >= 1 && fallbackStyleId <= 48
+				? fallbackStyleId
+				: modernStyleId - 100
+			strXml += `<mc:AlternateContent><mc:Choice Requires="c14"><c14:style val="${modernStyleId}"/></mc:Choice><mc:Fallback><c:style val="${fallback}"/></mc:Fallback></mc:AlternateContent>`
+		} else if (Number.isInteger(fallbackStyleId) && fallbackStyleId >= 1 && fallbackStyleId <= 48) {
+			strXml += `<c:style val="${fallbackStyleId}"/>`
+		}
 		strXml += `<c:roundedCorners val="${rel.opts.chartArea.roundedCorners ? '1' : '0'}"/>`
 		strXml += '<c:chart>'
 
@@ -735,7 +819,10 @@ export function makeXmlCharts (rel: ISlideRelChart): string {
 	if (Array.isArray(rel.opts._type)) {
 		rel.opts._type.forEach(type => {
 			const typeOptions = type.options || {}
-			const options = { ...rel.opts, ...typeOptions }
+			const relationHasNativeGalleryStyle = Number.isInteger((rel.opts as any).chartStyleModernId)
+				|| (Number.isInteger((rel.opts as any).chartStyleId) && (rel.opts as any).chartStyleId >= 1 && (rel.opts as any).chartStyleId <= 48)
+			const typePreset = getChartStylePresetForNativeGallery(type.type, relationHasNativeGalleryStyle)
+			const options = { ...typePreset, ...rel.opts, ...typeOptions }
 			if (typeOptions.secondaryValAxis === undefined) options.secondaryValAxis = false
 			if (typeOptions.secondaryCatAxis === undefined) options.secondaryCatAxis = false
 			// let options: IChartOptsLib = { type: type.type, }
@@ -780,11 +867,8 @@ export function makeXmlCharts (rel: ISlideRelChart): string {
 				strXml += makeValAxis(rel.opts, AXIS_ID_VALUE_SECONDARY, usesSecondaryCatAxis ? AXIS_ID_CATEGORY_SECONDARY : AXIS_ID_CATEGORY_PRIMARY)
 			}
 
-			// Add series axis for 3D bar
-			if (rel.opts._type === CHART_TYPE.BAR3D) {
-				strXml += makeSerAxis(rel.opts, AXIS_ID_SERIES_PRIMARY, AXIS_ID_VALUE_PRIMARY)
-			}
 		}
+		if (usesSeriesAxis) strXml += makeSerAxis(rel.opts, AXIS_ID_SERIES_PRIMARY, AXIS_ID_VALUE_PRIMARY)
 
 		// Combo Charts: Add secondary axes after all vals
 		if ((rel.opts?.catAxes && rel.opts?.catAxes[1]) || usesSecondaryCatAxis) {
@@ -907,12 +991,38 @@ export function makeXmlCharts (rel: ISlideRelChart): string {
  * @return {string} XML chart
  */
 function makeChartType (chartType: CHART_NAME, data: IOptsChartData[], opts: IChartOptsLib, valAxisId: string, catAxisId: string, isMultiTypeChart: boolean): string {
+	// Composite relations carry common options, but each subgroup has a distinct
+	// OOXML value domain. Validate label placement against the actual subgroup so
+	// a Bar-only value such as outEnd can never corrupt a Line/XY/Pie group.
+	const requestedDataLabelPosition = opts.dataLabelPosition as string | undefined
+	if (requestedDataLabelPosition) {
+		let valid = true
+		if (new Set<string>([CHART_TYPE.AREA, CHART_TYPE.BAR3D, CHART_TYPE.DOUGHNUT, CHART_TYPE.RADAR]).has(String(chartType))) valid = false
+		else if (chartType === CHART_TYPE.PIE) valid = ['bestFit', 'ctr', 'inEnd', 'outEnd'].includes(requestedDataLabelPosition)
+		else if (new Set<string>([CHART_TYPE.BUBBLE, CHART_TYPE.BUBBLE3D, CHART_TYPE.LINE, CHART_TYPE.SCATTER]).has(String(chartType))) valid = ['b', 'ctr', 'l', 'r', 't'].includes(requestedDataLabelPosition)
+		else if (chartType === CHART_TYPE.BAR) {
+			const grouping = opts.barGrouping || 'clustered'
+			const allowed = grouping === 'clustered'
+				? ['ctr', 'inBase', 'inEnd', 'outEnd']
+				: ['ctr', 'inBase', 'inEnd']
+			valid = allowed.includes(requestedDataLabelPosition)
+		}
+		if (!valid) {
+			opts = { ...opts }
+			delete opts.dataLabelPosition
+		}
+	}
 	// NOTE: "Chart Range" (as shown in "select Chart Area dialog") is calculated.
 	// ....: Ensure each X/Y Axis/Col has same row height (esp. applicable to XY Scatter where X can often be larger than Y's)
 	let colorIndex = -1 // Maintain the color index by region
 	let idxColLtr = 1
 	let optsChartData: IOptsChartData = null
 	let strXml = ''
+	// A native Office gallery style must be allowed to own fills, lines and
+	// chart-area treatment.  Explicit per-series spPr blocks override the
+	// gallery and make every variant look like the library default.
+	const nativeGalleryStyle = Number.isInteger((opts as any).chartStyleModernId)
+		|| (Number.isInteger((opts as any).chartStyleId) && (opts as any).chartStyleId >= 1 && (opts as any).chartStyleId <= 48)
 
 	switch (chartType) {
 		case CHART_TYPE.AREA:
@@ -988,29 +1098,31 @@ function makeChartType (chartType: CHART_NAME, data: IOptsChartData[], opts: ICh
 				// TODO: let seriesColor = obj.color ? obj.color : opts.chartColors ? opts.chartColors[colorIndex % opts.chartColors.length] : null
 				const seriesColor = opts.chartColors ? opts.chartColors[colorIndex % opts.chartColors.length] : null
 
-				strXml += '  <c:spPr>'
-				if (seriesColor === 'transparent') {
-					strXml += '<a:noFill/>'
-				} else if (opts.chartColorsOpacity) {
-					strXml += '<a:solidFill>' + createColorElement(seriesColor, `<a:alpha val="${Math.round(opts.chartColorsOpacity * 1000)}"/>`) + '</a:solidFill>'
-				} else {
-					strXml += '<a:solidFill>' + createColorElement(seriesColor) + '</a:solidFill>'
-				}
-
-				if (chartType === CHART_TYPE.LINE || chartType === CHART_TYPE.RADAR) {
-					if (opts.lineSize === 0) {
-						strXml += '<a:ln><a:noFill/></a:ln>'
+				if (!nativeGalleryStyle) {
+					strXml += '  <c:spPr>'
+					if (seriesColor === 'transparent') {
+						strXml += '<a:noFill/>'
+					} else if (opts.chartColorsOpacity) {
+						strXml += '<a:solidFill>' + createColorElement(seriesColor, `<a:alpha val="${Math.round(opts.chartColorsOpacity * 1000)}"/>`) + '</a:solidFill>'
 					} else {
-						strXml += `<a:ln w="${valToPts(opts.lineSize)}" cap="${createLineCap(opts.lineCap)}"><a:solidFill>${createColorElement(seriesColor)}</a:solidFill>`
-						strXml += '<a:prstDash val="' + (opts.lineDash || 'solid') + '"/><a:round/></a:ln>'
+						strXml += '<a:solidFill>' + createColorElement(seriesColor) + '</a:solidFill>'
 					}
-				} else if (opts.dataBorder) {
-					strXml += `<a:ln w="${valToPts(opts.dataBorder.pt)}" cap="${createLineCap(opts.lineCap)}"><a:solidFill>${createColorElement(opts.dataBorder.color)}</a:solidFill><a:prstDash val="solid"/><a:round/></a:ln>`
+
+					if (chartType === CHART_TYPE.LINE || chartType === CHART_TYPE.RADAR) {
+						if (opts.lineSize === 0) {
+							strXml += '<a:ln><a:noFill/></a:ln>'
+						} else {
+							strXml += `<a:ln w="${valToPts(opts.lineSize)}" cap="${createLineCap(opts.lineCap)}"><a:solidFill>${createColorElement(seriesColor)}</a:solidFill>`
+							strXml += '<a:prstDash val="' + (opts.lineDash || 'solid') + '"/><a:round/></a:ln>'
+						}
+					} else if (opts.dataBorder) {
+						strXml += `<a:ln w="${valToPts(opts.dataBorder.pt)}" cap="${createLineCap(opts.lineCap)}"><a:solidFill>${createColorElement(opts.dataBorder.color)}</a:solidFill><a:prstDash val="solid"/><a:round/></a:ln>`
+					}
+
+					strXml += createShadowElement(opts.shadow, DEF_SHAPE_SHADOW)
+
+					strXml += '  </c:spPr>'
 				}
-
-				strXml += createShadowElement(opts.shadow, DEF_SHAPE_SHADOW)
-
-				strXml += '  </c:spPr>'
 				strXml += '  <c:invertIfNegative val="0"/>'
 
 				// Data Labels per series
@@ -1170,8 +1282,10 @@ function makeChartType (chartType: CHART_NAME, data: IOptsChartData[], opts: ICh
 				strXml += '  <c:marker val="1"/>'
 			}
 
-			// 5: Add axisId (NOTE: order matters! (category comes first))
-			strXml += `<c:axId val="${catAxisId}"/><c:axId val="${valAxisId}"/><c:axId val="${AXIS_ID_SERIES_PRIMARY}"/>`
+			// 5: Add axisId (NOTE: order matters! (category comes first)). Only
+			// 3-D charts own a series axis; ordinary groups must not reference it.
+			strXml += `<c:axId val="${catAxisId}"/><c:axId val="${valAxisId}"/>`
+			if (chartType === CHART_TYPE.BAR3D) strXml += `<c:axId val="${AXIS_ID_SERIES_PRIMARY}"/>`
 
 			// 6: Close Chart tag
 			strXml += `</c:${chartType}Chart>`
