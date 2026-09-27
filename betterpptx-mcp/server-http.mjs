@@ -54,7 +54,7 @@ import { createVerifiedIdentityVerifier } from './auth/verified-identity.mjs'
 import { anonymousMcpRequestAllowed, publicIdentityPolicy } from './auth/public-identity-policy.mjs'
 import { createIdentityProxy } from './auth/identity-proxy.mjs'
 import { httpClientRateLimitKey, httpRateLimitConfig, developmentLogViewerAllowed } from './auth/http-admission.mjs'
-import { isProductionBillingEnvironment, assertProductionBillingConfiguration } from './billing/security-policy.mjs'
+import { isProductionBillingEnvironment, isFreePublicationBillingProfile, assertProductionBillingConfiguration } from './billing/security-policy.mjs'
 import { configuredCryptoPacks } from './billing/crypto-packs.mjs'
 import { createCryptoOrderStore } from './billing/crypto-orders.mjs'
 import { tryMintPaymentEnvelope, verifyPaymentEnvelope, quoteKeyForPaymentEnvelope } from './billing/payment-envelope.mjs'
@@ -504,10 +504,14 @@ export async function startBetterPptxHttp(options = {}) {
 	const app = express()
 	app.disable('x-powered-by')
 	const payPerJobBilling = String(process.env.BETTERPPTX_BILLING_MODEL || '').trim().toLowerCase() === 'pay_per_job'
-	const legacyCreditRouteDisabled = res => res.status(410).json({
+	const freePublicationBilling = isFreePublicationBillingProfile()
+	const paymentFlowsDisabled = payPerJobBilling || freePublicationBilling
+	const paymentRouteDisabled = res => res.status(410).json({
 		error: {
-			code: 'PAY_PER_JOB_ROUTE_ONLY',
-			message: 'This deployment accepts one exact x402 payment per bounded job; reusable credit-pack payment routes are unavailable.',
+			code: freePublicationBilling ? 'PAYMENT_NOT_CONFIGURED' : 'PAY_PER_JOB_ROUTE_ONLY',
+			message: freePublicationBilling
+				? 'This deployment is a free-publication service and does not accept payments.'
+				: 'This deployment accepts one exact x402 payment per bounded job; reusable credit-pack payment routes are unavailable.',
 		},
 	})
 	// Warm the immutable public capability manifest before binding the socket.
@@ -761,7 +765,7 @@ export async function startBetterPptxHttp(options = {}) {
 		}
 	})
 
-	const cryptoOrderStore = payPerJobBilling ? null : createCryptoOrderStore()
+	const cryptoOrderStore = paymentFlowsDisabled ? null : createCryptoOrderStore()
 	const x402QuoteStore = createX402QuoteStore()
 	const walletBalanceReader = options.walletBalanceReader || readBaseWalletFundingStatus
 	const orderStatusScans = new Map()
@@ -783,6 +787,7 @@ export async function startBetterPptxHttp(options = {}) {
 	}
 
 	app.get('/payments/wallet-balance/:address', async (req, res) => {
+		if (freePublicationBilling) return paymentRouteDisabled(res)
 		res.setHeader('Cache-Control', 'no-store')
 		try {
 			const status = await walletBalanceReader({
@@ -802,6 +807,7 @@ export async function startBetterPptxHttp(options = {}) {
 	})
 
 	app.get('/fund-wallet', async (req, res) => {
+		if (freePublicationBilling) return paymentRouteDisabled(res)
 		const nonce = randomBytes(16).toString('base64url')
 		paymentPageHeaders(res, nonce)
 		try {
@@ -825,7 +831,7 @@ export async function startBetterPptxHttp(options = {}) {
 	})
 
 	app.get('/pay/orders/new', async (req, res) => {
-		if (payPerJobBilling) return legacyCreditRouteDisabled(res)
+		if (paymentFlowsDisabled) return paymentRouteDisabled(res)
 		paymentPageHeaders(res)
 		let envelope
 		try {
@@ -860,7 +866,7 @@ export async function startBetterPptxHttp(options = {}) {
 	})
 
 	app.get('/pay/orders/:orderId', async (req, res) => {
-		if (payPerJobBilling) return legacyCreditRouteDisabled(res)
+		if (paymentFlowsDisabled) return paymentRouteDisabled(res)
 		const order = await cryptoOrderStore.getOrder(req.params.orderId)
 		if (!order) {
 			paymentPageHeaders(res)
@@ -886,7 +892,7 @@ export async function startBetterPptxHttp(options = {}) {
 	})
 
 	app.get('/pay/orders/:orderId/status', async (req, res) => {
-		if (payPerJobBilling) return legacyCreditRouteDisabled(res)
+		if (paymentFlowsDisabled) return paymentRouteDisabled(res)
 		let order = await cryptoOrderStore.getOrder(req.params.orderId)
 		if (!order) return res.status(404).json({ error: { code: 'CRYPTO_ORDER_NOT_FOUND', message: 'Payment order was not found.' } })
 		const scanIntervalMs = Math.max(5000, Number(process.env.BETTERPPTX_PAYMENT_STATUS_SCAN_INTERVAL_MS || 15000))
@@ -912,7 +918,7 @@ export async function startBetterPptxHttp(options = {}) {
 	})
 
 	app.post('/internal/payments/base/scan', async (req, res) => {
-		if (payPerJobBilling) return legacyCreditRouteDisabled(res)
+		if (paymentFlowsDisabled) return paymentRouteDisabled(res)
 		if (!requireScannerToken(req, res)) return
 		try {
 			const summary = await scanBaseUsdcHotWindow({ store: cryptoOrderStore })
@@ -923,7 +929,7 @@ export async function startBetterPptxHttp(options = {}) {
 	})
 
 	app.post('/internal/payments/forwarders/sweep', async (req, res) => {
-		if (payPerJobBilling) return legacyCreditRouteDisabled(res)
+		if (paymentFlowsDisabled) return paymentRouteDisabled(res)
 		res.setHeader('Cache-Control', 'no-store')
 		if (!requireScannerToken(req, res)) return
 		try {
@@ -976,7 +982,7 @@ export async function startBetterPptxHttp(options = {}) {
 	})
 
 	app.post('/pay/x402/credit-packs/:packId', async (req, res) => {
-		if (payPerJobBilling) return legacyCreditRouteDisabled(res)
+		if (paymentFlowsDisabled) return paymentRouteDisabled(res)
 		try { assertProductionBillingConfiguration() } catch (error) {
 			return res.status(503).json({ error: { code: error.code, message: 'Payment execution is not enabled for this deployment.' } })
 		}
@@ -1494,10 +1500,12 @@ export async function startBetterPptxHttp(options = {}) {
 		})
 	}
 
-	registerPayRamRoutes(app, {
-		requestInstallIdentity,
-		fetchFn: options.payramFetch || null,
-	})
+	if (!freePublicationBilling) {
+		registerPayRamRoutes(app, {
+			requestInstallIdentity,
+			fetchFn: options.payramFetch || null,
+		})
+	}
 
 	function assertSessionInstallIdentity(req, entry) {
 		const requestIdentity = requestInstallIdentity(req)

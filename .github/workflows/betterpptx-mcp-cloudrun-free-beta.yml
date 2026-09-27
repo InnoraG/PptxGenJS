@@ -1,0 +1,378 @@
+name: BetterPPTX MCP Cloud Run free beta
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: Type DEPLOY to publish the verified free-publication beta
+        required: true
+        type: choice
+        options:
+          - NO
+          - DEPLOY
+
+permissions:
+  contents: read
+
+concurrency:
+  group: betterpptx-mcp-cloudrun-free-beta
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    name: Verify source, runtime contracts, and container
+    if: github.repository == 'betterpptx/betterpptx-mcp' && github.ref == 'refs/heads/main' && inputs.confirmation == 'DEPLOY'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    steps:
+      - name: Check out the exact triggering revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 22
+
+      - name: Install locked dependencies
+        run: |
+          npm ci
+          npm ci --prefix betterpptx-mcp
+
+      - name: Validate the Cloudflare edge bundle without publishing
+        run: |
+          npm ci --prefix betterpptx-mcp/deploy/cloudflare-edge
+          npm audit --prefix betterpptx-mcp/deploy/cloudflare-edge --audit-level=high
+          cd betterpptx-mcp/deploy/cloudflare-edge
+          npx wrangler deploy --dry-run
+
+      - name: Refuse release with high or critical runtime dependency advisories
+        run: |
+          npm audit --omit=dev --audit-level=high
+          npm audit --prefix betterpptx-mcp --omit=dev --audit-level=high
+
+      - name: Verify release/schema binding and source types
+        run: |
+          npm run verify:release-version --prefix betterpptx-mcp
+          npx tsc --noEmit
+
+      - name: Run deployment-critical regression tests
+        run: |
+          npm run test:unit
+          npm run test:authoring-augmentation --prefix betterpptx-mcp
+          node --test betterpptx-mcp/test/production-free-publication-profile.test.mjs
+          node --test betterpptx-mcp/test/production-free-publication-http.test.mjs
+          node --test betterpptx-mcp/test/production-non-rendering-save.test.mjs
+          node --test betterpptx-mcp/test/public-artifact-download-sanitization.test.mjs
+          node --test betterpptx-mcp/test/cloudflare-edge-worker.test.mjs
+
+      - name: Build the immutable release image
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_digest="$(git archive "$GITHUB_SHA" | sha256sum | cut -d ' ' -f1)"
+          docker build \
+            --build-arg BETTERPPTX_BUILD_SOURCE_DIGEST="$source_digest" \
+            --build-arg BETTERPPTX_SOURCE_REVISION="$GITHUB_SHA" \
+            --file deploy/docker/Dockerfile.mcp \
+            --tag "betterpptx-mcp-free-beta-ci:$GITHUB_SHA" .
+
+  deploy:
+    name: Deploy protected worker and OAuth-guarded public gateway
+    needs: verify
+    if: github.repository == 'betterpptx/betterpptx-mcp' && github.ref == 'refs/heads/main' && inputs.confirmation == 'DEPLOY'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 75
+    environment:
+      name: betterpptx-canary
+    permissions:
+      contents: read
+      id-token: write
+    env:
+        GCP_PROJECT_ID: betterpptx-mcp-20260926
+        GCP_REGION: us-central1
+        GCP_ARTIFACT_REPOSITORY: betterpptx-canary
+        GCP_RUNTIME_SERVICE_ACCOUNT: betterpptx-public-runtime@betterpptx-mcp-20260926.iam.gserviceaccount.com
+        CLOUD_RUN_GATEWAY: betterpptx-public
+        CLOUD_RUN_WORKER: betterpptx-worker
+        CLOUD_RUN_SWEEPER: betterpptx-artifact-sweeper
+        CLOUD_SCHEDULER_JOB: betterpptx-artifact-sweep-hourly
+        INSTALL_HMAC_SECRET_NAME: betterpptx-install-hmac-secret
+        OPERATION_WORKER_SECRET_NAME: betterpptx-operation-worker-token
+        SWEEPER_INVOKER_SERVICE_ACCOUNT: betterpptx-maintenance-invoker@betterpptx-mcp-20260926.iam.gserviceaccount.com
+        GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+        GCP_DEPLOY_SERVICE_ACCOUNT: ${{ vars.GCP_DEPLOY_SERVICE_ACCOUNT }}
+        BETTERPPTX_PUBLIC_BASE: ${{ vars.BETTERPPTX_PUBLIC_BASE }}
+        BETTERPPTX_OAUTH_ISSUER: ${{ vars.BETTERPPTX_OAUTH_ISSUER }}
+        BETTERPPTX_OAUTH_AUDIENCE: ${{ vars.BETTERPPTX_OAUTH_AUDIENCE }}
+        BETTERPPTX_OAUTH_JWKS_URL: ${{ vars.BETTERPPTX_OAUTH_JWKS_URL }}
+        BETTERPPTX_OAUTH_CLIENT_ID: ${{ vars.BETTERPPTX_OAUTH_CLIENT_ID }}
+        BETTERPPTX_GCS_BUCKET: betterpptx-mcp-20260926-artifacts
+        BETTERPPTX_MAX_INSTANCES: '2'
+    steps:
+      - name: Check out the exact triggering revision
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Require the existing keyless deployment identity and canonical OAuth settings
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$GCP_WORKLOAD_IDENTITY_PROVIDER"
+          test -n "$GCP_DEPLOY_SERVICE_ACCOUNT"
+          test "$BETTERPPTX_PUBLIC_BASE" = "https://betterpptx.xmcpx.com"
+          test "$BETTERPPTX_OAUTH_ISSUER" = "$BETTERPPTX_PUBLIC_BASE/identity/realms/betterpptx"
+          test "$BETTERPPTX_OAUTH_AUDIENCE" = "$BETTERPPTX_PUBLIC_BASE"
+          test "$BETTERPPTX_OAUTH_JWKS_URL" = "$BETTERPPTX_OAUTH_ISSUER/protocol/openid-connect/certs"
+          discovery="$RUNNER_TEMP/betterpptx-oidc-discovery.json"
+          jwks="$RUNNER_TEMP/betterpptx-oidc-jwks.json"
+          curl --fail --silent --show-error --max-time 20 "$BETTERPPTX_OAUTH_ISSUER/.well-known/openid-configuration" -o "$discovery"
+          jq -e --arg issuer "$BETTERPPTX_OAUTH_ISSUER" --arg jwks "$BETTERPPTX_OAUTH_JWKS_URL" '.issuer == $issuer and .jwks_uri == $jwks' "$discovery" >/dev/null
+          curl --fail --silent --show-error --max-time 20 "$BETTERPPTX_OAUTH_JWKS_URL" -o "$jwks"
+          jq -e '(.keys | type == "array") and (.keys | length > 0)' "$jwks" >/dev/null
+
+      - name: Build and push the immutable image
+        id: image
+        env:
+          IMAGE_TAG: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          registry="${GCP_REGION}-docker.pkg.dev"
+          image="${registry}/${GCP_PROJECT_ID}/${GCP_ARTIFACT_REPOSITORY}/betterpptx-mcp"
+          tagged_image="${image}:${IMAGE_TAG}"
+          source_digest="$(git archive "$GITHUB_SHA" | sha256sum | cut -d ' ' -f1)"
+          docker build --build-arg BETTERPPTX_BUILD_SOURCE_DIGEST="$source_digest" --build-arg BETTERPPTX_SOURCE_REVISION="$GITHUB_SHA" --file deploy/docker/Dockerfile.mcp --tag "$tagged_image" .
+          echo "TAGGED_IMAGE=$tagged_image" >> "$GITHUB_ENV"
+          echo "SOURCE_DIGEST=$source_digest" >> "$GITHUB_ENV"
+
+      - name: Authenticate to Google Cloud through GitHub OIDC
+        uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3.0.0
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+          workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ env.GCP_DEPLOY_SERVICE_ACCOUNT }}
+
+      - name: Install Google Cloud CLI
+        uses: google-github-actions/setup-gcloud@aa5489c8933f4cc7a4f7d45035b3b1440c9c10db1 # v3.0.1
+        with:
+          project_id: ${{ env.GCP_PROJECT_ID }}
+
+      - name: Require the owner-provisioned runtime identity and secrets
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud iam service-accounts describe "$GCP_RUNTIME_SERVICE_ACCOUNT" --project="$GCP_PROJECT_ID" --format='value(email)' >/dev/null
+          gcloud secrets describe "$INSTALL_HMAC_SECRET_NAME" --project="$GCP_PROJECT_ID" --format='value(name)' >/dev/null
+          gcloud secrets versions describe latest --secret="$INSTALL_HMAC_SECRET_NAME" --project="$GCP_PROJECT_ID" --format='value(state)' | grep -qx ENABLED
+          gcloud secrets describe "$OPERATION_WORKER_SECRET_NAME" --project="$GCP_PROJECT_ID" --format='value(name)' >/dev/null
+          gcloud secrets versions describe latest --secret="$OPERATION_WORKER_SECRET_NAME" --project="$GCP_PROJECT_ID" --format='value(state)' | grep -qx ENABLED
+          for queue in betterpptx-deck-interactive betterpptx-deck-batch betterpptx-media-long; do
+            gcloud tasks queues describe "$queue" --project="$GCP_PROJECT_ID" --location="$GCP_REGION" --format='value(state)' | grep -qx RUNNING
+          done
+
+      - name: Push image and resolve its immutable digest
+        id: pushed-image
+        shell: bash
+        run: |
+          set -euo pipefail
+          registry="${GCP_REGION}-docker.pkg.dev"
+          gcloud auth configure-docker "$registry" --quiet
+          docker push "$TAGGED_IMAGE"
+          image_ref="$(docker image inspect --format='{{index .RepoDigests 0}}' "$TAGGED_IMAGE")"
+          [[ "$image_ref" == *@sha256:* ]]
+          echo "image_ref=$image_ref" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy the private Cloud Tasks worker
+        env:
+          IMAGE_REF: ${{ steps.pushed-image.outputs.image_ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+            common_env="BETTERPPTX_ENV=production,BETTERPPTX_DEPLOYMENT_STAGE=production,BETTERPPTX_PUBLIC_BLACK_BOX=1,BETTERPPTX_AUTH=oauth,BETTERPPTX_PUBLIC_BASE=${BETTERPPTX_PUBLIC_BASE},BETTERPPTX_OAUTH_ISSUER=${BETTERPPTX_OAUTH_ISSUER},BETTERPPTX_OAUTH_AUDIENCE=${BETTERPPTX_OAUTH_AUDIENCE},BETTERPPTX_OAUTH_JWKS_URL=${BETTERPPTX_OAUTH_JWKS_URL},BETTERPPTX_OAUTH_TOKEN_PROFILE=keycloak,BETTERPPTX_OAUTH_CLIENT_ID=${BETTERPPTX_OAUTH_CLIENT_ID},BETTERPPTX_SELF_HOSTED_IDENTITY=0,BETTERPPTX_BILLING_PROVIDER=none,BETTERPPTX_BILLING_MODEL=free_publication,BETTERPPTX_BILLING_ENFORCE=1,BETTERPPTX_MONETIZED_MCP_ENABLED=0,BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW=3,BETTERPPTX_FREE_PUBLICATION_WINDOW_DAYS=30,BETTERPPTX_FREE_NARRATION_PREPARATIONS_PER_WINDOW=3,BETTERPPTX_FREE_IDENTITY_MEDIA_PER_WINDOW=3,BETTERPPTX_REQUIRE_SHARED_STORES=1,BETTERPPTX_GCP_PROJECT=${GCP_PROJECT_ID},BETTERPPTX_FIRESTORE_DATABASE=(default),BETTERPPTX_BILLING_LEDGER_STORE=firestore,BETTERPPTX_X402_STORE=firestore,BETTERPPTX_X402_RELAYER_LEASE_STORE=firestore,BETTERPPTX_INSTALL_USAGE_STORE=firestore,BETTERPPTX_ENTITLEMENT_STORE=firestore,BETTERPPTX_ASSET_GRANT_STORE=firestore,BETTERPPTX_EDIT_STATE_MODE=distributed,BETTERPPTX_DURABLE_DECK_STATE_STORE=firestore-gcs,BETTERPPTX_DECK_SNAPSHOT_STORE=gcs,BETTERPPTX_DECK_SNAPSHOT_GCS_PREFIX=deck-specs,BETTERPPTX_LOCKED_ASSET_STORE=gcs,BETTERPPTX_LOCKED_ASSET_GCS_PREFIX=locked-assets,BETTERPPTX_ARTIFACT_STORE=gcs,BETTERPPTX_GCS_BUCKET=${BETTERPPTX_GCS_BUCKET},BETTERPPTX_GCS_PREFIX=artifacts,BETTERPPTX_ARTIFACT_TTL_MS=43200000,BETTERPPTX_DURABLE_OPERATION_STORE=firestore,BETTERPPTX_OPERATION_DISPATCHER=cloud-tasks,BETTERPPTX_OPERATION_EXECUTION_MODE=queued,BETTERPPTX_OPERATION_WORKER_SERVICE_ACCOUNT=${GCP_RUNTIME_SERVICE_ACCOUNT},BETTERPPTX_CLOUD_TASKS_PROJECT=${GCP_PROJECT_ID},BETTERPPTX_CLOUD_TASKS_LOCATION=${GCP_REGION},BETTERPPTX_CLOUD_TASKS_QUEUE_DECK_INTERACTIVE=betterpptx-deck-interactive,BETTERPPTX_CLOUD_TASKS_QUEUE_DECK_BATCH=betterpptx-deck-batch,BETTERPPTX_CLOUD_TASKS_QUEUE_MEDIA=betterpptx-media-long,BETTERPPTX_REQUIRE_DISTRIBUTED_OPERATION_DISPATCH=1,BETTERPPTX_REQUIRE_DURABLE_OPERATION_IDEMPOTENCY=1,BETTERPPTX_REQUIRE_DURABLE_DECK_STATE=1,BETTERPPTX_HTTP_STATELESS_MCP=1,BETTERPPTX_DISTRIBUTED_RUNTIME_VERIFIED=0,BETTERPPTX_MCP_MAX_INSTANCES=${BETTERPPTX_MAX_INSTANCES},BETTERPPTX_MAX_CONCURRENCY=1,BETTERPPTX_MAX_QUEUE=3,BETTERPPTX_TOOL_TIMEOUT_MS=300000,BETTERPPTX_LONG_TOOL_TIMEOUT_MS=1500000,BETTERPPTX_HTTP_REQUEST_TIMEOUT_MS=3600000,BETTERPPTX_VERIFICATION_POLICY=production-non-rendering,BETTERPPTX_AVATAR_PROVIDER=disabled,BETTERPPTX_LOG_PATHS=0,BETTERPPTX_LOG_PAYLOADS=0"
+          gcloud run deploy "$CLOUD_RUN_WORKER" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --image="$IMAGE_REF" --service-account="$GCP_RUNTIME_SERVICE_ACCOUNT" --execution-environment=gen2 --port=8080 --cpu=2 --memory=4Gi --concurrency=1 --min=0 --max="$BETTERPPTX_MAX_INSTANCES" --timeout=3600s --no-allow-unauthenticated --set-env-vars="$common_env,BETTERPPTX_MCP_REQUEST_CONCURRENCY=1,BETTERPPTX_OPERATION_WORKER_URL=https://bootstrap.invalid.run.app" --set-secrets="BETTERPPTX_INSTALL_HMAC_SECRET=${INSTALL_HMAC_SECRET_NAME}:latest,BETTERPPTX_OPERATION_WORKER_TOKEN=${OPERATION_WORKER_SECRET_NAME}:latest" --quiet
+          worker_url="$(gcloud run services describe "$CLOUD_RUN_WORKER" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format='value(status.url)')"
+          [[ "$worker_url" == https://*.a.run.app ]]
+          gcloud run services update "$CLOUD_RUN_WORKER" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --update-env-vars="BETTERPPTX_OPERATION_WORKER_URL=$worker_url" --quiet
+          gcloud run services add-iam-policy-binding "$CLOUD_RUN_WORKER" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --member="serviceAccount:$GCP_RUNTIME_SERVICE_ACCOUNT" --role=roles/run.invoker --quiet
+          worker_policy="$RUNNER_TEMP/worker-iam.json"
+          gcloud run services get-iam-policy "$CLOUD_RUN_WORKER" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json > "$worker_policy"
+          jq -e --arg runtime "$GCP_RUNTIME_SERVICE_ACCOUNT" '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' "$worker_policy" >/dev/null
+          jq -e --arg runtime "serviceAccount:$GCP_RUNTIME_SERVICE_ACCOUNT" '[.bindings[]? | select(.role == "roles/run.invoker") | .members[]? | select(. == $runtime)] | length == 1' "$worker_policy" >/dev/null
+          echo "WORKER_URL=$worker_url" >> "$GITHUB_ENV"
+
+      - name: Deploy the OAuth-protected, initially private public gateway
+        env:
+          IMAGE_REF: ${{ steps.pushed-image.outputs.image_ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+            common_env="BETTERPPTX_ENV=production,BETTERPPTX_DEPLOYMENT_STAGE=production,BETTERPPTX_PUBLIC_BLACK_BOX=1,BETTERPPTX_AUTH=oauth,BETTERPPTX_PUBLIC_BASE=${BETTERPPTX_PUBLIC_BASE},BETTERPPTX_OAUTH_ISSUER=${BETTERPPTX_OAUTH_ISSUER},BETTERPPTX_OAUTH_AUDIENCE=${BETTERPPTX_OAUTH_AUDIENCE},BETTERPPTX_OAUTH_JWKS_URL=${BETTERPPTX_OAUTH_JWKS_URL},BETTERPPTX_OAUTH_TOKEN_PROFILE=keycloak,BETTERPPTX_OAUTH_CLIENT_ID=${BETTERPPTX_OAUTH_CLIENT_ID},BETTERPPTX_SELF_HOSTED_IDENTITY=0,BETTERPPTX_BILLING_PROVIDER=none,BETTERPPTX_BILLING_MODEL=free_publication,BETTERPPTX_BILLING_ENFORCE=1,BETTERPPTX_MONETIZED_MCP_ENABLED=0,BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW=3,BETTERPPTX_FREE_PUBLICATION_WINDOW_DAYS=30,BETTERPPTX_FREE_NARRATION_PREPARATIONS_PER_WINDOW=3,BETTERPPTX_FREE_IDENTITY_MEDIA_PER_WINDOW=3,BETTERPPTX_REQUIRE_SHARED_STORES=1,BETTERPPTX_GCP_PROJECT=${GCP_PROJECT_ID},BETTERPPTX_FIRESTORE_DATABASE=(default),BETTERPPTX_BILLING_LEDGER_STORE=firestore,BETTERPPTX_X402_STORE=firestore,BETTERPPTX_X402_RELAYER_LEASE_STORE=firestore,BETTERPPTX_INSTALL_USAGE_STORE=firestore,BETTERPPTX_ENTITLEMENT_STORE=firestore,BETTERPPTX_ASSET_GRANT_STORE=firestore,BETTERPPTX_EDIT_STATE_MODE=distributed,BETTERPPTX_DURABLE_DECK_STATE_STORE=firestore-gcs,BETTERPPTX_DECK_SNAPSHOT_STORE=gcs,BETTERPPTX_DECK_SNAPSHOT_GCS_PREFIX=deck-specs,BETTERPPTX_LOCKED_ASSET_STORE=gcs,BETTERPPTX_LOCKED_ASSET_GCS_PREFIX=locked-assets,BETTERPPTX_ARTIFACT_STORE=gcs,BETTERPPTX_GCS_BUCKET=${BETTERPPTX_GCS_BUCKET},BETTERPPTX_GCS_PREFIX=artifacts,BETTERPPTX_ARTIFACT_TTL_MS=43200000,BETTERPPTX_DURABLE_OPERATION_STORE=firestore,BETTERPPTX_OPERATION_DISPATCHER=cloud-tasks,BETTERPPTX_OPERATION_EXECUTION_MODE=queued,BETTERPPTX_OPERATION_WORKER_URL=${WORKER_URL},BETTERPPTX_OPERATION_WORKER_SERVICE_ACCOUNT=${GCP_RUNTIME_SERVICE_ACCOUNT},BETTERPPTX_CLOUD_TASKS_PROJECT=${GCP_PROJECT_ID},BETTERPPTX_CLOUD_TASKS_LOCATION=${GCP_REGION},BETTERPPTX_CLOUD_TASKS_QUEUE_DECK_INTERACTIVE=betterpptx-deck-interactive,BETTERPPTX_CLOUD_TASKS_QUEUE_DECK_BATCH=betterpptx-deck-batch,BETTERPPTX_CLOUD_TASKS_QUEUE_MEDIA=betterpptx-media-long,BETTERPPTX_REQUIRE_DISTRIBUTED_OPERATION_DISPATCH=1,BETTERPPTX_REQUIRE_DURABLE_OPERATION_IDEMPOTENCY=1,BETTERPPTX_REQUIRE_DURABLE_DECK_STATE=1,BETTERPPTX_HTTP_STATELESS_MCP=1,BETTERPPTX_DISTRIBUTED_RUNTIME_VERIFIED=0,BETTERPPTX_MCP_MAX_INSTANCES=${BETTERPPTX_MAX_INSTANCES},BETTERPPTX_MAX_CONCURRENCY=1,BETTERPPTX_MAX_QUEUE=3,BETTERPPTX_TOOL_TIMEOUT_MS=300000,BETTERPPTX_LONG_TOOL_TIMEOUT_MS=1500000,BETTERPPTX_HTTP_REQUEST_TIMEOUT_MS=3600000,BETTERPPTX_VERIFICATION_POLICY=production-non-rendering,BETTERPPTX_AVATAR_PROVIDER=disabled,BETTERPPTX_LOG_PATHS=0,BETTERPPTX_LOG_PAYLOADS=0"
+          gcloud run deploy "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --image="$IMAGE_REF" --service-account="$GCP_RUNTIME_SERVICE_ACCOUNT" --execution-environment=gen2 --port=8080 --cpu=2 --memory=4Gi --concurrency=8 --min=0 --max="$BETTERPPTX_MAX_INSTANCES" --timeout=3600s --no-allow-unauthenticated --set-env-vars="$common_env,BETTERPPTX_MCP_REQUEST_CONCURRENCY=8" --set-secrets="BETTERPPTX_INSTALL_HMAC_SECRET=${INSTALL_HMAC_SECRET_NAME}:latest,BETTERPPTX_OPERATION_WORKER_TOKEN=${OPERATION_WORKER_SECRET_NAME}:latest" --quiet
+          gateway_url="$(gcloud run services describe "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format='value(status.url)')"
+          [[ "$gateway_url" == https://*.a.run.app ]]
+          echo "GATEWAY_URL=$gateway_url" >> "$GITHUB_ENV"
+
+      - name: Deploy the 12-hour artifact-retention job and hourly scheduler
+        env:
+          IMAGE_REF: ${{ steps.pushed-image.outputs.image_ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run jobs deploy "$CLOUD_RUN_SWEEPER" \
+            --project="$GCP_PROJECT_ID" --region="$GCP_REGION" \
+            --image="$IMAGE_REF" --service-account="$GCP_RUNTIME_SERVICE_ACCOUNT" \
+            --command=node --args=betterpptx-mcp/sweep-cloud-artifacts.mjs \
+            --tasks=1 --parallelism=1 --max-retries=1 --task-timeout=300s \
+            --memory=512Mi --cpu=1 \
+            --set-env-vars="BETTERPPTX_ARTIFACT_STORE=gcs,BETTERPPTX_REQUIRE_SHARED_STORES=1,BETTERPPTX_GCS_BUCKET=$BETTERPPTX_GCS_BUCKET,BETTERPPTX_GCS_PREFIX=artifacts,BETTERPPTX_ARTIFACT_TTL_MS=43200000" \
+            --quiet
+          gcloud run jobs add-iam-policy-binding "$CLOUD_RUN_SWEEPER" \
+            --project="$GCP_PROJECT_ID" --region="$GCP_REGION" \
+            --member="serviceAccount:$SWEEPER_INVOKER_SERVICE_ACCOUNT" --role=roles/run.invoker --quiet
+          gcloud run jobs get-iam-policy "$CLOUD_RUN_SWEEPER" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json > "$RUNNER_TEMP/sweeper-iam.json"
+          jq -e --arg invoker "serviceAccount:$SWEEPER_INVOKER_SERVICE_ACCOUNT" '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' "$RUNNER_TEMP/sweeper-iam.json" >/dev/null
+          jq -e --arg invoker "serviceAccount:$SWEEPER_INVOKER_SERVICE_ACCOUNT" '[.bindings[]? | select(.role == "roles/run.invoker") | .members[]? | select(. == $invoker)] | length == 1' "$RUNNER_TEMP/sweeper-iam.json" >/dev/null
+          scheduler_uri="https://run.googleapis.com/v2/projects/$GCP_PROJECT_ID/locations/$GCP_REGION/jobs/$CLOUD_RUN_SWEEPER:run"
+          if gcloud scheduler jobs describe "$CLOUD_SCHEDULER_JOB" --project="$GCP_PROJECT_ID" --location="$GCP_REGION" --format=json > "$RUNNER_TEMP/scheduler-job.json" 2>/dev/null; then
+            gcloud scheduler jobs update http "$CLOUD_SCHEDULER_JOB" --project="$GCP_PROJECT_ID" --location="$GCP_REGION" \
+              --schedule="0 * * * *" --time-zone="Etc/UTC" --uri="$scheduler_uri" --http-method=POST \
+              --oauth-service-account-email="$SWEEPER_INVOKER_SERVICE_ACCOUNT" --message-body='{}' --update-headers="Content-Type=application/json" \
+              --attempt-deadline=320s --max-retry-attempts=2 --quiet
+          else
+            gcloud scheduler jobs create http "$CLOUD_SCHEDULER_JOB" --project="$GCP_PROJECT_ID" --location="$GCP_REGION" \
+              --schedule="0 * * * *" --time-zone="Etc/UTC" --uri="$scheduler_uri" --http-method=POST \
+              --oauth-service-account-email="$SWEEPER_INVOKER_SERVICE_ACCOUNT" --message-body='{}' --headers="Content-Type=application/json" \
+              --attempt-deadline=320s --max-retry-attempts=2 --quiet
+          fi
+          gcloud scheduler jobs describe "$CLOUD_SCHEDULER_JOB" --project="$GCP_PROJECT_ID" --location="$GCP_REGION" --format=json > "$RUNNER_TEMP/scheduler-job.json"
+          jq -e --arg uri "$scheduler_uri" --arg invoker "$SWEEPER_INVOKER_SERVICE_ACCOUNT" '.schedule == "0 * * * *" and .timeZone == "Etc/UTC" and .httpTarget.uri == $uri and .httpTarget.httpMethod == "POST" and .httpTarget.oauthToken.serviceAccountEmail == $invoker' "$RUNNER_TEMP/scheduler-job.json" >/dev/null
+
+      - name: Verify private revisions, invocation boundaries, and OAuth configuration
+        shell: bash
+        run: |
+          set -euo pipefail
+          for service in "$CLOUD_RUN_GATEWAY" "$CLOUD_RUN_WORKER"; do
+            gcloud run services describe "$service" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json > "$RUNNER_TEMP/$service.json"
+            jq -e --arg sa "$GCP_RUNTIME_SERVICE_ACCOUNT" --arg base "$BETTERPPTX_PUBLIC_BASE" --arg issuer "$BETTERPPTX_OAUTH_ISSUER" --arg audience "$BETTERPPTX_OAUTH_AUDIENCE" --arg jwks "$BETTERPPTX_OAUTH_JWKS_URL" --arg client "$BETTERPPTX_OAUTH_CLIENT_ID" '
+              (.spec.template.spec.containers[0].env // []) as $e |
+              (
+                .status.latestReadyRevisionName != null and
+                ([.status.conditions[]? | select(.type == "Ready" and .status == "True")] | length > 0) and
+                .spec.template.spec.serviceAccountName == $sa and
+                ([ $e[]? | select(.name == "BETTERPPTX_AUTH") | .value ][0] == "oauth") and
+                ([ $e[]? | select(.name == "BETTERPPTX_PUBLIC_BASE") | .value ][0] == $base) and
+                ([ $e[]? | select(.name == "BETTERPPTX_OAUTH_ISSUER") | .value ][0] == $issuer) and
+                ([ $e[]? | select(.name == "BETTERPPTX_OAUTH_AUDIENCE") | .value ][0] == $audience) and
+                ([ $e[]? | select(.name == "BETTERPPTX_OAUTH_JWKS_URL") | .value ][0] == $jwks) and
+                ([ $e[]? | select(.name == "BETTERPPTX_OAUTH_CLIENT_ID") | .value ][0] == $client) and
+                ([ $e[]? | select(.name == "BETTERPPTX_BILLING_MODEL") | .value ][0] == "free_publication") and
+                ([ $e[]? | select(.name == "BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW") | .value ][0] == "3") and
+                ([ $e[]? | select(.name == "BETTERPPTX_FREE_PUBLICATION_WINDOW_DAYS") | .value ][0] == "30")
+              )
+            ' "$RUNNER_TEMP/$service.json" >/dev/null
+          done
+          for service in "$CLOUD_RUN_WORKER"; do
+            gcloud run services get-iam-policy "$service" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json > "$RUNNER_TEMP/$service-iam.json"
+          jq -e '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' "$RUNNER_TEMP/$service-iam.json" >/dev/null
+          done
+
+      - name: Re-protect an existing gateway before application-boundary preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run services get-iam-policy "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json > "$RUNNER_TEMP/gateway-iam-before-preflight.json"
+          for member in allUsers allAuthenticatedUsers; do
+            if jq -e --arg member "$member" '[.bindings[]? | select(.role == "roles/run.invoker") | .members[]? | select(. == $member)] | length > 0' "$RUNNER_TEMP/gateway-iam-before-preflight.json" >/dev/null; then
+              gcloud run services remove-iam-policy-binding "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --member="$member" --role=roles/run.invoker --quiet
+            fi
+          done
+          gcloud run services get-iam-policy "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json > "$RUNNER_TEMP/gateway-iam-private.json"
+          jq -e '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' "$RUNNER_TEMP/gateway-iam-private.json" >/dev/null
+
+      - name: Prove BetterPPTX OAuth guard before granting public Cloud Run ingress
+        shell: bash
+        run: |
+          set -euo pipefail
+          id_token="$(gcloud auth print-identity-token --impersonate-service-account="$GCP_DEPLOY_SERVICE_ACCOUNT" --audiences="$GATEWAY_URL" --include-email)"
+          test -n "$id_token"
+          echo "::add-mask::$id_token"
+          CLOUD_RUN_IAM_ID_TOKEN="$id_token" node betterpptx-mcp/verify-cloud-run-private-oauth-gateway.mjs "$GATEWAY_URL"
+
+      - name: Open only the gateway after OAuth is verified at the application boundary
+        shell: bash
+        run: |
+          set -euo pipefail
+          gcloud run services add-iam-policy-binding "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --member=allUsers --role=roles/run.invoker --quiet
+          gcloud run services get-iam-policy "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json > "$RUNNER_TEMP/gateway-iam.json"
+          jq -e '[.bindings[]?.members[]? | select(. == "allUsers")] | length == 1' "$RUNNER_TEMP/gateway-iam.json" >/dev/null
+          jq -e '[.bindings[]?.members[]? | select(. == "allAuthenticatedUsers")] | length == 0' "$RUNNER_TEMP/gateway-iam.json" >/dev/null
+
+      - name: Verify public discovery and application-level OAuth guard
+        shell: bash
+        run: node betterpptx-mcp/verify-cloud-run-public-free-beta.mjs "$GATEWAY_URL"
+
+      - name: Check for owner-configured Cloudflare deployment credentials
+        id: cloudflare-edge-auth
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]]; then
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          else
+            echo 'ready=false' >> "$GITHUB_OUTPUT"
+            {
+              echo '### Custom-domain route not changed'
+              echo 'Cloud Run is live and its run.app endpoint passed public OAuth-boundary checks. The xmcpx.com Worker route was left untouched because this GitHub environment does not yet contain both scoped Cloudflare deployment credentials.'
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Deploy the Cloudflare Worker route to the verified Cloud Run gateway
+        if: steps.cloudflare-edge-auth.outputs.ready == 'true'
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          BETTERPPTX_CLOUD_RUN_ORIGIN: ${{ env.GATEWAY_URL }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --prefix betterpptx-mcp/deploy/cloudflare-edge
+          cd betterpptx-mcp/deploy/cloudflare-edge
+          npx wrangler deploy --var "BETTERPPTX_CLOUD_RUN_ORIGIN:$BETTERPPTX_CLOUD_RUN_ORIGIN"
+
+      - name: Verify the custom-domain MCP and preserved OAuth issuer
+        if: steps.cloudflare-edge-auth.outputs.ready == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          node betterpptx-mcp/verify-cloud-run-public-free-beta.mjs "$BETTERPPTX_PUBLIC_BASE"
+          discovery="$RUNNER_TEMP/betterpptx-edge-oidc-discovery.json"
+          curl --fail --silent --show-error --max-time 20 "$BETTERPPTX_OAUTH_ISSUER/.well-known/openid-configuration" -o "$discovery"
+          jq -e --arg issuer "$BETTERPPTX_OAUTH_ISSUER" --arg jwks "$BETTERPPTX_OAUTH_JWKS_URL" '.issuer == $issuer and .jwks_uri == $jwks' "$discovery" >/dev/null
+          echo 'The custom domain passed public MCP/OAuth-boundary checks and retains the configured identity issuer.' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Record immutable deployment provenance and scope
+        env:
+          IMAGE_REF: ${{ steps.pushed-image.outputs.image_ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gateway_revision="$(gcloud run services describe "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format='value(status.latestReadyRevisionName)')"
+          worker_revision="$(gcloud run services describe "$CLOUD_RUN_WORKER" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format='value(status.latestReadyRevisionName)')"
+          {
+            echo '### BetterPPTX Cloud Run free-publication beta'
+            echo "- Source commit: \`$GITHUB_SHA\`"
+            echo "- Source tree digest: \`$SOURCE_DIGEST\`"
+            echo "- Immutable image: \`$IMAGE_REF\`"
+            echo "- Gateway: \`$GATEWAY_URL\` (revision \`$gateway_revision\`)"
+            echo "- Private worker revision: \`$worker_revision\`"
+            echo '- Billing profile: bounded free-publication only (3 downloadable decks per rolling 30 days); paid payment routes disabled.'
+            echo '- Production rendering: disabled; deterministic validation only.'
+            echo '- Domain routing: unchanged. Cloudflare edge publication and a fresh ChatGPT client test remain separate gates.'
+            echo '- Distributed-runtime verification flag remains off until restart, quota, and task-handoff failure tests pass.'
+          } >> "$GITHUB_STEP_SUMMARY"

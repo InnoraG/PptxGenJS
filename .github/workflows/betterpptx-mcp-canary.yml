@@ -59,6 +59,9 @@ jobs:
           node --test betterpptx-mcp/test/inline-image-dimensions-security.test.mjs
           node --test betterpptx-mcp/test/public-artifact-download-sanitization.test.mjs
           node --test betterpptx-mcp/test/production-non-rendering-save.test.mjs
+          node --test betterpptx-mcp/test/production-free-publication-profile.test.mjs
+          node --test betterpptx-mcp/test/production-free-publication-http.test.mjs
+          node --test betterpptx-mcp/test/cloudflare-edge-worker.test.mjs
 
   deploy:
     name: Build, publish and deploy the verified canary

@@ -1,0 +1,90 @@
+param(
+	[string]$Project = 'betterpptx-mcp-20260926',
+	[string]$Region = 'us-central1',
+	[string]$Bucket = 'betterpptx-mcp-20260926-artifacts',
+	[string]$DeployerServiceAccount = 'github-canary-deployer'
+)
+
+$ErrorActionPreference = 'Stop'
+
+function Invoke-Gcloud([string[]]$Arguments) {
+	$output = & gcloud @Arguments 2>&1
+	if ($LASTEXITCODE -ne 0) {
+		$summary = (@($output | ForEach-Object { [string]$_ }) -join "`n").Trim()
+		throw "gcloud $($Arguments[0..([Math]::Min(2, $Arguments.Length - 1))] -join ' ') failed: $summary"
+	}
+	return (@($output | ForEach-Object { [string]$_ }) -join "`n").Trim()
+}
+
+function Test-GcloudResource([string[]]$Arguments) {
+	$output = & gcloud @Arguments 2>&1
+	$exitCode = $LASTEXITCODE
+	$text = (@($output | ForEach-Object { [string]$_ }) -join "`n").Trim()
+	if ($exitCode -eq 0) { return -not [string]::IsNullOrWhiteSpace($text) }
+	if ($text -match '(?i)(NOT_FOUND|not found|does not exist|was not found)') { return $false }
+	throw "gcloud $($Arguments[0..([Math]::Min(2, $Arguments.Length - 1))] -join ' ') failed while checking resource existence: $text"
+}
+
+$runtimeId = 'betterpptx-public-runtime'
+$runtimeEmail = "$runtimeId@$Project.iam.gserviceaccount.com"
+$sweeperInvokerId = 'betterpptx-maintenance-invoker'
+$sweeperInvokerEmail = "$sweeperInvokerId@$Project.iam.gserviceaccount.com"
+$deployerEmail = "$DeployerServiceAccount@$Project.iam.gserviceaccount.com"
+$queues = @('betterpptx-deck-interactive', 'betterpptx-deck-batch', 'betterpptx-media-long')
+$hmacSecret = 'betterpptx-install-hmac-secret'
+$workerSecret = 'betterpptx-operation-worker-token'
+
+$projectNumber = Invoke-Gcloud @('projects', 'describe', $Project, '--format=value(projectNumber)')
+if (-not $projectNumber -match '^\d+$') { throw 'GCP project number could not be resolved.' }
+$tasksAgent = "service-$projectNumber@gcp-sa-cloudtasks.iam.gserviceaccount.com"
+$schedulerAgent = "service-$projectNumber@gcp-sa-cloudscheduler.iam.gserviceaccount.com"
+
+if (-not (Test-GcloudResource @('iam', 'service-accounts', 'describe', $runtimeEmail, "--project=$Project", '--format=value(email)'))) {
+	Invoke-Gcloud @('iam', 'service-accounts', 'create', $runtimeId, "--project=$Project", '--display-name=BetterPPTX public runtime', '--description=Least-privilege identity for the public free-beta gateway, worker, and artifact maintenance job.', '--quiet') | Out-Null
+}
+if (-not (Test-GcloudResource @('iam', 'service-accounts', 'describe', $sweeperInvokerEmail, "--project=$Project", '--format=value(email)'))) {
+	Invoke-Gcloud @('iam', 'service-accounts', 'create', $sweeperInvokerId, "--project=$Project", '--display-name=BetterPPTX maintenance job invoker', '--description=Cloud Scheduler-only identity allowed to invoke the artifact-retention job.', '--quiet') | Out-Null
+}
+
+$secretNames = (Invoke-Gcloud @('secrets', 'list', "--project=$Project", '--format=value(name)')) -split "\r?\n" | ForEach-Object { ($_ -split '/')[-1] }
+if ($hmacSecret -notin $secretNames) { throw "Required pre-existing identity secret is missing: $hmacSecret" }
+if ($workerSecret -notin $secretNames) {
+	Invoke-Gcloud @('secrets', 'create', $workerSecret, "--project=$Project", '--replication-policy=automatic', '--quiet') | Out-Null
+	$tempSecretFile = [System.IO.Path]::GetTempFileName()
+	try {
+		$random = [byte[]]::new(48)
+		$rng = [System.Security.Cryptography.RandomNumberGenerator]::Create()
+		try { $rng.GetBytes($random) } finally { $rng.Dispose() }
+		$token = [Convert]::ToBase64String($random).TrimEnd('=').Replace('+', '-').Replace('/', '_')
+		[System.IO.File]::WriteAllText($tempSecretFile, $token, [System.Text.UTF8Encoding]::new($false))
+		Invoke-Gcloud @('secrets', 'versions', 'add', $workerSecret, "--project=$Project", "--data-file=$tempSecretFile", '--quiet') | Out-Null
+	} finally {
+		if (Test-Path -LiteralPath $tempSecretFile) { Remove-Item -LiteralPath $tempSecretFile -Force }
+	}
+}
+
+# Firestore access is limited by IAM condition to this database, and enqueue
+# access is granted per queue. The task identity can invoke only through the
+# private worker's service-level binding, added after that service is created.
+$firestoreCondition = "expression=resource.name == 'projects/$Project/databases/(default)',title=betterpptx-default-firestore,description=Runtime access to the BetterPPTX default Firestore database"
+Invoke-Gcloud @('projects', 'add-iam-policy-binding', $Project, "--member=serviceAccount:$runtimeEmail", '--role=roles/datastore.user', "--condition=$firestoreCondition", '--quiet') | Out-Null
+
+Invoke-Gcloud @('storage', 'buckets', 'add-iam-policy-binding', "gs://$Bucket", "--member=serviceAccount:$runtimeEmail", '--role=roles/storage.objectAdmin', '--quiet') | Out-Null
+foreach ($secret in @($hmacSecret, $workerSecret)) {
+	Invoke-Gcloud @('secrets', 'add-iam-policy-binding', $secret, "--project=$Project", "--member=serviceAccount:$runtimeEmail", '--role=roles/secretmanager.secretAccessor', '--quiet') | Out-Null
+}
+
+Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $runtimeEmail, "--project=$Project", "--member=serviceAccount:$deployerEmail", '--role=roles/iam.serviceAccountUser', '--quiet') | Out-Null
+Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $runtimeEmail, "--project=$Project", "--member=serviceAccount:$tasksAgent", '--role=roles/iam.serviceAccountUser', '--quiet') | Out-Null
+Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $sweeperInvokerEmail, "--project=$Project", "--member=serviceAccount:$deployerEmail", '--role=roles/iam.serviceAccountUser', '--quiet') | Out-Null
+Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $sweeperInvokerEmail, "--project=$Project", "--member=serviceAccount:$schedulerAgent", '--role=roles/iam.serviceAccountTokenCreator', '--quiet') | Out-Null
+
+foreach ($queue in $queues) {
+	Invoke-Gcloud @('tasks', 'queues', 'add-iam-policy-binding', $queue, "--location=$Region", "--project=$Project", "--member=serviceAccount:$runtimeEmail", '--role=roles/cloudtasks.enqueuer', '--quiet') | Out-Null
+}
+
+Write-Output "Cloud Run free-beta runtime access is provisioned for project $Project in $Region."
+Write-Output "Runtime identity: $runtimeEmail"
+Write-Output "Scheduled-sweeper invoker: $sweeperInvokerEmail"
+Write-Output "Scoped Firestore database, artifact bucket, two runtime secrets, and $($queues.Count) task queues are configured."
+Write-Output 'The worker run.invoker binding and public gateway exposure are intentionally deferred to deployment verification.'
