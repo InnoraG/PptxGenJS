@@ -20,11 +20,10 @@ function responseJson(text) {
 }
 
 async function rpc(body, sessionId = '') {
-	const response = await fetch(`${base}/mcp`, {
+	const response = await fetchWithInvoker(`${base}/mcp`, {
 		method: 'POST',
 		headers: {
 			Accept: 'application/json, text/event-stream',
-			Authorization: `Bearer ${token}`,
 			'Content-Type': 'application/json',
 			'MCP-Protocol-Version': '2025-03-26',
 			...(sessionId ? { 'Mcp-Session-Id': sessionId } : {}),
@@ -35,8 +34,25 @@ async function rpc(body, sessionId = '') {
 	return { response, payload: responseJson(text) }
 }
 
-const health = await fetch(`${base}/health`, { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } })
-assert.equal(health.status, 200, `Private Cloud Run health must be reachable with the invoker token, got ${health.status}.`)
+async function fetchWithInvoker(url, init = {}) {
+	const headers = new Headers(init.headers || {})
+	// Keep Cloud Run's IAM credential out of BetterPPTX's app-level Authorization header.
+	// Cloud Run validates X-Serverless-Authorization and removes its signature before
+	// forwarding the request to the container.
+	headers.set('X-Serverless-Authorization', `Bearer ${token}`)
+	return fetch(url, { ...init, headers })
+}
+
+let health
+let healthBody = ''
+for (let attempt = 1; attempt <= 12; attempt += 1) {
+	health = await fetchWithInvoker(`${base}/health`, { headers: { Accept: 'application/json' } })
+	if (health.status !== 403) break
+	healthBody = await health.text()
+	if (attempt < 12) await new Promise(resolve => setTimeout(resolve, 5000))
+}
+assert.equal(health.status, 200,
+	`Private Cloud Run health must be reachable with the invoker token after IAM propagation retries, got ${health.status}${healthBody ? `: ${healthBody.slice(0, 240)}` : '.'}`)
 
 const initialized = await rpc({
 	jsonrpc: '2.0', id: 1, method: 'initialize',
