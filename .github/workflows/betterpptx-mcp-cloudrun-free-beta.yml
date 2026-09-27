@@ -279,7 +279,7 @@ jobs:
           jq -e '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' "$RUNNER_TEMP/$service-iam.json" >/dev/null
           done
 
-      - name: Re-protect an existing gateway before application-boundary preflight
+      - name: Keep the gateway private and authorize only the deployment preflight identity
         shell: bash
         run: |
           set -euo pipefail
@@ -289,8 +289,10 @@ jobs:
               gcloud run services remove-iam-policy-binding "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --member="$member" --role=roles/run.invoker --quiet
             fi
           done
+          gcloud run services add-iam-policy-binding "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --member="serviceAccount:$GCP_DEPLOY_SERVICE_ACCOUNT" --role=roles/run.invoker --condition=None --quiet
           gcloud run services get-iam-policy "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json > "$RUNNER_TEMP/gateway-iam-private.json"
           jq -e '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' "$RUNNER_TEMP/gateway-iam-private.json" >/dev/null
+          jq -e --arg deployer "serviceAccount:$GCP_DEPLOY_SERVICE_ACCOUNT" '[.bindings[]? | select(.role == "roles/run.invoker") | .members[]? | select(. == $deployer)] | length == 1' "$RUNNER_TEMP/gateway-iam-private.json" >/dev/null
 
       - name: Prove BetterPPTX OAuth guard before granting public Cloud Run ingress
         shell: bash
