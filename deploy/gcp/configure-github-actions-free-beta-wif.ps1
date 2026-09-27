@@ -19,19 +19,34 @@ $ErrorActionPreference = 'Stop'
 function Invoke-Gcloud([string[]]$Arguments, [string]$Description) {
 	Write-Host "- $Description"
 	if (-not $Apply) { return }
-	$output = & gcloud @Arguments 2>&1
-	if ($LASTEXITCODE -ne 0) {
+	$previousErrorAction = $ErrorActionPreference
+	try {
+		$ErrorActionPreference = 'Continue'
+		$output = & gcloud @Arguments 2>&1
+		$exitCode = $LASTEXITCODE
+	} finally {
+		$ErrorActionPreference = $previousErrorAction
+	}
+	if ($exitCode -ne 0) {
 		$summary = (@($output | ForEach-Object { [string]$_ }) -join "`n").Trim()
 		throw "$Description failed: $summary"
 	}
 }
 
 function Get-GcloudValue([string[]]$Arguments, [string]$Description) {
-	$value = & gcloud @Arguments
-	if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace([string]$value)) {
+	$previousErrorAction = $ErrorActionPreference
+	try {
+		$ErrorActionPreference = 'Continue'
+		$value = & gcloud @Arguments 2>&1
+		$exitCode = $LASTEXITCODE
+	} finally {
+		$ErrorActionPreference = $previousErrorAction
+	}
+	$valueText = (@($value | ForEach-Object { [string]$_ }) -join "`n").Trim()
+	if ($exitCode -ne 0 -or [string]::IsNullOrWhiteSpace($valueText)) {
 		throw "Could not read $Description. Confirm gcloud access and the exact free-beta resources."
 	}
-	return ([string]$value).Trim()
+	return $valueText
 }
 
 if (-not (Get-Command gcloud -ErrorAction SilentlyContinue)) { throw 'gcloud is required; this script does not install or authenticate the CLI.' }
@@ -129,9 +144,9 @@ $queueRole = "projects/$ProjectId/roles/$QueueRoleId"
 $secretMetadataRole = "projects/$ProjectId/roles/$SecretMetadataRoleId"
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $deployerEmail, "--project=$ProjectId", '--role=roles/iam.workloadIdentityUser', "--member=$repositoryPrincipal", '--quiet') 'allow only the separate free-beta pool to impersonate its deployer'
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $deployerEmail, "--project=$ProjectId", "--member=serviceAccount:$deployerEmail", '--role=roles/iam.serviceAccountTokenCreator', '--quiet') 'allow the deployer to mint its own short-lived Cloud Run preflight identity token'
-Invoke-Gcloud @('projects', 'add-iam-policy-binding', $ProjectId, "--member=serviceAccount:$deployerEmail", "--role=$runRole", '--quiet') 'grant non-deleting Cloud Run deployment access within the dedicated project'
-Invoke-Gcloud @('projects', 'add-iam-policy-binding', $ProjectId, "--member=serviceAccount:$deployerEmail", '--role=roles/serviceusage.serviceUsageConsumer', '--quiet') 'allow use of already-enabled Google Cloud services'
-Invoke-Gcloud @('projects', 'add-iam-policy-binding', $ProjectId, "--member=serviceAccount:$deployerEmail", "--role=$schedulerRole", '--quiet') 'grant only create/read/update access to Cloud Scheduler jobs'
+Invoke-Gcloud @('projects', 'add-iam-policy-binding', $ProjectId, "--member=serviceAccount:$deployerEmail", "--role=$runRole", '--condition=None', '--quiet') 'grant non-deleting Cloud Run deployment access within the dedicated project'
+Invoke-Gcloud @('projects', 'add-iam-policy-binding', $ProjectId, "--member=serviceAccount:$deployerEmail", '--role=roles/serviceusage.serviceUsageConsumer', '--condition=None', '--quiet') 'allow use of already-enabled Google Cloud services'
+Invoke-Gcloud @('projects', 'add-iam-policy-binding', $ProjectId, "--member=serviceAccount:$deployerEmail", "--role=$schedulerRole", '--condition=None', '--quiet') 'grant only create/read/update access to Cloud Scheduler jobs'
 Invoke-Gcloud @('artifacts', 'repositories', 'add-iam-policy-binding', $artifactRepository, "--project=$ProjectId", "--location=$Region", "--member=serviceAccount:$deployerEmail", '--role=roles/artifactregistry.writer', '--quiet') 'allow publishing images only to the BetterPPTX Artifact Registry repository'
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $runtimeEmail, "--project=$ProjectId", "--member=serviceAccount:$deployerEmail", '--role=roles/iam.serviceAccountUser', '--quiet') 'allow attaching only the BetterPPTX runtime identity'
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $schedulerInvokerEmail, "--project=$ProjectId", "--member=serviceAccount:$deployerEmail", '--role=roles/iam.serviceAccountUser', '--quiet') 'allow attaching only the artifact-sweep invocation identity'
