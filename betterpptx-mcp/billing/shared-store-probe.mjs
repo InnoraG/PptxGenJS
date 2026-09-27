@@ -1,5 +1,7 @@
 import { createBillingLedgerStore } from './ledger-store.mjs'
 import { relayerLeaseProviderName } from './relayer-lease.mjs'
+import { createInstallUsageStore } from '../auth/install-identity.mjs'
+import { isFreePublicationBillingProfile } from './security-policy.mjs'
 
 // Production shared-store boot gate (plan 24A.12 / 31.4). Run before the HTTP
 // server listens in public black-box mode with shared stores required. Asserts
@@ -38,6 +40,17 @@ export async function assertProductionSharedStores({
 		const ledger = ledgerStore || createBillingLedgerStore()
 		if (ledger?.shared !== true) {
 			throw new SharedStoreProbeError('billing-ledger-not-shared', 'Billing ledger store is not shared.')
+		}
+	}
+	if (isFreePublicationBillingProfile()) {
+		const usage = createInstallUsageStore()
+		if (usage?.shared !== true || usage?.provider !== 'firestore') {
+			throw new SharedStoreProbeError('free-usage-store-not-shared', 'Free publication quota storage is not shared.')
+		}
+		try {
+			await withTimeout(usage.getDailyUsage('betterpptx_boot_probe', new Date().toISOString().slice(0, 10)), probeTimeoutMs, 'free-usage-read')
+		} catch (error) {
+			throw new SharedStoreProbeError(`free-usage-store-unreachable:${error?.message || 'unknown'}`, 'Free publication quota storage is not reachable.')
 		}
 	}
 	const selfSettle = String(process.env.BETTERPPTX_X402_SETTLEMENT_MODE || 'self_settle').trim().toLowerCase() === 'self_settle'

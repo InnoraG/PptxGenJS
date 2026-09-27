@@ -1,0 +1,22 @@
+{
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "betterpptx-cloudrun-edge",
+	"main": "src/index.mjs",
+	"compatibility_date": "2026-09-25",
+	"workers_dev": false,
+	"routes": [
+		{
+			"pattern": "betterpptx.xmcpx.com/*",
+			"zone_name": "xmcpx.com"
+		}
+	],
+	"vars": {
+		"BETTERPPTX_CLOUD_RUN_ORIGIN": "https://not-yet-deployed.invalid"
+	},
+	"observability": {
+		"enabled": true,
+		"head_sampling_rate": 0.1,
+		"logs": { "invocation_logs": false },
+		"traces": { "enabled": false }
+	}
+}

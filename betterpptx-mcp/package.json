@@ -1,6 +1,6 @@
 {
 	"name": "betterpptx-mcp",
-  "version": "1.10.44",
+  "version": "1.10.45",
 	"type": "module",
 	"description": "Self-contained betterpptx-mcp MCP server for PPTX generation, editing, validation, charts, tables, media, animations, transitions, WordArt, Text3D, 3D models, and motion paths.",
 	"main": "./server.mjs",
