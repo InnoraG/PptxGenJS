@@ -28,11 +28,33 @@ Validation:
 node --test betterpptx-mcp/test/cloudflare-edge-worker.test.mjs
 ```
 
-Deployment is managed from GitHub Actions. The `betterpptx-canary` environment
-requires `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN` secrets. Scope the
-token to the single Cloudflare account and the `xmcpx.com` zone; grant only the
-Workers Scripts permission needed to deploy this Worker and Workers Routes
-write permission for that zone. Never put the token in the repository or a
-workflow log. Without both secrets, the Cloud Run release can still deploy and
-be verified at its run.app URL, but the custom-domain route is intentionally
-left unchanged.
+Deployment is managed from GitHub Actions after its existing keyless Google
+Cloud authentication. `CLOUDFLARE_ACCOUNT_ID` is a non-secret GitHub Actions
+environment variable. The scoped Cloudflare API token is owner-managed in
+BetterPPTX Mission Control and stored in Google Secret Manager as
+`betterpptx-cloudflare-worker-deploy-token`; only the dedicated private
+Mission Control runtime and GitHub deploy service account receive access to
+that individual secret. The public MCP runtime receives no access. Mission
+Control can verify, reveal (with explicit owner confirmation), and update the
+value. Create or rotate the token in Cloudflare, then update it in Mission
+Control. Scope the
+token to one Cloudflare account and the `xmcpx.com` zone, granting only Worker
+script edit and Worker route edit. Never put it in the repository, a GitHub
+secret, or a workflow log. Without an active secret version and the account ID,
+the Cloud Run release still deploys and verifies at its run.app URL, but the
+custom-domain route is intentionally left unchanged.
+
+Mission Control runs as a separate Cloud Run service with minimum instances
+set to zero, no unauthenticated access, and an Invoker binding for the named
+owner account only. To open it from the owner's workstation, authenticate the
+Google Cloud CLI as that same account and run:
+
+```powershell
+gcloud run services proxy betterpptx-mission-control --project=betterpptx-mcp-20260926 --region=us-central1 --port=8787
+```
+
+Then open `http://localhost:8787/ops/mission-control` in the owner's browser.
+The local proxy supplies Cloud Run IAM authentication; the page stores no
+access or admin bearer token. This deployment exposes only the Cloudflare
+deployment-token control, not the full secret registry. Production cloud
+storage and deployment credentials remain outside the public MCP gateway.

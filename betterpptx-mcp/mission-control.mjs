@@ -55,6 +55,14 @@ export function isMissionControlEnabled() {
 	return enabledEnv('BETTERPPTX_MISSION_CONTROL') || enabledEnv('BETTERPPTX_ENABLE_MISSION_CONTROL')
 }
 
+export function missionControlOnlyPathAllowed(pathname, method = 'GET') {
+	const path = String(pathname || '')
+	const verb = String(method || 'GET').toUpperCase()
+	if (verb === 'GET' && ['/ops/mission-control', '/ops/mission-control/data', '/ops/mission-control/secrets'].includes(path)) return true
+	if (verb === 'POST' && /^\/ops\/mission-control\/secrets\/[a-z0-9_-]+\/(?:reveal|update|rotate|test)$/.test(path)) return true
+	return false
+}
+
 export function missionControlAccess(req) {
 	if (!isMissionControlEnabled()) {
 		return { allowed: false, status: 404, code: 'NOT_FOUND', message: 'not found' }
@@ -77,6 +85,11 @@ export function missionControlAccess(req) {
 export function missionControlAdminAccess(req) {
 	const access = missionControlAccess(req)
 	if (!access.allowed) return access
+	// The dedicated Mission Control Cloud Run service is deployed with
+	// --no-allow-unauthenticated and a service-level invoker allowlist. In that
+	// isolated service, Cloud Run IAM is both the app and owner-admin boundary;
+	// never enable this mode on the public MCP gateway.
+	if (access.mode === 'private-iam') return { ...access, admin: true, adminMode: 'cloud-run-iam' }
 	const token = String(process.env.BETTERPPTX_MISSION_CONTROL_ADMIN_TOKEN || '').trim()
 	if (!token) {
 		return { allowed: false, status: 403, code: 'MC_ADMIN_DISABLED', message: 'Mission Control admin token is not configured.' }
@@ -167,7 +180,7 @@ function buildGates({ telemetry, paymentLaunchEvidence }) {
 	const firestoreBilling = process.env.BETTERPPTX_BILLING_LEDGER_STORE === 'firestore'
 		const billingProvider = String(process.env.BETTERPPTX_BILLING_PROVIDER || '').trim().toLowerCase()
 	const billingProviderReady = billingProvider === 'crypto_credits' || billingProvider === 'payram'
-	const ownerSecretControls = Boolean(String(process.env.BETTERPPTX_MISSION_CONTROL_ADMIN_TOKEN || '').trim())
+	const ownerSecretControls = Boolean(String(process.env.BETTERPPTX_MISSION_CONTROL_ADMIN_TOKEN || '').trim()) || enabledEnv('BETTERPPTX_MISSION_CONTROL_TRUST_CLOUD_RUN_IAM')
 	const editState = editStateReadiness()
 	const paymentSurfaces = paymentSurfaceReadiness({ includeRequirements: true })
 	return [
@@ -177,7 +190,7 @@ function buildGates({ telemetry, paymentLaunchEvidence }) {
 		{ id: 'shared-artifacts', name: 'Shared artifact delivery', status: sharedStoresRequired && gcsArtifacts ? 'ok' : 'warn', detail: sharedStoresRequired && gcsArtifacts ? 'Shared artifact store required and active.' : 'Shared artifact enforcement is incomplete.' },
 		{ id: 'entitlements', name: 'Shared entitlements', status: sharedStoresRequired && firestoreEntitlements ? 'ok' : 'warn', detail: sharedStoresRequired && firestoreEntitlements ? 'Entitlement state uses shared storage.' : 'Entitlement state is not fully shared.' },
 		{ id: 'billing-ledger', name: 'Billing ledger', status: firestoreBilling && billingProviderReady ? 'ok' : 'warn', detail: firestoreBilling && billingProviderReady ? `${billingProvider} billing is backed by shared storage.` : 'Billing ledger/provider state needs review.' },
-		{ id: 'owner-secret-controls', name: 'Owner secret controls', status: ownerSecretControls ? 'ok' : 'warn', detail: ownerSecretControls ? 'MC2 reveal, update, rotate, and test controls are installed behind owner admin auth.' : 'MC2 routes are installed, but the owner admin token is not configured.' },
+		{ id: 'owner-secret-controls', name: 'Owner secret controls', status: ownerSecretControls ? 'ok' : 'warn', detail: ownerSecretControls ? (enabledEnv('BETTERPPTX_MISSION_CONTROL_TRUST_CLOUD_RUN_IAM') ? 'MC2 owner controls use the dedicated Cloud Run IAM boundary.' : 'MC2 reveal, update, rotate, and test controls are installed behind owner admin auth.') : 'MC2 routes are installed, but owner authentication is not configured.' },
 		{ id: 'telemetry', name: 'Privacy-safe telemetry', status: 'ok', detail: `${telemetry.toolCalls} tool calls, ${telemetry.downloads} downloads, no raw deck payloads exposed here.` },
 		{ id: 'cross-instance-state', name: 'Cross-instance edit state', status: editState.status, detail: editState.detail },
 		{ id: 'payment-web', name: 'Browser payment surface', status: paymentSurfaces.readiness.webReady ? 'ok' : 'warn', detail: paymentSurfaces.readiness.webReady ? 'Browser wallet, gasless EIP-3009, and direct-transfer recovery are configured.' : `Browser payment is missing: ${paymentSurfaces.readiness.missing.join(', ')}` },
@@ -309,6 +322,12 @@ export function buildMissionControlSnapshot({ sessions, visibleTools = [], authM
 }
 
 export function renderMissionControlPage() {
+	const hasAccessToken = Boolean(String(process.env.BETTERPPTX_MISSION_CONTROL_TOKEN || '').trim())
+	const usesPrivateIam = !hasAccessToken && enabledEnv('BETTERPPTX_MISSION_CONTROL_TRUST_CLOUD_RUN_IAM')
+	const ownerControlOnly = enabledEnv('BETTERPPTX_MISSION_CONTROL_ONLY')
+	const accessControls = usesPrivateIam
+		? '<div class="secretbar"><span class="secretmeta">Authenticated by the private Cloud Run IAM boundary. No application token is stored in this page.</span><button id="reloadSecrets" type="button">Reload</button></div>'
+		: '<div class="secretbar"><input id="appToken" type="password" autocomplete="off" placeholder="Mission Control access token"><input id="adminToken" type="password" autocomplete="off" placeholder="Owner admin token"><button id="reloadSecrets" type="button">Reload</button></div>'
 	return `<!doctype html>
 <html lang="en">
 <head>
@@ -352,15 +371,16 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 6px;
     <section class="wide"><h2>Current Decisions</h2><div id="decisions"></div></section>
     <section class="wide"><h2>Top Tools</h2><div id="topTools"></div></section>
     <section class="wide"><h2>Security</h2><div id="security"></div></section>
-    <section class="full"><h2>Owner Secrets</h2><div class="secretbar"><input id="adminToken" type="password" autocomplete="off" placeholder="Owner admin token"><button id="reloadSecrets" type="button">Reload</button></div><div id="ownerSecrets"></div></section>
+    <section class="full"><h2>Owner Secrets</h2>${accessControls}<div id="ownerSecrets"></div></section>
     <section class="full"><h2>Billing Operations</h2><div id="billingOps"></div></section>
-    <section class="full"><h2>Payment Health</h2><div id="paymentHealth"></div></section>
+    ${ownerControlOnly ? '' : '<section class="full"><h2>Payment Health</h2><div id="paymentHealth"></div></section>'}
     <section class="wide"><h2>Error Codes</h2><div id="errors"></div></section>
     <section class="wide"><h2>Artifact Sizes</h2><div id="sizes"></div></section>
   </div>
 </main>
 <script>
 const cls=s=>s==='ok'?'ok':s==='pending'||s==='deferred'?'warn':s==='warn'?'warn':s==='bad'?'bad':'info';
+const paymentHealthAvailable=${ownerControlOnly ? 'false' : 'true'};
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmtSecs=s=>{s=Number(s)||0;const h=Math.floor(s/3600),m=Math.floor((s%3600)/60);return h?(h+'h '+m+'m'):(m+'m');};
 function table(rows,cols){if(!rows||!rows.length)return '<div class="empty">No data yet.</div>';return '<table><thead><tr>'+cols.map(c=>'<th>'+c.label+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+cols.map(c=>'<td>'+String(c.value(r)??'')+'</td>').join('')+'</tr>').join('')+'</tbody></table>'}
@@ -407,8 +427,10 @@ function renderSecrets(data){
   const version=s.activeVersion?('v'+esc(s.activeVersion)):'no active version';
   const rotated=s.lastRotationTime?new Date(s.lastRotationTime).toLocaleString():'unknown rotation time';
   const source=s.source?(esc(s.source.type)+': '+esc(s.source.secretName||s.source.envName||'')):'unknown source';
+  const dependents=Array.isArray(s.dependentServices)&&s.dependentServices.length?' · used by '+s.dependentServices.map(esc).join(', '):' · no dependent services listed';
+  const description=s.description?('<br><span class="secretmeta">'+esc(s.description)+'</span>'):'';
   const error=s.error?('<br><span class="bad">'+esc(s.error.code)+': '+esc(s.error.message)+'</span>'):'';
-  return '<div class="secretrow"><div><div class="status '+cls(s.status)+'">'+esc(s.status).toUpperCase()+'</div><div class="secretmeta">'+esc(s.kind)+'</div></div><div><b>'+esc(s.displayName)+'</b><br><span class="secretmeta">'+source+' · '+version+' · '+rotated+' · '+esc(s.fingerprint||'no fingerprint')+'</span>'+error+'</div><div class="secret-actions">'+buttons+'</div><div class="secret-output" data-output="'+esc(s.id)+'"></div></div>';
+  return '<div class="secretrow"><div><div class="status '+cls(s.status)+'">'+esc(s.status).toUpperCase()+'</div><div class="secretmeta">'+esc(s.kind)+'</div></div><div><b>'+esc(s.displayName)+'</b>'+description+'<br><span class="secretmeta">'+source+' · '+version+' · '+rotated+' · '+esc(s.fingerprint||'no fingerprint')+dependents+'</span>'+error+'</div><div class="secret-actions">'+buttons+'</div><div class="secret-output" data-output="'+esc(s.id)+'"></div></div>';
  }).join('');
 }
 function healthRow(status,name,detail){
@@ -430,29 +452,31 @@ function renderPaymentHealth(data){
  ];
  box.innerHTML=rows.join('');
 }
-function secretHeaders(){
- const token=document.getElementById('adminToken').value||'';
+function missionControlHeaders(includeAdmin=false){
+ const appToken=document.getElementById('appToken')?.value||'';
  const headers={'Content-Type':'application/json'};
- if(token)headers['x-betterpptx-mission-control-admin-token']=token;
+ if(appToken)headers['x-betterpptx-mission-control-token']=appToken;
+ const adminToken=document.getElementById('adminToken')?.value||'';
+ if(includeAdmin&&adminToken)headers['x-betterpptx-mission-control-admin-token']=adminToken;
  return headers;
 }
 async function secretPost(id,action,body){
- const r=await fetch('/ops/mission-control/secrets/'+encodeURIComponent(id)+'/'+action,{method:'POST',headers:secretHeaders(),body:JSON.stringify(body||{}),cache:'no-store'});
+ const r=await fetch('/ops/mission-control/secrets/'+encodeURIComponent(id)+'/'+action,{method:'POST',headers:missionControlHeaders(true),body:JSON.stringify(body||{}),cache:'no-store'});
  const data=await r.json().catch(()=>({}));
  if(!r.ok)throw new Error((data.error&&data.error.code)||('HTTP '+r.status));
  return data;
 }
 async function loadSecrets(){
- const r=await fetch('/ops/mission-control/secrets',{cache:'no-store'});
+ const r=await fetch('/ops/mission-control/secrets',{headers:missionControlHeaders(),cache:'no-store'});
  if(!r.ok)throw new Error('Owner secrets failed: '+r.status);
  renderSecrets(await r.json());
 }
 async function loadPaymentHealth(){
- const r=await fetch('/ops/mission-control/payment-health',{cache:'no-store'});
+ const r=await fetch('/ops/mission-control/payment-health',{headers:missionControlHeaders(),cache:'no-store'});
  if(!r.ok)throw new Error('Payment health failed: '+r.status);
  renderPaymentHealth(await r.json());
 }
-async function refresh(){const r=await fetch('/ops/mission-control/data',{cache:'no-store'});if(!r.ok)throw new Error('Mission Control data failed: '+r.status);render(await r.json());await loadSecrets().catch(e=>{document.getElementById('ownerSecrets').innerHTML='<div class="bad">'+esc(e.message)+'</div>'});await loadPaymentHealth().catch(e=>{document.getElementById('paymentHealth').innerHTML='<div class="bad">'+esc(e.message)+'</div>'})}
+async function refresh(){const r=await fetch('/ops/mission-control/data',{headers:missionControlHeaders(),cache:'no-store'});if(!r.ok)throw new Error('Mission Control data failed: '+r.status);render(await r.json());await loadSecrets().catch(e=>{document.getElementById('ownerSecrets').innerHTML='<div class="bad">'+esc(e.message)+'</div>'});if(paymentHealthAvailable)await loadPaymentHealth().catch(e=>{document.getElementById('paymentHealth').innerHTML='<div class="bad">'+esc(e.message)+'</div>'})}
 document.getElementById('refresh').addEventListener('click',refresh);
 document.getElementById('reloadSecrets').addEventListener('click',()=>loadSecrets().catch(e=>{document.getElementById('ownerSecrets').innerHTML='<div class="bad">'+esc(e.message)+'</div>'}));
 document.getElementById('ownerSecrets').addEventListener('click',async e=>{
@@ -466,7 +490,7 @@ document.getElementById('ownerSecrets').addEventListener('click',async e=>{
  }catch(err){out.innerHTML='<pre class="reveal bad">'+esc(err.message||err)+'</pre>';}
 });
 refresh().catch(e=>{document.querySelector('main').innerHTML='<section><h2>Error</h2><div class="bad">'+e.message+'</div></section>'});
-setInterval(()=>refresh().catch(()=>{}),10000);
+setInterval(()=>refresh().catch(()=>{}),paymentHealthAvailable?10000:60000);
 </script>
 </body>
 </html>`

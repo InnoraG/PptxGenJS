@@ -2,7 +2,7 @@ param(
 	[string]$Project = 'betterpptx-mcp-20260926',
 	[string]$Region = 'us-central1',
 	[string]$Bucket = 'betterpptx-mcp-20260926-artifacts',
-	[string]$DeployerServiceAccount = 'github-canary-deployer'
+	[string]$DeployerServiceAccount = 'github-free-beta-deployer'
 )
 
 $ErrorActionPreference = 'Stop'
@@ -27,12 +27,15 @@ function Test-GcloudResource([string[]]$Arguments) {
 
 $runtimeId = 'betterpptx-public-runtime'
 $runtimeEmail = "$runtimeId@$Project.iam.gserviceaccount.com"
+$missionControlRuntimeId = 'betterpptx-mission-control-runtime'
+$missionControlRuntimeEmail = "$missionControlRuntimeId@$Project.iam.gserviceaccount.com"
 $sweeperInvokerId = 'betterpptx-maintenance-invoker'
 $sweeperInvokerEmail = "$sweeperInvokerId@$Project.iam.gserviceaccount.com"
 $deployerEmail = "$DeployerServiceAccount@$Project.iam.gserviceaccount.com"
 $queues = @('betterpptx-deck-interactive', 'betterpptx-deck-batch', 'betterpptx-media-long')
 $hmacSecret = 'betterpptx-install-hmac-secret'
 $workerSecret = 'betterpptx-operation-worker-token'
+$cloudflareDeploySecret = 'betterpptx-cloudflare-worker-deploy-token'
 
 $projectNumber = Invoke-Gcloud @('projects', 'describe', $Project, '--format=value(projectNumber)')
 if (-not $projectNumber -match '^\d+$') { throw 'GCP project number could not be resolved.' }
@@ -41,6 +44,9 @@ $schedulerAgent = "service-$projectNumber@gcp-sa-cloudscheduler.iam.gserviceacco
 
 if (-not (Test-GcloudResource @('iam', 'service-accounts', 'describe', $runtimeEmail, "--project=$Project", '--format=value(email)'))) {
 	Invoke-Gcloud @('iam', 'service-accounts', 'create', $runtimeId, "--project=$Project", '--display-name=BetterPPTX public runtime', '--description=Least-privilege identity for the public free-beta gateway, worker, and artifact maintenance job.', '--quiet') | Out-Null
+}
+if (-not (Test-GcloudResource @('iam', 'service-accounts', 'describe', $missionControlRuntimeEmail, "--project=$Project", '--format=value(email)'))) {
+	Invoke-Gcloud @('iam', 'service-accounts', 'create', $missionControlRuntimeId, "--project=$Project", '--display-name=BetterPPTX private Mission Control runtime', '--description=Owner-only, scale-to-zero Mission Control service identity with access only to its explicitly selected secrets.', '--quiet') | Out-Null
 }
 if (-not (Test-GcloudResource @('iam', 'service-accounts', 'describe', $sweeperInvokerEmail, "--project=$Project", '--format=value(email)'))) {
 	Invoke-Gcloud @('iam', 'service-accounts', 'create', $sweeperInvokerId, "--project=$Project", '--display-name=BetterPPTX maintenance job invoker', '--description=Cloud Scheduler-only identity allowed to invoke the artifact-retention job.', '--quiet') | Out-Null
@@ -62,6 +68,9 @@ if ($workerSecret -notin $secretNames) {
 		if (Test-Path -LiteralPath $tempSecretFile) { Remove-Item -LiteralPath $tempSecretFile -Force }
 	}
 }
+if ($cloudflareDeploySecret -notin $secretNames) {
+	Invoke-Gcloud @('secrets', 'create', $cloudflareDeploySecret, "--project=$Project", '--replication-policy=automatic', '--quiet') | Out-Null
+}
 
 # Firestore access is limited by IAM condition to this database, and enqueue
 # access is granted per queue. The task identity can invoke only through the
@@ -73,8 +82,18 @@ Invoke-Gcloud @('storage', 'buckets', 'add-iam-policy-binding', "gs://$Bucket", 
 foreach ($secret in @($hmacSecret, $workerSecret)) {
 	Invoke-Gcloud @('secrets', 'add-iam-policy-binding', $secret, "--project=$Project", "--member=serviceAccount:$runtimeEmail", '--role=roles/secretmanager.secretAccessor', '--quiet') | Out-Null
 }
+$cloudflarePolicy = (Invoke-Gcloud @('secrets', 'get-iam-policy', $cloudflareDeploySecret, "--project=$Project", '--format=json')) | ConvertFrom-Json
+$legacyRuntimeAccess = @($cloudflarePolicy.bindings | Where-Object { $_.role -eq 'roles/secretmanager.secretAccessor' -and $_.members -contains "serviceAccount:$runtimeEmail" })
+if ($legacyRuntimeAccess.Count -gt 0) {
+	Invoke-Gcloud @('secrets', 'remove-iam-policy-binding', $cloudflareDeploySecret, "--project=$Project", "--member=serviceAccount:$runtimeEmail", '--role=roles/secretmanager.secretAccessor', '--quiet') | Out-Null
+}
+Invoke-Gcloud @('secrets', 'add-iam-policy-binding', $cloudflareDeploySecret, "--project=$Project", "--member=serviceAccount:$deployerEmail", '--role=roles/secretmanager.secretAccessor', '--quiet') | Out-Null
+foreach ($role in @('roles/secretmanager.viewer', 'roles/secretmanager.secretAccessor', 'roles/secretmanager.secretVersionAdder')) {
+	Invoke-Gcloud @('secrets', 'add-iam-policy-binding', $cloudflareDeploySecret, "--project=$Project", "--member=serviceAccount:$missionControlRuntimeEmail", "--role=$role", '--quiet') | Out-Null
+}
 
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $runtimeEmail, "--project=$Project", "--member=serviceAccount:$deployerEmail", '--role=roles/iam.serviceAccountUser', '--quiet') | Out-Null
+Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $missionControlRuntimeEmail, "--project=$Project", "--member=serviceAccount:$deployerEmail", '--role=roles/iam.serviceAccountUser', '--quiet') | Out-Null
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $runtimeEmail, "--project=$Project", "--member=serviceAccount:$tasksAgent", '--role=roles/iam.serviceAccountUser', '--quiet') | Out-Null
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $sweeperInvokerEmail, "--project=$Project", "--member=serviceAccount:$deployerEmail", '--role=roles/iam.serviceAccountUser', '--quiet') | Out-Null
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $sweeperInvokerEmail, "--project=$Project", "--member=serviceAccount:$schedulerAgent", '--role=roles/iam.serviceAccountTokenCreator', '--quiet') | Out-Null
@@ -85,6 +104,7 @@ foreach ($queue in $queues) {
 
 Write-Output "Cloud Run free-beta runtime access is provisioned for project $Project in $Region."
 Write-Output "Runtime identity: $runtimeEmail"
+Write-Output "Private Mission Control identity: $missionControlRuntimeEmail"
 Write-Output "Scheduled-sweeper invoker: $sweeperInvokerEmail"
-Write-Output "Scoped Firestore database, artifact bucket, two runtime secrets, and $($queues.Count) task queues are configured."
+Write-Output "Scoped Firestore database, artifact bucket, runtime secrets, and $($queues.Count) task queues are configured. The Cloudflare credential has no public-runtime access; its Secret Manager access is limited to the owner-only Mission Control service and deploy identity."
 Write-Output 'The worker run.invoker binding and public gateway exposure are intentionally deferred to deployment verification.'

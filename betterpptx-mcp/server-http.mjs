@@ -86,7 +86,7 @@ import {
 	readBaseWalletFundingStatus,
 } from './billing/base-wallet-funding.mjs'
 import { registerPayRamRoutes } from './billing/payram-routes.mjs'
-import { buildMissionControlSnapshot, missionControlAccess, missionControlAdminAccess, renderMissionControlPage, sendMissionControlDenied } from './mission-control.mjs'
+import { buildMissionControlSnapshot, missionControlAccess, missionControlAdminAccess, missionControlOnlyPathAllowed, renderMissionControlPage, sendMissionControlDenied } from './mission-control.mjs'
 import {
 	getMissionControlSecretsSnapshot,
 	MissionControlSecretError,
@@ -503,6 +503,13 @@ export async function startBetterPptxHttp(options = {}) {
 
 	const app = express()
 	app.disable('x-powered-by')
+	if (envFlag('BETTERPPTX_MISSION_CONTROL_ONLY')) {
+		app.use((req, res, next) => {
+			if (missionControlOnlyPathAllowed(req.path, req.method)) return next()
+			res.setHeader('Cache-Control', 'no-store')
+			return res.status(404).json({ error: { code: 'NOT_FOUND', message: 'not found' } })
+		})
+	}
 	const payPerJobBilling = String(process.env.BETTERPPTX_BILLING_MODEL || '').trim().toLowerCase() === 'pay_per_job'
 	const freePublicationBilling = isFreePublicationBillingProfile()
 	const paymentFlowsDisabled = payPerJobBilling || freePublicationBilling

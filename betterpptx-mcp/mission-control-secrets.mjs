@@ -24,7 +24,7 @@ export const MISSION_CONTROL_SECRET_DEFINITIONS = Object.freeze([
 		secretName: 'betterpptx-mission-control-token',
 		envName: 'BETTERPPTX_MISSION_CONTROL_TOKEN',
 		alternateEnvNames: [],
-		dependentServices: ['betterpptx-mcp-staging'],
+		dependentServices: ['betterpptx-mission-control'],
 		actions: { reveal: true, update: true, rotate: true, test: true },
 	}),
 	Object.freeze({
@@ -34,7 +34,7 @@ export const MISSION_CONTROL_SECRET_DEFINITIONS = Object.freeze([
 		secretName: 'betterpptx-mission-control-admin-token',
 		envName: 'BETTERPPTX_MISSION_CONTROL_ADMIN_TOKEN',
 		alternateEnvNames: [],
-		dependentServices: ['betterpptx-mcp-staging'],
+		dependentServices: ['betterpptx-mission-control'],
 		actions: { reveal: true, update: true, rotate: true, test: true },
 	}),
 	Object.freeze({
@@ -46,6 +46,19 @@ export const MISSION_CONTROL_SECRET_DEFINITIONS = Object.freeze([
 		alternateEnvNames: ['BETTERPPTX_AVATAR_WORKER_TOKEN'],
 		dependentServices: ['betterpptx-mcp-staging'],
 		actions: { reveal: true, update: true, rotate: true, test: true },
+	}),
+	Object.freeze({
+		id: 'cloudflare_worker_deploy_token',
+		displayName: 'Cloudflare Worker Deployment Token',
+		kind: 'cloudflare-api-token',
+		description: 'Owner-created in Cloudflare. Grant Workers Scripts edit on this account and Workers Routes edit only on the xmcpx.com zone. Store and update the value here; status testing confirms the token is active but does not enumerate its permissions.',
+		secretName: 'betterpptx-cloudflare-worker-deploy-token',
+		envName: 'BETTERPPTX_CLOUDFLARE_WORKER_DEPLOY_TOKEN',
+		alternateEnvNames: [],
+		dependentServices: ['betterpptx-mission-control', 'betterpptx-cloudrun-deploy', 'betterpptx-cloudflare-edge-worker'],
+		// Tokens are created and revoked at Cloudflare. Mission Control owns the
+		// protected value and its test/update path, but cannot mint a replacement.
+		actions: { reveal: true, update: true, rotate: false, test: true },
 	}),
 	Object.freeze({
 		id: 'meshy_api_key',
@@ -362,9 +375,21 @@ function backendMode(def) {
 
 function definitionFor(id) {
 	const text = String(id || '').trim()
-	const def = MISSION_CONTROL_SECRET_DEFINITIONS.find(item => item.id === text)
+	const def = selectedSecretDefinitions().find(item => item.id === text)
 	if (!def) throw new MissionControlSecretError('MC_SECRET_NOT_ALLOWED', 'This Mission Control secret is not allowlisted.', 404)
 	return def
+}
+
+function selectedSecretDefinitions() {
+	const raw = String(process.env.BETTERPPTX_MISSION_CONTROL_SECRET_IDS || '').trim()
+	if (!raw) return MISSION_CONTROL_SECRET_DEFINITIONS
+	const ids = [...new Set(raw.split(',').map(id => id.trim()).filter(Boolean))]
+	const unknown = ids.filter(id => !MISSION_CONTROL_SECRET_DEFINITIONS.some(def => def.id === id))
+	if (unknown.length) {
+		throw new MissionControlSecretError('MC_SECRET_SELECTION_INVALID', 'Mission Control secret selection contains an unsupported secret identifier.', 500)
+	}
+	const selected = new Set(ids)
+	return MISSION_CONTROL_SECRET_DEFINITIONS.filter(def => selected.has(def.id))
 }
 
 function isoNow() {
@@ -417,6 +442,7 @@ function redactedRecord(def, { backend, projectId = null, value = '', versionNam
 		id: def.id,
 		displayName: def.displayName,
 		kind: def.kind,
+		...(def.description ? { description: def.description } : {}),
 		status: effectiveStatus,
 		configured,
 		fingerprint: valueFingerprint(value),
@@ -464,6 +490,16 @@ function ensureSecretValue(value) {
 		throw new MissionControlSecretError('MC_SECRET_VALUE_TOO_LARGE', 'Secret value exceeds the Mission Control update limit.', 413, { maxBytes: VALUE_MAX_BYTES })
 	}
 	return text
+}
+
+function validateSecretValueForDefinition(def, value) {
+	if (def.kind === 'cloudflare-api-token') {
+		const text = String(value || '')
+		if (Buffer.byteLength(text.trim(), 'utf8') < 20 || text !== text.trim() || /[\s\u0000]/.test(text)) {
+			throw new MissionControlSecretError('MC_SECRET_VALUE_INVALID', 'Cloudflare API tokens must be a single non-whitespace value of at least 20 bytes.', 400)
+		}
+	}
+	return value
 }
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = 8000) {
@@ -755,10 +791,11 @@ function safeSecretError(err) {
 }
 
 export function listMissionControlSecretDefinitions() {
-	return MISSION_CONTROL_SECRET_DEFINITIONS.map(def => ({
+	return selectedSecretDefinitions().map(def => ({
 		id: def.id,
 		displayName: def.displayName,
 		kind: def.kind,
+		...(def.description ? { description: def.description } : {}),
 		secretName: def.secretName,
 		envName: def.envName,
 		dependentServices: def.dependentServices,
@@ -772,7 +809,7 @@ export async function getMissionControlSecretsSnapshot(options = {}) {
 		? await projectId(options).catch(() => null)
 		: null
 	const secrets = []
-	for (const def of MISSION_CONTROL_SECRET_DEFINITIONS) {
+	for (const def of selectedSecretDefinitions()) {
 		try {
 			const record = await readSecret(def, options)
 			secrets.push(redactedRecord(def, record))
@@ -826,7 +863,7 @@ export async function updateMissionControlSecret(id, { value, confirm, ...option
 	const def = definitionFor(id)
 	ensureAction(def, 'update')
 	ensureConfirm('update', def.id, confirm)
-	const cleanValue = ensureSecretValue(value)
+	const cleanValue = validateSecretValueForDefinition(def, ensureSecretValue(value))
 	const record = await writeSecret(def, cleanValue, options)
 	const redacted = auditSecretAction(def, 'update', record)
 	return {
@@ -1019,6 +1056,33 @@ async function testPayRamApiKey(value, { fetchImpl = fetch } = {}) {
 	}
 }
 
+async function testCloudflareApiToken(value, { fetchImpl = fetch } = {}) {
+	const token = String(value || '').trim()
+	if (Buffer.byteLength(token, 'utf8') < 20 || /[\r\n\u0000]/.test(token)) {
+		return { ok: false, check: 'cloudflare-api-token-active', reason: 'invalid-token-format' }
+	}
+	try {
+		const response = await fetchWithTimeout('https://api.cloudflare.com/client/v4/user/tokens/verify', {
+			fetchImpl,
+			method: 'GET',
+			headers: { Accept: 'application/json', Authorization: `Bearer ${token}` },
+		}, 10000)
+		const data = await parseJsonResponse(response)
+		const active = response.ok && data?.success === true && data?.result?.status === 'active'
+		return {
+			ok: active,
+			check: 'cloudflare-api-token-active',
+			httpStatus: response.status,
+			status: data?.result?.status === 'active' || data?.result?.status === 'disabled' || data?.result?.status === 'expired'
+				? data.result.status
+				: 'unknown',
+			permissions: 'not-enumerated-by-token-verification',
+		}
+	} catch {
+		return { ok: false, check: 'cloudflare-api-token-active', reason: 'verification-request-failed' }
+	}
+}
+
 function testDepositXpub(value) {
 	try {
 		const config = normalizeDepositXpubConfig(String(value || ''))
@@ -1103,6 +1167,7 @@ export async function testMissionControlSecret(id, options = {}) {
 	if (!record.value) throw new MissionControlSecretError('MC_SECRET_MISSING', 'Secret value is missing.', 404)
 	let result
 	if (def.kind === 'payram-api-key') result = await testPayRamApiKey(record.value, options)
+	else if (def.kind === 'cloudflare-api-token') result = await testCloudflareApiToken(record.value, options)
 	else if (def.kind === 'meshy-api-key') result = testMeshyApiKey(record.value)
 	else if (def.kind === 'random-token') result = testRandomToken(record.value)
 	else if (def.kind === 'hmac-secret') result = testHmacSecret(record.value)

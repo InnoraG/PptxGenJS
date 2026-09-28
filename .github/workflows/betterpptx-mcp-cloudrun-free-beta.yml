@@ -66,6 +66,9 @@ jobs:
           node --test betterpptx-mcp/test/production-non-rendering-save.test.mjs
           node --test betterpptx-mcp/test/public-artifact-download-sanitization.test.mjs
           node --test betterpptx-mcp/test/cloudflare-edge-worker.test.mjs
+          node --test betterpptx-mcp/test/cloudflare-deploy-secret.test.mjs
+          node --test betterpptx-mcp/test/mission-control-private-iam.test.mjs
+          node --test betterpptx-mcp/test/mission-control-deployment-contract.test.mjs
 
       - name: Build the immutable release image
         shell: bash
@@ -96,6 +99,8 @@ jobs:
         GCP_RUNTIME_SERVICE_ACCOUNT: betterpptx-public-runtime@betterpptx-mcp-20260926.iam.gserviceaccount.com
         CLOUD_RUN_GATEWAY: betterpptx-public
         CLOUD_RUN_WORKER: betterpptx-worker
+        CLOUD_RUN_MISSION_CONTROL: betterpptx-mission-control
+        GCP_MISSION_CONTROL_SERVICE_ACCOUNT: betterpptx-mission-control-runtime@betterpptx-mcp-20260926.iam.gserviceaccount.com
         CLOUD_RUN_SWEEPER: betterpptx-artifact-sweeper
         CLOUD_SCHEDULER_JOB: betterpptx-artifact-sweep-hourly
         INSTALL_HMAC_SECRET_NAME: betterpptx-install-hmac-secret
@@ -103,6 +108,8 @@ jobs:
         SWEEPER_INVOKER_SERVICE_ACCOUNT: betterpptx-maintenance-invoker@betterpptx-mcp-20260926.iam.gserviceaccount.com
         GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ vars.GCP_FREE_BETA_WORKLOAD_IDENTITY_PROVIDER }}
         GCP_DEPLOY_SERVICE_ACCOUNT: ${{ vars.GCP_FREE_BETA_DEPLOY_SERVICE_ACCOUNT }}
+        GCP_MISSION_CONTROL_OWNER_EMAIL: ${{ vars.GCP_MISSION_CONTROL_OWNER_EMAIL }}
+        CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
         BETTERPPTX_PUBLIC_BASE: ${{ vars.BETTERPPTX_PUBLIC_BASE }}
         BETTERPPTX_OAUTH_ISSUER: ${{ vars.BETTERPPTX_OAUTH_ISSUER }}
         BETTERPPTX_OAUTH_AUDIENCE: ${{ vars.BETTERPPTX_OAUTH_AUDIENCE }}
@@ -122,6 +129,8 @@ jobs:
           set -euo pipefail
           test -n "$GCP_WORKLOAD_IDENTITY_PROVIDER"
           test -n "$GCP_DEPLOY_SERVICE_ACCOUNT"
+          test -n "$GCP_MISSION_CONTROL_OWNER_EMAIL"
+          [[ "$GCP_MISSION_CONTROL_OWNER_EMAIL" =~ ^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$ ]]
           test "$BETTERPPTX_PUBLIC_BASE" = "https://betterpptx.xmcpx.com"
           test "$BETTERPPTX_OAUTH_ISSUER" = "$BETTERPPTX_PUBLIC_BASE/identity/realms/betterpptx"
           test "$BETTERPPTX_OAUTH_AUDIENCE" = "$BETTERPPTX_PUBLIC_BASE"
@@ -165,10 +174,26 @@ jobs:
         run: |
           set -euo pipefail
           gcloud iam service-accounts describe "$GCP_RUNTIME_SERVICE_ACCOUNT" --project="$GCP_PROJECT_ID" --format='value(email)' >/dev/null
+          gcloud iam service-accounts describe "$GCP_MISSION_CONTROL_SERVICE_ACCOUNT" --project="$GCP_PROJECT_ID" --format='value(email)' >/dev/null
           gcloud secrets describe "$INSTALL_HMAC_SECRET_NAME" --project="$GCP_PROJECT_ID" --format='value(name)' >/dev/null
           gcloud secrets versions describe latest --secret="$INSTALL_HMAC_SECRET_NAME" --project="$GCP_PROJECT_ID" --format='value(state)' | grep -qx ENABLED
           gcloud secrets describe "$OPERATION_WORKER_SECRET_NAME" --project="$GCP_PROJECT_ID" --format='value(name)' >/dev/null
           gcloud secrets versions describe latest --secret="$OPERATION_WORKER_SECRET_NAME" --project="$GCP_PROJECT_ID" --format='value(state)' | grep -qx ENABLED
+          gcloud secrets describe betterpptx-cloudflare-worker-deploy-token --project="$GCP_PROJECT_ID" --format='value(name)' >/dev/null
+          gcloud secrets get-iam-policy betterpptx-cloudflare-worker-deploy-token --project="$GCP_PROJECT_ID" --format=json > "$RUNNER_TEMP/cloudflare-secret-iam.json"
+          jq -e --arg mc "serviceAccount:$GCP_MISSION_CONTROL_SERVICE_ACCOUNT" '[.bindings[]? | select(.role == "roles/secretmanager.viewer") | .members[]? | select(. == $mc)] | length == 1' "$RUNNER_TEMP/cloudflare-secret-iam.json" >/dev/null
+          jq -e --arg mc "serviceAccount:$GCP_MISSION_CONTROL_SERVICE_ACCOUNT" '[.bindings[]? | select(.role == "roles/secretmanager.secretAccessor") | .members[]? | select(. == $mc)] | length == 1' "$RUNNER_TEMP/cloudflare-secret-iam.json" >/dev/null
+          jq -e --arg mc "serviceAccount:$GCP_MISSION_CONTROL_SERVICE_ACCOUNT" '[.bindings[]? | select(.role == "roles/secretmanager.secretVersionAdder") | .members[]? | select(. == $mc)] | length == 1' "$RUNNER_TEMP/cloudflare-secret-iam.json" >/dev/null
+          jq -e --arg deployer "serviceAccount:$GCP_DEPLOY_SERVICE_ACCOUNT" '[.bindings[]? | select(.role == "roles/secretmanager.secretAccessor") | .members[]? | select(. == $deployer)] | length == 1' "$RUNNER_TEMP/cloudflare-secret-iam.json" >/dev/null
+          jq -e --arg runtime "serviceAccount:$GCP_RUNTIME_SERVICE_ACCOUNT" '[.bindings[]?.members[]? | select(. == $runtime)] | length == 0' "$RUNNER_TEMP/cloudflare-secret-iam.json" >/dev/null
+          jq -e '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' "$RUNNER_TEMP/cloudflare-secret-iam.json" >/dev/null
+          gcloud projects get-iam-policy "$GCP_PROJECT_ID" --format=json > "$RUNNER_TEMP/project-iam.json"
+          jq -e --arg runtime "serviceAccount:$GCP_RUNTIME_SERVICE_ACCOUNT" '
+            [.bindings[]? | select(
+              (.role | startswith("roles/secretmanager.")) or
+              .role == "roles/owner" or .role == "roles/editor" or .role == "roles/admin"
+            ) | .members[]? | select(. == $runtime)] | length == 0
+          ' "$RUNNER_TEMP/project-iam.json" >/dev/null
           for queue in betterpptx-deck-interactive betterpptx-deck-batch betterpptx-media-long; do
             gcloud tasks queues describe "$queue" --project="$GCP_PROJECT_ID" --location="$GCP_REGION" --format='value(state)' | grep -qx RUNNING
           done
@@ -214,6 +239,21 @@ jobs:
           gateway_url="$(gcloud run services describe "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format='value(status.url)')"
           [[ "$gateway_url" == https://*.a.run.app ]]
           echo "GATEWAY_URL=$gateway_url" >> "$GITHUB_ENV"
+
+          # Mission Control is a separate, owner-only secret console. It does
+          # not expose MCP, artifacts, identity, or payment routes, and it gets
+          # no public-runtime secrets or shared-store privileges.
+          mission_control_env="BETTERPPTX_ENV=production,BETTERPPTX_DEPLOYMENT_STAGE=production,BETTERPPTX_PUBLIC_BLACK_BOX=0,BETTERPPTX_AUTH=none,BETTERPPTX_BILLING_PROVIDER=none,BETTERPPTX_BILLING_MODEL=free_publication,BETTERPPTX_BILLING_ENFORCE=1,BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW=3,BETTERPPTX_FREE_PUBLICATION_WINDOW_DAYS=30,BETTERPPTX_MISSION_CONTROL=1,BETTERPPTX_MISSION_CONTROL_ONLY=1,BETTERPPTX_MISSION_CONTROL_TRUST_CLOUD_RUN_IAM=1,BETTERPPTX_MISSION_CONTROL_SECRET_IDS=cloudflare_worker_deploy_token,BETTERPPTX_MC_SECRET_BACKEND=gcp-secret-manager,BETTERPPTX_GCP_PROJECT=${GCP_PROJECT_ID},BETTERPPTX_LOG_PATHS=0,BETTERPPTX_LOG_PAYLOADS=0,BETTERPPTX_LOG=off,BETTERPPTX_TRACE=0,BETTERPPTX_AVATAR_PROVIDER=disabled"
+          gcloud run deploy "$CLOUD_RUN_MISSION_CONTROL" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --image="$IMAGE_REF" --service-account="$GCP_MISSION_CONTROL_SERVICE_ACCOUNT" --execution-environment=gen2 --port=8080 --cpu=1 --memory=512Mi --concurrency=1 --min=0 --max=1 --timeout=300s --no-allow-unauthenticated --set-env-vars="$mission_control_env" --quiet
+          for member in allUsers allAuthenticatedUsers; do
+            if gcloud run services get-iam-policy "$CLOUD_RUN_MISSION_CONTROL" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json | jq -e --arg member "$member" '[.bindings[]? | select(.role == "roles/run.invoker") | .members[]? | select(. == $member)] | length > 0' >/dev/null; then
+              gcloud run services remove-iam-policy-binding "$CLOUD_RUN_MISSION_CONTROL" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --member="$member" --role=roles/run.invoker --quiet
+            fi
+          done
+          gcloud run services add-iam-policy-binding "$CLOUD_RUN_MISSION_CONTROL" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --member="user:$GCP_MISSION_CONTROL_OWNER_EMAIL" --role=roles/run.invoker --condition=None --quiet
+          mission_control_url="$(gcloud run services describe "$CLOUD_RUN_MISSION_CONTROL" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format='value(status.url)')"
+          [[ "$mission_control_url" == https://*.a.run.app ]]
+          echo "MISSION_CONTROL_URL=$mission_control_url" >> "$GITHUB_ENV"
 
       - name: Deploy the 12-hour artifact-retention job and hourly scheduler
         env:
@@ -271,13 +311,36 @@ jobs:
                 ([ $e[]? | select(.name == "BETTERPPTX_BILLING_MODEL") | .value ][0] == "free_publication") and
                 ([ $e[]? | select(.name == "BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW") | .value ][0] == "3") and
                 ([ $e[]? | select(.name == "BETTERPPTX_FREE_PUBLICATION_WINDOW_DAYS") | .value ][0] == "30")
-              )
+            )
+            ' "$RUNNER_TEMP/$service.json" >/dev/null
+            jq -e '
+              ([.spec.template.spec.containers[0].env[]? | select(.name == "BETTERPPTX_MISSION_CONTROL" and .value == "1")] | length == 0) and
+              ([.spec.template.spec.containers[0].env[]? | select(.name == "BETTERPPTX_MISSION_CONTROL_TRUST_CLOUD_RUN_IAM" and .value == "1")] | length == 0)
             ' "$RUNNER_TEMP/$service.json" >/dev/null
           done
           for service in "$CLOUD_RUN_WORKER"; do
             gcloud run services get-iam-policy "$service" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json > "$RUNNER_TEMP/$service-iam.json"
           jq -e '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' "$RUNNER_TEMP/$service-iam.json" >/dev/null
           done
+          gcloud run services describe "$CLOUD_RUN_MISSION_CONTROL" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json > "$RUNNER_TEMP/$CLOUD_RUN_MISSION_CONTROL.json"
+          jq -e --arg sa "$GCP_MISSION_CONTROL_SERVICE_ACCOUNT" '
+            .status.latestReadyRevisionName != null and
+            ([.status.conditions[]? | select(.type == "Ready" and .status == "True")] | length > 0) and
+            .spec.template.spec.serviceAccountName == $sa and
+            ((.spec.template.metadata.annotations["autoscaling.knative.dev/minScale"] // "0") == "0") and
+            ((.spec.template.metadata.annotations["autoscaling.knative.dev/maxScale"] // "1") == "1") and
+            ([.spec.template.spec.containers[0].env[]? | select(.name == "BETTERPPTX_MISSION_CONTROL") | .value] | index("1")) != null and
+            ([.spec.template.spec.containers[0].env[]? | select(.name == "BETTERPPTX_MISSION_CONTROL_ONLY") | .value] | index("1")) != null and
+            ([.spec.template.spec.containers[0].env[]? | select(.name == "BETTERPPTX_MISSION_CONTROL_TRUST_CLOUD_RUN_IAM") | .value] | index("1")) != null and
+            ([.spec.template.spec.containers[0].env[]? | select(.name == "BETTERPPTX_MISSION_CONTROL_SECRET_IDS") | .value] | index("cloudflare_worker_deploy_token")) != null
+          ' "$RUNNER_TEMP/$CLOUD_RUN_MISSION_CONTROL.json" >/dev/null
+          gcloud run services get-iam-policy "$CLOUD_RUN_MISSION_CONTROL" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json > "$RUNNER_TEMP/$CLOUD_RUN_MISSION_CONTROL-iam.json"
+          jq -e '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' "$RUNNER_TEMP/$CLOUD_RUN_MISSION_CONTROL-iam.json" >/dev/null
+          jq -e --arg owner "user:$GCP_MISSION_CONTROL_OWNER_EMAIL" '[.bindings[]? | select(.role == "roles/run.invoker") | .members[]?] | unique == [$owner]' "$RUNNER_TEMP/$CLOUD_RUN_MISSION_CONTROL-iam.json" >/dev/null
+          mission_control_url="$(gcloud run services describe "$CLOUD_RUN_MISSION_CONTROL" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format='value(status.url)')"
+          anonymous_status="$(curl --silent --show-error --max-time 20 -o /dev/null -w '%{http_code}' "$mission_control_url/ops/mission-control")"
+          [[ "$anonymous_status" == 401 || "$anonymous_status" == 403 ]]
+          echo 'Mission Control is independently deployed with scale-to-zero and a single owner IAM invoker; anonymous access is denied.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Keep the gateway private and authorize only the deployment preflight identity
         shell: bash
@@ -318,34 +381,33 @@ jobs:
 
       - name: Check for owner-configured Cloudflare deployment credentials
         id: cloudflare-edge-auth
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         shell: bash
         run: |
           set -euo pipefail
-          if [[ -n "$CLOUDFLARE_API_TOKEN" && -n "$CLOUDFLARE_ACCOUNT_ID" ]]; then
+          secret_name=betterpptx-cloudflare-worker-deploy-token
+          if [[ -n "$CLOUDFLARE_ACCOUNT_ID" ]] && \
+             gcloud secrets versions describe latest --secret="$secret_name" --project="$GCP_PROJECT_ID" --format='value(state)' 2>/dev/null | grep -qx ENABLED; then
             echo 'ready=true' >> "$GITHUB_OUTPUT"
           else
             echo 'ready=false' >> "$GITHUB_OUTPUT"
             {
               echo '### Custom-domain route not changed'
-              echo 'Cloud Run is live and its run.app endpoint passed public OAuth-boundary checks. The xmcpx.com Worker route was left untouched because this GitHub environment does not yet contain both scoped Cloudflare deployment credentials.'
+              echo 'Cloud Run is live and its run.app endpoint passed public OAuth-boundary checks. The xmcpx.com Worker route was left untouched because the Cloudflare account ID or owner-managed Secret Manager token is not ready.'
             } >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Deploy the Cloudflare Worker route to the verified Cloud Run gateway
         if: steps.cloudflare-edge-auth.outputs.ready == 'true'
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          BETTERPPTX_CLOUD_RUN_ORIGIN: ${{ env.GATEWAY_URL }}
         shell: bash
         run: |
           set -euo pipefail
+          token="$(gcloud secrets versions access latest --secret=betterpptx-cloudflare-worker-deploy-token --project="$GCP_PROJECT_ID")"
+          test -n "$token"
+          echo "::add-mask::$token"
           npm ci --prefix betterpptx-mcp/deploy/cloudflare-edge
           cd betterpptx-mcp/deploy/cloudflare-edge
-          npx wrangler deploy --var "BETTERPPTX_CLOUD_RUN_ORIGIN:$BETTERPPTX_CLOUD_RUN_ORIGIN"
+          CLOUDFLARE_API_TOKEN="$token" CLOUDFLARE_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID" npx wrangler deploy --var "BETTERPPTX_CLOUD_RUN_ORIGIN:$GATEWAY_URL"
+          unset token
 
       - name: Verify the custom-domain MCP and preserved OAuth issuer
         if: steps.cloudflare-edge-auth.outputs.ready == 'true'
