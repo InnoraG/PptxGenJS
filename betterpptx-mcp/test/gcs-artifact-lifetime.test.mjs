@@ -317,8 +317,14 @@ test('cold cache renewal and chunk verification remain owner- and generation-bou
 
 test('.53 owner-bound authority renews without requiring new owner/hash/MIME tags', async t => {
   const { store, prepare, finalize, recordPath, authorityName } = await fixture(t)
+  t.mock.timers.enable({ apis: ['Date'], now: Date.UTC(2031, 0, 2, 12, 0, 0, 375) })
   const published = await finalize(await prepare(true))
   const newRecord = JSON.parse(await fs.readFile(recordPath(published.downloadUrl), 'utf8'))
+  // Replace the simulated publication's authority, not its retained bytes.
+  // Keeping the .54 authority would contradict the .53 object tags below,
+  // especially when renewal returns the identical URL in the same second.
+  objects.delete(authorityName(published.downloadUrl))
+  await fs.unlink(recordPath(published.downloadUrl))
   const legacyUrl = published.downloadUrl.replace(/&generation=[0-9]+/, '')
   const legacy = { ...newRecord, downloadUrl: legacyUrl }
   delete legacy.contentType
@@ -335,12 +341,20 @@ test('.53 owner-bound authority renews without requiring new owner/hash/MIME tag
   await assert.rejects(as(bob, () => store.issueBrowserDownload(request)), { code: 'ARTIFACT_NOT_AVAILABLE' })
   const renewed = await as(alice, () => store.issueBrowserDownload(request))
   assert.notEqual(renewed.downloadUrl, legacyUrl)
+  assert.equal(renewed.downloadUrl, published.downloadUrl, 'frozen signer second reproduces the original URL')
   assert.equal(renewed.downloadLinkExpiresAt, published.downloadLinkExpiresAt)
   assert.equal(signedRequests.at(-1).options.responseType, 'image/png')
   const recovered = JSON.parse(await fs.readFile(recordPath(renewed.downloadUrl), 'utf8'))
   assert.equal(recovered.artifactExpiresAt, legacy.artifactExpiresAt)
   assert.deepEqual(recovered.resourceOwner, legacy.resourceOwner)
   assert.equal(recovered.objectGeneration, object.metadata.generation)
+  const writeCount = saves.length
+  const repeated = await as(alice, () => store.issueBrowserDownload(request))
+  assert.deepEqual(repeated, renewed, 'repeated legacy recovery in the same signer second is idempotent')
+  assert.equal(saves.length, writeCount, 'the matching authority is reused without an overwrite')
+  assert.deepEqual(JSON.parse(await fs.readFile(recordPath(renewed.downloadUrl), 'utf8')), recovered)
+  assert.deepEqual(JSON.parse(objects.get(authorityName(legacyUrl)).data.toString('utf8')), legacy)
+  await assert.rejects(as(bob, () => store.issueBrowserDownload(renewed)), { code: 'ARTIFACT_NOT_AVAILABLE' })
   const chunk = await as(alice, () => store.readArtifactChunk({ ...request, maxBytes: 9 }))
   assert.equal(chunk.bytes.toString(), 'immutable')
 })

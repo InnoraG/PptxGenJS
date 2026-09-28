@@ -13,11 +13,15 @@ This conservative threshold is a product safety setting, not a measured host
 maximum. `mode:"chunk"` remains available for explicit bounded retrieval.
 
 New publications default to 12 hours of file retention and a bearer download
-link valid until the same file expiry. The link grants access to one owned file;
+link covering the same 12-hour window. The link grants access to one owned file;
 anyone possessing it can download until expiry, so do not share it publicly.
-ChatGPT currently appends `utm_source=chatgpt.com` to rendered Markdown links;
-the download route ignores only that non-authorizing field and still verifies
-the exact signed permit. Other unexpected query fields remain rejected.
+The local download route tolerates ChatGPT's `utm_source=chatgpt.com`
+decoration, while verifying the exact signed permit; other unexpected query
+fields remain rejected. Cloud-storage signed URLs must remain byte-exact.
+Rendered-link compatibility with each consuming host is a separate live test,
+not proven by a signing fixture. The cloud signer's whole-second clock may
+expire a link less than one second before the file expiry; results report the
+actual signer deadline rather than claiming extra validity.
 `operation.status` or `operation.read_file` can recover a link while the file is retained,
 without another save, charge, or publication. The durable operation ID is the
 recovery reference. Late retrieval is capped at the original file expiry: a
@@ -40,7 +44,7 @@ portable source and media separately for authorized regeneration. A durable
 owner-authenticated library, monitored replicated storage, retention notices,
 and optional user-owned export are needed before promising longer-term
 availability. Any extension must budget bytes, egress, backups, and recovery;
-Link renewal cannot substitute for retained bytes.
+link renewal cannot substitute for retained bytes.
 
 Production safety: public URLs never expose server paths; bare file routes
 require the verified owner; browser grants are scoped and expire; capacity
