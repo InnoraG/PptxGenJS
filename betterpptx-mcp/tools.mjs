@@ -943,7 +943,7 @@ export const TOOLS = [
 					},
 				},
 				billingOverride: { type: 'boolean', default: false, description: 'Owner/maintainer override for unusually large accepted billing estimates where policy allows it.' },
-				idempotencyKey: { type: 'string', description: 'Optional stable key used to make billing reservations for spec sub-operations idempotent.' },
+				idempotencyKey: { type: 'string', description: 'Stable retry key for side-effecting operations. Hosted deployments may require it for resolve/commit; reuse the exact key and arguments on retries. Mutation-free dryRun and lockedDryRun do not require or persist a durable operation key. This key does not authorize payment.' },
 				planId: { type: 'string', description: 'Locked compile plan id returned by dryRun. Commit should pass this value so generation persists the same plan instead of reclassifying independently.' },
 				lockedPlanId: { type: 'string', description: 'Alias for planId. Pass the dry-run planId so commit consumes the locked compile plan.' },
 				planDigest: { type: 'string', description: 'Alias for planId. The dry-run planDigest may be sent on commit for compile-once generation.' },
