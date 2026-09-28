@@ -30,6 +30,8 @@ test('deployment keeps Mission Control private, scale-to-zero, and isolated from
 	assert.match(workflow, /select\(\. == "allUsers" or \. == "allAuthenticatedUsers"\).*length == 0/)
 	assert.match(workflow, /gcloud secrets versions access latest --secret=betterpptx-cloudflare-worker-deploy-token/)
 	assert.doesNotMatch(workflow, /secrets\.CLOUDFLARE_API_TOKEN/)
+	assert.match(workflow, /retry-cloud-run-service-add-iam-binding\.sh/)
+	assert.doesNotMatch(workflow, /gcloud run services add-iam-policy-binding/)
 
 	assert.match(provision, /betterpptx-mc-runtime/)
 	assert.match(provision, /DeployerServiceAccount = 'github-free-beta-deployer'/)
