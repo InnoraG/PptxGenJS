@@ -80,6 +80,7 @@ $attributeCondition = "assertion.repository == '$Repository' && assertion.ref ==
 
 $runPermissions = @(
 	'resourcemanager.projects.get',
+	'resourcemanager.projects.getIamPolicy',
 	'run.jobs.create', 'run.jobs.get', 'run.jobs.getIamPolicy', 'run.jobs.list', 'run.jobs.setIamPolicy', 'run.jobs.update',
 	'run.locations.list', 'run.operations.get', 'run.revisions.get', 'run.revisions.list',
 	'run.services.create', 'run.services.get', 'run.services.getIamPolicy', 'run.services.list', 'run.services.setIamPolicy', 'run.services.update'
@@ -96,7 +97,7 @@ Write-Host "Workload pool        : $poolResource"
 Write-Host "Workload provider    : $providerResource"
 Write-Host "Deployer identity    : $deployerEmail"
 Write-Host "Mode                 : $(if ($Apply) { 'APPLY' } else { 'PLAN ONLY; pass -Apply to configure' })"
-Write-Host 'Planned access is limited to non-deleting Cloud Run service/job deployment, scheduler job create/read/update, queue metadata reads, named-secret metadata reads, and image publishing to the BetterPPTX repository.'
+Write-Host 'Planned access is limited to non-deleting Cloud Run service/job deployment, read-only project IAM policy inspection for the runtime-security preflight, scheduler job create/read/update, queue metadata reads, named-secret metadata reads, and image publishing to the BetterPPTX repository.'
 
 $existingPools = @(& gcloud iam workload-identity-pools list "--project=$ProjectId" '--location=global' '--format=value(name)')
 if ($LASTEXITCODE -ne 0) { throw 'Could not list Workload Identity pools.' }
