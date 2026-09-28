@@ -17,6 +17,7 @@ test('deployment keeps Mission Control private, scale-to-zero, and isolated from
 	assert.match(workflow, /--min=0 --max=1 --timeout=300s --no-allow-unauthenticated --set-env-vars="\$mission_control_env"/)
 	assert.match(workflow, /gcloud projects get-iam-policy "\$GCP_PROJECT_ID"/)
 	assert.match(workflow, /roles\/secretmanager\./)
+	assert.match(workflow, /select\(\.role == "roles\/secretmanager\.viewer"\).*\$deployer/)
 	assert.match(workflow, /BETTERPPTX_MISSION_CONTROL_ONLY=1/)
 	assert.match(workflow, /BETTERPPTX_MISSION_CONTROL_TRUST_CLOUD_RUN_IAM=1/)
 	assert.match(workflow, /user:\$GCP_MISSION_CONTROL_OWNER_EMAIL/)
@@ -30,6 +31,7 @@ test('deployment keeps Mission Control private, scale-to-zero, and isolated from
 	assert.match(provision, /roles\/secretmanager\.viewer/)
 	assert.match(provision, /roles\/secretmanager\.secretAccessor/)
 	assert.match(provision, /roles\/secretmanager\.secretVersionAdder/)
+	assert.match(provision, /"--member=serviceAccount:\$deployerEmail".*roles\/secretmanager\.viewer/)
 	assert.match(provision, /remove-iam-policy-binding.*\$runtimeEmail/)
 	assert.doesNotMatch(provision, /add-iam-policy-binding.*\$cloudflareDeploySecret.*\$runtimeEmail/)
 

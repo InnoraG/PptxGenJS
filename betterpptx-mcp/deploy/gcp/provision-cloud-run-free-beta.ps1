@@ -88,6 +88,7 @@ if ($legacyRuntimeAccess.Count -gt 0) {
 	Invoke-Gcloud @('secrets', 'remove-iam-policy-binding', $cloudflareDeploySecret, "--project=$Project", "--member=serviceAccount:$runtimeEmail", '--role=roles/secretmanager.secretAccessor', '--quiet') | Out-Null
 }
 Invoke-Gcloud @('secrets', 'add-iam-policy-binding', $cloudflareDeploySecret, "--project=$Project", "--member=serviceAccount:$deployerEmail", '--role=roles/secretmanager.secretAccessor', '--quiet') | Out-Null
+Invoke-Gcloud @('secrets', 'add-iam-policy-binding', $cloudflareDeploySecret, "--project=$Project", "--member=serviceAccount:$deployerEmail", '--role=roles/secretmanager.viewer', '--quiet') | Out-Null
 foreach ($role in @('roles/secretmanager.viewer', 'roles/secretmanager.secretAccessor', 'roles/secretmanager.secretVersionAdder')) {
 	Invoke-Gcloud @('secrets', 'add-iam-policy-binding', $cloudflareDeploySecret, "--project=$Project", "--member=serviceAccount:$missionControlRuntimeEmail", "--role=$role", '--quiet') | Out-Null
 }

@@ -185,6 +185,7 @@ jobs:
           jq -e --arg mc "serviceAccount:$GCP_MISSION_CONTROL_SERVICE_ACCOUNT" '[.bindings[]? | select(.role == "roles/secretmanager.secretAccessor") | .members[]? | select(. == $mc)] | length == 1' "$RUNNER_TEMP/cloudflare-secret-iam.json" >/dev/null
           jq -e --arg mc "serviceAccount:$GCP_MISSION_CONTROL_SERVICE_ACCOUNT" '[.bindings[]? | select(.role == "roles/secretmanager.secretVersionAdder") | .members[]? | select(. == $mc)] | length == 1' "$RUNNER_TEMP/cloudflare-secret-iam.json" >/dev/null
           jq -e --arg deployer "serviceAccount:$GCP_DEPLOY_SERVICE_ACCOUNT" '[.bindings[]? | select(.role == "roles/secretmanager.secretAccessor") | .members[]? | select(. == $deployer)] | length == 1' "$RUNNER_TEMP/cloudflare-secret-iam.json" >/dev/null
+          jq -e --arg deployer "serviceAccount:$GCP_DEPLOY_SERVICE_ACCOUNT" '[.bindings[]? | select(.role == "roles/secretmanager.viewer") | .members[]? | select(. == $deployer)] | length == 1' "$RUNNER_TEMP/cloudflare-secret-iam.json" >/dev/null
           jq -e --arg runtime "serviceAccount:$GCP_RUNTIME_SERVICE_ACCOUNT" '[.bindings[]?.members[]? | select(. == $runtime)] | length == 0' "$RUNNER_TEMP/cloudflare-secret-iam.json" >/dev/null
           jq -e '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' "$RUNNER_TEMP/cloudflare-secret-iam.json" >/dev/null
           gcloud projects get-iam-policy "$GCP_PROJECT_ID" --format=json > "$RUNNER_TEMP/project-iam.json"
