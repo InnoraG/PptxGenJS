@@ -42346,11 +42346,29 @@ function durableOperationQueuedMode() {
 	return durableOperationExecutionMode() === 'queued'
 }
 
+function specGenerationPhaseForDurableOperation(name, args = {}) {
+	if (name !== 'betterpptx.deck.generate_from_spec') return undefined
+	try {
+		return normalizeSpecGenerationPhase(args)
+	} catch {
+		// Let the spec handler return the precise phase/argument finding. Invalid
+		// requests cannot mutate a deck and should not be masked by an idempotency
+		// prerequisite or persisted as durable operations.
+		return null
+	}
+}
+
+function isNonMutatingSpecGenerationInvocation(name, args = {}) {
+	const phase = specGenerationPhaseForDurableOperation(name, args)
+	return phase === null || phase === 'dryRun' || phase === 'lockedDryRun'
+}
+
 function supportsDurableOperationLedger(name, args = {}) {
 	if (!durableOperationStoreEnabled()) return false
 	if (!hasIdempotencyKey(args)) return false
 	if (isReadOnlyTool(name)) return false
 	if (name.startsWith('betterpptx.billing.') || name.startsWith('betterpptx.auth.')) return false
+	if (isNonMutatingSpecGenerationInvocation(name, args)) return false
 	return Boolean(
 		DECK_CREATION_TOOLS.has(name)
 		|| supportsDeckIdempotency(name, args)
@@ -42363,6 +42381,7 @@ function durableOperationIdempotencyRequired(name, args = {}) {
 	return process.env.BETTERPPTX_REQUIRE_DURABLE_OPERATION_IDEMPOTENCY === '1'
 		&& durableOperationStoreEnabled()
 		&& isMutatingTool(name)
+		&& !isNonMutatingSpecGenerationInvocation(name, args)
 		&& !name.startsWith('betterpptx.billing.')
 		&& !name.startsWith('betterpptx.auth.')
 		&& !hasIdempotencyKey(args)
@@ -42980,7 +42999,7 @@ function publicNextActionsForError(code, details = {}) {
 			]
 		case 'IDEMPOTENCY_KEY_REQUIRED':
 			return [
-				{ type: 'supply_idempotency_key', description: 'Choose one stable idempotencyKey for this logical save and reuse it with identical arguments on every retry.' },
+				{ type: 'supply_idempotency_key', description: 'Choose one stable idempotencyKey for this side-effecting operation and reuse it with identical arguments on every retry. This is retry protection, not payment authorization.' },
 			]
 		case 'PREVIEW_REQUIRED':
 		case 'PREVIEW_INCOMPLETE':
@@ -43587,7 +43606,7 @@ async function callBetterPptxToolInScope(name, args = {}, context = {}) {
 			ok: false,
 			error: {
 				code: 'IDEMPOTENCY_KEY_REQUIRED',
-				message: 'This operation requires an idempotencyKey for durable retry safety.',
+				message: 'This side-effecting operation requires an idempotencyKey for durable retry safety.',
 				recoverable: true,
 				retry_safe: true,
 				artifact_state: 'unchanged_or_unknown',

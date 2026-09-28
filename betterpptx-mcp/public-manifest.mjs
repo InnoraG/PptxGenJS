@@ -14,7 +14,7 @@ import { publicVerificationPolicy } from './verification-policy.mjs'
 // Increment whenever the server-advertised public tool records change,
 // including descriptions or metadata covered by PUBLIC_TOOL_SCHEMA_DIGEST_COVERAGE.
 // The capability registry has its own independent revision and digest.
-export const TOOL_SCHEMA_VERSION = '2026-09-26.5'
+export const TOOL_SCHEMA_VERSION = '2026-09-28.1'
 const PACKAGE_SEMANTIC_VERSION = String(JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version || '').trim()
 const CONFIGURED_SEMANTIC_VERSION = String(process.env.BETTERPPTX_PUBLIC_VERSION || '').trim()
 if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(PACKAGE_SEMANTIC_VERSION)) {
@@ -25,10 +25,11 @@ if (CONFIGURED_SEMANTIC_VERSION && CONFIGURED_SEMANTIC_VERSION !== PACKAGE_SEMAN
 }
 export const PUBLIC_SEMANTIC_VERSION = PACKAGE_SEMANTIC_VERSION
 export const PUBLIC_SCHEMA_CHANGE = Object.freeze({
-	previousToolSchemaVersion: '2026-09-26.4',
+	previousToolSchemaVersion: '2026-09-26.5',
 	compatibility: 'additive',
 	changes: [
 		'Default saved-file retrieval now returns a fresh download link; large resource requests fall back to link mode before entering chat context. Published artifact default retention is 30 days for new publications, subject to explicit storage capacity.',
+		'Production idempotency requirements now follow the generate_from_spec phase: mutation-free dryRun and lockedDryRun need no durable key or ledger entry; side-effecting phases retain stable-key protection. The public key description now documents this boundary.',
 	],
 })
 export const PUBLIC_CAPABILITY_DIGEST_COVERAGE = 'Canonical SHA-256 over all stable public family fields and contracts, extended layers, persona terminology/contracts, motion, narration, and combined examples; live readiness and measured inventories are excluded.'
