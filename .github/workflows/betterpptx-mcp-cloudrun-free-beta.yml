@@ -67,6 +67,7 @@ jobs:
           node --test betterpptx-mcp/test/public-artifact-download-sanitization.test.mjs
           node --test betterpptx-mcp/test/cloudflare-edge-worker.test.mjs
           node --test betterpptx-mcp/test/cloudflare-release-identity-retry.test.mjs
+          node --test betterpptx-mcp/test/cloud-run-service-iam-retry.test.mjs
           node --test betterpptx-mcp/test/cloudflare-deploy-secret.test.mjs
           node --test betterpptx-mcp/test/mission-control-private-iam.test.mjs
           node --test betterpptx-mcp/test/mission-control-deployment-contract.test.mjs
@@ -223,7 +224,7 @@ jobs:
           worker_url="$(gcloud run services describe "$CLOUD_RUN_WORKER" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format='value(status.url)')"
           [[ "$worker_url" == https://*.a.run.app ]]
           gcloud run services update "$CLOUD_RUN_WORKER" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --update-env-vars="BETTERPPTX_OPERATION_WORKER_URL=$worker_url" --quiet
-          gcloud run services add-iam-policy-binding "$CLOUD_RUN_WORKER" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --member="serviceAccount:$GCP_RUNTIME_SERVICE_ACCOUNT" --role=roles/run.invoker --quiet
+          bash betterpptx-mcp/deploy/gcp/retry-cloud-run-service-add-iam-binding.sh "$CLOUD_RUN_WORKER" "$GCP_PROJECT_ID" "$GCP_REGION" "serviceAccount:$GCP_RUNTIME_SERVICE_ACCOUNT" roles/run.invoker
           worker_policy="$RUNNER_TEMP/worker-iam.json"
           gcloud run services get-iam-policy "$CLOUD_RUN_WORKER" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json > "$worker_policy"
           jq -e --arg runtime "$GCP_RUNTIME_SERVICE_ACCOUNT" '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' "$worker_policy" >/dev/null
@@ -252,7 +253,7 @@ jobs:
               gcloud run services remove-iam-policy-binding "$CLOUD_RUN_MISSION_CONTROL" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --member="$member" --role=roles/run.invoker --quiet
             fi
           done
-          gcloud run services add-iam-policy-binding "$CLOUD_RUN_MISSION_CONTROL" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --member="user:$GCP_MISSION_CONTROL_OWNER_EMAIL" --role=roles/run.invoker --condition=None --quiet
+          bash betterpptx-mcp/deploy/gcp/retry-cloud-run-service-add-iam-binding.sh "$CLOUD_RUN_MISSION_CONTROL" "$GCP_PROJECT_ID" "$GCP_REGION" "user:$GCP_MISSION_CONTROL_OWNER_EMAIL" roles/run.invoker --condition=None
           mission_control_url="$(gcloud run services describe "$CLOUD_RUN_MISSION_CONTROL" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format='value(status.url)')"
           [[ "$mission_control_url" == https://*.a.run.app ]]
           echo "MISSION_CONTROL_URL=$mission_control_url" >> "$GITHUB_ENV"
@@ -357,7 +358,7 @@ jobs:
               gcloud run services remove-iam-policy-binding "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --member="$member" --role=roles/run.invoker --quiet
             fi
           done
-          gcloud run services add-iam-policy-binding "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --member="serviceAccount:$GCP_DEPLOY_SERVICE_ACCOUNT" --role=roles/run.invoker --condition=None --quiet
+          bash betterpptx-mcp/deploy/gcp/retry-cloud-run-service-add-iam-binding.sh "$CLOUD_RUN_GATEWAY" "$GCP_PROJECT_ID" "$GCP_REGION" "serviceAccount:$GCP_DEPLOY_SERVICE_ACCOUNT" roles/run.invoker --condition=None
           gcloud run services get-iam-policy "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json > "$RUNNER_TEMP/gateway-iam-private.json"
           jq -e '[.bindings[]?.members[]? | select(. == "allUsers" or . == "allAuthenticatedUsers")] | length == 0' "$RUNNER_TEMP/gateway-iam-private.json" >/dev/null
           jq -e --arg deployer "serviceAccount:$GCP_DEPLOY_SERVICE_ACCOUNT" '[.bindings[]? | select(.role == "roles/run.invoker") | .members[]? | select(. == $deployer)] | length == 1' "$RUNNER_TEMP/gateway-iam-private.json" >/dev/null
@@ -375,7 +376,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          gcloud run services add-iam-policy-binding "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --member=allUsers --role=roles/run.invoker --quiet
+          bash betterpptx-mcp/deploy/gcp/retry-cloud-run-service-add-iam-binding.sh "$CLOUD_RUN_GATEWAY" "$GCP_PROJECT_ID" "$GCP_REGION" allUsers roles/run.invoker
           gcloud run services get-iam-policy "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json > "$RUNNER_TEMP/gateway-iam.json"
           jq -e '[.bindings[]?.members[]? | select(. == "allUsers")] | length == 1' "$RUNNER_TEMP/gateway-iam.json" >/dev/null
           jq -e '[.bindings[]?.members[]? | select(. == "allAuthenticatedUsers")] | length == 0' "$RUNNER_TEMP/gateway-iam.json" >/dev/null
