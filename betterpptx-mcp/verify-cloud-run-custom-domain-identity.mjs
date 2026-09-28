@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict'
+import { waitForIdentityMatch } from './deploy/cloudflare-edge/release-identity-retry.mjs'
 
 const origin = String(process.argv[2] || '').trim().replace(/\/+$/, '')
 const publicBase = String(process.argv[3] || '').trim().replace(/\/+$/, '')
@@ -30,7 +31,7 @@ function unwrapStatus(result) {
 	return parsed?.data || parsed
 }
 
-async function readReleaseIdentity(base) {
+async function readReleaseIdentity(base, signal = AbortSignal.timeout(10_000)) {
 	async function rpc(body, sessionId = '') {
 		const response = await fetch(`${base}/mcp`, {
 			method: 'POST',
@@ -41,6 +42,7 @@ async function readReleaseIdentity(base) {
 				...(sessionId ? { 'Mcp-Session-Id': sessionId } : {}),
 			},
 			body: JSON.stringify(body),
+			signal,
 		})
 		const text = await response.text()
 		return { response, payload: responseJson(text) }
@@ -76,13 +78,20 @@ async function readReleaseIdentity(base) {
 	return identity
 }
 
-const [originIdentity, publicIdentity] = await Promise.all([
-	readReleaseIdentity(origin),
-	readReleaseIdentity(publicBase),
-])
-const differences = Object.keys(originIdentity)
-	.filter(field => originIdentity[field] !== publicIdentity[field])
-	.map(field => `${field}: run.app=${originIdentity[field]}; customDomain=${publicIdentity[field]}`)
-assert.deepEqual(differences, [], `The custom domain does not serve the verified Cloud Run release: ${differences.join('; ')}`)
+const originIdentity = await readReleaseIdentity(origin)
+const { actual: publicIdentity, attempts } = await waitForIdentityMatch(
+	originIdentity,
+	signal => readReleaseIdentity(publicBase, signal),
+	{
+		maxAttempts: 24,
+		retryDelayMs: 5000,
+		timeoutMs: 120_000,
+		onRetry: ({ attempt, mismatchFields, readFailed }) => {
+			const reason = readFailed ? 'the endpoint has not returned a valid identity' : `identity differs in ${mismatchFields.join(', ')}`
+			console.warn(`Custom-domain propagation check ${attempt}/24: ${reason}; retrying.`)
+		},
+	},
+)
+assert.deepEqual(publicIdentity, originIdentity, 'Custom-domain identity must match the verified Cloud Run release.')
 
-console.log(`CUSTOM-DOMAIN CLOUD RUN IDENTITY: PASS version=${originIdentity.version} schema=${originIdentity.toolSchemaVersion} environment=${originIdentity.environmentMode} build=${originIdentity.buildIdentity}`)
+console.log(`CUSTOM-DOMAIN CLOUD RUN IDENTITY: PASS attempts=${attempts} version=${originIdentity.version} schema=${originIdentity.toolSchemaVersion} environment=${originIdentity.environmentMode} build=${originIdentity.buildIdentity}`)
