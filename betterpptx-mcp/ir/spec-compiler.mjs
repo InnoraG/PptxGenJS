@@ -3088,23 +3088,83 @@ function addTransitionWarnings(plan, options = {}) {
 	return []
 }
 
+const VALIDATION_INTENT_FIELDS = new Set(['validateBeforeSave', 'requireAccessibility', 'previewBeforeSave'])
+// These policies already have scoped consumers in layout/HTML compilation and
+// committed-deck validation. They are not requests to schedule validators.
+const SCOPED_VALIDATION_POLICY_FIELDS = new Set(['readabilityPolicy', 'morphPolicy', 'fontPolicy'])
+
+function validationIntentForSpec(spec = {}) {
+	const validation = spec.validation
+	if (validation === undefined) return {}
+	if (!validation || typeof validation !== 'object' || Array.isArray(validation)) throw new Error('validation must be an object.')
+	const intent = {}
+	for (const field of VALIDATION_INTENT_FIELDS) {
+		if (!Object.prototype.hasOwnProperty.call(validation, field)) continue
+		if (typeof validation[field] !== 'boolean') throw new Error(`validation.${field} must be a boolean.`)
+		intent[field] = validation[field]
+	}
+	return intent
+}
+
+function validationContractReadback(spec, verificationPolicy, errors, uncompiledWarnings) {
+	return {
+		contractVersion: 'betterpptx.validation-intent.v1',
+		authoredIntent: validationIntentForSpec(spec),
+		declarationRole: 'intent-only',
+		clientMayDisableRequiredValidation: false,
+		uncompiledFields: uncompiledWarnings.filter(issue => issue.field.startsWith('validation.')).map(issue => issue.field),
+		scopedPolicyFields: Object.keys(spec.validation || {}).filter(field => SCOPED_VALIDATION_POLICY_FIELDS.has(field)),
+		compile: {
+			phase: 'semantic-compile',
+			status: errors.length ? 'blocked' : 'passed',
+			evidenceScope: 'compiled-plan-only',
+			blockingFindingCount: errors.length,
+			note: 'Compilation checks native arguments, semantic structure, and layout. This evidence does not certify a committed deck, saved package, accessibility result, or PowerPoint rendering.',
+		},
+		commit: {
+			declarationRunsValidation: false,
+			note: 'Commit materializes the compiled operations. The validation declaration does not run validators; validateAfterCompile optionally runs package/layout validation only and does not complete the aggregate save gate.',
+		},
+		beforeSave: {
+			status: 'not-evaluated',
+			required: true,
+			currentVersionRequired: true,
+			accessibilityRequired: true,
+			tool: 'betterpptx.deck.validate_quality',
+			checks: ['package', 'design', 'accessibility', 'narration', 'aggregate-quality'],
+			note: 'Public save requires passing aggregate validation evidence for the current deckVersion. A declaration, dryRun, or successful commit alone does not provide that evidence; false declarations do not bypass required gates.',
+		},
+		preview: {
+			status: 'not-evaluated',
+			requestedBeforeSave: spec.validation?.previewBeforeSave ?? null,
+			requiredForSave: verificationPolicy.rendererRequiredForSave,
+			policy: verificationPolicy.policy,
+			declarationOverridesPolicy: false,
+			note: 'previewBeforeSave records intent without scheduling a preview. The deployment-selected verification policy determines whether a complete PowerPoint preview of the frozen package is required for save.',
+		},
+	}
+}
+
 function knownButUncompiledWarnings(spec = {}) {
 	const warnings = []
-	const add = ({ field, message, next, severity = 'info' }) => warnings.push({
+	const add = ({ field, message, next, severity = 'info', reason, evidence }) => warnings.push({
 		code: 'SPEC_FIELD_NOT_COMPILED',
 		severity,
 		field,
 		message,
-		reason: 'The field is a valid semantic contract declaration, but this compiler phase does not apply it as a direct operation.',
+		reason: reason || 'The field is a valid semantic contract declaration, but this compiler phase does not apply it as a direct operation.',
 		fix: next || 'Inspect the returned contract/readback and express the desired behavior through the supported semantic fields before rerunning dryRun.',
-		evidence: { field, compilerPhase: 'semantic-compile', appliedBy: 'downstream validation or scoped block contract' },
+		evidence: { field, compilerPhase: 'semantic-compile', appliedBy: 'downstream validation or scoped block contract', ...evidence },
 		...(next ? { next } : {}),
 	})
-	if (spec.validation && typeof spec.validation === 'object' && Object.keys(spec.validation).length) {
+	for (const field of Object.keys(spec.validation || {})) {
+		if (VALIDATION_INTENT_FIELDS.has(field) || SCOPED_VALIDATION_POLICY_FIELDS.has(field)) continue
 		add({
-			field: 'validation',
-			message: 'validation is accepted as an authoring contract and enforced by the shared layout and design-quality gates after compile.',
-			next: 'Run validate_design after commit; composition errors are blocking and world-neutral.',
+			field: `validation.${field}`,
+			message: `validation.${field} has no compiled enforcement contract; declaring it does not change the required validation gates.`,
+			reason: 'This requirement is not enforced from spec.validation. Supported intent declarations do not configure additional validator thresholds or custom gates.',
+			evidence: { appliedBy: 'not-compiled' },
+			next: 'Use the supported validation intent fields and the explicit validator tool arguments for additional requirements.',
 		})
 	}
 	if (spec.costPolicy && typeof spec.costPolicy === 'object' && Object.keys(spec.costPolicy).length) {
@@ -5580,6 +5640,7 @@ export function findPresenterPerformanceCollision({ samples, rect, animations = 
 
 export function buildSpecOperationPlan(spec, options = {}) {
 	const verificationPolicy = publicVerificationPolicy()
+	validationIntentForSpec(spec)
 	// Preserve the exact AI-authored boundary before per-slide lowering can
 	// normalize away an unsupported or mistyped cross-slide request.
 	let slideContinuities = normalizeSlideContinuities(spec)
@@ -6169,6 +6230,7 @@ export function buildSpecOperationPlan(spec, options = {}) {
 	slides: timingSpine,
 	}
 	const appliedDefaults = buildAppliedDefaults(spec, plan, timingReadback)
+	appliedDefaults.validation = validationContractReadback(spec, verificationPolicy, errors, uncompiledWarnings)
 	appliedDefaults.decisionSummary = buildAuthoringDecisionSummary(spec, plan, { appliedDefaults, warnings, errors, timingSpine: timingReadback })
 	const selectionManifest = buildAiSelectionExecutionReadback({
 		manifest: spec.selectionManifest,

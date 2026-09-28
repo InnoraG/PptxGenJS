@@ -1,4 +1,4 @@
-# Publication delivery and retention (1.10.42)
+# Publication delivery and retention (1.10.54)
 
 The published PPTX is not stored in ChatGPT. An MCP result containing a large
 file can exhaust a chat's context even when the server can transmit it. One
@@ -12,21 +12,27 @@ only attempted for files at most 256 KiB; above that it falls back to the link.
 This conservative threshold is a product safety setting, not a measured host
 maximum. `mode:"chunk"` remains available for explicit bounded retrieval.
 
-The link is a short-lived bearer grant (10 minutes) for a single owned file.
+New publications default to 12 hours of file retention and a bearer download
+link valid until the same file expiry. The link grants access to one owned file;
+anyone possessing it can download until expiry, so do not share it publicly.
 ChatGPT currently appends `utm_source=chatgpt.com` to rendered Markdown links;
 the download route ignores only that non-authorizing field and still verifies
 the exact signed permit. Other unexpected query fields remain rejected.
-The underlying file has a separate retention expiry. `operation.status` or
-`operation.read_file` can mint a fresh link while the file is retained,
+`operation.status` or `operation.read_file` can recover a link while the file is retained,
 without another save, charge, or publication. The durable operation ID is the
-recovery reference. A link must not be described as permanently valid.
+recovery reference. Late retrieval is capped at the original file expiry: a
+request after 11 hours gets at most one remaining hour, not another 12 hours.
+A link must not be described as permanently valid.
 
-New local publications default to 30 days of retention. Existing files keep
+Both supported storage backends default to 12-hour retention. Existing files keep
 their issued expiry. A configured `BETTERPPTX_ARTIFACT_TTL_MS` may override the
 default; public results must report the actual per-file expiry. The local
 storage budget defaults to 2 GiB. Reaching it now refuses new publication
 storage instead of silently evicting unexpired files. Physical disk failure,
 lost backups, or an operator changing retention can still affect availability.
+Production also explicitly configures 12 hours. Access stops at the recorded
+expiry even before asynchronous cleanup; the hourly cleanup job can delete
+expired bytes later, so this is not a promise of deletion at exactly 12 hours.
 
 This is a bounded low-cost policy, not free perpetual hosting. The user should
 download and keep an owned copy after publication; BetterPPTX should preserve
@@ -34,7 +40,7 @@ portable source and media separately for authorized regeneration. A durable
 owner-authenticated library, monitored replicated storage, retention notices,
 and optional user-owned export are needed before promising longer-term
 availability. Any extension must budget bytes, egress, backups, and recovery;
-short-lived link renewal cannot substitute for retained bytes.
+Link renewal cannot substitute for retained bytes.
 
 Production safety: public URLs never expose server paths; bare file routes
 require the verified owner; browser grants are scoped and expire; capacity

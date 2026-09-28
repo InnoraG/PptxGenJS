@@ -4,7 +4,7 @@ import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
 import { spawnSync } from 'node:child_process'
-import { artifactTtlMs, createArtifactStore, isPermittedBrowserGrantQuery, verifyLocalArtifactBrowserGrant, verifyLocalArtifactOwner } from '../storage/artifact-store.mjs'
+import { artifactTtlMs, createArtifactStore, isPermittedBrowserGrantQuery, sweepLocalArtifactRoot, verifyLocalArtifactBrowserGrant, verifyLocalArtifactOwner } from '../storage/artifact-store.mjs'
 import { resourceOwnerForContext, withResourceAuthorization } from '../auth/resource-authorization.mjs'
 
 // Synthetic server contexts only. No engine, HTTP server, credentials or cloud.
@@ -44,15 +44,17 @@ async function publish(store, context = alice, generic = false) {
 	})
 }
 
-test('new publication retention defaults to 30 days without extending old records', async t => {
+test('new publications and browser links default to the same 12-hour expiry', async t => {
 	const prior = process.env.BETTERPPTX_ARTIFACT_TTL_MS
 	delete process.env.BETTERPPTX_ARTIFACT_TTL_MS
 	try {
-		assert.equal(artifactTtlMs(), 30 * 24 * 60 * 60 * 1000)
+		assert.equal(artifactTtlMs(), 12 * 60 * 60 * 1000)
 		const { store } = await fixture(t)
 		const artifact = await publish(store)
 		const remaining = Date.parse(artifact.expiresAt) - Date.now()
-		assert.ok(remaining > 29 * 24 * 60 * 60 * 1000)
+		assert.ok(remaining > 12 * 60 * 60 * 1000 - 5000)
+		assert.ok(remaining <= 12 * 60 * 60 * 1000)
+		assert.equal(artifact.downloadLinkExpiresAt, artifact.expiresAt)
 	} finally {
 		if (prior === undefined) delete process.env.BETTERPPTX_ARTIFACT_TTL_MS
 		else process.env.BETTERPPTX_ARTIFACT_TTL_MS = prior
@@ -110,7 +112,7 @@ test('verification survives a fresh process without a cache or a store instance'
 	assert.equal(JSON.parse(child.stdout), true)
 })
 
-test('browser delivery grants are short-lived, scoped to one owned artifact, and owner-refreshable', async t => {
+test('browser delivery grants are bounded, scoped to one owned artifact, and owner-refreshable', async t => {
 	const { root, store } = await fixture(t)
 	const artifact = await publish(store)
 	const url = new URL(artifact.downloadUrl)
@@ -125,7 +127,67 @@ test('browser delivery grants are short-lived, scoped to one owned artifact, and
 	const refreshed = await as(alice, () => store.issueBrowserDownload(artifact))
 	assert.equal(verifyLocalArtifactBrowserGrant({ root, token, name: artifact.downloadName,
 		permit: new URL(refreshed.downloadUrl).searchParams.get('permit') }), true)
-	assert.ok(Date.parse(refreshed.downloadLinkExpiresAt) <= Date.now() + 10 * 60 * 1000)
+	assert.ok(Date.parse(refreshed.downloadLinkExpiresAt) <= Date.now() + 12 * 60 * 60 * 1000)
+	assert.ok(Date.parse(refreshed.downloadLinkExpiresAt) <= Date.parse(artifact.expiresAt))
+})
+
+test('12-hour browser access and late renewal stop at the immutable file expiry', async t => {
+	const prior = process.env.BETTERPPTX_ARTIFACT_TTL_MS
+	delete process.env.BETTERPPTX_ARTIFACT_TTL_MS
+	t.after(() => {
+		if (prior === undefined) delete process.env.BETTERPPTX_ARTIFACT_TTL_MS
+		else process.env.BETTERPPTX_ARTIFACT_TTL_MS = prior
+	})
+	const { root, store } = await fixture(t)
+	const artifact = await publish(store)
+	const grant = { root, token: artifact.objectName.split('/')[0], name: artifact.downloadName,
+		permit: new URL(artifact.downloadUrl).searchParams.get('permit') }
+	t.mock.timers.enable({ apis: ['Date'], now: Date.parse(artifact.expiresAt) - 60 * 1000 })
+	assert.equal(verifyLocalArtifactBrowserGrant(grant), true, 'original link remains valid after almost 12 hours')
+	process.env.BETTERPPTX_ARTIFACT_TTL_MS = String(30 * 24 * 60 * 60 * 1000)
+	const renewed = await as(alice, () => store.issueBrowserDownload(artifact))
+	assert.equal(renewed.downloadLinkExpiresAt, artifact.expiresAt, 'configuration changes and late renewal do not extend a file')
+	t.mock.timers.tick(59999)
+	assert.equal(verifyLocalArtifactBrowserGrant(grant), true)
+	t.mock.timers.tick(1)
+	assert.equal(verifyLocalArtifactBrowserGrant(grant), false)
+	assert.equal(verifyLocalArtifactOwner(requestFor(root, artifact)), false)
+	await assert.rejects(as(alice, () => store.issueBrowserDownload(artifact)), { code: 'ARTIFACT_DOWNLOAD_AUTHORITY_CONFLICT' })
+	assert.ok((await fs.stat(artifact.target)).isFile(), 'access expires before asynchronous physical cleanup')
+})
+
+test('configured shorter retention caps browser links without changing already issued expiry', async t => {
+	const prior = process.env.BETTERPPTX_ARTIFACT_TTL_MS
+	process.env.BETTERPPTX_ARTIFACT_TTL_MS = String(60 * 60 * 1000)
+	t.after(() => {
+		if (prior === undefined) delete process.env.BETTERPPTX_ARTIFACT_TTL_MS
+		else process.env.BETTERPPTX_ARTIFACT_TTL_MS = prior
+	})
+	const { store } = await fixture(t)
+	const artifact = await publish(store)
+	assert.equal(artifact.downloadLinkExpiresAt, artifact.expiresAt)
+	assert.ok(Date.parse(artifact.expiresAt) <= Date.now() + 60 * 60 * 1000)
+	delete process.env.BETTERPPTX_ARTIFACT_TTL_MS
+	const renewed = await as(alice, () => store.issueBrowserDownload(artifact))
+	assert.equal(renewed.downloadLinkExpiresAt, artifact.expiresAt)
+})
+
+test('store and HTTP cleanup use recorded expiry, not file age or later retention settings', async t => {
+	const { root, store } = await fixture(t)
+	const expired = await publish(store)
+	t.mock.timers.enable({ apis: ['Date'], now: Date.parse(expired.expiresAt) - 1000 })
+	const live = await publish(store)
+	const old = new Date(0)
+	await fs.utimes(path.dirname(live.target), old, old)
+	assert.equal(await store.sweepExpired({ ttlMs: 1 }), 0, 'shorter configuration does not delete a live issued artifact')
+	t.mock.timers.tick(1000)
+	await fs.utimes(path.dirname(expired.target), new Date(Date.now()), new Date(Date.now()))
+	assert.equal(await sweepLocalArtifactRoot(root, { ttlMs: 30 * 24 * 60 * 60 * 1000 }), 1,
+		'touching the directory or increasing retention does not extend an expired artifact')
+	await assert.rejects(fs.stat(expired.target), { code: 'ENOENT' })
+	assert.ok((await fs.stat(live.target)).isFile())
+	assert.equal(await store.sweepExpired({ ttlMs: 1 }), 0)
+	assert.equal(await sweepLocalArtifactRoot(path.parse(root).root), 0, 'a broad filesystem root is never a cleanup target')
 })
 
 test('saved bytes are readable in bounded chunks by the owner without a browser URL fetch', async t => {
