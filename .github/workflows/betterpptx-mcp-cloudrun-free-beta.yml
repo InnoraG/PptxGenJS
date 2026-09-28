@@ -100,7 +100,7 @@ jobs:
         CLOUD_RUN_GATEWAY: betterpptx-public
         CLOUD_RUN_WORKER: betterpptx-worker
         CLOUD_RUN_MISSION_CONTROL: betterpptx-mission-control
-        GCP_MISSION_CONTROL_SERVICE_ACCOUNT: betterpptx-mission-control-runtime@betterpptx-mcp-20260926.iam.gserviceaccount.com
+        GCP_MISSION_CONTROL_SERVICE_ACCOUNT: betterpptx-mc-runtime@betterpptx-mcp-20260926.iam.gserviceaccount.com
         CLOUD_RUN_SWEEPER: betterpptx-artifact-sweeper
         CLOUD_SCHEDULER_JOB: betterpptx-artifact-sweep-hourly
         INSTALL_HMAC_SECRET_NAME: betterpptx-install-hmac-secret

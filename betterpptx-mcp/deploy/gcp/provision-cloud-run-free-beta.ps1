@@ -27,7 +27,7 @@ function Test-GcloudResource([string[]]$Arguments) {
 
 $runtimeId = 'betterpptx-public-runtime'
 $runtimeEmail = "$runtimeId@$Project.iam.gserviceaccount.com"
-$missionControlRuntimeId = 'betterpptx-mission-control-runtime'
+$missionControlRuntimeId = 'betterpptx-mc-runtime'
 $missionControlRuntimeEmail = "$missionControlRuntimeId@$Project.iam.gserviceaccount.com"
 $sweeperInvokerId = 'betterpptx-maintenance-invoker'
 $sweeperInvokerEmail = "$sweeperInvokerId@$Project.iam.gserviceaccount.com"

@@ -13,7 +13,7 @@ test('deployment keeps Mission Control private, scale-to-zero, and isolated from
 	const server = read('betterpptx-mcp/server-http.mjs')
 
 	assert.match(workflow, /CLOUD_RUN_MISSION_CONTROL: betterpptx-mission-control/)
-	assert.match(workflow, /GCP_MISSION_CONTROL_SERVICE_ACCOUNT: betterpptx-mission-control-runtime@/)
+	assert.match(workflow, /GCP_MISSION_CONTROL_SERVICE_ACCOUNT: betterpptx-mc-runtime@/)
 	assert.match(workflow, /--min=0 --max=1 --timeout=300s --no-allow-unauthenticated --set-env-vars="\$mission_control_env"/)
 	assert.match(workflow, /gcloud projects get-iam-policy "\$GCP_PROJECT_ID"/)
 	assert.match(workflow, /roles\/secretmanager\./)
@@ -25,7 +25,7 @@ test('deployment keeps Mission Control private, scale-to-zero, and isolated from
 	assert.match(workflow, /gcloud secrets versions access latest --secret=betterpptx-cloudflare-worker-deploy-token/)
 	assert.doesNotMatch(workflow, /secrets\.CLOUDFLARE_API_TOKEN/)
 
-	assert.match(provision, /betterpptx-mission-control-runtime/)
+	assert.match(provision, /betterpptx-mc-runtime/)
 	assert.match(provision, /DeployerServiceAccount = 'github-free-beta-deployer'/)
 	assert.match(provision, /roles\/secretmanager\.viewer/)
 	assert.match(provision, /roles\/secretmanager\.secretAccessor/)
