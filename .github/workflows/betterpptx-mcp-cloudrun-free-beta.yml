@@ -328,8 +328,11 @@ jobs:
             .status.latestReadyRevisionName != null and
             ([.status.conditions[]? | select(.type == "Ready" and .status == "True")] | length > 0) and
             .spec.template.spec.serviceAccountName == $sa and
-            ((.spec.template.metadata.annotations["autoscaling.knative.dev/minScale"] // "0") == "0") and
-            ((.spec.template.metadata.annotations["autoscaling.knative.dev/maxScale"] // "1") == "1") and
+            ((.metadata.annotations["run.googleapis.com/minScale"] // "0") == "0") and
+            # gcloud --max configures the service-wide cap. A revision-level
+            # autoscaling.knative.dev/maxScale may retain a larger value; the
+            # service-level maximum is the effective cap across revisions.
+            (.metadata.annotations["run.googleapis.com/maxScale"] == "1") and
             ([.spec.template.spec.containers[0].env[]? | select(.name == "BETTERPPTX_MISSION_CONTROL") | .value] | index("1")) != null and
             ([.spec.template.spec.containers[0].env[]? | select(.name == "BETTERPPTX_MISSION_CONTROL_ONLY") | .value] | index("1")) != null and
             ([.spec.template.spec.containers[0].env[]? | select(.name == "BETTERPPTX_MISSION_CONTROL_TRUST_CLOUD_RUN_IAM") | .value] | index("1")) != null and
