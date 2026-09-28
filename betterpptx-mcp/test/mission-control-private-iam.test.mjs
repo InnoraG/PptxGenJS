@@ -48,6 +48,10 @@ test('private Cloud Run IAM can authorize Mission Control owner controls without
 	assert.doesNotMatch(page, /id="appToken"|id="adminToken"/)
 	assert.doesNotMatch(page, /<h2>Payment Health<\/h2>/)
 	assert.match(page, /headers:missionControlHeaders\(\)/)
+	assert.match(page, /<dialog id="secretActionDialog"/)
+	assert.match(page, /id="secretValue" type="password"/)
+	assert.match(page, /secretPost\(pending\.id,'update',\{value,confirm\}\)/)
+	assert.doesNotMatch(page, /\bprompt\(/)
 })
 
 test('private-IAM trust is not a fallback on the public service when it is disabled', t => {
@@ -129,4 +133,6 @@ test('token-authenticated local Mission Control still asks for tokens and applie
 	assert.match(page, /x-betterpptx-mission-control-token/)
 	assert.match(page, /x-betterpptx-mission-control-admin-token/)
 	assert.doesNotMatch(page, /Authenticated by the private Cloud Run IAM boundary/)
+	assert.match(page, /<dialog id="secretActionDialog"/)
+	assert.doesNotMatch(page, /\bprompt\(/)
 })

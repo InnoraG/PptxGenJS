@@ -351,6 +351,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 6px;
 .status{font-weight:800}.empty{color:var(--muted);padding:12px 0}
 .secretbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:12px}.secretbar input{min-width:280px;flex:1;border:1px solid var(--line);background:#0b1220;color:var(--text);border-radius:8px;padding:9px 10px}
 .secretrow{display:grid;grid-template-columns:210px 1fr 250px;gap:12px;padding:11px 0;border-bottom:1px solid var(--line)}.secretrow:last-child{border-bottom:0}.secretmeta{color:var(--muted);font-size:12px}.secret-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}.secret-actions button{padding:7px 9px}.secret-output{grid-column:1/-1}.reveal{white-space:pre-wrap;word-break:break-all;background:#060b16;border:1px solid var(--line);border-radius:8px;padding:10px;margin:6px 0 0;color:var(--text)}
+.secret-dialog{width:min(560px,calc(100vw - 32px));max-height:calc(100vh - 32px);overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--text);padding:20px;box-shadow:0 24px 80px #0009}.secret-dialog::backdrop{background:#000a}.secret-dialog form{display:grid;gap:14px}.secret-dialog h2{margin:0}.secret-dialog p,.secret-dialog label{margin:0;color:var(--muted)}.secret-dialog label{display:grid;gap:7px}.secret-dialog input{width:100%;border:1px solid var(--line);background:#0b1220;color:var(--text);border-radius:8px;padding:10px}.secret-dialog code{display:inline-block;padding:5px 8px;border:1px solid var(--line);border-radius:6px;color:var(--text);background:#0b1220}.secret-dialog .dialog-actions{display:flex;justify-content:flex-end;gap:8px}.secret-dialog [hidden]{display:none!important}
 @media (max-width:980px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.wide{grid-column:1/-1}}@media (max-width:620px){header{align-items:flex-start;flex-direction:column}.grid{grid-template-columns:1fr}.gate,.decision,.secrow{grid-template-columns:1fr}}
 @media (max-width:760px){.secretrow{grid-template-columns:1fr}.secret-actions{justify-content:flex-start}.secretbar input{min-width:0}}
 </style>
@@ -378,6 +379,24 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 6px;
     <section class="wide"><h2>Artifact Sizes</h2><div id="sizes"></div></section>
   </div>
 </main>
+<dialog id="secretActionDialog" class="secret-dialog" aria-labelledby="secretActionTitle">
+  <form id="secretActionForm" novalidate>
+    <h2 id="secretActionTitle">Confirm owner secret action</h2>
+    <p id="secretActionDescription"></p>
+    <label id="secretValueField" hidden>New secret value
+      <input id="secretValue" type="password" autocomplete="new-password" spellcheck="false" maxlength="8192">
+    </label>
+    <label>Type this exact confirmation phrase
+      <code id="secretConfirmExpected"></code>
+      <input id="secretConfirmInput" type="text" autocomplete="off" spellcheck="false" required>
+    </label>
+    <div id="secretActionError" class="bad" role="status" aria-live="polite"></div>
+    <div class="dialog-actions">
+      <button id="secretActionCancel" type="button">Cancel</button>
+      <button id="secretActionSubmit" type="submit">Confirm</button>
+    </div>
+  </form>
+</dialog>
 <script>
 const cls=s=>s==='ok'?'ok':s==='pending'||s==='deferred'?'warn':s==='warn'?'warn':s==='bad'?'bad':'info';
 const paymentHealthAvailable=${ownerControlOnly ? 'false' : 'true'};
@@ -466,6 +485,56 @@ async function secretPost(id,action,body){
  if(!r.ok)throw new Error((data.error&&data.error.code)||('HTTP '+r.status));
  return data;
 }
+const secretActionDialog=document.getElementById('secretActionDialog');
+const secretActionForm=document.getElementById('secretActionForm');
+let pendingSecretAction=null;
+function openSecretActionDialog(id,action,out){
+ pendingSecretAction={id,action,out,confirm:action.toUpperCase()+' '+id};
+ document.getElementById('secretActionTitle').textContent=action==='update'?'Update owner secret':action==='reveal'?'Reveal owner secret':'Rotate owner secret';
+ document.getElementById('secretActionDescription').textContent=action==='update'?'The new value is sent only to the private owner-secret endpoint and is not shown after submission.':action==='reveal'?'The secret value will be revealed in this private owner session after confirmation.':'This requests the configured owner-only rotation action.';
+ document.getElementById('secretConfirmExpected').textContent=pendingSecretAction.confirm;
+ const valueField=document.getElementById('secretValueField');
+ const valueInput=document.getElementById('secretValue');
+ valueField.hidden=action!=='update';
+ valueInput.required=action==='update';
+ document.getElementById('secretConfirmInput').value='';
+ document.getElementById('secretActionError').textContent='';
+ secretActionDialog.showModal();
+ (action==='update'?valueInput:document.getElementById('secretConfirmInput')).focus();
+}
+function clearSecretActionDialog(){
+ secretActionForm.reset();
+ document.getElementById('secretActionError').textContent='';
+ pendingSecretAction=null;
+}
+document.getElementById('secretActionCancel').addEventListener('click',()=>secretActionDialog.close());
+secretActionDialog.addEventListener('close',clearSecretActionDialog);
+secretActionForm.addEventListener('submit',async e=>{
+ e.preventDefault();
+ const pending=pendingSecretAction;
+ if(!pending)return;
+ const confirm=document.getElementById('secretConfirmInput').value.trim();
+ const error=document.getElementById('secretActionError');
+ if(confirm!==pending.confirm){error.textContent='The confirmation phrase does not match.';document.getElementById('secretConfirmInput').focus();return;}
+ const submit=document.getElementById('secretActionSubmit');
+ submit.disabled=true;
+ try{
+  if(pending.action==='update'){
+   const value=document.getElementById('secretValue').value;
+   if(!value){error.textContent='Enter a secret value.';document.getElementById('secretValue').focus();return;}
+   await secretPost(pending.id,'update',{value,confirm});
+   await loadSecrets();
+  }else if(pending.action==='reveal'){
+   const result=await secretPost(pending.id,'reveal',{confirm});
+   pending.out.innerHTML='<pre class="reveal">'+esc(result.value||'')+'</pre>';
+  }else if(pending.action==='rotate'){
+   await secretPost(pending.id,'rotate',{confirm});
+   await loadSecrets();
+  }
+  secretActionDialog.close();
+ }catch(err){error.textContent=String(err.message||err);}
+ finally{document.getElementById('secretValue').value='';submit.disabled=false;}
+});
 async function loadSecrets(){
  const r=await fetch('/ops/mission-control/secrets',{headers:missionControlHeaders(),cache:'no-store'});
  if(!r.ok)throw new Error('Owner secrets failed: '+r.status);
@@ -484,9 +553,7 @@ document.getElementById('ownerSecrets').addEventListener('click',async e=>{
  const id=btn.getAttribute('data-secret'), action=btn.getAttribute('data-action'), out=document.querySelector('[data-output="'+CSS.escape(id)+'"]');
  try{
   if(action==='test'){const j=await secretPost(id,'test',{});out.innerHTML='<pre class="reveal">'+esc(JSON.stringify(j.test,null,2))+'</pre>';return;}
-  if(action==='reveal'){const confirmText=prompt('Type REVEAL '+id);if(confirmText===null)return;const j=await secretPost(id,'reveal',{confirm:confirmText});out.innerHTML='<pre class="reveal">'+esc(j.value||'')+'</pre>';return;}
-  if(action==='update'){const value=prompt('New value for '+id);if(value===null)return;const confirmText=prompt('Type UPDATE '+id);if(confirmText===null)return;await secretPost(id,'update',{value,confirm:confirmText});await loadSecrets();return;}
-  if(action==='rotate'){const confirmText=prompt('Type ROTATE '+id);if(confirmText===null)return;await secretPost(id,'rotate',{confirm:confirmText});await loadSecrets();return;}
+  if(action==='reveal'||action==='update'||action==='rotate'){openSecretActionDialog(id,action,out);return;}
  }catch(err){out.innerHTML='<pre class="reveal bad">'+esc(err.message||err)+'</pre>';}
 });
 refresh().catch(e=>{document.querySelector('main').innerHTML='<section><h2>Error</h2><div class="bad">'+e.message+'</div></section>'});
