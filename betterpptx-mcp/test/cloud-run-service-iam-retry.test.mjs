@@ -19,7 +19,7 @@ test('Cloud Run IAM add retries transient ETag conflicts with bounded exponentia
 	printf 'CALLS=%s;WAITS=%s\\n' "$count" "$waits"
 	`, 'bash', script], { encoding: 'utf8' })
 	assert.equal(result.status, 0, result.stderr)
-	assert.match(result.stdout, /CALLS=3;WAITS=2,4,/)
+	assert.match(result.stdout, /CALLS=3;WAITS=1,2,/)
 })
 
 test('Cloud Run IAM add stops after six attempts when the policy keeps conflicting', { skip: !canRunBash }, () => {
@@ -34,5 +34,5 @@ test('Cloud Run IAM add stops after six attempts when the policy keeps conflicti
 	printf 'STATUS=%s;CALLS=%s;WAITS=%s\\n' "$status" "$count" "$waits"
 	`, 'bash', script], { encoding: 'utf8' })
 	assert.equal(result.status, 0, result.stderr)
-	assert.match(result.stdout, /STATUS=1;CALLS=6;WAITS=2,4,8,16,30,/)
+	assert.match(result.stdout, /STATUS=1;CALLS=6;WAITS=1,2,4,8,16,/)
 })
