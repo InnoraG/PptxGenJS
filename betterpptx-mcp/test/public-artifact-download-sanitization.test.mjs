@@ -17,6 +17,7 @@ process.env.BETTERPPTX_REQUIRE_SHARED_STORES = '0'
 const fileName = 'Talk-Enumerate-Mixamo Review.pptx'
 const base = 'https://presentations.example.test/tenant'
 const pairOf = artifact => ({ downloadUrl: artifact.downloadUrl, downloadName: artifact.downloadName })
+const localOwner = fn => withResourceAuthorization({ installHash: `install_${'a'.repeat(64)}`, sessionId: 'local-download-fixture' }, fn)
 
 async function temporaryRoot(t) {
 	const root = await fs.mkdtemp(path.join(os.tmpdir(), 'betterpptx-download-boundary-test-'))
@@ -32,11 +33,11 @@ async function localArtifact(t) {
 	process.env.BETTERPPTX_ARTIFACT_STORE = 'local'
 	const root = await temporaryRoot(t)
 	const store = createArtifactStore({ base, root, budgetBytes: 0 })
-	const artifact = await store.prepareSaveTarget({ fileName })
+	const artifact = await localOwner(() => store.prepareSaveTarget({ fileName }))
 	assert.equal(isPublishedArtifactDownloadPair(artifact.downloadUrl, artifact.downloadName), false, 'a prepared but absent artifact is not published')
 	await fs.writeFile(artifact.target, 'isolated artifact-store fixture; not a presentation')
-	await store.finalizeSaveTarget(artifact)
-	return { root, store, artifact }
+	const published = await localOwner(() => store.finalizeSaveTarget(artifact))
+	return { root, store, artifact: published }
 }
 
 function coldReplay(pair, config, extraEnv = {}) {
@@ -88,10 +89,10 @@ test('an existing local publication survives a fresh-process receipt replay with
 test('the same exact publication rule covers non-deck preview and media artifacts', async t => {
 	const { store } = await localArtifact(t)
 	for (const extension of ['.png', '.json', '.wav']) {
-		const artifact = await store.prepareArtifactTarget({ fileName: `Mixamo reference${extension}`, extension })
+		const artifact = await localOwner(() => store.prepareArtifactTarget({ fileName: `Mixamo reference${extension}`, extension }))
 		await fs.writeFile(artifact.target, 'isolated generic artifact fixture')
-		await store.finalizeSaveTarget(artifact)
-		assert.deepEqual(sanitizePublicResult({ artifacts: [pairOf(artifact)] }).artifacts[0], pairOf(artifact))
+		const published = await localOwner(() => store.finalizeSaveTarget(artifact))
+		assert.deepEqual(sanitizePublicResult({ artifacts: [pairOf(published)] }).artifacts[0], pairOf(published))
 	}
 })
 
@@ -136,11 +137,15 @@ test('a live store configuration owns the exact origin, base prefix and publicat
 
 test('signed artifact URLs preserve exact signature bytes only through issuance, including cold replay and expiry', async t => {
 	const root = await temporaryRoot(t)
+	const priorTtl = process.env.BETTERPPTX_ARTIFACT_TTL_MS
+	delete process.env.BETTERPPTX_ARTIFACT_TTL_MS
 	process.env.BETTERPPTX_ARTIFACT_STORE = 'gcs'
 	process.env.BETTERPPTX_GCS_BUCKET = 'test-private-artifact-bucket'
 	process.env.BETTERPPTX_GCS_PREFIX = 'issued'
 	process.env.BETTERPPTX_GCS_TEMP_ROOT = root
 	t.after(() => {
+		if (priorTtl === undefined) delete process.env.BETTERPPTX_ARTIFACT_TTL_MS
+		else process.env.BETTERPPTX_ARTIFACT_TTL_MS = priorTtl
 		process.env.BETTERPPTX_ARTIFACT_STORE = 'local'
 		delete process.env.BETTERPPTX_GCS_BUCKET
 		delete process.env.BETTERPPTX_GCS_PREFIX
@@ -149,6 +154,7 @@ test('signed artifact URLs preserve exact signature bytes only through issuance,
 	const mockUrl = `data:text/javascript,${encodeURIComponent(`
 		import fs from 'node:fs/promises'
 		export const objects = new Map()
+		export const signedRequests = []
 		export class Storage {
 			bucket(name) { return {
 				upload: async (source, options) => {
@@ -156,10 +162,10 @@ test('signed artifact URLs preserve exact signature bytes only through issuance,
 					objects.set(options.destination, { data, metadata: { ...options.metadata, generation: '1', size: String(data.length) } })
 				},
 				file: objectName => ({
-					getSignedUrl: async () => [
+					getSignedUrl: async options => { signedRequests.push(options); return [
 						'https://signed.example.test/' + name + '/' + objectName.split('/').map(encodeURIComponent).join('/')
 						+ '?X-Goog-Signature=Mixamo%2BFLUX%2fBaker&response-content-disposition=attachment%3B%20filename%3D%22Mixamo.pptx%22'
-					],
+					] },
 					save: async (data, options) => {
 						if (objects.has(objectName)) throw Object.assign(new Error('already exists'), { code: 412 })
 						objects.set(objectName, { data: Buffer.from(data), metadata: { ...options.metadata, generation: '1', size: String(Buffer.byteLength(data)) } })
@@ -188,19 +194,25 @@ test('signed artifact URLs preserve exact signature bytes only through issuance,
 		return specifier === '@google-cloud/storage' ? { url: mockUrl, shortCircuit: true } : nextResolve(specifier, context)
 	} })
 	t.after(() => hooks.deregister())
-	const { objects } = await import(mockUrl)
+	const { objects, signedRequests } = await import(mockUrl)
 	const store = createArtifactStore()
-	const prepared = await store.prepareSaveTarget({ fileName })
+	const asOwner = fn => withResourceAuthorization({ installHash: `install_${'a'.repeat(64)}`, sessionId: 'gcs-fixture' }, fn)
+	const prepared = await asOwner(() => store.prepareSaveTarget({ fileName }))
 	prepared.cleanupTarget = false
 	await fs.writeFile(prepared.target, 'isolated signed-artifact fixture; no cloud request')
-	const asOwner = fn => withResourceAuthorization({ installHash: `install_${'a'.repeat(64)}`, sessionId: 'gcs-fixture' }, fn)
 	const published = await asOwner(() => store.finalizeSaveTarget(prepared))
+	assert.equal(published.downloadLinkExpiresAt, published.expiresAt, 'GCS link and file share the original 12-hour expiry')
+	assert.equal(signedRequests.at(-1).expires, Date.parse(published.expiresAt), 'actual V4 signing request uses the recorded expiry')
+	assert.equal(signedRequests.at(-1).version, 'v4')
+	assert.ok(Date.parse(published.expiresAt) > Date.now() + 12 * 60 * 60 * 1000 - 5000)
 	const pair = pairOf(published)
 	assert.equal(isPublishedArtifactDownloadPair(pair.downloadUrl, pair.downloadName), true)
 	assert.deepEqual(sanitizePublicResult({ data: pair }).data, pair)
 	assert.deepEqual(sanitizePublicResult(structuredClone({ data: pair })).data, pair)
 	assert.deepEqual(coldReplay(pair, {}), pair, 'trusted publication record survives a fresh process without contacting the signer')
 	assert.equal(isPublishedArtifactDownloadPair(`${pair.downloadUrl}&extra=Mixamo`, pair.downloadName), false)
+	assert.equal(isPublishedArtifactDownloadPair(`${pair.downloadUrl}?ignored=true`, pair.downloadName), false)
+	assert.equal(isPublishedArtifactDownloadPair(`${pair.downloadUrl}#ignored`, pair.downloadName), false)
 	assert.equal(isPublishedArtifactDownloadPair(pair.downloadUrl.replace('signed.example.test', 'provider.example.test'), pair.downloadName), false)
 	const recordPath = path.join(root, '.public-delivery-records', `${createHash('sha256').update(pair.downloadUrl).digest('hex')}.json`)
 	const record = JSON.parse(await fs.readFile(recordPath, 'utf8'))
@@ -225,7 +237,19 @@ test('signed artifact URLs preserve exact signature bytes only through issuance,
 	assert.deepEqual(pairOf(repeated), pair, 'the signer returned the same exact URL')
 	assert.equal(repeated.expiresAt, published.expiresAt, 'repeated issuance does not extend the first record lifetime')
 	assert.deepEqual(JSON.parse(await fs.readFile(recordPath, 'utf8')), record, 'EEXIST neither fails nor overwrites an identical issued record')
-	const secondPrepared = await store.prepareSaveTarget({ fileName: 'Mixamo active.pptx' })
+	t.mock.timers.enable({ apis: ['Date'], now: Date.parse(published.expiresAt) - 1 })
+	assert.equal(isPublishedArtifactDownloadPair(pair.downloadUrl, pair.downloadName), true, 'original link remains recognized until file expiry')
+	const lateRenewal = await asOwner(() => store.issueBrowserDownload(pair))
+	assert.equal(lateRenewal.downloadLinkExpiresAt, published.expiresAt, 'late recovery cannot extend retained bytes')
+	assert.equal(signedRequests.at(-1).expires, Date.parse(published.expiresAt))
+	t.mock.timers.tick(1)
+	assert.equal(isPublishedArtifactDownloadPair(pair.downloadUrl, pair.downloadName), false, 'link expires exactly at the original file boundary')
+	const signingCount = signedRequests.length
+	await assert.rejects(asOwner(() => store.issueBrowserDownload(pair)), { code: 'ARTIFACT_NOT_AVAILABLE' })
+	await assert.rejects(asOwner(() => store.readArtifactChunk(pair)), { code: 'ARTIFACT_NOT_AVAILABLE' })
+	assert.equal(signedRequests.length, signingCount, 'expired recovery does not issue another storage grant')
+	t.mock.timers.reset()
+	const secondPrepared = await asOwner(() => store.prepareSaveTarget({ fileName: 'Mixamo active.pptx' }))
 	await fs.writeFile(secondPrepared.target, 'isolated active signed-artifact fixture')
 	const secondPublished = await asOwner(() => store.finalizeSaveTarget(secondPrepared))
 	const unrelatedPath = path.join(root, '.public-delivery-records', 'unrelated.json')

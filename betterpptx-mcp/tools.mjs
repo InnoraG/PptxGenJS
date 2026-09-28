@@ -483,7 +483,7 @@ export const TOOLS = [
 	{
 		name: 'betterpptx.operation.status',
 		title: 'Check durable operation status',
-		description: 'Poll an opaque durable operation id returned by BetterPPTX. Returns owner-scoped state and the completed result. For a saved artifact, this read-only call refreshes its short-lived browser download link without another publication or charge. If the AI client cannot fetch the download host, use betterpptx.operation.read_file with the same operationId.',
+		description: 'Poll an opaque durable operation id returned by BetterPPTX. Returns owner-scoped state and the completed result. For a saved artifact, this read-only call refreshes its browser download link without another publication or charge. New files and links default to 12 hours; refresh is capped at the original file expiry and never extends retention. If the AI client cannot fetch the download host, use betterpptx.operation.read_file with the same operationId.',
 		inputSchema: {
 			type: 'object',
 			required: ['operationId'],
@@ -496,7 +496,7 @@ export const TOOLS = [
 	{
 		name: 'betterpptx.operation.read_file',
 		title: 'Read a saved presentation through MCP',
-		description: 'Owner-scoped, read-only retrieval of an already-published PPTX. Default mode:"link" returns a fresh browser download URL and file integrity metadata without placing file bytes in the chat context. mode:"resource" embeds only small files; larger files return the link instead, because a large MCP resource can exhaust a client conversation. mode:"chunk" is for explicit bounded byte retrieval by capable clients. Links can be refreshed with operation.status while the artifact is retained; link renewal does not extend artifact retention. No save, charge, or publication is performed.',
+		description: 'Owner-scoped, read-only retrieval of an already-published PPTX. Default mode:"link" returns a browser download URL and file integrity metadata without placing file bytes in the chat context. New files and links default to 12 hours; actual expiries are returned, and late retrieval uses only the remaining file lifetime. mode:"resource" embeds only small files; larger files return the link instead, because a large MCP resource can exhaust a client conversation. mode:"chunk" is for explicit bounded byte retrieval by capable clients. Link renewal never extends artifact retention. No save, charge, or publication is performed.',
 		inputSchema: {
 			type: 'object', required: ['operationId'], additionalProperties: false,
 			properties: {
@@ -2427,7 +2427,7 @@ export const TOOLS = [
 		name: 'betterpptx.deck.save',
 		title: 'Publish the approved deck artifact',
 		description: PUBLIC_BLACK_BOX_SCHEMA
-			? 'Publish an approved PPTX artifact under the deployment-selected verification policy. Release qualification requires current-version deterministic validation plus a complete PowerPoint preview of the exact frozen package; production-non-rendering intentionally has no hosted PowerPoint dependency and requires deterministic package, media, timing, accessibility, and selection validation instead. One logical save requires one stable idempotencyKey; retries with identical arguments do not publish twice. The returned browser download link expires after ten minutes; use the saved operationId with betterpptx.operation.status to refresh it without another publication.'
+			? 'Publish an approved PPTX artifact under the deployment-selected verification policy. Release qualification requires current-version deterministic validation plus a complete PowerPoint preview of the exact frozen package; production-non-rendering intentionally has no hosted PowerPoint dependency and requires deterministic package, media, timing, accessibility, and selection validation instead. One logical save requires one stable idempotencyKey; retries with identical arguments do not publish twice. New files default to 12-hour retention, with a browser download link valid until that file expiry. Keep an owned copy before expiry. Read-only recovery with the saved operationId does not extend retention or consume another publication.'
 			: 'Serialize the deck as .pptx, .potx, or .thmx when theme export is available. Local maintainer behavior remains available without the public preview-freeze requirement.',
 		inputSchema: {
 			type: 'object',
@@ -4809,7 +4809,7 @@ const SPECIFIC_DATA = {
 		totalBytes: { type: 'integer' }, packageSha256: { type: 'string' }, offset: { type: 'integer' },
 		bytesReturned: { type: 'integer' }, nextOffset: { type: ['integer', 'null'] },
 		encoding: { type: 'string', enum: ['base64'] }, mode: { type: 'string', enum: ['link', 'resource', 'chunk'] },
-		downloadUrl: { type: 'string', description: 'Fresh short-lived owner-issued browser URL when bytes are not embedded.' },
+		downloadUrl: { type: 'string', description: 'Owner-issued browser URL, valid for up to 12 hours and capped at the original file expiry, when bytes are not embedded.' },
 		downloadName: { type: 'string' }, downloadLinkExpiresAt: { type: 'string' }, artifactExpiresAt: { type: 'string' },
 		deliveryReason: { type: 'string', description: 'Why link delivery was used instead of embedding bytes.' },
 		dataBase64: { type: 'string', description: 'Returned in chunk mode as structuredContent; omitted from duplicate text content.' },
@@ -5051,7 +5051,7 @@ const SPECIFIC_DATA = {
 		verification: { type: 'object', description: 'Deployment-selected verification evidence. Production-non-rendering records renderPerformed:false, policy, package binding, deterministic validation evidence, and media/timing inspection without claiming PowerPoint preview.' },
 		selectionVerification: { type: 'object', description: 'Saved-package proof that required AI-authored native selections survived serialization without substitution.' },
 		artifact: { type: 'object', description: 'Opaque delivery state and expiry for the published artifact.' },
-		downloadUrl: { type: 'string', description: 'Short-lived browser-usable link for the published artifact. Anyone possessing this link can download until its expiry; recover a fresh link through the owner-scoped operation.status result.' },
+		downloadUrl: { type: 'string', description: 'Browser-usable link for the published artifact, valid for up to 12 hours and capped at its original expiry. Anyone possessing this link can download until its expiry; recovery does not extend the file lifetime.' },
 		downloadName: { type: 'string', description: 'Suggested user-facing download file name.' },
 		idempotentReplay: { type: 'boolean', description: 'True when this response replays an earlier call with the same idempotency key.' },
 	},

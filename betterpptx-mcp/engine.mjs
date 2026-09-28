@@ -5108,7 +5108,7 @@ function maintainerWorkflowGuidance(args = {}) {
 		'Deterministic package/layout/timing/metadata blockers are resolved.',
 		'Subjective design issues are warnings or explicitly accepted.',
 		'Preview is reviewed when available; strict mode requires it before save.',
-		'The saved artifact returns a ten-minute browser downloadUrl without server paths. If it expires, call betterpptx.operation.status with the saved operationId to refresh the link without another publication while the file is retained. For ordinary delivery use owner-scoped betterpptx.operation.read_file in link mode and present the actual clickable URL; large files are not embedded into a chat response.',
+		'New saved files and browser downloadUrl links default to a 12-hour window without server paths; keep an owned copy before the returned expiry. Owner-scoped betterpptx.operation.status or betterpptx.operation.read_file in link mode can recover delivery while the file is retained, without another publication. A refreshed link uses only the remaining original file lifetime, never another 12 hours of retention. Present the actual clickable URL; large files are not embedded into a chat response.',
 	])
 	const routing = compactObject({
 		newDeck: ['betterpptx.auth.status', 'betterpptx.help.capabilities', 'betterpptx.help.workflow', 'betterpptx.deck.generate_from_spec', 'betterpptx.deck.validate', 'betterpptx.deck.validate_design', 'betterpptx.deck.validate_accessibility', 'betterpptx.deck.validate_quality', 'betterpptx.deck.preview', 'betterpptx.deck.save'],
@@ -42460,17 +42460,38 @@ async function replayCompletedSaveFromDurableLedger(args = {}, context = {}) {
 		throw err
 	}
 	if (operation.state !== 'succeeded') return null
-	const result = durableOperationSuccessResult(operation, 'betterpptx.deck.save', args)
+	const result = await durableOperationSuccessResult(operation, 'betterpptx.deck.save', args)
 	result.data.operationId = operation.operationId
 	result.data.idempotentReplay = true
 	return result
 }
 
-function durableOperationSuccessResult(operation, name, args = {}) {
+async function durableOperationSuccessResult(operation, name, args = {}) {
 	const data = annotateDurableOperationData(restorePersistedSpecHandoffProvenance(cloneForResult(operation?.result || {})), operation, true)
 	if (data && typeof data === 'object' && !Array.isArray(data)) {
 		addDeckVersionToData(data, args)
 		addSuccessEnvelope(data, name, args)
+		if (typeof data.downloadUrl === 'string' && typeof data.downloadName === 'string') {
+			// Legacy private records may carry the storage object key. Only the
+			// owner-authorized download pair belongs in the public replay result.
+			delete data.objectName
+			// A cold instance has no local delivery attestation. Recover through
+			// the store's owner/immutable-publication checks before sanitation can
+			// rewrite signed bytes. Issuance cannot extend the original file expiry
+			// or regenerate the saved package; the persisted success stays intact.
+			try {
+				const fresh = await _artifactStore.issueBrowserDownload({
+					downloadUrl: data.downloadUrl, downloadName: data.downloadName,
+				})
+				data.downloadUrl = fresh.downloadUrl
+				data.artifact = { ...(data.artifact || {}), downloadLinkExpiresAt: fresh.downloadLinkExpiresAt }
+			} catch {
+				// Publication success and present delivery availability are distinct.
+				// Never leak a stale capability or private storage failure details.
+				data.downloadUrl = null
+				data.artifact = { ...(data.artifact || {}), state: 'unavailable' }
+			}
+		}
 	}
 	return { ok: true, data: sanitizePublicResult(data) }
 }
@@ -42521,7 +42542,7 @@ async function beginDurableOperation(name, args = {}, context = {}) {
 	const started = await _operationStore.createOrGetOperation(durableOperationInput(name, args, context))
 	const operation = started.operation
 	if (!started.created) {
-		if (operation.state === 'succeeded') return { replayResult: durableOperationSuccessResult(operation, name, args) }
+		if (operation.state === 'succeeded') return { replayResult: await durableOperationSuccessResult(operation, name, args) }
 		if (operation.state === 'failed' || operation.state === 'cancelled') return { replayResult: durableOperationFailedResult(operation) }
 		if (operation.state === 'queued') {
 			const updatedAtMs = Date.parse(operation.updatedAt || operation.createdAt || '')
@@ -42546,7 +42567,7 @@ async function beginDurableOperation(name, args = {}, context = {}) {
 			leaseMs: durableOperationLeaseMs(name),
 		})
 		if (!claim.claimed && claim.terminal && claim.operation?.state === 'succeeded') {
-			return { replayResult: durableOperationSuccessResult(claim.operation, name, args) }
+			return { replayResult: await durableOperationSuccessResult(claim.operation, name, args) }
 		}
 		if (!claim.claimed) return { replayResult: durableOperationPendingResult(claim.operation || operation, 'terminal-or-unclaimable') }
 		return { operation: claim.operation, lease: claim.lease }

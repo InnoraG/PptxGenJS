@@ -37,7 +37,7 @@ import { traceArtifactDelivery, traceAuthDecision, traceMcpHttp, withDiagnosticR
 import { recordResourceUnitEvent } from './billing/resource-meter.mjs'
 import { isPublicBlackBoxMode, publicToolList } from './blackbox.mjs'
 import { publicRuntimeManifest } from './public-manifest.mjs'
-import { artifactTtlMs, isPermittedBrowserGrantQuery, verifyLocalArtifactBrowserGrant, verifyLocalArtifactOwner } from './storage/artifact-store.mjs'
+import { sweepLocalArtifactRoot, isPermittedBrowserGrantQuery, verifyLocalArtifactBrowserGrant, verifyLocalArtifactOwner } from './storage/artifact-store.mjs'
 import { credentialAccounts } from './config/credential-store.mjs'
 import { handleMcpV2Post, mcpV2HandshakePayload } from './mcp-v2/handler.mjs'
 import { isMcpV2Request, publicMcpProtocolManifest } from './mcp-v2/protocol.mjs'
@@ -1620,16 +1620,13 @@ export async function startBetterPptxHttp(options = {}) {
 	}, 5 * 60 * 1000)
 	sweepHandle.unref?.()
 
-	// Published-download sweep: delete token dirs after the artifact TTL so disk stays bounded.
-	const DL_TTL_MS = artifactTtlMs()
-	const dlSweep = setInterval(() => {
-		try {
-			for (const dir of fs.readdirSync(downloadRoot, { withFileTypes: true })) {
-				if (!dir.isDirectory()) continue
-				const p = path.join(downloadRoot, dir.name)
-				try { if (Date.now() - fs.statSync(p).mtimeMs > DL_TTL_MS) fs.rmSync(p, { recursive: true, force: true }) } catch (_) {}
-			}
-		} catch (_) {}
+	// Use recorded per-artifact expiry, shared with storage maintenance.
+	let dlSweepActive = false
+	const dlSweep = setInterval(async () => {
+		if (dlSweepActive) return
+		dlSweepActive = true
+		try { await sweepLocalArtifactRoot(downloadRoot) } catch (_) {}
+		finally { dlSweepActive = false }
 	}, 60 * 60 * 1000)
 	dlSweep.unref?.()
 
@@ -1870,7 +1867,7 @@ export async function startBetterPptxHttp(options = {}) {
 			: statelessRequiresInstallIdentity
 				? '  Use a BetterPPTX connector/installer so x-betterpptx-device is sent,'
 				: '  Paste the PUBLIC https URL of this endpoint into a compatible AI client',
-		authMode === 'oauth' ? '  Account access tokens protect authoring and bare file URLs; owner-issued browser download links expire after ten minutes.' : authMode === 'bearer'
+		authMode === 'oauth' ? '  Account access tokens protect authoring and bare file URLs; owner-issued browser download links last up to 12 hours, capped at file expiry.' : authMode === 'bearer'
 			? '  BETTERPPTX_URL_SECRET=<secret> (path mode) or BETTERPPTX_AUTH=none (open).'
 			: statelessRequiresInstallIdentity
 				? '  then add the endpoint as a custom connector / remote MCP server.'

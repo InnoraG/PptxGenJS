@@ -66,6 +66,10 @@ jobs:
           node --test betterpptx-mcp/test/production-free-publication-http.test.mjs
           node --test betterpptx-mcp/test/production-non-rendering-save.test.mjs
           node --test betterpptx-mcp/test/public-artifact-download-sanitization.test.mjs
+          node --test betterpptx-mcp/test/local-artifact-ownership.test.mjs
+          node --test betterpptx-mcp/test/compiler-validation-readback.test.mjs
+          node --test betterpptx-mcp/test/gcs-artifact-lifetime.test.mjs
+          node --test betterpptx-mcp/test/durable-operation-download-authority-replay.test.mjs
           node --test betterpptx-mcp/test/cloudflare-edge-worker.test.mjs
           node --test betterpptx-mcp/test/cloudflare-release-identity-retry.test.mjs
           node --test betterpptx-mcp/test/cloud-run-service-iam-retry.test.mjs
