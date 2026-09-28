@@ -353,6 +353,7 @@ jobs:
         run: |
           set -euo pipefail
           node betterpptx-mcp/verify-cloud-run-public-free-beta.mjs "$BETTERPPTX_PUBLIC_BASE"
+          node betterpptx-mcp/verify-cloud-run-custom-domain-identity.mjs "$GATEWAY_URL" "$BETTERPPTX_PUBLIC_BASE"
           discovery="$RUNNER_TEMP/betterpptx-edge-oidc-discovery.json"
           curl --fail --silent --show-error --max-time 20 "$BETTERPPTX_OAUTH_ISSUER/.well-known/openid-configuration" -o "$discovery"
           jq -e --arg issuer "$BETTERPPTX_OAUTH_ISSUER" --arg jwks "$BETTERPPTX_OAUTH_JWKS_URL" '.issuer == $issuer and .jwks_uri == $jwks' "$discovery" >/dev/null
