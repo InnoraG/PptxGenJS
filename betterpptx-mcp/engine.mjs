@@ -42054,7 +42054,7 @@ function isDeckAuthoringInvocation(name, args = {}) {
 }
 
 function throwMcpAuthoringPipelineRequired(name) {
-	const err = new Error('Deck generation and mutation require a running BetterPPTX MCP endpoint. Direct engine imports, maintainer scripts, and primitive authoring calls are disabled.')
+	const err = new Error('Presentation changes require an authorized BetterPPTX authoring workflow.')
 	err.code = 'MCP_AUTHORING_PIPELINE_REQUIRED'
 	err.details = {
 		status: 'mcp_authoring_pipeline_required',
@@ -42062,7 +42062,7 @@ function throwMcpAuthoringPipelineRequired(name) {
 		reason: 'A cold AI client must discover the Authoring Excellence JSON-spec contract from the MCP endpoint and compile through betterpptx.deck.generate_from_spec.',
 		nextAction: {
 			recommendedTool: 'betterpptx.help.capabilities',
-			reason: 'Connect to the running MCP endpoint, discover its tools, then submit the Director-authored JSON spec through generate_from_spec.',
+			reason: 'Connect to BetterPPTX, discover the public contract, then submit the AI-authored specification through generate_from_spec.',
 		},
 	}
 	throw err
@@ -42674,6 +42674,11 @@ export async function runDurableOperationById(operationId, { leaseOwner = '' } =
 		err.code = 'OPERATION_REQUEST_MISSING'
 		throw err
 	}
+	if (existing.installHash !== durableOperationInput(existing.toolName, request.args, request.context || {}).installHash) {
+		const err = new Error('The stored operation and its request have inconsistent ownership.')
+		err.code = 'OPERATION_REQUEST_IDENTITY_MISMATCH'
+		throw err
+	}
 	let claim
 	try {
 		claim = await _operationStore.claimOperation(id, {
@@ -42688,6 +42693,11 @@ export async function runDurableOperationById(operationId, { leaseOwner = '' } =
 	const workerContext = {
 		...(request.context || {}),
 		sessionId: request.context?.sessionId || `durable-worker:${id}`,
+		// Only the authenticated private worker may resume a server-owned request.
+		// Admission checked this module-private capability before persisting it;
+		// JSON cannot retain Symbols. Restore it here, never from public arguments
+		// or a client-supplied string flag. All owner/quote/asset/save gates still run.
+		[MCP_AUTHORING_CAPABILITY]: true,
 		__skipDurableOperationLedger: true,
 		__durableOperationWorker: true,
 		__claimedDurableOperation: { operation: claim.operation, lease: claim.lease },

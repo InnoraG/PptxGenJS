@@ -81,6 +81,7 @@ jobs:
           node --test betterpptx-mcp/test/art-direction-freedom.test.mjs
           node --test betterpptx-mcp/test/art-direction-world-contract.test.mjs
           node --test betterpptx-mcp/test/durable-operation-dispatch-recovery.test.mjs
+          node --test betterpptx-mcp/test/durable-mcp-authoring-worker.test.mjs
 
       - name: Build the immutable release image
         shell: bash
