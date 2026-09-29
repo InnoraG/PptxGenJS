@@ -21,6 +21,10 @@ export function isPermittedBrowserGrantQuery(query) {
 		&& (query.utm_source === undefined || query.utm_source === 'chatgpt.com')
 }
 
+export function isPermittedCloudArtifactQuery(search) {
+	return search === '' || search === '?utm_source=chatgpt.com'
+}
+
 function localArtifactPaths(root, token, name) {
 	if (typeof root !== 'string' || !root || typeof token !== 'string' || typeof name !== 'string'
 		|| !/^[A-Za-z0-9_-]{24}$/.test(token) || !/^[A-Za-z0-9._() -]+$/.test(name)
@@ -297,7 +301,7 @@ async function getStorageClient() {
 	return storageClientPromise
 }
 
-function createGcsArtifactStore({ budgetBytes = 2048 * 1048576 } = {}) {
+function createGcsArtifactStore({ base = '', budgetBytes = 2048 * 1048576 } = {}) {
 	const provider = 'gcs'
 	const bucketName = String(process.env.BETTERPPTX_GCS_BUCKET || process.env.BETTERPPTX_ARTIFACT_BUCKET || '').trim()
 	if (!bucketName) {
@@ -315,8 +319,31 @@ function createGcsArtifactStore({ budgetBytes = 2048 * 1048576 } = {}) {
 	const deliveryObjectName = url => `${prefix}/.delivery-authority/${crypto.createHash('sha256').update(url).digest('hex')}.json`
 	const bucket = async () => (await getStorageClient()).bucket(bucketName)
 	const preparedArtifacts = new WeakMap()
+	let publicBase = normalizePublicBase(base || process.env.BETTERPPTX_PUBLIC_BASE || '')
 	function authorityConflict() {
 		return new ArtifactStoreConfigError('ARTIFACT_DOWNLOAD_AUTHORITY_CONFLICT', 'The saved artifact download could not be verified.')
+	}
+	function normalizePublicBase(value) {
+		if (!value) return ''
+		const normalized = String(value).replace(/\/+$/, '')
+		const url = new URL(normalized)
+		if (!['https:', 'http:'].includes(url.protocol) || url.username || url.password || url.search || url.hash
+			|| url.href.replace(/\/+$/, '') !== normalized) throw authorityConflict()
+		return normalized
+	}
+	function browserCapability(downloadUrl, downloadName) {
+		if (!publicBase || typeof downloadUrl !== 'string' || typeof downloadName !== 'string') return null
+		try {
+			const url = new URL(downloadUrl)
+			if (url.hash || !isPermittedCloudArtifactQuery(url.search)) return null
+			const start = `${publicBase}/files/`
+			const canonical = downloadUrl.slice(0, downloadUrl.length - url.search.length)
+			if (!canonical.startsWith(start)) return null
+			const [token, encodedName, ...extra] = canonical.slice(start.length).split('/')
+			if (!/^[A-Za-z0-9_-]{43}$/.test(token || '') || extra.length || encodedName !== encodeURIComponent(downloadName)
+				|| !/^[A-Za-z0-9._() -]+$/.test(downloadName) || downloadName.startsWith('.') || downloadName.includes('..')) return null
+			return { token, url: canonical, hash: crypto.createHash('sha256').update(token).digest('hex') }
+		} catch { return null }
 	}
 	function signedLinkExpiry(downloadUrl, requestedExpiry) {
 		const query = new URL(downloadUrl).searchParams
@@ -338,7 +365,13 @@ function createGcsArtifactStore({ budgetBytes = 2048 * 1048576 } = {}) {
 	function validDeliveryRecord(record, downloadUrl, downloadName) {
 		const linkExpiry = Date.parse(record?.expiresAt)
 		const fileExpiry = Date.parse(record?.artifactExpiresAt)
-		try { if (!Number.isFinite(linkExpiry) || signedLinkExpiry(downloadUrl, linkExpiry) < linkExpiry) return false } catch { return false }
+		const wrapped = record?.deliveryKind === 'browser-capability'
+		if (wrapped) {
+			const capability = browserCapability(downloadUrl, downloadName)
+			if (!capability || capability.url !== downloadUrl || capability.hash !== record.capabilitySha256
+				|| typeof record.signedDownloadUrl !== 'string' || record.signedDownloadUrl === downloadUrl) return false
+		} else if (record?.deliveryKind !== undefined || record?.signedDownloadUrl !== undefined || record?.capabilitySha256 !== undefined) return false
+		try { if (!Number.isFinite(linkExpiry) || signedLinkExpiry(wrapped ? record.signedDownloadUrl : downloadUrl, linkExpiry) < linkExpiry) return false } catch { return false }
 		return record?.downloadUrl === downloadUrl && record?.downloadName === downloadName
 			&& record?.bucket === bucketName && record?.prefix === prefix
 			&& typeof record?.objectName === 'string' && record.objectName.startsWith(`${prefix}/`)
@@ -348,13 +381,19 @@ function createGcsArtifactStore({ budgetBytes = 2048 * 1048576 } = {}) {
 			&& (record.contentSha256 === undefined || (typeof record.contentSha256 === 'string' && /^[a-f0-9]{64}$/.test(record.contentSha256)))
 			&& (record.objectGeneration === undefined || (typeof record.objectGeneration === 'string' && /^[1-9][0-9]*$/.test(record.objectGeneration)))
 	}
-	function sameDeliveryIdentity(existing, record) {
-		return validDeliveryRecord(existing, record.downloadUrl, record.downloadName)
-			&& existing.objectName === record.objectName
+	function sameArtifactIdentity(existing, record) {
+		return existing.bucket === record.bucket && existing.prefix === record.prefix
+			&& existing.downloadName === record.downloadName && existing.objectName === record.objectName
 			&& existing.artifactExpiresAt === record.artifactExpiresAt
 			&& existing.contentType === record.contentType && existing.contentSha256 === record.contentSha256
 			&& existing.objectGeneration === record.objectGeneration
 			&& sameArtifactOwner(resourceOwnerOf(existing), resourceOwnerOf(record))
+	}
+	function sameDeliveryIdentity(existing, record) {
+		return validDeliveryRecord(existing, record.downloadUrl, record.downloadName)
+			&& sameArtifactIdentity(existing, record)
+			&& existing.deliveryKind === record.deliveryKind && existing.signedDownloadUrl === record.signedDownloadUrl
+			&& existing.capabilitySha256 === record.capabilitySha256
 			&& Date.parse(existing.expiresAt) > Date.now()
 	}
 	function assertStoredPublication(metadata, record) {
@@ -370,24 +409,42 @@ function createGcsArtifactStore({ budgetBytes = 2048 * 1048576 } = {}) {
 			|| (record.contentType !== undefined && metadata.contentType !== record.contentType)) throw authorityConflict()
 	}
 	function verifiesSignedDownload(downloadUrl, downloadName) {
+		const capability = browserCapability(downloadUrl, downloadName)
+		if (capability) downloadUrl = capability.url
 		const record = JSON.parse(readFileSync(deliveryRecordPath(downloadUrl), 'utf8'))
-		return validDeliveryRecord(record, downloadUrl, downloadName)
-			&& Number.isFinite(Date.parse(record.expiresAt)) && Date.parse(record.expiresAt) > Date.now()
+		if (!validDeliveryRecord(record, downloadUrl, downloadName) || Date.parse(record.expiresAt) <= Date.now()) return false
+		if (record.deliveryKind === 'browser-capability') {
+			const signed = JSON.parse(readFileSync(deliveryRecordPath(record.signedDownloadUrl), 'utf8'))
+			return validDeliveryRecord(signed, record.signedDownloadUrl, downloadName) && signed.deliveryKind === undefined
+				&& sameArtifactIdentity(signed, record) && signed.expiresAt === record.expiresAt
+		}
+		return true
 	}
-	async function loadSignedDownload(downloadUrl, downloadName) {
+	async function loadSignedDownload(downloadUrl, downloadName, directOnly = false) {
+		const capability = browserCapability(downloadUrl, downloadName)
+		if (capability) downloadUrl = capability.url
 		let record
 		try { record = JSON.parse(await fs.readFile(deliveryRecordPath(downloadUrl), 'utf8')) } catch {}
-		if (validDeliveryRecord(record, downloadUrl, downloadName)) return record
-		// Cloud Run's filesystem is ephemeral. The private GCS authority record is
-		// shared across instances and survives restarts; the local copy exists only
-		// for synchronous public-result sanitization within this process.
-		try {
-			const [bytes] = await (await bucket()).file(deliveryObjectName(downloadUrl)).download()
-			record = JSON.parse(bytes.toString('utf8'))
-		} catch { return null }
-		if (!validDeliveryRecord(record, downloadUrl, downloadName)) return null
-		await fs.mkdir(deliveryRecordRoot, { recursive: true })
-		await fs.writeFile(deliveryRecordPath(downloadUrl), JSON.stringify(record), { mode: 0o600 })
+		if (!validDeliveryRecord(record, downloadUrl, downloadName)) {
+			// Cloud Run's filesystem is ephemeral. The private GCS authority record is
+			// shared across instances and survives restarts; the local copy exists only
+			// for synchronous public-result sanitization within this process.
+			try {
+				const [bytes] = await (await bucket()).file(deliveryObjectName(downloadUrl)).download()
+				record = JSON.parse(bytes.toString('utf8'))
+			} catch { return null }
+			if (!validDeliveryRecord(record, downloadUrl, downloadName)) return null
+			await fs.mkdir(deliveryRecordRoot, { recursive: true })
+			await fs.writeFile(deliveryRecordPath(downloadUrl), JSON.stringify(record), { mode: 0o600 })
+		}
+		if (record.deliveryKind === 'browser-capability') {
+			if (directOnly) return null
+			// The wrapper points only at a separately issued, exact signed URL.
+			// Never turn caller-provided destinations into redirects or fetches.
+			const signed = await loadSignedDownload(record.signedDownloadUrl, downloadName, true)
+			if (!signed || signed.deliveryKind !== undefined || !sameArtifactIdentity(signed, record)
+				|| signed.expiresAt !== record.expiresAt) return null
+		}
 		return record
 	}
 	async function recordSignedDownload(record) {
@@ -423,6 +480,36 @@ function createGcsArtifactStore({ budgetBytes = 2048 * 1048576 } = {}) {
 			if (sameDeliveryIdentity(existing, record)) return existing
 			throw authorityConflict()
 		}
+	}
+	async function browserDelivery(signedRecord) {
+		if (!publicBase) return { downloadUrl: signedRecord.downloadUrl, downloadLinkExpiresAt: signedRecord.expiresAt }
+		const token = crypto.randomBytes(32).toString('base64url')
+		const downloadUrl = `${publicBase}/files/${token}/${encodeURIComponent(signedRecord.downloadName)}`
+		const issued = await recordSignedDownload({
+			...signedRecord, downloadUrl, deliveryKind: 'browser-capability',
+			signedDownloadUrl: signedRecord.downloadUrl, capabilitySha256: crypto.createHash('sha256').update(token).digest('hex'),
+		})
+		return { downloadUrl, downloadLinkExpiresAt: issued.expiresAt }
+	}
+	async function resolveBrowserDownload({ token, name } = {}) {
+		if (!publicBase || typeof token !== 'string' || !/^[A-Za-z0-9_-]{43}$/.test(token) || typeof name !== 'string') throw authorityConflict()
+		const downloadUrl = `${publicBase}/files/${token}/${encodeURIComponent(name)}`
+		const record = await loadSignedDownload(downloadUrl, name)
+		if (!record || record.deliveryKind !== 'browser-capability' || Date.parse(record.expiresAt) <= Date.now()) throw authorityConflict()
+		const file = (await bucket()).file(record.objectName)
+		const [metadata] = await file.getMetadata()
+		assertStoredPublication(metadata, record)
+		if (Date.parse(record.expiresAt) <= Date.now()) throw authorityConflict()
+		const signed = new URL(record.signedDownloadUrl)
+		// This adapter uses the SDK's default path-style GCS signer, never a
+		// caller-supplied host. Even corrupted authority must not redirect elsewhere.
+		if (signed.origin !== 'https://storage.googleapis.com' || signed.username || signed.password || signed.hash
+			|| decodeURIComponent(signed.pathname) !== `/${bucketName}/${record.objectName}`
+			|| signed.searchParams.getAll('generation').length !== 1
+			|| signed.searchParams.get('generation') !== record.objectGeneration
+			|| signed.searchParams.getAll('X-Goog-Signature').length !== 1
+			|| !signed.searchParams.get('X-Goog-Signature')) throw authorityConflict()
+		return { downloadUrl: record.signedDownloadUrl }
 	}
 	async function sweepExpiredDeliveries() {
 		let entries
@@ -593,8 +680,7 @@ function createGcsArtifactStore({ budgetBytes = 2048 * 1048576 } = {}) {
 			if (artifact.cleanupTarget) {
 				try { await fs.rm(path.dirname(identity.target), { recursive: true, force: true }) } catch {}
 			}
-			const finalized = { ...artifact, downloadUrl, expiresAt: identity.expiresAt,
-				downloadLinkExpiresAt: issuedRecord.expiresAt, localPathAvailable: false }
+			const finalized = { ...artifact, ...(await browserDelivery(issuedRecord)), expiresAt: identity.expiresAt, localPathAvailable: false }
 			preparedArtifacts.set(finalized, prepared)
 			return finalized
 		}
@@ -606,10 +692,11 @@ function createGcsArtifactStore({ budgetBytes = 2048 * 1048576 } = {}) {
 		const record = await loadSignedDownload(downloadUrl, downloadName)
 		const owner = currentResourceOwner()
 		const artifactExpiresAt = Date.parse(record?.artifactExpiresAt || record?.expiresAt)
-		if (!record || record.downloadUrl !== downloadUrl || record.downloadName !== downloadName
+		if (!record || record.downloadName !== downloadName
 			|| record.bucket !== bucketName || record.prefix !== prefix
 			|| !sameArtifactOwner(resourceOwnerOf(record), owner)
 			|| !Number.isFinite(artifactExpiresAt) || artifactExpiresAt <= Date.now()
+			|| (record.deliveryKind === 'browser-capability' && Date.parse(record.expiresAt) <= Date.now())
 			|| typeof record.objectName !== 'string' || !record.objectName.startsWith(`${prefix}/`)) {
 			throw new ArtifactStoreConfigError('ARTIFACT_NOT_AVAILABLE', 'The saved artifact is unavailable to this caller.')
 		}
@@ -617,6 +704,10 @@ function createGcsArtifactStore({ budgetBytes = 2048 * 1048576 } = {}) {
 		const file = (await getStorageClient()).bucket(bucketName).file(record.objectName)
 		const [metadata] = await file.getMetadata()
 		assertStoredPublication(metadata, record)
+		if (record.deliveryKind === 'browser-capability') {
+			if (Date.parse(record.expiresAt) <= Date.now()) throw new ArtifactStoreConfigError('ARTIFACT_NOT_AVAILABLE', 'The saved artifact is unavailable to this caller.')
+			return { downloadUrl: record.downloadUrl, downloadLinkExpiresAt: record.expiresAt }
+		}
 		const contentType = record.contentType || metadata.contentType || contentTypeForGeneric(downloadName)
 		const objectGeneration = record.objectGeneration || String(metadata.generation)
 		if (expiresMs <= Date.now()) throw new ArtifactStoreConfigError('ARTIFACT_NOT_AVAILABLE', 'The saved artifact is unavailable to this caller.')
@@ -631,13 +722,13 @@ function createGcsArtifactStore({ budgetBytes = 2048 * 1048576 } = {}) {
 			bucket: bucketName, prefix, objectName: record.objectName, resourceOwner: owner,
 			contentType, objectGeneration, ...(record.contentSha256 ? { contentSha256: record.contentSha256 } : {}),
 		})
-		return { downloadUrl: freshUrl, downloadLinkExpiresAt: issued.expiresAt }
+		return browserDelivery(issued)
 	}
 
 	async function readArtifactChunk({ downloadUrl, downloadName, offset = 0, maxBytes = 32768 } = {}) {
 		const record = await loadSignedDownload(downloadUrl, downloadName)
 		const owner = currentResourceOwner()
-		if (!record || record.downloadUrl !== downloadUrl || record.downloadName !== downloadName
+		if (!record || record.downloadName !== downloadName
 			|| record.bucket !== bucketName || record.prefix !== prefix
 			|| !sameArtifactOwner(resourceOwnerOf(record), owner)
 			|| Date.parse(record.artifactExpiresAt || record.expiresAt) <= Date.now()
@@ -665,10 +756,13 @@ function createGcsArtifactStore({ budgetBytes = 2048 * 1048576 } = {}) {
 	return withArtifactDownloadVerifier({
 		provider,
 		shared: true,
-		get base() { return '' },
+		get base() { return publicBase },
 		get root() { return '' },
 		get budgetBytes() { return maxBytes },
-		configure() { return this.describe() },
+		configure({ base: nextBase } = {}) {
+			if (nextBase !== undefined) publicBase = normalizePublicBase(nextBase)
+			return this.describe()
+		},
 		describe() {
 			return { provider, shared: true, bucketConfigured: true, prefix, budgetBytes: maxBytes, ttlMs: artifactTtlMs() }
 		},
@@ -676,6 +770,7 @@ function createGcsArtifactStore({ budgetBytes = 2048 * 1048576 } = {}) {
 		prepareArtifactTarget,
 		finalizeSaveTarget,
 		issueBrowserDownload,
+		resolveBrowserDownload,
 		readArtifactChunk,
 		enforceBudget: async () => {},
 		resolveLocalDownload: () => null,
@@ -686,7 +781,7 @@ function createGcsArtifactStore({ budgetBytes = 2048 * 1048576 } = {}) {
 export function createArtifactStore({ base = '', root = '', budgetBytes = 2048 * 1048576 } = {}) {
 	const provider = artifactStoreProvider()
 	assertSupportedProvider(provider)
-	if (provider === 'gcs') return createGcsArtifactStore({ budgetBytes })
+	if (provider === 'gcs') return createGcsArtifactStore({ base, budgetBytes })
 	if (requireSharedStores()) {
 		throw new ArtifactStoreConfigError(
 			'ARTIFACT_STORE_NOT_SHARED',

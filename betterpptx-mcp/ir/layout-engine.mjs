@@ -576,7 +576,7 @@ const STYLE_PRESETS = {
 // --- Art directions: genuinely distinct visual WORLDS, not just recolors ---
 // Each world branches background treatment, card language, type system, corners and accent
 // logic so two decks look STRUCTURALLY different. The AI picks one via styleIntent.artDirection
-// to match the audience/tone; default stays 'aurora'. Author overrides (theme.palette,
+// to match the audience/tone; omission selects no World. Author overrides (theme.palette,
 // slide.background, content[].options.fill) always win over any of this.
 // M12 application fidelity: the canvas builders derive from the EFFECTIVE bg (b.bg = the
 // author's brand palette[4] when supplied, else the world's own signature) so a brand colour
@@ -585,7 +585,7 @@ function artDarkGrad(base) { return gradient([[0, lightenHex(base, 0.16), 0], [0
 function artLightGrad(base) { return gradient([[0, 'FFFFFF', 0], [0.72, base, 0], [1, darkenHex(base, 0.05), 0]], 15) }
 const ART_DIRECTIONS = {
 	aurora: {
-		label: 'Aurora — modern SaaS: dark navy gradient, glassy lifted cards, clean grotesk. Default; good for product/startup/exec.',
+		label: 'Aurora — modern SaaS: dark navy gradient, glassy lifted cards, clean grotesk; good for product/startup/exec.',
 		mode: 'dark', palette: ['F8FAFC', '2DD4BF', '38BDF8', 'F59E0B', '0B1120'],
 		headFontFace: 'Segoe UI Semibold', bodyFontFace: 'Calibri',
 		bg: (b, dark) => dark ? artDarkGrad(b.bg || '0B1120') : artLightGrad(b.bg || 'F8FAFC'),
@@ -769,8 +769,8 @@ function synthesizeArtDirection(obj) {
 	const modeIn = String(obj.mode || '').toLowerCase().trim()
 	const palette = Array.isArray(obj.palette) && obj.palette.length >= 2 ? obj.palette : null
 	const bgHex = String(obj.bg || (palette && palette[4]) || '').replace(/^#/, '') || null
-	const mode = modeIn === 'light' ? 'light' : modeIn === 'dark' ? 'dark' : (bgHex ? (isDarkHex(bgHex) ? 'dark' : 'light') : 'dark')
-	const card = String(obj.card || (mode === 'dark' ? 'glass' : 'soft')).toLowerCase()
+	const mode = modeIn === 'light' ? 'light' : modeIn === 'dark' ? 'dark' : (bgHex ? (isDarkHex(bgHex) ? 'dark' : 'light') : 'light')
+	const card = String(obj.card || 'neutral').toLowerCase()
 	const surfaceFill = String(obj.surface?.fill || '').toLowerCase()
 	// Keep bespoke synthesis aligned with gradientPolicyForArtDirection. A
 	// flat/outline/bare surface is a deliberate visual choice, not a request
@@ -779,12 +779,14 @@ function synthesizeArtDirection(obj) {
 		? ['glass', 'lift'].includes(surfaceFill)
 		: ['glass', 'candy'].includes(card)
 	const fallbackBg = mode === 'dark' ? '0B1120' : 'F8FAFC'
+	const resolvedPalette = palette ? [...palette] : null
+	if (resolvedPalette && obj.bg) resolvedPalette[4] = bgHex
 	return {
 		label: obj.label || obj.name || 'Bespoke world (AI-composed)',
 		mode,
-		palette: palette || undefined,
-		headFontFace: obj.headFontFace || obj.headFont || (mode === 'dark' ? 'Segoe UI Semibold' : 'Segoe UI Semibold'),
-		bodyFontFace: obj.bodyFontFace || obj.bodyFont || 'Calibri',
+		palette: resolvedPalette || (bgHex ? [mode === 'dark' ? 'FFFFFF' : '172033', '475569', '475569', '475569', bgHex] : undefined),
+		headFontFace: obj.headFontFace || obj.headFont || 'Aptos Display',
+		bodyFontFace: obj.bodyFontFace || obj.bodyFont || 'Aptos',
 		card,
 		// Continuous surface knobs (corner/fill/border/elevation) — the AI can sculpt the
 		// surface beyond the 6 card presets. card stays as the base preset; surface overrides.
@@ -809,13 +811,23 @@ function synthesizeArtDirection(obj) {
 	}
 }
 
-// World selection is an AI design decision. Explicit artDirection/theme.artDirection
-// always wins. Luxe remains only as a legacy execution-compatibility fallback for
-// older specs that omit a World; that fallback is never an AI selection and is not
-// eligible for first-time-right certification. The public catalog is descriptive
-// and deliberately unranked.
-export const DEFAULT_ART_DIRECTION = 'luxe'
+// v2 separates business completeness from aesthetic selection. No deck-spec.v1
+// omission is interpreted as consent to a named World (including older assisted
+// specs). Authors can retain legacy looks by explicitly selecting that World.
+// Internal neutral-execution marker, not a named World or a public selector enum.
+export const DEFAULT_ART_DIRECTION = 'neutral'
 export const AURORA_LAST_RESORT_ART_DIRECTION = 'aurora'
+
+export function artDirectionSelectionForSpec(spec = {}) {
+	// Explicit null resets the style selector instead of resurrecting a theme World.
+	const raw = spec?.styleIntent?.artDirection !== undefined
+		? spec.styleIntent.artDirection : spec?.theme?.artDirection
+	if (raw === null) return { kind: 'neutral', key: null, raw, explicit: true }
+	if (raw && typeof raw === 'object' && !Array.isArray(raw)) return { kind: 'bespoke', key: 'bespoke', raw, explicit: true }
+	const key = String(raw ?? '').toLowerCase().trim().replace(/\s+/g, '-')
+	if (!key) return { kind: 'omitted', key: null, raw, explicit: false }
+	return { kind: ART_DIRECTIONS[key] ? 'named' : 'unsupported', key, raw, explicit: true }
+}
 
 export const WORLD_CAPABILITY_PROFILES = Object.freeze({
 	luxe: { strengths: ['gradient', 'depth', 'expressive-type', 'premium-space'] },
@@ -827,10 +839,10 @@ export const WORLD_CAPABILITY_PROFILES = Object.freeze({
 })
 
 function artDirectionFor(spec) {
-	const raw = spec?.styleIntent?.artDirection ?? spec?.theme?.artDirection
+	const { raw, kind, key } = artDirectionSelectionForSpec(spec)
 	// Inline object = a bespoke, AI-composed world (not one of the named six).
-	if (raw && typeof raw === 'object') return synthesizeArtDirection(raw)
-	const key = String(raw || DEFAULT_ART_DIRECTION).toLowerCase().trim().replace(/\s+/g, '-')
+	if (kind === 'bespoke') return synthesizeArtDirection(raw)
+	if (kind !== 'named') return null
 	const base = ART_DIRECTIONS[key]
 	if (!base) return null
 	// Both-mode resolution: swap in the tuned light/dark variant if the spec asks for the
@@ -848,9 +860,7 @@ export function listArtDirections() {
 // Key for an art-direction selection. A named world returns its registry key; a
 // bespoke inline world returns 'bespoke' (so callers can label/log it).
 function artDirectionKey(spec) {
-	const raw = spec?.styleIntent?.artDirection ?? spec?.theme?.artDirection
-	if (raw && typeof raw === 'object') return 'bespoke'
-	return String(raw || DEFAULT_ART_DIRECTION).toLowerCase().trim().replace(/\s+/g, '-')
+	return artDirectionSelectionForSpec(spec).key
 }
 export function artDirectionInfo(spec) {
 	const art = artDirectionFor(spec)
@@ -860,27 +870,25 @@ export function artDirectionInfo(spec) {
 	return { key, mode: art.mode, headFontFace: art.headFontFace, bodyFontFace: art.bodyFontFace, card: art.card, bespoke: !!art.bespoke, label: art.label, ...(profile || {}) }
 }
 
+function cardAxisForSpec(spec, art = artDirectionFor(spec)) {
+	return spec?.theme?.card || spec?.styleIntent?.card || art?.card || 'neutral'
+}
+
 // Completeness is an AI-authored intent, not a request to add decorative
 // objects. The engine reports deterministic execution constraints and never
-// chooses a richer or simpler treatment on the AI's behalf. The compatibility
-// default keeps older specs executable but cannot replace an explicit World in
-// a first-time-right certification run.
+// chooses a richer or simpler treatment on the AI's behalf. Complete means
+// business-appropriate, evidence-led and usable, not ornamental or maximally complex.
 const COMPLETENESS_TIERS = Object.freeze({ complete: 'complete', balanced: 'balanced', minimal: 'minimal' })
 const COMPLETENESS_ALIASES = Object.freeze({ premium: 'complete', rich: 'complete', full: 'complete', standard: 'balanced', simple: 'minimal', basic: 'minimal' })
 const COMPLETENESS_PREFERENCE_ORDER = Object.freeze([
-	'gradient-world',
-	'semantic-visual-proof',
-	'native-3d-when-a-meaningful-model-or-presenter-is-authored',
-	'hero-type-emphasis-when-short-and-legible',
-	'diagram-or-native-smartart-for-process-relationships',
-	'narration-synchronised-motion-on-meaningful-objects',
+	'audience-purpose-and-decision',
+	'credible-evidence-and-clear-information-hierarchy',
+	'readable-accessible-and-editable-business-delivery',
 ])
 const COMPLETENESS_LAST_RESORTS = Object.freeze([
-	'flat-or-unadorned-canvas-when-the-selected-world-is-not-gradient-native',
-	'ordinary-text-only-visual-when-no-proof-or-asset-is-available',
-	'no-presenter-when-no-consented-or-authored-presenter-asset-exists',
-	'plain-hero-type-when-text-art-would-reduce-legibility-or-compete-with-a-model',
-	'static-or-minimal-process-rendering-when-no-semantic-relationship-is-declared',
+	'restrained-or-expressive-custom-styling-is-valid-without-a-named-world',
+	'no-invented-evidence-media-or-presenter-identity',
+	'no-motion-effects-or-decoration-without-author-intent',
 ])
 
 function completenessTierValue(value) {
@@ -900,21 +908,21 @@ export function authoringCompletenessForSpec(spec = {}) {
 		: 'engine-default'
 	const allowDowngrade = policy && typeof policy === 'object' && policy.allowDowngrade === false ? false : true
 	return {
-		contractVersion: 'authoring-excellence.completeness.v1',
+		contractVersion: 'authoring-excellence.completeness.v2',
 		requestedTier: requested || null,
 		effectiveTier: tier,
 		defaultTier: COMPLETENESS_TIERS.complete,
-		defaultWorld: DEFAULT_ART_DIRECTION,
-		lastResortWorld: AURORA_LAST_RESORT_ART_DIRECTION,
+		defaultWorld: null,
+		lastResortWorld: null,
 		source,
 		allowDowngrade,
 		preferenceOrder: [...COMPLETENESS_PREFERENCE_ORDER],
 		lastResortRules: [...COMPLETENESS_LAST_RESORTS],
 		selectionRule: tier === 'complete'
-			? 'The AI selects the most complete coherent treatment the story can honestly support; the engine executes that choice and records any factual downgrade constraint.'
+			? 'Premium-complete business ambition: the AI authors a coherent, evidence-led, readable and accessible result fit for its audience and purpose. No named World, ornament, feature coverage, or maximum complexity is required.'
 			: tier === 'balanced'
 				? 'The AI selects a coherent, evidence-led treatment and may choose restraint when complexity would not serve the story.'
-				: 'Use the minimum semantic treatment requested by the author; this is an explicit exception to the complete default.',
+				: 'Use the minimum semantic treatment requested by the author while retaining truthful content, readability, accessibility and validation.',
 		forbiddenShortcuts: ['empty decoration without communicative purpose', 'engine-invented geometry', 'opaque native payloads', 'invented media or presenter identity'],
 	}
 }
@@ -926,86 +934,63 @@ export function authoringCompletenessForSpec(spec = {}) {
 export const GRADIENT_NATIVE_WORLDS = Object.freeze(['aurora', 'luxe', 'candy'])
 export const INTENTIONALLY_FLAT_WORLDS = Object.freeze(Object.keys(ART_DIRECTIONS).filter(key => !GRADIENT_NATIVE_WORLDS.includes(key)))
 
-// Gradient coverage is a World contract shared by the Director plan and the
-// quality validator. Keep the decision in one place so a semantic readback
-// cannot claim one treatment while quality scoring applies another.
+// Aesthetic preferences are descriptive, never quality/certification quotas.
+// Keep zero requirements shared by readback and the quality validator.
 export function gradientPolicyForArtDirection(spec = {}) {
 	// `styleIntent.artDirection` is the public Director form, while
 	// `theme.artDirection` remains a supported compatibility/readback form.
 	// Resolve the same precedence as artDirectionInfo so a bespoke gradient
 	// World cannot silently become a flat quality result merely because it was
 	// supplied through `theme`.
-	const rawArtDirection = spec?.styleIntent?.artDirection ?? spec?.theme?.artDirection
+	const rawArtDirection = artDirectionSelectionForSpec(spec).raw
 	const surfaceFill = rawArtDirection && typeof rawArtDirection === 'object'
 		? rawArtDirection.surface?.fill || rawArtDirection.fill || null
 		: null
 	const art = artDirectionInfo(spec)
-	const expected = surfaceFill
+	const preferred = surfaceFill
 		? ['glass', 'lift'].includes(String(surfaceFill).toLowerCase())
 		: art
 			? GRADIENT_NATIVE_WORLDS.includes(art.key) || ['glass', 'candy'].includes(art.card)
-			: true
-	const world = art?.key || (surfaceFill ? 'bespoke-surface' : 'default-aurora')
+			: false
+	const world = art?.key || 'neutral'
 	return {
-		contractVersion: 'authoring-excellence.gradient.v1',
-		expected,
+		contractVersion: 'authoring-excellence.gradient.v2',
+		expected: false,
+		preferred,
 		world,
 		surfaces: ['canvas', 'cards', 'charts', 'process bands', 'accent bands'],
-		rule: expected
-			? 'The selected World expects at least one gradient surface across the canvas or authored visual system.'
-			: 'The selected World intentionally uses a flat, outline, bare, or wireframe treatment; gradient coverage is not required.',
+		rule: 'Gradient is an optional authored aesthetic, not a completeness or certification quota. Explicit named World defaults remain available; author overrides win.',
 	}
 }
 
-// Accent coverage is a World contract, not a universal score target. These Worlds
-// deliberately use one restrained accent in their visual language; forcing a second
-// accent would make the Director add decorative colour that the selected World does
-// not call for. All other named/bespoke Worlds retain the default two-accent minimum.
+// Named World vocabulary remains descriptive; no author must meet an accent count.
 const SINGLE_ACCENT_WORLDS = new Set(['editorial', 'brutalist', 'luxe', 'mist', 'meridian', 'mono'])
 export function accentPolicyForArtDirection(spec = {}) {
 	const info = artDirectionInfo(spec)
-	const world = info?.key || 'default-aurora'
-	const minimumDistinctAccents = SINGLE_ACCENT_WORLDS.has(world) ? 1 : 2
+	const world = info?.key || 'neutral'
+	const minimumDistinctAccents = 0
 	return {
-		contractVersion: 'authoring-excellence.accent.v1',
+		contractVersion: 'authoring-excellence.accent.v2',
 		minimumDistinctAccents,
 		world,
 		singleAccentWorlds: [...SINGLE_ACCENT_WORLDS],
-		rule: minimumDistinctAccents === 1
-			? 'The selected World permits a restrained single-accent treatment; do not add a second accent merely to satisfy a score.'
-			: 'The selected World expects at least two distinct accent colours across the authored visual system.',
+		rule: 'No accent-count quota. Monochrome, restrained and multicolour styling are valid when authored for meaning and legibility.',
 	}
 }
 
-// Depth coverage is also a World contract. A full-bleed, poster, quiet-keynote,
-// or frameless editorial treatment must not be forced to add shadows merely to
-// satisfy a universal quota; Worlds with soft elevation or a meaningful frame
-// still need at least one authored/engine depth treatment per slide.
+// Preserve selected depth vocabulary without requiring any depth objects.
 export function depthPolicyForArtDirection(spec = {}) {
 	const info = artDirectionInfo(spec)
-	const world = info?.key || 'default-aurora'
-	// Match artDirectionInfo/gradientPolicy precedence so a bespoke flat
-	// surface supplied through the supported theme compatibility form cannot
-	// inherit a soft shadow/frame requirement by accident.
-	const rawDirection = spec?.styleIntent?.artDirection ?? spec?.theme?.artDirection
-	const surface = rawDirection && typeof rawDirection === 'object' && rawDirection.surface && typeof rawDirection.surface === 'object'
-		? rawDirection.surface
-		: null
+	const world = info?.key || 'neutral'
 	const depth = artDepthForSpec(spec)
-	const explicitlyFlat = String(surface?.elevation || '').toLowerCase() === 'none'
-		|| (String(surface?.fill || '').toLowerCase() === 'flat' && (!surface?.border || String(surface.border).toLowerCase() === 'none'))
-	const minimumDepthObjectsPerSlide = explicitlyFlat
-		? 0
-		: (depth?.shadow === 'soft' || depth?.imageFrame ? 1 : 0)
+	const minimumDepthObjectsPerSlide = 0
 	return {
-		contractVersion: 'authoring-excellence.depth.v1',
+		contractVersion: 'authoring-excellence.depth.v2',
 		minimumDepthObjectsPerSlide,
 		world,
 		shadow: depth?.shadow || 'none',
 		imageFrame: !!depth?.imageFrame,
-		rule: minimumDepthObjectsPerSlide > 0
-			? 'The selected World uses soft elevation or a meaningful frame; provide at least one depth treatment per slide where visual objects call for it.'
-			: 'The selected World intentionally uses a flat, poster, quiet, or frameless treatment; do not add shadows or depth merely to satisfy a score.',
+		rule: 'No depth-object quota. Flat and dimensional styling are equally valid; apply framing or elevation only when the author selects it.',
 	}
 }
 // Resolve dark/light the way the renderer does: explicit mode > art-direction > preset > custom-bg > light.
@@ -1214,14 +1199,12 @@ export function dataLanguageForAxes(axes = {}) {
 // override at theme.dataStyle / styleIntent.dataStyle.
 export function artDataStyleForSpec(spec = {}) {
 	const art = artDirectionFor(spec)
-	const override = art?.dataStyle || spec?.theme?.dataStyle || spec?.styleIntent?.dataStyle
-	const base = art
-		? dataLanguageForAxes({ card: art.card, headFontFace: art.headFontFace, bodyFontFace: art.bodyFontFace })
-		: dataLanguageForAxes({
-			card: spec?.theme?.card || spec?.styleIntent?.card,
-			headFontFace: spec?.theme?.headFontFace || spec?.theme?.displayFontFace,
-			bodyFontFace: spec?.theme?.bodyFontFace || spec?.theme?.fontFace,
-		})
+	const override = spec?.theme?.dataStyle || spec?.styleIntent?.dataStyle || art?.dataStyle
+	const base = dataLanguageForAxes({
+		card: cardAxisForSpec(spec, art),
+		headFontFace: spec?.theme?.headFontFace || spec?.theme?.displayFontFace || spec?.theme?.fontFace || art?.headFontFace,
+		bodyFontFace: spec?.theme?.bodyFontFace || spec?.theme?.fontFace || art?.bodyFontFace,
+	})
 	const surface = artTableSurfaceForSpec(spec)
 	const resolved = surface ? { ...base, ...surface } : base
 	return (override && typeof override === 'object') ? { ...resolved, ...override } : resolved
@@ -1292,8 +1275,9 @@ export function compositionForAxes(axes = {}) {
 }
 export function artCompositionForSpec(spec = {}) {
 	const art = artDirectionFor(spec)
-	const base = compositionForAxes({ card: art ? art.card : (spec?.theme?.card || spec?.styleIntent?.card) })
-	const override = art?.composition || spec?.theme?.composition
+	const card = cardAxisForSpec(spec, art)
+	const base = card === 'neutral' ? { corner: 'sharp', titleAlign: 'left', coverAlign: 'left', margin: DEFAULT_MARGIN } : compositionForAxes({ card })
+	const override = spec?.theme?.composition || spec?.styleIntent?.composition || art?.composition
 	return (override && typeof override === 'object') ? { ...base, ...override } : base
 }
 
@@ -1336,8 +1320,9 @@ export function motionForAxes(axes = {}) {
 }
 export function artMotionForSpec(spec = {}) {
 	const art = artDirectionFor(spec)
-	const override = art?.motion || spec?.motion?.temperament || spec?.styleIntent?.motion
-	const base = motionForAxes({ card: art ? art.card : (spec?.theme?.card || spec?.styleIntent?.card) })
+	const override = spec?.motion?.temperament || spec?.styleIntent?.motion || art?.motion
+	const card = cardAxisForSpec(spec, art)
+	const base = card === 'neutral' ? { transition: null, build: 'none', emphasis: 'none', model3d: null } : motionForAxes({ card })
 	const resolved = (override && typeof override === 'object') ? { ...base, ...override } : base
 	const effectivePolicy = String(spec?._motionPolicyApplied?.policy || spec?.motionPolicy || spec?.motion?.policy || '').trim().toLowerCase()
 	// A static compilation may retain the World's harmless slide transition, but it
@@ -1398,8 +1383,9 @@ export function stageForAxes(axes = {}) {
 }
 export function artStageForSpec(spec = {}) {
 	const art = artDirectionFor(spec)
-	const override = art?.stage || art?.stage3d || spec?.stage3d || spec?.styleIntent?.stage3d
-	const base = stageForAxes({ card: art ? art.card : (spec?.theme?.card || spec?.styleIntent?.card) })
+	const override = spec?.stage3d || spec?.styleIntent?.stage3d || art?.stage || art?.stage3d
+	const card = cardAxisForSpec(spec, art)
+	const base = card === 'neutral' ? null : stageForAxes({ card })
 	return (override && typeof override === 'object') ? { ...base, ...override } : base
 }
 
@@ -1433,8 +1419,9 @@ export function iconForAxes(axes = {}) {
 }
 export function artIconForSpec(spec = {}) {
 	const art = artDirectionFor(spec)
-	const override = art?.icon || spec?.icon?.temperament || spec?.styleIntent?.icon
-	const base = iconForAxes({ card: art ? art.card : (spec?.theme?.card || spec?.styleIntent?.card) })
+	const override = spec?.icon?.temperament || spec?.styleIntent?.icon || art?.icon
+	const card = cardAxisForSpec(spec, art)
+	const base = card === 'neutral' ? { style: 'plain', cornerRadius: 0 } : iconForAxes({ card })
 	return (override && typeof override === 'object') ? { ...base, ...override } : base
 }
 
@@ -1630,8 +1617,8 @@ export function typeEmphasisForAxes(axes = {}, accent = '2DD4BF') {
 export function artTypeEmphasisForSpec(spec = {}) {
 	const accent = palette(spec || {}).accent
 	const art = artDirectionFor(spec)
-	const base = typeEmphasisForAxes({ card: art ? art.card : (spec?.theme?.card || spec?.styleIntent?.card) }, accent)
-	const override = art?.emphasis || spec?.theme?.emphasis || spec?.styleIntent?.emphasis
+	const base = typeEmphasisForAxes({ card: cardAxisForSpec(spec, art) }, accent)
+	const override = spec?.theme?.emphasis || spec?.styleIntent?.emphasis || art?.emphasis
 	return (override && typeof override === 'object') ? { ...base, ...override } : base
 }
 
@@ -1665,8 +1652,9 @@ export function depthForAxes(axes = {}, accent = '2DD4BF') {
 export function artDepthForSpec(spec = {}) {
 	const accent = palette(spec || {}).accent
 	const art = artDirectionFor(spec)
-	const base = depthForAxes({ card: art ? art.card : (spec?.theme?.card || spec?.styleIntent?.card) }, accent)
-	const override = art?.depth || spec?.theme?.depth || spec?.styleIntent?.depth
+	const card = cardAxisForSpec(spec, art)
+	const base = card === 'neutral' ? { imageFrame: null, imageRadius: 0, shadow: 'none' } : depthForAxes({ card }, accent)
+	const override = spec?.theme?.depth || spec?.styleIntent?.depth || art?.depth
 	return (override && typeof override === 'object') ? { ...base, ...override } : base
 }
 
@@ -1702,8 +1690,9 @@ export function imageTreatmentForAxes(axes = {}, palette = {}) {
 export function artImageTreatmentForSpec(spec = {}) {
 	const art = artDirectionFor(spec)
 	const pal = palette(spec || {})
-	const base = imageTreatmentForAxes({ card: art ? art.card : (spec?.theme?.card || spec?.styleIntent?.card) }, pal)
-	const override = art?.imageTreatment || spec?.theme?.imageTreatment || spec?.styleIntent?.imageTreatment
+	const card = cardAxisForSpec(spec, art)
+	const base = card === 'neutral' ? { treatment: 'none', worldOps: [] } : imageTreatmentForAxes({ card }, pal)
+	const override = spec?.theme?.imageTreatment || spec?.styleIntent?.imageTreatment || art?.imageTreatment
 	return (override && typeof override === 'object') ? { ...base, ...override } : base
 }
 
@@ -1735,8 +1724,9 @@ export function mediaMotionForAxes(axes = {}) {
 }
 export function artMediaMotionForSpec(spec = {}) {
 	const art = artDirectionFor(spec)
-	const base = mediaMotionForAxes({ card: art ? art.card : (spec?.theme?.card || spec?.styleIntent?.card) })
-	const override = art?.mediaMotion || spec?.theme?.mediaMotion || spec?.styleIntent?.mediaMotion
+	const card = cardAxisForSpec(spec, art)
+	const base = card === 'neutral' ? { entrance: 'none', pacing: 'author', kenBurns: 'none', cut: 'cut' } : mediaMotionForAxes({ card })
+	const override = spec?.theme?.mediaMotion || spec?.styleIntent?.mediaMotion || art?.mediaMotion
 	return (override && typeof override === 'object') ? { ...base, ...override } : base
 }
 
@@ -1767,7 +1757,7 @@ function palette(spec) {
 	}
 	if (!p) { const pr = presetFor(spec); if (pr && Array.isArray(pr.palette)) p = pr.palette }
 	if (!p) { const ar = artDirectionFor(spec); if (ar && Array.isArray(ar.palette)) p = ar.palette }
-	if (!p) p = ['0B1220', '2563EB', '14B8A6', 'F59E0B', 'F8FAFC']
+	if (!p) p = ['172033', '475569', '475569', '475569', 'FFFFFF']
 	const authoredBg = p[4] || 'F8FAFC'
 	// A declared mode is a canvas contract, not a suggestion.  A common cold-AI
 	// failure is to select a dark World while copying a light brand palette (or
@@ -2143,6 +2133,10 @@ function deckIsDark(spec = {}, slide = {}) {
 	if (art?.mode) return art.mode === 'dark'
 	const preset = presetFor(spec)
 	if (preset?.mode) return preset.mode === 'dark'
+	const authoredBackground = slide.background?.color || (typeof slide.background === 'string' ? slide.background : null)
+		|| spec.theme?.palette?.[4] || spec.styleIntent?.palette?.[4]
+		|| spec.styleIntent?.palette?.background || spec.styleIntent?.palette?.bg
+	if (authoredBackground) return isDarkHex(authoredBackground)
 	return false
 }
 
@@ -2301,6 +2295,7 @@ function isDarkTheme(theme) { return isDarkHex(theme?.bg) || isDarkHex(theme?.pa
 //   border:    'none' | 'wireframe' | 'accent' | 'lifted'
 //   elevation: 'none' | 'soft' | 'thin' | 'glass'  (shadow weight)
 const SURFACE_PRESETS = {
+	neutral: { corner: 0, fill: 'flat', border: 'none', elevation: 'none' },
 	glass:   { corner: 0.10, fill: 'glass',       border: 'lifted',    elevation: 'glass' },
 	soft:    { corner: 0.14, fill: 'flat',        border: 'none',      elevation: 'soft'  },
 	thin:    { corner: 0.06, fill: 'lift',        border: 'accent',    elevation: 'thin'  },
@@ -2333,10 +2328,10 @@ export function listSurfaceKnobs() {
 // Resolve continuous surface knobs: explicit theme.art.surface / theme.surface over the
 // card preset (or the dark/light default). This is the single seam every card* default reads.
 function resolveSurfaceKnobs(theme) {
-	const card = theme?.art?.card || (isDarkTheme(theme) ? 'glass' : 'soft')
-	const preset = SURFACE_PRESETS[card] || SURFACE_PRESETS.glass
-	const explicit = (theme?.art?.surface && typeof theme.art.surface === 'object') ? theme.art.surface
-		: (theme?.surface && typeof theme.surface === 'object') ? theme.surface : {}
+	const card = theme?.card || theme?.art?.card || 'neutral'
+	const preset = SURFACE_PRESETS[card] || SURFACE_PRESETS.neutral
+	const explicit = (theme?.surface && typeof theme.surface === 'object') ? theme.surface
+		: (theme?.art?.surface && typeof theme.art.surface === 'object') ? theme.art.surface : {}
 	return { ...preset, ...explicit }
 }
 function cardFillDefault(theme) {
@@ -2397,24 +2392,12 @@ function slideVisualSystem(spec, slide, slideIndex, slideSize, baseTheme, option
 	const isDark = deckIsDark(spec, slide)
 	const accent2 = baseTheme.success || baseTheme.raw[2] || '14B8A6'
 	const accent3 = baseTheme.warn || baseTheme.raw[3] || 'F59E0B'
-	const paper = baseTheme.bg || 'F8FAFC'
-	// In dark mode `ink` is the (light) text colour, so derive a genuine dark
-	// canvas base from the palette background instead of from ink.
-	// Premium dark canvas (M2a): a clean navy -> near-black diagonal gradient with a
-	// visible (not invisible near-black) luminance range. If the author supplied a real
-	// dark palette background, derive the gradient from it; otherwise use a tuned navy.
-	const customDark = isDarkHex(baseTheme.bg)
-	const darkBase = customDark ? baseTheme.bg : '0B1120'
-	// Art-direction owns the canvas + card base; without one we keep the original Aurora look.
+	// Only an explicitly selected World supplies its aesthetic canvas treatment.
 	const art = artDirectionFor(spec)
 	const panelHex = art ? art.panel(baseTheme, isDark) : (isDark ? '172033' : 'FFFFFF')
 	const background = art
 		? art.bg(baseTheme, isDark)
-		: isDark
-		? (customDark
-			? gradient([[0, lightenHex(darkBase, 0.16), 0], [0.55, darkBase, 0], [1, darkenHex(darkBase, 0.45), 0]], 115)
-			: gradient([[0, '17314D', 0], [0.55, '0B1626', 0], [1, '05080F', 0]], 115))
-		: gradient([[0, 'FFFFFF', 0], [0.74, paper, 0], [1, 'E0F2FE', 0]], 15)
+		: { color: baseTheme.bg }
 	const visualTheme = isDark
 		? {
 			ink: baseTheme.ink || 'F8FAFC',
@@ -6047,16 +6030,10 @@ function planBlock({ spec, slide, slideIndex = 0, block, blockIndex, regions, re
 				color: theme.ink,
 				fontSize: 11,
 			}),
-			// 3D is top-premium THROUGH dynamics: a model with no author animation adopts the
-			// world's native 3D dynamic (luxe turntable, brutalist jump&turn, …). One tasteful
-			// motion per model (restraint). Author animation / animation:false always wins.
-			// EXCEPTION: a rigged model with a selected Scene auto-plays that embedded clip (the
-			// clip IS the motion) instead of the world turntable — duration/loop follow the scene.
-			// autoScenePlayAnimation mirrors the emitter's strict predicates so playback and
-			// selection never disagree; it returns null (→ world dynamic) when there is no valid scene.
+			// Only authored animation or an explicitly selected embedded Scene plays.
+			// World motion vocabulary never becomes automatic model playback.
 			animation: block.animation !== undefined ? block.animation
-				: (autoScenePlayAnimation(scene)
-					|| (theme.motion?.model3d ? { type: theme.motion.model3d.type, effect: theme.motion.model3d.effect, duration: theme.motion.model3d.durationMs, trigger: 'afterPrevious' } : undefined)),
+				: autoScenePlayAnimation(scene),
 			altText: block.altText || `3D model: ${slide.message || slide.title}`,
 		})
 		return objects
@@ -6946,7 +6923,7 @@ export function planDeckLayout(spec, options = {}) {
 		const effectiveContent = autoPlaceBlocks(contentForLayout, slideSize, slide.arrange, layoutIntent, presenterZone, composition.margin, warnings, slide.id, regions)
 		const namedRegionRects = namedRegionStackRects(effectiveContent, regions)
 		for (let i = 0; i < effectiveContent.length; i += 1) {
-			const blockTheme = { ...theme, ...visual.theme, textColorRoles, art: visual.art, composition, typeEmphasis, depth, motion, stage3d, iconTemperament, imageTreatment, mediaMotion, headFontFace: spec.theme?.headFontFace || visual.headFontFace, bodyFontFace: spec.theme?.bodyFontFace || visual.bodyFontFace }
+			const blockTheme = { ...theme, ...visual.theme, textColorRoles, art: visual.art, card: cardAxisForSpec(spec, visual.art), surface: spec.theme?.surface || spec.styleIntent?.surface, composition, typeEmphasis, depth, motion, stage3d, iconTemperament, imageTreatment, mediaMotion, headFontFace: spec.theme?.headFontFace || spec.theme?.fontFace || visual.headFontFace, bodyFontFace: spec.theme?.bodyFontFace || spec.theme?.fontFace || visual.bodyFontFace }
 			const blockObjects = planBlock({ spec, slide, slideIndex, block: effectiveContent[i], blockIndex: i, regions, regionRect: stackRectFor(namedRegionRects, effectiveContent[i]), theme: blockTheme, warnings, handles, templateContract, preserveSourceGeometry, preserveAuthoredPrecision })
 			objects.push(...blockObjects)
 			for (const object of blockObjects) addOverexpandedTextShapeWarning(warnings, slide.id, effectiveContent[i], object)

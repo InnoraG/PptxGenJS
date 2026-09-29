@@ -37,7 +37,7 @@ import { traceArtifactDelivery, traceAuthDecision, traceMcpHttp, withDiagnosticR
 import { recordResourceUnitEvent } from './billing/resource-meter.mjs'
 import { isPublicBlackBoxMode, publicToolList } from './blackbox.mjs'
 import { publicRuntimeManifest } from './public-manifest.mjs'
-import { sweepLocalArtifactRoot, isPermittedBrowserGrantQuery, verifyLocalArtifactBrowserGrant, verifyLocalArtifactOwner } from './storage/artifact-store.mjs'
+import { createArtifactStore, sweepLocalArtifactRoot, isPermittedCloudArtifactQuery, isPermittedBrowserGrantQuery, verifyLocalArtifactBrowserGrant, verifyLocalArtifactOwner } from './storage/artifact-store.mjs'
 import { credentialAccounts } from './config/credential-store.mjs'
 import { handleMcpV2Post, mcpV2HandshakePayload } from './mcp-v2/handler.mjs'
 import { isMcpV2Request, publicMcpProtocolManifest } from './mcp-v2/protocol.mjs'
@@ -464,6 +464,40 @@ function readLogTail(file, maxBytes, maxLines) {
 	return { lines, offset: stat.size, size: stat.size, truncatedBytes: start }
 }
 
+export function registerGcsArtifactDownloadRoute(app, { store, base } = {}) {
+	if (store?.provider !== 'gcs' || !base) return
+	const root = `${new URL(base).pathname.replace(/\/+$/, '')}/files`
+	const notFound = res => {
+		res.setHeader('Cache-Control', 'private, no-store')
+		res.setHeader('Referrer-Policy', 'no-referrer')
+		res.setHeader('X-Content-Type-Options', 'nosniff')
+		return res.status(404).json({ error: { code: 'ARTIFACT_NOT_FOUND', message: 'The artifact is unavailable.' } })
+	}
+	app.get(`${root}/:token/:name`, async (req, res) => {
+		res.setHeader('Cache-Control', 'private, no-store')
+		res.setHeader('Referrer-Policy', 'no-referrer')
+		res.setHeader('X-Content-Type-Options', 'nosniff')
+		const question = req.originalUrl.indexOf('?')
+		const pathname = question < 0 ? req.originalUrl : req.originalUrl.slice(0, question)
+		const search = question < 0 ? '' : req.originalUrl.slice(question)
+		if (!isPermittedCloudArtifactQuery(search) || pathname !== `${root}/${req.params.token}/${encodeURIComponent(req.params.name)}`) return notFound(res)
+		try {
+			const target = await store.resolveBrowserDownload({ token: req.params.token, name: req.params.name })
+			// Write the exact issued destination; neither the decorator nor Express's
+			// redirect encoder may change any signed query bytes.
+			res.status(302).setHeader('Location', target.downloadUrl)
+			return res.end()
+		} catch { return notFound(res) }
+	})
+	// Express decodes route parameters before the handler. Do not let a malformed
+	// percent escape fall through to its diagnostic HTML/error stack response.
+	app.use(root, (error, req, res, next) => {
+		if (!(error instanceof URIError)) return next(error)
+		return notFound(res)
+	})
+	app.use(root, (req, res) => notFound(res))
+}
+
 export async function startBetterPptxHttp(options = {}) {
 	if (process.env.BETTERPPTX_PUBLIC_BLACK_BOX === undefined && process.env.BETTERPPTX_BLACK_BOX === undefined) {
 		process.env.BETTERPPTX_PUBLIC_BLACK_BOX = process.env.BETTERPPTX_LOCAL_MAINTAINER === '1' ? '0' : '1'
@@ -632,6 +666,10 @@ export async function startBetterPptxHttp(options = {}) {
 		}
 		next(err)
 	})
+
+	// Capabilities and exact signed redirects are bearer secrets. Handle this
+	// namespace before diagnostic request/response capture, including failures.
+	registerGcsArtifactDownloadRoute(app, { store: createArtifactStore({ base: publicBase, root: downloadRoot }), base: publicBase })
 
 	// ---- Development traffic logger. The logger itself is opt-in and writes
 	// NDJSON to disk, so this middleware is cheap when BETTERPPTX_LOG is unset.

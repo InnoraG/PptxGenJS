@@ -1,4 +1,4 @@
-import { deterministicPlanDigest, planDeckLayout, validateLayoutPlan, artDirectionInfo, gradientPolicyForArtDirection, accentPolicyForArtDirection, depthPolicyForArtDirection, specIsDark, artDataStyleForSpec, resolvedPaletteForSpec, legibilityReport, paletteHealth, textColorRolesForSpec, ensureAccentOnCanvas, artMotionForSpec, artVoiceForSpec, artBuildTempoForSpec, artEmphasisForSpec, artTypeEmphasisForSpec, artDepthForSpec, artStageForSpec, artIconForSpec, artPresenterForSpec, artImageTreatmentForSpec, artMediaMotionForSpec, authoringCompletenessForSpec, normalizeContentKindsInSpec, attachContentRepresentationAudit, assertContentRepresentationIntegrity } from './layout-engine.mjs'
+import { deterministicPlanDigest, planDeckLayout, validateLayoutPlan, artDirectionInfo, artDirectionSelectionForSpec, gradientPolicyForArtDirection, accentPolicyForArtDirection, depthPolicyForArtDirection, specIsDark, artDataStyleForSpec, resolvedPaletteForSpec, legibilityReport, paletteHealth, textColorRolesForSpec, ensureAccentOnCanvas, artMotionForSpec, artVoiceForSpec, artBuildTempoForSpec, artEmphasisForSpec, artTypeEmphasisForSpec, artDepthForSpec, artStageForSpec, artIconForSpec, artPresenterForSpec, artImageTreatmentForSpec, artMediaMotionForSpec, authoringCompletenessForSpec, normalizeContentKindsInSpec, attachContentRepresentationAudit, assertContentRepresentationIntegrity } from './layout-engine.mjs'
 import { expandPresenterDirective, expandCastDirective, expandPresenterPerformances, planPresenterGestures } from './presenter-director.mjs'
 import { expandInteractions, planInteractions, proposeInteractions, publicInteractionContract, interactionPlanIssues, resolveInteractionTargetGeometry } from './synergy-compiler.mjs'
 import { expandAnimatedTables } from './animated-table.mjs'
@@ -651,10 +651,10 @@ export const SPEC_CAPABILITY_MATRIX = Object.freeze({
 	specAuthoringContracts: [
 		{
 			field: 'authoringContract.completeness',
-			owner: 'AI declares the bar; engine resolves the richest safe semantic treatment',
+			owner: 'AI declares the business ambition and owns aesthetic decisions; engine compiles and verifies',
 			default: 'complete',
-			compiledAs: 'Aurora complete World when no world is selected, plus world-aware proof, depth, type emphasis, motion, and capability readback',
-			rule: 'balanced/minimal are explicit exceptions. Rich lanes require meaningful story signals and available assets; downgrades are read back in appliedDefaults.completeness. Never add empty decorations or invented identity.',
+			compiledAs: 'Business-complete ambition readback independent of aesthetic selection. Omission/null selects neutral execution; named or bespoke styling is opt-in.',
+			rule: 'Complete means audience-appropriate, evidence-led, readable and accessible, not ornament or maximum complexity. No aesthetic quota or automatic motion. Explicit balanced/minimal intent remains supported; validation is not bypassed.',
 		},
 		{
 			field: 'slides[].narration or content kind:"narration"',
@@ -4739,9 +4739,9 @@ function buildAppliedDefaults(spec, plan, timingReadback = null) {
 	const aiSovereign = isAiSovereignSpec(spec)
 	const completeness = authoringCompletenessForSpec(spec)
 	const gradientPolicy = gradientPolicyForArtDirection(spec)
-	const m = String(spec.styleIntent?.mode || spec.styleIntent?.tone || spec.theme?.mode || '').toLowerCase()
-	const mode = m.includes('dark') ? 'dark' : m.includes('light') ? 'light' : (art ? art.mode : 'dark')
-	const headFont = spec.theme?.headFontFace || spec.theme?.fontFace || art?.headFontFace || 'Aptos'
+	const mode = specIsDark(spec) ? 'dark' : 'light'
+	const aestheticSelection = aiWorldSelectionForSpec(spec)
+	const headFont = spec.theme?.headFontFace || spec.theme?.fontFace || art?.headFontFace || 'Aptos Display'
 	const bodyFont = spec.theme?.bodyFontFace || spec.theme?.fontFace || art?.bodyFontFace || 'Aptos'
 	const authorFonts = !!(spec.theme?.headFontFace || spec.theme?.bodyFontFace || spec.theme?.fontFace)
 	const fontsExplicit = authorFonts || !!art
@@ -4761,7 +4761,7 @@ function buildAppliedDefaults(spec, plan, timingReadback = null) {
 			layoutIntent: ps.layoutIntent,
 			visualBalance: ps.visualBalance,
 			layoutIntentDefaulted: !s.layoutIntent,
-			background: { source: s.background ? 'author' : 'engine-default', kind: ps.background?.gradientStops ? 'gradient' : (ps.background?.color ? 'solid' : 'none') },
+			background: { source: s.background ? 'author' : (!ps.background ? 'template-or-preserved' : art ? `artDirection:${art.key}` : 'neutral-default'), kind: ps.background?.gradientStops ? 'gradient' : (ps.background?.color ? 'solid' : 'none') },
 			cardsStyledByDefault: blocks.filter(b => isCard(b) && !(b.options?.fill || b.style?.fill)).length,
 			chartsStyledByDefault: blocks.filter(b => b?.kind === 'chart-panel' && !(b.chartOptions && b.chartOptions.chartColors)).length,
 			tablesStyledByDefault: blocks.filter(b => b?.kind === 'table-panel' && !b.tableOptions).length,
@@ -4773,12 +4773,13 @@ function buildAppliedDefaults(spec, plan, timingReadback = null) {
 		mode,
 		preset: spec.styleIntent?.preset || null,
 		artDirection: art ? (art.bespoke ? `bespoke: ${art.label}` : art.key) : null,
+		aestheticSelection,
 		completeness,
 		artDirectionNote: art
 			? (art.bespoke
 				? `Bespoke world "${art.label}" (AI-composed). Its axes — mode:${art.mode}, card:${art.card}, type:${art.headFontFace}/${art.bodyFontFace}, your palette — drive background, cards, type, corners, theme accents AND chart/table styling. The legibility invariant guarantees readable text.`
 				: `World "${art.key}" drives background, card language (${art.card}), type, and corners. Pick a different styleIntent.artDirection to author a globally different look; betterpptx.help.capabilities lists all worlds.`)
-			: 'No World was selected by the AI; the engine uses the richest complete Luxe fallback (warm gradient + gold depth). Set styleIntent.artDirection to the richest story-fit named world or inline bespoke world; Aurora remains a compatibility last resort.',
+			: `${aestheticSelection.selectionStatus === 'neutral-explicit' ? 'Explicit neutral reset' : 'No named World selected'}: authored theme, backgrounds, fonts and per-object styles remain authoritative. Omitted values use plain readable neutral defaults; no Luxe/Aurora fallback, automatic ornament, or named-World certification obligation.`,
 		// Legibility INVARIANT status — the guardrail that keeps any world (incl. a
 		// bespoke AI-composed palette) readable. corrected:true means the engine had to
 		// snap the ink polarity; fix the palette if you want full control.
@@ -4814,8 +4815,8 @@ function buildAppliedDefaults(spec, plan, timingReadback = null) {
 				readback: ['validate_design.metrics.animatedSlides', 'validate_design.metrics.animatedObjects', 'validate_design.issues[]'],
 				recommendation: authoredAnimationSlides || explicitNarrationSlides
 					? 'Motion is semantically authored or narration-synced; inspect validate_design and timingSpine for story coverage and timing fit.'
-					: 'No semantic motion or explicit narration sync was authored. Add cue-ordered animation to meaningful story objects or add narration cues; do not animate decorative scaffolds merely to raise coverage.',
-				rule: 'World motion is a starting character; semantic cues and narration/text remain the timing authority.'
+					: 'No semantic motion or explicit narration sync was authored. Static delivery is valid; no motion is added or required by aesthetic completeness. Explicit delivery-experience requirements still apply.',
+				rule: 'Motion vocabulary is optional guidance only; semantic cues and narration/text remain the timing authority.'
 			}
 		})(),
 		voice: { ...artVoiceForSpec(spec), note: 'applied only on kind:"narration"; sets pace/pause, not the voice identity. Approved local EN voice: en_US-ljspeech-high.' },
@@ -4823,7 +4824,7 @@ function buildAppliedDefaults(spec, plan, timingReadback = null) {
 		// most worlds add nothing) and material/depth (image framing + elevation).
 		typeEmphasis: { ...artTypeEmphasisForSpec(spec), note: 'hero/cover heading only; null = the world\'s emphasis is type weight/family, not ornament.' },
 		depth: { ...artDepthForSpec(spec), note: 'image framing + elevation derived from the world surface; author line/shadow/rectRadius win.' },
-		stage3d: { ...artStageForSpec(spec), note: 'how this world FRAMES + LIGHTS a 3D model (camera lens fov + pose + key-light tint); applied to model3d when you set no camera/trans/lights. luxe=telephoto+warm gold, blueprint=flat+cool cyan, brutalist=wide+hard white.' },
+		stage3d: { ...artStageForSpec(spec), note: art ? 'Explicit World framing/light vocabulary; authored camera/trans/lights win. No model or animation is added.' : 'No World framing or lighting selected. Authored camera/trans/lights remain authoritative; no aesthetic staging is injected.' },
 		presenter: (() => {
 			const wp = artPresenterForSpec(spec)
 			const presenterActive = presenterExecutionAuthored(spec)
@@ -4978,13 +4979,13 @@ function buildAppliedDefaults(spec, plan, timingReadback = null) {
 		fonts: {
 			head: headFont,
 			body: bodyFont,
-			source: authorFonts ? 'author' : (art ? `artDirection:${art.key}` : 'engine-default (Aptos)'),
+			source: authorFonts ? 'author' : (art ? `artDirection:${art.key}` : 'neutral-default (Aptos Display/Aptos)'),
 			fallbackRisk: fallbackRisk.length ? fallbackRisk : null,
 			fallbackNote: fallbackRisk.length ? 'Not host-safe and not embedded; PowerPoint may substitute. For faithful local render use Segoe UI / Calibri.' : null,
 		},
 		premiumDefaultsApplied: {
-			background: art ? `art-direction "${art.key}" canvas (override via slide.background)` : 'premium gradient (navy on dark / light on light) unless slide.background set',
-			cards: art ? `art-direction "${art.key}" card language: ${art.card} (override via content[].options.fill)` : 'glassy gradient fill + lifted border (dark) for stat/kpi/metric-grid unless options.fill set',
+			background: art ? `explicit art-direction "${art.key}" canvas where slide.background is omitted` : 'plain solid neutral canvas where slide.background is omitted; no aesthetic preset selected',
+			cards: art ? `explicit art-direction "${art.key}" card language: ${art.card}; authored surface/fill/line/shadow win` : 'flat neutral surface without elevation; authored surface/fill/line/shadow win',
 			charts: 'single-series monochrome accent + direct labels + value axis hidden unless chartOptions set',
 			tables: 'dark-aware text + header emphasis + horizontal-only hairlines unless tableOptions set',
 			statValue: 'hero value font auto-scaled to card height',
@@ -5171,25 +5172,26 @@ const HANDSHAKE_ACTION = /\b(adopt|approve|fund|give|donate|join|start|decide|do
 function hsText(value) { return String(value ?? '').trim() }
 
 function aiWorldSelectionForSpec(spec = {}) {
-	const raw = spec?.styleIntent?.artDirection ?? spec?.theme?.artDirection
-	const explicit = typeof raw === 'string'
-		? raw.trim().length > 0
-		: !!(raw && typeof raw === 'object' && Object.keys(raw).length)
+	const selection = artDirectionSelectionForSpec(spec)
 	const selectedWorld = artDirectionInfo(spec)?.key || null
 	return {
-		contractVersion: 'authoring-excellence.world-selection.v1',
+		contractVersion: 'authoring-excellence.world-selection.v2',
 		selectionAuthority: 'ai',
-		selectionStatus: explicit ? 'ai-selected' : 'legacy-compatibility-fallback',
+		selectionStatus: selection.kind === 'named' ? 'ai-selected'
+			: selection.kind === 'bespoke' ? 'ai-selected-bespoke'
+				: selection.kind === 'neutral' ? 'neutral-explicit'
+					: selection.kind === 'unsupported' ? 'unsupported' : 'neutral-omission',
 		selectedWorld,
-		explicitSelection: explicit,
-		certificationEligible: explicit,
+		explicitSelection: selection.explicit,
+		certificationEligible: selection.kind !== 'unsupported',
+		certificationScope: 'aesthetic-selection-only; not a release certificate or a substitute for current-version validation',
+		namedWorldRequired: false,
+		customStylingValid: true,
+		presetApplied: selection.kind === 'named',
 		catalogOrder: 'stable-vocabulary-not-ranking',
 		catalogTool: 'betterpptx.authoring.catalog',
-		legacyCompatibilityFallback: 'luxe',
-		compatibilityVocabulary: 'aurora',
-		rule: explicit
-			? 'The engine executed the explicit AI World choice without aesthetic ranking or substitution.'
-			: 'The spec omitted an AI World choice. Luxe was used only for legacy execution compatibility; this run is not eligible for first-time-right certification.',
+		legacyCompatibilityFallback: null,
+		rule: 'Omission/null imposes no named aesthetic. Complete explicit custom styling is valid without a World; named and inline bespoke selections execute without ranking. Business completeness, accessibility, package and current-version validation remain independent requirements. Legacy looks require an explicit World selection.',
 	}
 }
 
@@ -6163,13 +6165,13 @@ export function buildSpecOperationPlan(spec, options = {}) {
 		.map(issue => ({ ...issue, source: 'presenter-contract' }))
 	const presenterRuntimeIssues = (presenterRuntime.issues || []).map(issue => ({ ...issue, source: 'presenter-runtime-director' }))
 	const worldSelection = aiWorldSelectionForSpec(spec)
-	const worldSelectionWarnings = worldSelection.explicitSelection ? [] : [{
-		code: 'AI_ART_DIRECTION_REQUIRED_FOR_CERTIFICATION',
-		severity: 'warning',
-		message: 'No explicit AI art direction was supplied; the compatibility World cannot certify first-time-right authorship.',
-		reason: 'World selection is an AI design decision. The engine may keep legacy specs executable, but it must not choose or recommend a release-quality design.',
-		fix: 'Inspect the unranked public World catalog, choose a coherent World with your own design judgment, and set styleIntent.artDirection before commit.',
-		evidence: { selectionStatus: worldSelection.selectionStatus, compatibilityFallback: worldSelection.legacyCompatibilityFallback, certificationEligible: false },
+	const worldSelectionWarnings = worldSelection.selectionStatus !== 'unsupported' ? [] : [{
+		code: 'ART_DIRECTION_UNSUPPORTED',
+		severity: 'error',
+		message: 'The explicit art-direction selector is unsupported; no aesthetic substitution was applied.',
+		reason: 'An explicit unsupported choice cannot silently become a named or neutral preset.',
+		fix: 'Use a supported named World, an inline bespoke object, or omission/null with authored styling.',
+		evidence: { selectionStatus: worldSelection.selectionStatus, certificationEligible: false },
 	}]
 	slideContinuities = bindSlideContinuitiesToMeasuredDeckClock(slideContinuities, spec, timingSpine)
 	const htmlRepresentationFindings = [
@@ -6186,12 +6188,13 @@ export function buildSpecOperationPlan(spec, options = {}) {
 		...freemiumWarnings,
 		...transitionWarnings,
 		...uncompiledWarnings,
-		...worldSelectionWarnings,
+		...worldSelectionWarnings.filter(issue => issue.severity !== 'error'),
 		...htmlRepresentationFindings.filter(issue => issue.severity !== 'error').map(compactWarning),
 		...autoPresenterSelectionIssues.filter(issue => issue.severity !== 'error'),
 		...presenterRuntimeIssues.filter(issue => issue.severity !== 'error'),
 	]
 	const errors = [
+		...worldSelectionWarnings.filter(issue => issue.severity === 'error'),
 		...(plan.warnings || []).filter(issue => issue.severity === 'error').map(issue => ({ ...issue, message: issue.message || issue.code })),
 		...(layoutValidation.issues || []).filter(issue => issue.severity === 'error').map(issue => ({ ...issue, message: issue.message || issue.code })),
 		...htmlRepresentationFindings.filter(issue => issue.severity === 'error'),

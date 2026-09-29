@@ -103,37 +103,44 @@ function createCloudTasksDispatcher() {
 		return clientPromise
 	}
 	async function dispatchOperation({ operationId = '', queueClass = 'default', scheduleDelaySeconds = 0 } = {}) {
-		const c = await client()
-		const parent = `projects/${projectId()}/locations/${locationId()}/queues/${queueForClass(queueClass)}`
-		const name = operationTaskName({ operationId, queueClass })
-		const url = workerUrl(operationId)
-		const task = {
-			name,
-			httpRequest: {
-				httpMethod: 'POST',
-				url,
-				headers: {
-					'Content-Type': 'application/json',
-					'X-BetterPPTX-Operation-Id': String(operationId),
-				},
-				body: Buffer.from(JSON.stringify({ operationId })).toString('base64'),
-			},
-		}
-		const workerToken = String(process.env.BETTERPPTX_OPERATION_WORKER_TOKEN || '').trim()
-		if (workerToken) task.httpRequest.headers['X-BetterPPTX-Worker-Token'] = workerToken
-		const serviceAccountEmail = String(process.env.BETTERPPTX_OPERATION_WORKER_SERVICE_ACCOUNT || '').trim()
-		if (serviceAccountEmail) task.httpRequest.oidcToken = { serviceAccountEmail }
-		const delay = Math.max(0, Number(scheduleDelaySeconds) || 0)
-		if (delay > 0) task.scheduleTime = { seconds: Math.floor(Date.now() / 1000) + delay }
+		let name = ''
 		try {
+			const c = await client()
+			const parent = `projects/${projectId()}/locations/${locationId()}/queues/${queueForClass(queueClass)}`
+			name = operationTaskName({ operationId, queueClass })
+			const task = {
+				name,
+				httpRequest: {
+					httpMethod: 'POST',
+					url: workerUrl(operationId),
+					headers: {
+						'Content-Type': 'application/json',
+						'X-BetterPPTX-Operation-Id': String(operationId),
+					},
+					body: Buffer.from(JSON.stringify({ operationId })).toString('base64'),
+				},
+			}
+			const workerToken = String(process.env.BETTERPPTX_OPERATION_WORKER_TOKEN || '').trim()
+			if (workerToken) task.httpRequest.headers['X-BetterPPTX-Worker-Token'] = workerToken
+			const serviceAccountEmail = String(process.env.BETTERPPTX_OPERATION_WORKER_SERVICE_ACCOUNT || '').trim()
+			if (serviceAccountEmail) task.httpRequest.oidcToken = { serviceAccountEmail }
+			const delay = Math.max(0, Number(scheduleDelaySeconds) || 0)
+			if (delay > 0) task.scheduleTime = { seconds: Math.floor(Date.now() / 1000) + delay }
 			const [created] = await c.createTask({ parent, task })
 			return { accepted: true, provider: 'cloud-tasks', operationId: String(operationId), queueClass: String(queueClass || 'default'), taskName: created.name || name, idempotent: false }
 		} catch (err) {
 			const code = Number(err?.code)
-			if (code === 6 || String(err?.message || '').includes('ALREADY_EXISTS')) {
+			if (name && (code === 6 || String(err?.message || '').includes('ALREADY_EXISTS'))) {
 				return { accepted: true, provider: 'cloud-tasks', operationId: String(operationId), queueClass: String(queueClass || 'default'), taskName: name, idempotent: true }
 			}
-			throw err
+			// The provider may have accepted a task before a transport error reached
+			// us. Keep the deterministic task name for an identical retry, but never
+			// return provider messages, project data, service-account identities, or
+			// request paths through the public MCP result.
+			throw new OperationDispatcherError(
+				'OPERATION_DISPATCH_UNAVAILABLE',
+				'Operation dispatch could not be confirmed.',
+			)
 		}
 	}
 	return { provider: 'cloud-tasks', distributed: true, dispatchOperation }

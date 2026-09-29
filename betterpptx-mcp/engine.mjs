@@ -3320,22 +3320,22 @@ function specDomainComposition(spec = {}, compiled = {}) {
 		_source: 'spec-derived',
 	}
 	const visualDeclared = domainValue({ ...spec, domainContract: declared }, 'visual-design') || {}
-	const rawArtDirection = spec.styleIntent?.artDirection ?? spec.theme?.artDirection
+	const rawArtDirection = spec.styleIntent?.artDirection !== undefined ? spec.styleIntent.artDirection : spec.theme?.artDirection
 	const explicitArtDirection = typeof rawArtDirection === 'string'
 		? rawArtDirection.trim().length > 0
 		: !!(rawArtDirection && typeof rawArtDirection === 'object' && Object.keys(rawArtDirection).length)
 	const selectedWorld = artDirectionInfo(spec)?.key || null
-	const effectiveWorld = selectedWorld || DEFAULT_ART_DIRECTION || 'luxe'
+	const effectiveWorld = selectedWorld
 	const visualWorldIntent = visualDeclared.world || visualDeclared.visualWorld || visualDeclared.artDirection || null
 	const visualDesign = {
-		world: String(visualWorldIntent || effectiveWorld),
-		mode: String(visualDeclared.mode || spec.styleIntent?.mode || artDirectionInfo(spec)?.mode || 'dark'),
-		framing: String(visualDeclared.framing || visualDeclared.visualPromise || 'World-derived composition, typography, palette, and visual assets'),
-		worldRole: visualWorldIntent ? 'descriptive-intent' : 'operational-selection',
+		world: String(visualWorldIntent || effectiveWorld || 'neutral-author-styling'),
+		mode: String(visualDeclared.mode || spec.styleIntent?.mode || artDirectionInfo(spec)?.mode || 'light'),
+		framing: String(visualDeclared.framing || visualDeclared.visualPromise || 'AI-authored composition, typography, palette, and visual assets'),
+		worldRole: visualWorldIntent ? 'descriptive-intent' : (explicitArtDirection ? 'operational-selection' : 'no-world-selected'),
 		...(visualWorldIntent ? { worldIntent: String(visualWorldIntent) } : {}),
 		selectedWorld,
 		effectiveWorld,
-		selectionSource: explicitArtDirection ? (spec.styleIntent?.artDirection != null ? 'styleIntent.artDirection' : 'theme.artDirection') : 'compatibility-fallback',
+		selectionSource: explicitArtDirection ? (spec.styleIntent?.artDirection != null ? 'styleIntent.artDirection' : 'theme.artDirection') : 'neutral-technical-defaults',
 		_source: visualDeclared._source || (visualWorldIntent ? 'authored-domain' : 'spec-derived'),
 		...(visualDeclared.visualPromise ? { visualPromise: String(visualDeclared.visualPromise) } : {}),
 	}
@@ -5965,9 +5965,9 @@ function deterministicAuthoringContract() {
 			rawNativePreservationPolicy: 'forbidden-in-director-spec',
 		completeness: {
 			tier: 'complete',
-			defaultWorld: DEFAULT_ART_DIRECTION,
-			lastResortWorld: AURORA_LAST_RESORT_ART_DIRECTION,
-			selectionRule: 'Prefer the most complete semantic treatment that serves the story; simple/basic rendering is a last-resort fallback with a reason in appliedDefaults.completeness.',
+			defaultWorld: null,
+			lastResortWorld: null,
+			selectionRule: 'Premium, complete, business-appropriate ambition is an advisory standard when relevant to the brief, not a World requirement or an effect quota. Rich and restrained original compositions remain valid.',
 			readback: 'appliedDefaults.completeness',
 		},
 		textPolicy: 'Use shape only for geometry. Use textBox for standalone text and textShape for text inside a PowerPoint shape.',
@@ -6236,11 +6236,11 @@ function publicCapabilityPlan(args = {}) {
 		? 'READABILITY IS DESIGN QUALITY — the AI must inspect every slide at full rendered size, not only trust package checks or a contact sheet. Judge foreground/background contrast, lighting and visual interference, role-appropriate type size, wrapping/line length, chart/table labels, every native SmartArt node and styled native surface, hierarchy, density, scan order, whitespace, crop sharpness, and viewing comfort. Black/white is not a mandatory typography lock: deliberately choose content[].style.textColorRole (primary, secondary, accent, displayAccent, proof, caution, onAccent/onProof/onCaution/onDark/onLight) or an exact style.color when restrained chromatic type improves meaning and beauty. For mixed-fill SmartArt, choose nodes[].textColorRole or nodes[].color independently; for a native Shape/Table/Chart gallery preset, judge the rendered preset fill rather than assuming its text polarity from the deck accent. Never assume one global ink survives every gallery fill or 3D lighting treatment. appliedDefaults.typographicColor returns the theme-synchronised executable values. If a slide is technically present but tiring or ambiguous to read, simplify the message, change the semantic layout/world/native variant, colour role, or increase type; never shrink copy into compliance or patch geometry.'
 		: 'READABILITY IS DESIGN QUALITY — use deterministic fit, overflow, contrast, occupancy, crop, metadata, and package checks for the production artifact; these checks do not claim that every slide was opened or visually reviewed in PowerPoint. Release qualification may add full-size rendered inspection. Black/white is not a mandatory typography lock: deliberately choose content[].style.textColorRole (primary, secondary, accent, displayAccent, proof, caution, onAccent/onProof/onCaution/onDark/onLight) or an exact style.color when restrained chromatic type improves meaning and beauty. For mixed-fill SmartArt, choose nodes[].textColorRole or nodes[].color independently; for a native Shape/Table/Chart gallery preset, keep text polarity explicit. appliedDefaults.typographicColor returns the theme-synchronised executable values. If deterministic checks report a readability risk, revise the semantic layout/world/native variant, colour role, or text; never shrink copy into compliance or patch geometry.'
 	const guidance = [
-		'Author CONTENT-FIRST — the AI selects the richest coherent story-fit World from the advertised unranked catalog using its own design judgment. Give content + styleIntent.artDirection and mode ("dark"|"light") and the selected World supplies its canvas, card language, chart/table treatment, typography, depth, and motion with NO hand-styling. A missing World uses Luxe only as a legacy execution-compatibility default and is not eligible for first-time-right certification; release-quality Director specs select a World explicitly. Gradient-native Worlds use gradients; flat or wireframe Worlds remain flat by deliberate world choice. Read appliedDefaults.completeness, worldSelection, gradientPolicy, accentPolicy, and depthPolicy before correcting the semantic spec.',
+		'Author CONTENT-FIRST with ambitious, complete, business-appropriate visual thinking when the brief calls for it. Exact geometry and explicit styling belong to the AI. styleIntent.artDirection and mode are optional conveniences: select a named World deliberately or author custom styling; omission/null selects no named World and carries no certification penalty. Read appliedDefaults for technical defaults and selected treatments. Effects and motion serve the story, not a quota, and spending requires separate authorization.',
 		verificationPolicy.rendererRequiredForSave
 			? 'HANDSHAKE — drive it BEFORE save: declare spec.handshake {audience, promise, proof:[...], payoff, bar:"what EXCELLENT means for THIS specific ask", commitments:[e.g. "data-driven","verified-claims","restraint:minimal","tone:calm"]} + one slide.message per slide. generate_from_spec returns a deterministic factual-consistency report (message coverage, declared data/proof, payoff, and restraint). It never grades taste. Resolve factual gaps before the first save. Pre-save dry-runs, compilation, validation, semantic correction, and available preview may iterate; they are the private authoring room, not failed FTR attempts. Certification starts at the first deck.save artifact and additionally requires repair-free PowerPoint open, package/accessibility validation, and every full-size slide passing all ten AI visual-review lenses with no post-save rescue.'
 			: 'HANDSHAKE — drive it BEFORE save: declare spec.handshake {audience, promise, proof:[...], payoff, bar:"what EXCELLENT means for THIS specific ask", commitments:[e.g. "data-driven","verified-claims","restraint:minimal","tone:calm"]} + one slide.message per slide. generate_from_spec returns a deterministic factual-consistency report (message coverage, declared data/proof, payoff, and restraint). It never grades taste. Resolve factual gaps before the first save. Pre-save dry-runs, compilation, validation, and semantic correction may iterate; production certification is based on current-version deterministic package, media, timing, accessibility, selection, and aggregate evidence bound to the delivered bytes. PowerPoint visual/playback qualification remains a separate release activity.',
-		'CHOOSE A DESIGN WORLD with styleIntent.artDirection: inspect the unranked artDirections.worlds list or authoring.catalog family art-direction and bind an exact key. Named Worlds include editorial, blueprint, brutalist, mist, atelier, meridian, chalkline, playbook, pulse, collage, observatory, storybook, candy, horizon, mono, botanical, luxe, and aurora; bespoke axes are also valid. Do not start from luxe by habit. Each World branches canvas, card language, typography, and corners — not just color. The engine exposes and executes the explicit choice; it does not score or recommend a World.',
+		'OPTIONAL DESIGN WORLD — styleIntent.artDirection can select an exact key from the unranked art-direction catalog, or structured custom axes. A named World supplies optional defaults but never placement or creative acceptance. Omit it or use null for neutral technical defaults with original AI-authored styling. Explicit object/slide styles take precedence; neither Editorial/light nor Luxe/dark is a compulsory design starting point.',
 		'VISUAL-REFERENCE RECONSTRUCTION — in the principal route, the AI observes the external HTML or other visual reference and designs the native PowerPoint reconstruction itself; BetterPPTX does not ingest or lower that reference. Declare spec.visualReference with the source viewport and author every ordinary visual as editable text, textShape, shape, connector, freeform/customGeometry, chart, table, SmartArt, equation, ink, animation, or transition. pixelFrame/pixelPoints/pixelPaths preserve the AI\'s exact pixel composition through deterministic conversion to slide units. Only photographs, detailed illustrations, 3D models, video, and audio may remain assets. Whole-slide raster, sliced-slide raster, and automatic non-media raster fallback are forbidden. Automatic HTML conversion exists separately under spec.htmlConversion and cannot certify this AI route.',
 		'VISUAL PROOF FLOOR — every finished slide has a seen object. Completeness minimal removes decorative chrome; it does not remove proof. A title on empty canvas is not a slide. Author native proof: textShape for product chrome (a Pay pill, a room card), stat/kpi for a single numeral, chart-panel or table-panel for evidence, process or equation for a mechanism, image or model3d for spatial proof. If the story is a button, the button must exist as a textShape, not as a sentence about a button.',
 		'BRAND ADHERENCE — perception is yours, the engine applies it faithfully: (1) logo/brand COLOURS -> theme.palette (or a brandKit:{palette OR {ink,accent,background}, headFontFace, bodyFontFace, artDirection} that fans out) flows into ANY art-direction (canvas + cards + accent) while keeping that world\'s treatment; (2) a corporate TEMPLATE -> spec.template:{handle|path|url|data} loads the .potx master (its background shows through — the engine no longer overpaints it — and its fonts apply); (3) MIRROR a reference design -> read the image, extract its palette and composition, then author the object frames directly or use visualReference pixel frames. Precedence: author styling intent > applied template master > art-direction > engine default. A non-host brand font may substitute unless embedded (appliedDefaults.fonts.fallbackRisk flags it).',
@@ -6330,13 +6330,13 @@ function publicCapabilityPlan(args = {}) {
 				rule: 'Never invent a renderer preset name from visualDesign.world prose. Inspect the descriptive, unranked artDirections.worlds catalog and make the design choice yourself; the engine does not score, rank, or recommend a World.',
 			},
 			worldSelection: {
-				contractVersion: 'authoring-excellence.world-selection.v1',
-				aiDecision: 'Choose the richest story-fit World from the advertised catalog using your own design knowledge first; use retrieval when current or uncertain evidence is needed.',
+				contractVersion: 'authoring-excellence.world-selection.v2',
+				aiDecision: 'Author a premium, complete, business-appropriate presentation when the brief calls for it. Choose a named World only if useful; custom or neutral styling is equally valid. Ambition is not an effect quota, a compulsory style, or spending authorization.',
 				catalogReadback: 'artDirections.worlds exposes stable names, modes, and descriptive capability strengths in vocabulary order; that order is not a ranking.',
-				legacyCompatibilityFallback: DEFAULT_ART_DIRECTION,
+				legacyCompatibilityFallback: null,
 				compatibilityVocabulary: AURORA_LAST_RESORT_ART_DIRECTION,
-				explicitSelectionRequiredForCertification: true,
-				rule: 'The engine never scores, ranks, recommends, or silently replaces an explicit AI World choice. An omitted choice may use the legacy compatibility fallback for execution, but that run is not first-time-right-certification eligible.',
+				explicitSelectionRequiredForCertification: false,
+				rule: 'A named World is optional. Omission or null uses neutral technical defaults, not a named visual direction. Explicit authored styles and geometry remain authoritative; the engine never scores, ranks, or silently replaces the choice.',
 			},
 			layoutIntentContracts: LAYOUT_INTENT_CONTRACTS,
 			balanceFindings: [
@@ -6344,7 +6344,7 @@ function publicCapabilityPlan(args = {}) {
 				{ code: 'LAYOUT_REGION_UNDERFILLED', trigger: 'substantive blocks occupy only one primary split region', action: 'revise content[].region/regionPlan or choose a compatible layoutIntent' },
 				{ code: 'LAYOUT_BALANCE_IMBALANCE', trigger: 'both primary regions are populated but one is strongly denser in occupied visual area', action: 'reassign semantic regions, reduce competing blocks, or choose a compatible layoutIntent' },
 				{ code: 'EMPTY_GEOMETRY_SHAPE', trigger: 'geometry-only shape has no visual treatment', action: 'add semantic style/visualIntent, explicitly mark decorative/keep, or remove it' },
-				{ code: 'LAYOUT_TEXTSHAPE_OVEREXPANDED', trigger: 'explicit textShape rectangle is substantially larger than its short copy', action: 'remove explicit geometry and choose a semantic region/layoutIntent so the engine can compact the card; use keep:true only for intentional quiet space' },
+				{ code: 'LAYOUT_TEXTSHAPE_OVEREXPANDED', trigger: 'explicit textShape rectangle is substantially larger than its short copy', action: 'Review the authored frame; revise it deliberately or retain the intentional quiet space. Geometry remains AI-owned.' },
 			],
 			geometryOnlyShapePolicy: { text: 'forbidden', treatment: 'style|visualIntent|decorative:true|keep:true', rule: 'Unadorned geometry-only shapes are read back as likely empty panels and should be removed or made intentional before commit.' },
 			namedRegionPolicy: {
@@ -42517,6 +42517,17 @@ function durableOperationPendingResult(operation, reason = 'operation-in-progres
 	}))
 }
 
+function durableOperationDispatchError(operation = {}) {
+	const error = new Error('Dispatch could not be confirmed. First check operation status. Do not start a replacement mutation; if replay is needed, send the identical request with its original idempotency key.')
+	error.code = 'OPERATION_DISPATCH_UNAVAILABLE'
+	error.retryable = true
+	error.details = {
+		operationId: String(operation.operationId || ''),
+		dispatchStatus: 'unconfirmed',
+	}
+	return error
+}
+
 function durableOperationFailedResult(operation) {
 	const error = operation?.error || {}
 	return sanitizePublicResult(normalizePublicErrorResult({
@@ -42553,10 +42564,17 @@ async function beginDurableOperation(name, args = {}, context = {}) {
 	if (durableOperationQueuedMode()) {
 		if (operation.state === 'running') return { replayResult: durableOperationPendingResult(operation, 'leased') }
 		if (operation.state === 'queued' || operation.state === 'retry') {
-			await _operationDispatcher.dispatchOperation({
-				operationId: operation.operationId,
-				queueClass: operation.queueClass || 'default',
-			})
+			try {
+				await _operationDispatcher.dispatchOperation({
+					operationId: operation.operationId,
+					queueClass: operation.queueClass || 'default',
+				})
+			} catch {
+				// The operation is already durable. Preserve it as recoverable because
+				// a task may exist even when its create response was lost; status and
+				// same-key retry are safe through the operation/task idempotency keys.
+				throw durableOperationDispatchError(operation)
+			}
 			return { replayResult: durableOperationPendingResult(operation, started.created ? 'queued-dispatched' : 'queued-redispatched') }
 		}
 		return { replayResult: durableOperationPendingResult(operation, 'queued-mode') }
@@ -42846,6 +42864,19 @@ function publicNextActionsForError(code, details = {}) {
 			return [
 				{ type: 'retry_smaller_step', description: 'Retry with a smaller operation or split the deck work into smaller chunks.' },
 			]
+		case 'OPERATION_DISPATCH_UNAVAILABLE':
+		case 'OPERATION_PENDING': {
+			const operationId = String(details?.operationId || '')
+			if (!/^op_[0-9a-f]{32}$/i.test(operationId)) {
+				return [{ type: 'retry_same_request', description: 'If retrying, send the identical request with its original idempotency key.' }]
+			}
+			return [{
+				type: 'check_operation_status',
+				tool: 'betterpptx.operation.status',
+				request: { operationId },
+				description: 'First check operation status and poll while it is queued or running. If an identical replay is needed, resend the exact original request with its original idempotency key; do not change the payload.',
+			}]
+		}
 		case 'UPLOAD_TOO_LARGE':
 			return [
 				{ type: 'reduce_upload', description: 'Upload a smaller PowerPoint file or reduce embedded media before retrying.' },
@@ -43085,6 +43116,7 @@ function publicRecoverableForError(code) {
 		'BILLING_CONFIRMATION_REQUIRED',
 		'INVALID_PREMIUM_PREVIEW_TRANSITION',
 		'BUSY',
+		'OPERATION_DISPATCH_UNAVAILABLE',
 		'BLACK_BOX',
 		'SAFE_FETCH_REFUSED',
 		'SAFE_FETCH_INVALID_CONTENT_TYPE',
@@ -43168,6 +43200,7 @@ function publicRetrySafeForError(code) {
 		'BILLING_CONFIRMATION_REQUIRED',
 		'INVALID_PREMIUM_PREVIEW_TRANSITION',
 		'BUSY',
+		'OPERATION_DISPATCH_UNAVAILABLE',
 		'SAFE_FETCH_TIMEOUT',
 		'SAFE_FETCH_FAILED',
 		'NARRATION_SYNTHESIS_RUNTIME_UNAVAILABLE',
@@ -43212,6 +43245,7 @@ function publicRetrySafeForError(code) {
 
 function publicArtifactStateForError(code, details = {}) {
 	if (details?.artifactStatus) return details.artifactStatus
+	if (code === 'OPERATION_DISPATCH_UNAVAILABLE') return 'unknown_or_pending'
 	if (code === 'REQUIRES_UPGRADE' || code === 'INVALID_PREMIUM_PREVIEW_TRANSITION') return 'work_so_far_valid'
 	if (code === 'PPTX_PACKAGE_SAFETY_FAILED') return 'not_delivered'
 	if (code === 'PUBLIC_OUTPUT_SHAPE_LIMIT') return 'not_saved'

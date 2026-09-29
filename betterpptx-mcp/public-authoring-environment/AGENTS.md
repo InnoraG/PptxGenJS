@@ -24,10 +24,15 @@ example.
 ## Division of strengths
 
 - You own audience understanding, factual judgment, narrative, art direction,
-  composition, typography, colour, imagery, native-medium choice, motion,
-  timing, and beauty.
-- BetterPPTX owns deterministic geometry resolution, native construction,
-  package assembly, factual constraint measurement, and validation readback.
+  exact composition and geometry, typography, colour, imagery, native-medium
+  choice, motion, timing, and beauty. Exact AI-authored coordinates remain
+  authoritative in AI and Director-assisted workflows.
+- BetterPPTX owns deterministic serialization of authored geometry, native
+  construction, package assembly, factual constraint measurement, and
+  validation readback; it does not choose or rewrite exact AI geometry.
+- Aim by default for premium, complete, business-appropriate work. This is a
+  quality ambition, not a required World, effects quota, maximum-complexity
+  target, or paid/provider-specific capability.
 - Validators provide evidence. They do not replace your visual judgment.
 - Catalogs expose unranked executable choices. You choose exact IDs and record
   semantic reasons.
@@ -36,12 +41,17 @@ example.
 
 - Use the semantic JSON-spec workflow through
   `betterpptx.deck.generate_from_spec`.
-- Use stable semantic names and never author slide coordinates.
+- Use stable semantic names and author exact slide coordinates in the supported
+  coordinate system. Preserve those coordinates; Director assistance does not
+  transfer geometry authority away from the AI.
 - For revisions, inspect the public export, patch the smallest exact target,
   and preserve unaffected content.
-- Inspect every slide at full size through the public preview workflow. Continue
-  in batches until `complete:true`, and require a single `packageSha256` across
-  preview and publication.
+- When the selected route supports rendering and its release policy requires a
+  preview, inspect every slide at full size in batches until `complete:true`
+  and require a single `packageSha256` across preview and publication.
+- Production-nonrendering routes do not require or imply a preview. Use the
+  available structural and quality validation, report that visual rendering
+  was not performed, and never claim a visual inspection that did not occur.
 - Treat `betterpptx.deck.save` as the first public release, not as a preview.
   Save the frozen accepted candidate exactly once with a stable idempotency key.
 

@@ -76,6 +76,11 @@ jobs:
           node --test betterpptx-mcp/test/cloudflare-deploy-secret.test.mjs
           node --test betterpptx-mcp/test/mission-control-private-iam.test.mjs
           node --test betterpptx-mcp/test/mission-control-deployment-contract.test.mjs
+          node --test betterpptx-mcp/test/cloud-task-runtime-identity-deployment.test.mjs
+          node --test betterpptx-mcp/test/gcs-browser-download-route.test.mjs
+          node --test betterpptx-mcp/test/art-direction-freedom.test.mjs
+          node --test betterpptx-mcp/test/art-direction-world-contract.test.mjs
+          node --test betterpptx-mcp/test/durable-operation-dispatch-recovery.test.mjs
 
       - name: Build the immutable release image
         shell: bash
@@ -181,6 +186,11 @@ jobs:
         run: |
           set -euo pipefail
           gcloud iam service-accounts describe "$GCP_RUNTIME_SERVICE_ACCOUNT" --project="$GCP_PROJECT_ID" --format='value(email)' >/dev/null
+          # A configured queue is insufficient: the gateway must be permitted
+          # to attach the existing worker identity to each authenticated task.
+          gcloud iam service-accounts get-iam-policy "$GCP_RUNTIME_SERVICE_ACCOUNT" --project="$GCP_PROJECT_ID" --format=json > "$RUNNER_TEMP/task-identity-iam.json"
+          jq -e --arg runtime "serviceAccount:$GCP_RUNTIME_SERVICE_ACCOUNT" '[.bindings[]? | select(.role == "roles/iam.serviceAccountUser" and (.condition == null)) | .members[]? | select(. == $runtime)] | length == 1' "$RUNNER_TEMP/task-identity-iam.json" >/dev/null
+          jq -e --arg runtime "serviceAccount:$GCP_RUNTIME_SERVICE_ACCOUNT" --arg signer "projects/$GCP_PROJECT_ID/roles/betterpptxArtifactSigner" '[.bindings[]? | select(.role == $signer and (.condition == null)) | .members[]? | select(. == $runtime)] | length == 1' "$RUNNER_TEMP/task-identity-iam.json" >/dev/null
           gcloud iam service-accounts describe "$GCP_MISSION_CONTROL_SERVICE_ACCOUNT" --project="$GCP_PROJECT_ID" --format='value(email)' >/dev/null
           gcloud secrets describe "$INSTALL_HMAC_SECRET_NAME" --project="$GCP_PROJECT_ID" --format='value(name)' >/dev/null
           gcloud secrets versions describe latest --secret="$INSTALL_HMAC_SECRET_NAME" --project="$GCP_PROJECT_ID" --format='value(state)' | grep -qx ENABLED

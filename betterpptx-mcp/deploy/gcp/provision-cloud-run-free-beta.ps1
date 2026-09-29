@@ -96,6 +96,16 @@ foreach ($role in @('roles/secretmanager.viewer', 'roles/secretmanager.secretAcc
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $runtimeEmail, "--project=$Project", "--member=serviceAccount:$deployerEmail", '--role=roles/iam.serviceAccountUser', '--quiet') | Out-Null
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $missionControlRuntimeEmail, "--project=$Project", "--member=serviceAccount:$deployerEmail", '--role=roles/iam.serviceAccountUser', '--quiet') | Out-Null
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $runtimeEmail, "--project=$Project", "--member=serviceAccount:$tasksAgent", '--role=roles/iam.serviceAccountUser', '--quiet') | Out-Null
+# The gateway itself creates OIDC-authenticated tasks. Permission granted only
+# to the Tasks service agent does not authorize that task-creating principal.
+# Scope actAs to its existing runtime identity, never to the whole project.
+Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $runtimeEmail, "--project=$Project", "--member=serviceAccount:$runtimeEmail", '--role=roles/iam.serviceAccountUser', '--quiet') | Out-Null
+# Keyless artifact signing needs signBlob, not general token creation. Bind the
+# single permission on this identity only; do not grant project-wide minting.
+$signerRoleId = 'betterpptxArtifactSigner'
+$signerVerb = if (Test-GcloudResource @('iam', 'roles', 'describe', $signerRoleId, "--project=$Project", '--format=value(name)')) { 'update' } else { 'create' }
+Invoke-Gcloud @('iam', 'roles', $signerVerb, $signerRoleId, "--project=$Project", '--title=BetterPPTX artifact signer', '--description=Keyless signing for the selected artifact runtime identity only.', '--permissions=iam.serviceAccounts.signBlob', '--stage=GA', '--quiet') | Out-Null
+Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $runtimeEmail, "--project=$Project", "--member=serviceAccount:$runtimeEmail", "--role=projects/$Project/roles/$signerRoleId", '--quiet') | Out-Null
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $sweeperInvokerEmail, "--project=$Project", "--member=serviceAccount:$deployerEmail", '--role=roles/iam.serviceAccountUser', '--quiet') | Out-Null
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $sweeperInvokerEmail, "--project=$Project", "--member=serviceAccount:$schedulerAgent", '--role=roles/iam.serviceAccountTokenCreator', '--quiet') | Out-Null
 

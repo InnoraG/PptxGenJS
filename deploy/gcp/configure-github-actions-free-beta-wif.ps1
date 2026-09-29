@@ -11,6 +11,7 @@ param(
 	[string]$SchedulerRoleId = 'betterpptxFreeBetaScheduler',
 	[string]$QueueRoleId = 'betterpptxFreeBetaQueueReader',
 	[string]$SecretMetadataRoleId = 'betterpptxFreeBetaSecretMetadataReader',
+	[string]$RuntimePolicyRoleId = 'betterpptxRuntimePolicyReader',
 	[switch]$Apply
 )
 
@@ -88,6 +89,7 @@ $runPermissions = @(
 $schedulerPermissions = 'cloudscheduler.jobs.create,cloudscheduler.jobs.get,cloudscheduler.jobs.list,cloudscheduler.jobs.update'
 $queuePermissions = 'cloudtasks.queues.get'
 $secretMetadataPermissions = 'secretmanager.secrets.get,secretmanager.versions.get'
+$runtimePolicyPermissions = 'iam.serviceAccounts.getIamPolicy'
 
 Write-Host "Project              : $ProjectId ($projectNumber)"
 Write-Host "Trusted repository   : $Repository"
@@ -131,7 +133,8 @@ foreach ($role in @(
 	@{ Id = $RunRoleId; Title = 'BetterPPTX free beta deployer'; Description = 'Non-deleting Cloud Run service and job deployment/readback for the dedicated BetterPPTX project.'; Permissions = $runPermissions },
 	@{ Id = $SchedulerRoleId; Title = 'BetterPPTX free beta scheduler'; Description = 'Create, inspect, list, and update BetterPPTX artifact-sweep schedules without deleting or manually running jobs.'; Permissions = $schedulerPermissions },
 	@{ Id = $QueueRoleId; Title = 'BetterPPTX free beta queue reader'; Description = 'Read Cloud Tasks queue metadata only.'; Permissions = $queuePermissions },
-	@{ Id = $SecretMetadataRoleId; Title = 'BetterPPTX free beta secret metadata reader'; Description = 'Read named Secret Manager metadata and version state without reading secret payloads.'; Permissions = $secretMetadataPermissions }
+	@{ Id = $SecretMetadataRoleId; Title = 'BetterPPTX free beta secret metadata reader'; Description = 'Read named Secret Manager metadata and version state without reading secret payloads.'; Permissions = $secretMetadataPermissions },
+	@{ Id = $RuntimePolicyRoleId; Title = 'BetterPPTX runtime policy reader'; Description = 'Read the selected runtime identity IAM policy for deployment preflight only.'; Permissions = $runtimePolicyPermissions }
 )) {
 	$roleResource = "projects/$ProjectId/roles/$($role.Id)"
 	$verb = if ($existingRoles -contains $roleResource) { 'update' } else { 'create' }
@@ -150,6 +153,7 @@ Invoke-Gcloud @('projects', 'add-iam-policy-binding', $ProjectId, "--member=serv
 Invoke-Gcloud @('projects', 'add-iam-policy-binding', $ProjectId, "--member=serviceAccount:$deployerEmail", "--role=$schedulerRole", '--condition=None', '--quiet') 'grant only create/read/update access to Cloud Scheduler jobs'
 Invoke-Gcloud @('artifacts', 'repositories', 'add-iam-policy-binding', $artifactRepository, "--project=$ProjectId", "--location=$Region", "--member=serviceAccount:$deployerEmail", '--role=roles/artifactregistry.writer', '--quiet') 'allow publishing images only to the BetterPPTX Artifact Registry repository'
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $runtimeEmail, "--project=$ProjectId", "--member=serviceAccount:$deployerEmail", '--role=roles/iam.serviceAccountUser', '--quiet') 'allow attaching only the BetterPPTX runtime identity'
+Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $runtimeEmail, "--project=$ProjectId", "--member=serviceAccount:$deployerEmail", "--role=projects/$ProjectId/roles/$RuntimePolicyRoleId", '--quiet') 'allow reading only the runtime identity policy for task-dispatch preflight'
 Invoke-Gcloud @('iam', 'service-accounts', 'add-iam-policy-binding', $schedulerInvokerEmail, "--project=$ProjectId", "--member=serviceAccount:$deployerEmail", '--role=roles/iam.serviceAccountUser', '--quiet') 'allow attaching only the artifact-sweep invocation identity'
 
 foreach ($queue in $queues) {

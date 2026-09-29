@@ -14,7 +14,7 @@ import { publicVerificationPolicy } from './verification-policy.mjs'
 // Increment whenever the server-advertised public tool records change,
 // including descriptions or metadata covered by PUBLIC_TOOL_SCHEMA_DIGEST_COVERAGE.
 // The capability registry has its own independent revision and digest.
-export const TOOL_SCHEMA_VERSION = '2026-09-28.2'
+export const TOOL_SCHEMA_VERSION = '2026-09-29.1'
 const PACKAGE_SEMANTIC_VERSION = String(JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version || '').trim()
 const CONFIGURED_SEMANTIC_VERSION = String(process.env.BETTERPPTX_PUBLIC_VERSION || '').trim()
 if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(PACKAGE_SEMANTIC_VERSION)) {
@@ -25,11 +25,12 @@ if (CONFIGURED_SEMANTIC_VERSION && CONFIGURED_SEMANTIC_VERSION !== PACKAGE_SEMAN
 }
 export const PUBLIC_SEMANTIC_VERSION = PACKAGE_SEMANTIC_VERSION
 export const PUBLIC_SCHEMA_CHANGE = Object.freeze({
-	previousToolSchemaVersion: '2026-09-28.1',
+	previousToolSchemaVersion: '2026-09-28.2',
 	compatibility: 'additive',
 	changes: [
-		'New published artifacts default to 12-hour retention and browser download-link validity. Every issued or refreshed link is capped at the original file expiry; retries and recovery do not extend retention or consume another publication.',
-		'Supported validation declarations receive phase-appropriate contract readback rather than a misleading uncompiled-field repair notice. Technical verification remains required by the active production policy.',
+		'Named art directions are optional; omitted/null selections use neutral technical defaults with no aesthetic certification penalty. Explicit geometry, styling and motion remain AI-authored.',
+		'Cloud browser downloads use opaque, generation-bound links compatible with ChatGPT URL decoration. Large presentations stay outside the conversation; links and retained bytes share the original 12-hour boundary.',
+		'Durable dispatch failures provide a public-safe operation recovery path. Release preflight verifies the scoped worker-identity permission before deployment.',
 	],
 })
 export const PUBLIC_CAPABILITY_DIGEST_COVERAGE = 'Canonical SHA-256 over all stable public family fields and contracts, extended layers, persona terminology/contracts, motion, narration, and combined examples; live readiness and measured inventories are excluded.'
