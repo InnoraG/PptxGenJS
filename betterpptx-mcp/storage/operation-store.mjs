@@ -62,6 +62,31 @@ function clone(value) {
 	try { return structuredClone(value) } catch (_) { return JSON.parse(JSON.stringify(value)) }
 }
 
+// Operation records use the same JSON representation locally and in Firestore.
+// Optional object fields disappear; array slots remain as null. Do not alter
+// request/quote digests or enable global Firestore undefined suppression.
+function persistenceValue(value, ancestors = new Set()) {
+	const invalid = () => new OperationStoreError('OPERATION_PAYLOAD_INVALID', 'The operation payload must be JSON-compatible.')
+	if (value === undefined || value === null || typeof value === 'string' || typeof value === 'boolean') return value
+	if (typeof value === 'number') {
+		if (!Number.isFinite(value)) throw invalid()
+		return Object.is(value, -0) ? 0 : value
+	}
+	if (value instanceof Date) {
+		if (!Number.isFinite(value.getTime())) throw invalid()
+		return value.toISOString()
+	}
+	if (typeof value !== 'object' || ancestors.has(value)) throw invalid()
+	if (!Array.isArray(value) && ![Object.prototype, null].includes(Object.getPrototypeOf(value))) throw invalid()
+	ancestors.add(value)
+	try {
+		if (Array.isArray(value)) return Array.from(value, item => persistenceValue(item, ancestors) ?? null)
+		return Object.fromEntries(Object.entries(value)
+			.filter(([, item]) => item !== undefined)
+			.map(([key, item]) => [key, persistenceValue(item, ancestors)]))
+	} finally { ancestors.delete(value) }
+}
+
 function stableForHash(value) {
 	if (value === undefined) return null
 	if (value === null || typeof value !== 'object') return value
@@ -117,7 +142,7 @@ function requestDigest(input = {}) {
 function publicOperation(input = {}, nowMs = Date.now()) {
 	const operationId = String(input.operationId || randomOperationId())
 	const createdAt = nowIso(nowMs)
-	return {
+	return persistenceValue({
 		operationId,
 		installHash: String(input.installHash || ''),
 		toolName: String(input.toolName || ''),
@@ -136,11 +161,11 @@ function publicOperation(input = {}, nowMs = Date.now()) {
 		fencingToken: Number(input.fencingToken || 0),
 		result: null,
 		error: null,
-		metadata: clone(input.metadata || {}),
-		request: input.request ? clone(input.request) : null,
+		metadata: input.metadata || {},
+		request: input.request || null,
 		createdAt,
 		updatedAt: createdAt,
-	}
+	})
 }
 
 function emptyLocalStore() {
@@ -176,7 +201,7 @@ function normalizeError(error = {}) {
 		code: String(error.code || error.name || 'OPERATION_FAILED'),
 		message: String(error.message || error),
 		retryable: Boolean(error.retryable),
-		details: clone(error.details || {}),
+		details: persistenceValue(error.details || {}),
 	}
 }
 
@@ -308,7 +333,7 @@ function createLocalOperationStore() {
 			assertLease(operation, token)
 			if (terminal(operation)) return clone(operation)
 			operation.state = 'succeeded'
-			operation.result = clone(result || {})
+			operation.result = persistenceValue(result)
 			operation.error = null
 			operation.completedAt = nowIso(nowMs)
 			operation.leaseExpiresAt = ''
@@ -505,7 +530,7 @@ function createFirestoreOperationStore() {
 			const updated = {
 				...operation,
 				state: 'succeeded',
-				result: clone(result || {}),
+				result: persistenceValue(result),
 				error: null,
 				completedAt: nowIso(nowMs),
 				leaseExpiresAt: '',

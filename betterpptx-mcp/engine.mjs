@@ -7109,9 +7109,17 @@ function publicDurableOperationStatus(operation = {}) {
 	if (operation.state === 'failed' || operation.state === 'cancelled') {
 		out.error = {
 			code: operation.error?.code || 'OPERATION_FAILED',
-			message: operation.error?.message || 'Operation failed.',
+			message: isPublicBlackBoxMode() && operation.error?.code === 'TOOL_ERROR'
+				? 'The operation did not complete successfully; its artifact outcome has not been confirmed.'
+				: operation.error?.message || 'Operation failed.',
 		}
-		out.next = { type: 'new_idempotency_key' }
+		if (['OPERATION_RESULT_PERSISTENCE_FAILED', 'TOOL_ERROR'].includes(operation.error?.code)) {
+			out.executionState = 'unconfirmed'
+			out.artifact_state = 'unchanged_or_unknown'
+			out.retry_safe = false
+			out.next = { type: 'recover_operation', tool: 'betterpptx.operation.status',
+				reason: 'Completion could not be confirmed; do not start a duplicate mutation with a new key.' }
+		} else out.next = { type: 'new_idempotency_key' }
 	}
 	return out
 }
@@ -42637,10 +42645,35 @@ function persistedSpecHandoffResult(data = {}) {
 
 async function completeDurableOperation(run = null, data = {}) {
 	if (!run?.operation?.operationId || !run?.lease?.leaseToken) return null
-	return _operationStore.completeOperation(run.operation.operationId, {
-		leaseToken: run.lease.leaseToken,
-		result: persistedSpecHandoffResult(data),
-	})
+	try {
+		return await _operationStore.completeOperation(run.operation.operationId, {
+			leaseToken: run.lease.leaseToken,
+			result: persistedSpecHandoffResult(data),
+		})
+	} catch (cause) {
+		if (['OPERATION_NOT_FOUND', 'OPERATION_LEASE_STALE'].includes(cause?.code)) throw cause
+		// A lost transaction acknowledgement is not a failed transaction. Recover
+		// only a confirmed success for the same owned immutable request, without
+		// repeating its handler or introducing another billing/publication event.
+		try {
+			const recorded = await _operationStore.getOperation(run.operation.operationId)
+			if (recorded?.state === 'succeeded'
+				&& recorded.installHash === run.operation.installHash
+				&& recorded.toolName === run.operation.toolName
+				&& recorded.inputDigest === run.operation.inputDigest
+				&& recorded.requestDigest === run.operation.requestDigest) return recorded
+		} catch { /* unconfirmed remains unconfirmed */ }
+		// Completion can fail after materialization. Do not expose provider internals
+		// or imply rollback; the owned operation is the authorized recovery anchor.
+		logEvent('durable_operation.result_persistence_failed', {
+			operationId: run.operation.operationId,
+			code: cause?.code || 'RESULT_PERSISTENCE_FAILED',
+		})
+		throw Object.assign(new Error('The operation result could not be recorded. Inspect the owned operation before starting another mutation.'), {
+			code: 'OPERATION_RESULT_PERSISTENCE_FAILED',
+			details: { operationId: run.operation.operationId, artifactStatus: 'unchanged_or_unknown' },
+		})
+	}
 }
 
 function durableWorkerRetryableError(code = '') {
@@ -42713,10 +42746,7 @@ export async function runDurableOperationById(operationId, { leaseOwner = '' } =
 		&& result?.ok === true
 		&& result?.data?.status === 'failed'
 	if (result?.ok === true && !avatarJobFailed) {
-		const completed = await _operationStore.completeOperation(id, {
-			leaseToken: claim.lease.leaseToken,
-			result: persistedSpecHandoffResult(result.data || {}),
-		})
+		const completed = await completeDurableOperation({ operation: claim.operation, lease: claim.lease }, result.data || {})
 		return publicDurableOperationStatus(completed)
 	}
 	const error = result?.error || result?.data?.error || (avatarJobFailed
@@ -42822,6 +42852,12 @@ function withToolTimeout(promise, timeoutMs, name) {
 }
 
 function publicNextActionsForError(code, details = {}) {
+	if (code === 'OPERATION_RESULT_PERSISTENCE_FAILED') {
+		return [{ type: 'recover_operation', tool: 'betterpptx.operation.status',
+			description: 'Inspect the existing owned operation before any new mutation; result persistence failure does not establish rollback.',
+			...(details.operationId ? { input: { operationId: details.operationId } } : {}),
+		}]
+	}
 	// Spec validation can fail before the compiler produces a top-level error code. Keep the
 	// outer envelope recoverable, but let a cold AI act on the typed inner finding immediately.
 	const nestedSpecCode = code === 'SPEC_COMPILE_FAILED' && Array.isArray(details?.errors)
@@ -43115,6 +43151,7 @@ function publicNextActionsForError(code, details = {}) {
 }
 
 function publicRecoverableForError(code) {
+	if (code === 'OPERATION_RESULT_PERSISTENCE_FAILED') return true
 	if (/^MOTION_/.test(String(code || ''))) return true
 	if (code === 'PRESENTER_STAGE_TREATMENT_INVALID') return true
 	return [
@@ -43329,6 +43366,17 @@ function normalizePublicErrorResult(result) {
 		? details.errors.map(item => String(item?.code || '')).find(item => /^(?:MOTION_|PRESENTER_)/.test(item))
 		: null
 	const code = nestedMotionCode || baseCode
+	if (baseCode === 'TOOL_ERROR') {
+		// Unknown runtime failures are not authoring findings. Keep the recovery
+		// anchor without leaking dependencies, provider paths or private internals.
+		return { ...result, error: {
+			code: 'TOOL_ERROR', message: 'The presentation operation could not be confirmed.',
+			recoverable: true, retry_safe: false, retryable: false, artifact_state: 'unchanged_or_unknown',
+			...(details.operationId ? { details: { operationId: details.operationId },
+				next_actions: [{ type: 'recover_operation', tool: 'betterpptx.operation.status', input: { operationId: details.operationId } }],
+			} : {}),
+		} }
+	}
 	const findingFixes = {
 		SPEC_REQUIRED: 'Provide a semantic JSON spec with schemaVersion, title, and slides, then rerun dryRun.',
 		SPEC_PHASE_INVALID: 'Choose phase dryRun, resolve, lockedDryRun, or commit and rerun the request.',
@@ -43611,6 +43659,17 @@ async function callBetterPptxToolInScope(name, args = {}, context = {}) {
 	}
 	try {
 		assertDeckVersionFresh(internalName, args)
+		if (internalName === 'betterpptx.deck.save'
+			&& context[MCP_AUTHORING_CAPABILITY] === true
+			&& context.__durableOperationWorker === true
+			&& context.__claimedDurableOperation?.operation?.toolName === internalName
+			&& !publicVerificationPolicy().rendererRequiredForSave
+			&& currentVersionValidationVerification(getDeck(args.deckId)).complete !== true) {
+			// Gateway validation is not shared worker memory. Validate the actual
+			// owner-bound, version-checked rehydrated package rather than restoring an
+			// unbound pass or trusting a caller flag. Existing save gates remain active.
+			await handleValidateQuality({ deckId: args.deckId, strictness: 'strict' })
+		}
 		assertDirectorAllowsTool(internalName, args)
 	} catch (err) {
 		const result = buildToolErrorResult(err, internalName, args)
