@@ -1,3 +1,5 @@
+import { relayAuthorizedPresentationDownload } from './download-proxy.mjs'
+
 const IDENTITY_ROOT = '/identity'
 const NO_STORE = 'no-store'
 
@@ -57,6 +59,8 @@ export default {
 
 		try {
 			const upstream = await fetch(cloudRunRequest(request, origin), { cache: NO_STORE })
+			const download = await relayAuthorizedPresentationDownload(request, upstream, env)
+			if (download) return download
 			return new Response(upstream.body, upstream)
 		} catch {
 			return new Response('BetterPPTX is temporarily unavailable.', {

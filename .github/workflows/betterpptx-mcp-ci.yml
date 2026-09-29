@@ -78,6 +78,9 @@ jobs:
           node --test betterpptx-mcp/test/durable-operation-phase-idempotency.test.mjs
           node --test betterpptx-mcp/test/inline-image-dimensions-security.test.mjs
           node --test betterpptx-mcp/test/public-artifact-download-sanitization.test.mjs
+          node --test betterpptx-mcp/test/public-file-result.test.mjs
+          node --test betterpptx-mcp/test/public-file-result-size-policy.test.mjs
+          node --test betterpptx-mcp/test/large-artifact-http-transport.test.mjs
           node --test betterpptx-mcp/test/local-artifact-ownership.test.mjs
           node --test betterpptx-mcp/test/compiler-validation-readback.test.mjs
           node --test betterpptx-mcp/test/gcs-artifact-lifetime.test.mjs
@@ -86,6 +89,7 @@ jobs:
           node --test betterpptx-mcp/test/production-free-publication-profile.test.mjs
           node --test betterpptx-mcp/test/production-free-publication-http.test.mjs
           node --test betterpptx-mcp/test/cloudflare-edge-worker.test.mjs
+          node --test betterpptx-mcp/test/cloudflare-download-proxy.test.mjs
           node --test betterpptx-mcp/test/cloudflare-deploy-secret.test.mjs
           node --test betterpptx-mcp/test/mission-control-private-iam.test.mjs
           node --test betterpptx-mcp/test/mission-control-deployment-contract.test.mjs

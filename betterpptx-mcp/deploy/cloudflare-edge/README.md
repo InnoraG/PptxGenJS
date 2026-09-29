@@ -3,8 +3,9 @@
 This Worker keeps the canonical BetterPPTX origin while routing application
 traffic to Cloud Run. `/identity/*` is passed to the pre-existing proxied DNS
 origin so the current Keycloak issuer and RP ID remain unchanged during the
-separate identity/database migration. All other paths are forwarded, without
-caching or body transformation, to the pinned Cloud Run service URL.
+separate identity/database migration. Other paths are forwarded to the pinned
+Cloud Run service URL. Approved presentation downloads are streamed at the
+same public hostname rather than redirecting the browser to storage.
 
 The route is intentionally configured for `betterpptx.xmcpx.com/*`. The zone
 must already have an active proxied DNS record for that hostname. A public
@@ -21,6 +22,17 @@ The Worker does not cache MCP, identity, or artifact traffic. It preserves the
 request method, path, query, body stream, authorization, MCP session headers,
 and upstream response stream. Errors are generic and do not disclose origin
 details. The origin URL is restricted to HTTPS Cloud Run `run.app` hosts.
+
+For `/files/.../*.pptx` GET/HEAD, Cloud Run first validates the opaque download
+capability, owner binding, original expiry, package identity and generation.
+The edge may relay only its signed GET redirect for the configured artifact
+bucket/prefix, exact filename and bounded V4 expiry. It never follows another
+storage redirect, forwards browser credentials to storage, buffers the whole
+file, publishes again or extends retention. Storage errors are generic. The
+release workflow supplies `BETTERPPTX_GCS_BUCKET` and `BETTERPPTX_GCS_PREFIX`;
+missing or mismatched artifact configuration fails closed. Browser security
+settings are not changed. This adds an edge storage subrequest; no separate
+paid service or customer billing entitlement is enabled by the relay.
 
 Validation:
 

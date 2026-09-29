@@ -446,26 +446,42 @@ test('old direct and .53 authority recovery can issue wrappers without requiring
   assert.deepEqual(f.record(oldUrl), legacy, 'legacy authority is never replaced')
 })
 
-test('Cloudflare forwards prefixed capability GET/HEAD and decorator unchanged without following the final GCS redirect', async () => {
+test('Cloudflare authorizes prefixed GET/HEAD unchanged then streams the pinned presentation without exposing its storage redirect', async () => {
   const guardedFetch = globalThis.fetch
-  const signed = 'https://storage.googleapis.com/synthetic-bucket/file?X-Goog-Signature=exact%2Bsignature%2fbytes'
+  const bytes = Buffer.from('PK-synthetic-presentation-wire')
+  const mime = 'application/vnd.openxmlformats-officedocument.presentationml.presentation'
+  const signed = new URL('https://storage.googleapis.com/synthetic-bucket/artifacts/run/Deck%20Review.pptx')
+  const date = new Date(Math.floor(Date.now() / 1000) * 1000).toISOString().replace(/[-:]/g, '').replace('.000', '')
+  for (const [key, value] of Object.entries({
+    'X-Goog-Algorithm': 'GOOG4-RSA-SHA256', 'X-Goog-Credential': `synthetic-signer/${date.slice(0, 8)}/auto/storage/goog4_request`,
+    'X-Goog-Date': date, 'X-Goog-Expires': '43200', 'X-Goog-SignedHeaders': 'host', 'X-Goog-Signature': 'a'.repeat(512),
+    generation: '1234', 'response-content-type': mime, 'response-content-disposition': 'attachment; filename="Deck Review.pptx"',
+  })) signed.searchParams.set(key, value)
   try {
     for (const method of ['GET', 'HEAD']) {
-      let forwarded
+      const forwarded = []
       globalThis.fetch = async request => {
-        forwarded = request
-        return new Response(null, { status: 302, headers: { Location: signed, 'Cache-Control': 'private, no-store' } })
+        forwarded.push(request)
+        if (request.url.startsWith('https://synthetic-uc.a.run.app/')) return new Response(null, { status: 302, headers: { Location: signed.href, 'Cache-Control': 'private, no-store' } })
+        assert.equal(request.url, signed.href)
+        assert.equal(request.method, 'GET', 'the retained signed GET URL must not be reused with HEAD')
+        assert.equal(request.headers.get('authorization'), null)
+        assert.equal(request.headers.get('cookie'), null)
+        return new Response(bytes, { headers: { 'Content-Type': mime, 'Content-Disposition': 'attachment; filename="Deck Review.pptx"', 'Content-Length': String(bytes.length) } })
       }
       const pathname = '/tenant/files/' + 'A'.repeat(43) + '/Deck%20Review.pptx?utm_source=chatgpt.com'
       const response = await worker.fetch(new Request('https://presentations.example.test' + pathname, { method }), {
         BETTERPPTX_CLOUD_RUN_ORIGIN: 'https://synthetic-uc.a.run.app',
+        BETTERPPTX_GCS_BUCKET: 'synthetic-bucket', BETTERPPTX_GCS_PREFIX: 'artifacts',
       })
-      assert.equal(forwarded.url, 'https://synthetic-uc.a.run.app' + pathname)
-      assert.equal(forwarded.method, method)
-      assert.equal(forwarded.redirect, 'manual')
-      assert.equal(response.status, 302)
-      assert.equal(response.headers.get('location'), signed)
-      assert.equal(await response.text(), '')
+      assert.equal(forwarded.length, 2)
+      assert.equal(forwarded[0].url, 'https://synthetic-uc.a.run.app' + pathname)
+      assert.equal(forwarded[0].method, method)
+      assert.ok(forwarded.every(request => request.redirect === 'manual'))
+      assert.equal(response.status, 200)
+      assert.equal(response.headers.get('location'), null)
+      assert.equal(response.headers.get('cache-control'), 'private, no-store')
+      assert.deepEqual(Buffer.from(await response.arrayBuffer()), method === 'HEAD' ? Buffer.alloc(0) : bytes)
     }
   } finally { globalThis.fetch = guardedFetch }
 })

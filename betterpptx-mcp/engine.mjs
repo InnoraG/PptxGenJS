@@ -16,7 +16,7 @@ import sharp from 'sharp'
 import svgpath from 'svgpath'
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 import { BETTERPPTX_BRAND } from './branding.mjs'
-import { assertEmbeddedPresentationSize, shouldOfferDownloadLink, verifyEmbeddedPresentation } from './delivery/embedded-presentation.mjs'
+import { assertEmbeddedPresentationSize, shouldOfferDownloadLink, verifyEmbeddedPresentation, DEFAULT_CLIENT_SAFE_EMBED_BYTES } from './delivery/embedded-presentation.mjs'
 import { logEvent, logToolEnd, logToolStart, logToolThrow } from './logger.mjs'
 import { secondsToMs, clampAdvanceMs, assertLikelyMilliseconds } from './narration/timing.mjs'
 import { synthesizeNarration, resolveNarrationAudio, makeNarrationObjectName } from './narration/service.mjs'
@@ -7198,6 +7198,12 @@ async function handleOperationReadFile(args = {}, context = {}) {
 	const offset = args.offset === undefined ? 0 : Number(args.offset)
 	const maxBytes = args.maxBytes === undefined ? 32768 : Number(args.maxBytes)
 	const mode = args.mode || 'link'
+	const resourceDeliveryPolicy = {
+		maxDirectResourceBytes: DEFAULT_CLIENT_SAFE_EMBED_BYTES,
+		sizeBasis: 'decoded-artifact-bytes',
+		largerFiles: 'browser-download-link',
+		limitBasis: 'conservative-product-policy-not-a-universal-host-limit',
+	}
 	if (!Number.isSafeInteger(offset) || offset < 0 || !Number.isSafeInteger(maxBytes)
 		|| maxBytes < 1 || maxBytes > 32768 || !['link', 'chunk', 'resource'].includes(mode)) {
 		throw Object.assign(new Error('Use a nonnegative integer offset, maxBytes from 1 to 32768, and mode link, chunk or resource.'), { code: 'ARTIFACT_READ_ARGUMENT_INVALID' })
@@ -7219,6 +7225,7 @@ async function handleOperationReadFile(args = {}, context = {}) {
 		const fresh = await _artifactStore.issueBrowserDownload({ downloadUrl: saved.downloadUrl, downloadName: saved.downloadName })
 		return {
 			ok: true, operationId: String(args.operationId), mode: 'link',
+			resourceDeliveryPolicy,
 			fileName: saved.downloadName, downloadName: saved.downloadName,
 			mimeType: 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
 			totalBytes: probe.totalBytes, bytes: probe.totalBytes, packageSha256: saved.packageSha256,
@@ -7252,6 +7259,7 @@ async function handleOperationReadFile(args = {}, context = {}) {
 		nextOffset: offset + bytes.length < totalBytes ? offset + bytes.length : null,
 		encoding: 'base64',
 		mode,
+		resourceDeliveryPolicy,
 		dataBase64: bytes.toString('base64'),
 	}
 }

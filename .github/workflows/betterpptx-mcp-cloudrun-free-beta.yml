@@ -71,6 +71,7 @@ jobs:
           node --test betterpptx-mcp/test/gcs-artifact-lifetime.test.mjs
           node --test betterpptx-mcp/test/durable-operation-download-authority-replay.test.mjs
           node --test betterpptx-mcp/test/cloudflare-edge-worker.test.mjs
+          node --test betterpptx-mcp/test/cloudflare-download-proxy.test.mjs
           node --test betterpptx-mcp/test/cloudflare-release-identity-retry.test.mjs
           node --test betterpptx-mcp/test/cloud-run-service-iam-retry.test.mjs
           node --test betterpptx-mcp/test/cloudflare-deploy-secret.test.mjs
@@ -87,6 +88,9 @@ jobs:
           node --test betterpptx-mcp/test/durable-quality-save-worker.test.mjs
           node --test betterpptx-mcp/test/free-value-store-json-persistence.test.mjs
           node --test betterpptx-mcp/test/free-value-save-firestore-integration.test.mjs
+          node --test betterpptx-mcp/test/public-file-result.test.mjs
+          node --test betterpptx-mcp/test/public-file-result-size-policy.test.mjs
+          node --test betterpptx-mcp/test/large-artifact-http-transport.test.mjs
 
       - name: Build the immutable release image
         shell: bash
@@ -433,7 +437,7 @@ jobs:
           echo "::add-mask::$token"
           npm ci --prefix betterpptx-mcp/deploy/cloudflare-edge
           cd betterpptx-mcp/deploy/cloudflare-edge
-          CLOUDFLARE_API_TOKEN="$token" CLOUDFLARE_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID" npx wrangler deploy --var "BETTERPPTX_CLOUD_RUN_ORIGIN:$GATEWAY_URL"
+          CLOUDFLARE_API_TOKEN="$token" CLOUDFLARE_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID" npx wrangler deploy --var "BETTERPPTX_CLOUD_RUN_ORIGIN:$GATEWAY_URL" --var "BETTERPPTX_GCS_BUCKET:$BETTERPPTX_GCS_BUCKET" --var "BETTERPPTX_GCS_PREFIX:artifacts"
           unset token
 
       - name: Verify the custom-domain MCP and preserved OAuth issuer

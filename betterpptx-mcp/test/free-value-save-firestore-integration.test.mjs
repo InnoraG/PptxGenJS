@@ -211,6 +211,9 @@ test('real public dispatcher free save commits one strict Firestore event bound 
 		}), 'read-only re-download link')
 		assert.equal(download.operationId, saved.operationId)
 		assert.equal(download.packageSha256, saved.packageSha256)
+		assert.equal(download.resourceDeliveryPolicy.maxDirectResourceBytes, 262144)
+		assert.equal(download.resourceDeliveryPolicy.largerFiles, 'browser-download-link')
+		assert.equal(download.resourceDeliveryPolicy.sizeBasis, 'decoded-artifact-bytes')
 		assert.equal(typeof download.downloadUrl, 'string')
 		const chunk = dataOf(await client.call('betterpptx.operation.read_file', {
 			operationId: saved.operationId, mode: 'chunk', offset: 0, maxBytes: 64,

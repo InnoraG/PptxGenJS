@@ -6,10 +6,10 @@ const artifact = {
 	downloadName: 'example.pptx',
 	downloadUrl: 'https://presentations.example/files/opaque/example.pptx?permit=short-lived',
 	packageSha256: 'a'.repeat(64),
-	bytes: 17215011,
+	bytes: 22527,
 }
 
-test('a successful saved artifact adds a standard, non-embedded resource link', () => {
+test('a small successful saved artifact adds a standard, non-embedded resource link', () => {
 	const result = withSavedPresentationResourceLink({ content: [{ type: 'text', text: 'saved' }] }, { ok: true, data: artifact })
 	assert.equal(result.content.length, 2)
 	assert.equal(result.content[1].type, 'resource_link')
