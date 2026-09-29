@@ -7088,6 +7088,15 @@ async function handleBillingUsageSummary(_args = {}, context = {}) {
 	return publicUsageSummary(context)
 }
 
+function unclassifiedRuntimeErrorCode(code) {
+	const value = String(code || 'OPERATION_FAILED')
+	return /^\d+$/.test(value) || [
+		'TOOL_ERROR', 'OPERATION_FAILED', 'UNKNOWN', 'INTERNAL', 'UNAVAILABLE',
+		'DEADLINE_EXCEEDED', 'RESOURCE_EXHAUSTED', 'ABORTED', 'INVALID_ARGUMENT',
+		'PERMISSION_DENIED', 'UNAUTHENTICATED', 'NOT_FOUND', 'CANCELLED',
+	].includes(value)
+}
+
 function publicDurableOperationStatus(operation = {}) {
 	const out = {
 		operationId: operation.operationId || '',
@@ -7107,13 +7116,14 @@ function publicDurableOperationStatus(operation = {}) {
 		out.next = { type: 'use_result' }
 	}
 	if (operation.state === 'failed' || operation.state === 'cancelled') {
+		const failureCode = String(operation.error?.code || 'OPERATION_FAILED')
 		out.error = {
-			code: operation.error?.code || 'OPERATION_FAILED',
-			message: isPublicBlackBoxMode() && operation.error?.code === 'TOOL_ERROR'
+			code: failureCode,
+			message: isPublicBlackBoxMode() && unclassifiedRuntimeErrorCode(failureCode)
 				? 'The operation did not complete successfully; its artifact outcome has not been confirmed.'
 				: operation.error?.message || 'Operation failed.',
 		}
-		if (['OPERATION_RESULT_PERSISTENCE_FAILED', 'TOOL_ERROR'].includes(operation.error?.code)) {
+		if (failureCode === 'OPERATION_RESULT_PERSISTENCE_FAILED' || unclassifiedRuntimeErrorCode(failureCode)) {
 			out.executionState = 'unconfirmed'
 			out.artifact_state = 'unchanged_or_unknown'
 			out.retry_safe = false
@@ -43366,11 +43376,11 @@ function normalizePublicErrorResult(result) {
 		? details.errors.map(item => String(item?.code || '')).find(item => /^(?:MOTION_|PRESENTER_)/.test(item))
 		: null
 	const code = nestedMotionCode || baseCode
-	if (baseCode === 'TOOL_ERROR') {
+	if (unclassifiedRuntimeErrorCode(baseCode)) {
 		// Unknown runtime failures are not authoring findings. Keep the recovery
 		// anchor without leaking dependencies, provider paths or private internals.
 		return { ...result, error: {
-			code: 'TOOL_ERROR', message: 'The presentation operation could not be confirmed.',
+			code: baseCode, message: 'The presentation operation could not be confirmed.',
 			recoverable: true, retry_safe: false, retryable: false, artifact_state: 'unchanged_or_unknown',
 			...(details.operationId ? { details: { operationId: details.operationId },
 				next_actions: [{ type: 'recover_operation', tool: 'betterpptx.operation.status', input: { operationId: details.operationId } }],
@@ -43903,10 +43913,11 @@ async function callBetterPptxToolInScope(name, args = {}, context = {}) {
 			throw err
 		}
 		if (freeValueReservation) {
+			const publicationOperationId = durableOperation?.operation?.operationId || data?.operationId
 			const committed = await commitFreeValue(freeValueReservation, {
 				tool: internalName,
-				deckIdHash: args?.deckId ? hashDeckId(args.deckId).slice(-16) : undefined,
-				operationId: data?.operationId || undefined,
+				...(args?.deckId ? { deckIdHash: hashDeckId(args.deckId).slice(-16) } : {}),
+				...(publicationOperationId ? { operationId: publicationOperationId } : {}),
 			})
 			if (!committed?.ok) throw Object.assign(new Error('The free-value reservation could not be committed.'), {
 				code: committed?.code || 'FREE_VALUE_COMMIT_FAILED',

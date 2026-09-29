@@ -85,6 +85,8 @@ jobs:
           node --test betterpptx-mcp/test/operation-store-json-persistence.test.mjs
           node --test betterpptx-mcp/test/durable-operation-persistence-failure.test.mjs
           node --test betterpptx-mcp/test/durable-quality-save-worker.test.mjs
+          node --test betterpptx-mcp/test/free-value-store-json-persistence.test.mjs
+          node --test betterpptx-mcp/test/free-value-save-firestore-integration.test.mjs
 
       - name: Build the immutable release image
         shell: bash

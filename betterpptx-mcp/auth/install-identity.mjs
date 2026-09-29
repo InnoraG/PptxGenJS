@@ -1,6 +1,7 @@
 import * as crypto from 'node:crypto'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import { jsonPersistenceValue } from '../storage/json-persistence.mjs'
 
 import {
 	meteredFirestoreGet,
@@ -156,6 +157,14 @@ function reservationFingerprint(reservationId) {
 	return crypto.createHash('sha256').update(String(reservationId || '')).digest('hex')
 }
 
+// Rolling allowance records use the same JSON representation in both stores.
+// Optional object fields disappear; array slots stay null. Normalize the whole
+// document at each write so legacy events without metadata remain writable too.
+// Do not alter owner/reservation fingerprints or global provider settings.
+function rollingPersistenceValue(value) {
+	return jsonPersistenceValue(value, () => new InstallIdentityError('INSTALL_USAGE_PAYLOAD_INVALID', 'The allowance metadata must be JSON-compatible.'))
+}
+
 function normalizedRollingUsage(input = {}, identityHash = '', category = '', options = {}) {
 	const nowMs = Number.isFinite(Number(options.nowMs)) ? Number(options.nowMs) : Date.now()
 	const windowMs = Math.max(1, Number(options.windowMs) || 30 * 24 * 60 * 60 * 1000)
@@ -279,7 +288,7 @@ function createFirestoreUsageStore() {
 		return runMeteredFirestoreTransaction(db, async tx => {
 			const snap = await tx.get(ref)
 			const mutation = mutateRollingUsage(snap.exists ? snap.data() || {} : {}, identityHash, request)
-			tx.set(ref, mutation.state, { merge: false })
+			tx.set(ref, rollingPersistenceValue(mutation.state), { merge: false })
 			return mutation.result
 		})
 	}
@@ -355,7 +364,7 @@ function createLocalUsageStore() {
 			if (!store.rolling || typeof store.rolling !== 'object') store.rolling = {}
 			const id = rollingDocumentId(identityHash, request.category)
 			const mutation = mutateRollingUsage(store.rolling[id] || {}, identityHash, request)
-			store.rolling[id] = mutation.state
+			store.rolling[id] = rollingPersistenceValue(mutation.state)
 			save(store)
 			return mutation.result
 		})

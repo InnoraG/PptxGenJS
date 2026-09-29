@@ -1,6 +1,7 @@
 import * as crypto from 'node:crypto'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import { jsonPersistenceValue } from './json-persistence.mjs'
 
 import {
 	meteredFirestoreGet,
@@ -65,26 +66,8 @@ function clone(value) {
 // Operation records use the same JSON representation locally and in Firestore.
 // Optional object fields disappear; array slots remain as null. Do not alter
 // request/quote digests or enable global Firestore undefined suppression.
-function persistenceValue(value, ancestors = new Set()) {
-	const invalid = () => new OperationStoreError('OPERATION_PAYLOAD_INVALID', 'The operation payload must be JSON-compatible.')
-	if (value === undefined || value === null || typeof value === 'string' || typeof value === 'boolean') return value
-	if (typeof value === 'number') {
-		if (!Number.isFinite(value)) throw invalid()
-		return Object.is(value, -0) ? 0 : value
-	}
-	if (value instanceof Date) {
-		if (!Number.isFinite(value.getTime())) throw invalid()
-		return value.toISOString()
-	}
-	if (typeof value !== 'object' || ancestors.has(value)) throw invalid()
-	if (!Array.isArray(value) && ![Object.prototype, null].includes(Object.getPrototypeOf(value))) throw invalid()
-	ancestors.add(value)
-	try {
-		if (Array.isArray(value)) return Array.from(value, item => persistenceValue(item, ancestors) ?? null)
-		return Object.fromEntries(Object.entries(value)
-			.filter(([, item]) => item !== undefined)
-			.map(([key, item]) => [key, persistenceValue(item, ancestors)]))
-	} finally { ancestors.delete(value) }
+function persistenceValue(value) {
+	return jsonPersistenceValue(value, () => new OperationStoreError('OPERATION_PAYLOAD_INVALID', 'The operation payload must be JSON-compatible.'))
 }
 
 function stableForHash(value) {

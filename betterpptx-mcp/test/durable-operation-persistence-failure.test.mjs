@@ -172,6 +172,83 @@ async function deckHeads() {
 	catch (error) { if (error.code === 'ENOENT') return {}; throw error }
 }
 
+for (const [label, historicCode] of [['generic', 'OPERATION_FAILED'], ['numeric-3', 3], ['numeric-14', 14], ['unavailable', 'UNAVAILABLE'], ['missing-code', undefined]]) {
+	test(`historical ${label}: raw provider failure stays private in envelope and real stored-operation status`, async () => {
+		const created = await storeForTest.createOrGetOperation({ installHash: ownerContext.installHash,
+			toolName: 'betterpptx.deck.save', idempotencyKey: `historical-${label}`, inputDigest: label })
+		const operationId = created.operation.operationId
+		const claim = await storeForTest.claimOperation(operationId, { leaseOwner: 'historical-failure-fixture' })
+		const privateError = Object.assign(new Error(rawMessage), {
+			...(historicCode === undefined ? {} : { code: historicCode }), retryable: true,
+			details: { operationId, providerMessage: rawMessage, internal: { field: rawMessage }, retryable: true },
+		})
+		const envelope = errorForTest(privateError, 'betterpptx.deck.save', {})
+		assertPublicSafe(envelope)
+		assert.equal(envelope.ok, false)
+		assert.equal(envelope.error.code, historicCode === undefined ? 'TOOL_ERROR' : String(historicCode))
+		assert.equal(envelope.error.message, 'The presentation operation could not be confirmed.')
+		assert.deepEqual(envelope.error.details, { operationId })
+		assert.equal(envelope.error.artifact_state, 'unchanged_or_unknown')
+		assert.equal(envelope.error.retry_safe, false)
+		assert.equal(envelope.error.retryable, false)
+		assert.equal(envelope.error.next_actions[0].tool, 'betterpptx.operation.status')
+		assert.deepEqual(envelope.error.next_actions[0].input, { operationId })
+		await storeForTest.failOperation(operationId, { leaseToken: claim.lease.leaseToken,
+			error: { ...privateError, message: rawMessage }, retryable: false })
+		const original = await storeForTest.getOperation(operationId)
+		assert.equal(original.error.message, rawMessage, 'fixture must retain the actual historical private error, not pre-sanitize it')
+		const observed = await owner.call('betterpptx.operation.status', { operationId })
+		assert.equal(observed.ok, true, JSON.stringify(observed))
+		const status = observed.data
+		assertPublicSafe(status)
+		assert.equal(status.operationId, operationId)
+		assert.equal(status.state, 'failed')
+		assert.equal(status.error.code, historicCode === undefined ? 'OPERATION_FAILED' : String(historicCode))
+		assert.equal(status.error.message, 'The operation did not complete successfully; its artifact outcome has not been confirmed.')
+		assert.equal(status.executionState, 'unconfirmed')
+		assert.equal(status.artifact_state, 'unchanged_or_unknown')
+		assert.equal(status.retry_safe, false)
+		assert.equal(status.next.type, 'recover_operation')
+		assert.equal(status.next.tool, 'betterpptx.operation.status')
+		assert.ok(!JSON.stringify(status).includes('new_idempotency_key'))
+		const denied = await foreign.call('betterpptx.operation.status', { operationId })
+		assert.equal(denied.error?.code, 'OPERATION_NOT_FOUND')
+		assertPublicSafe(denied)
+		const repeated = await runDurableOperationById(operationId, { leaseOwner: 'historical-terminal-replay' })
+		assert.deepEqual(repeated, status)
+		assert.deepEqual(await storeForTest.getOperation(operationId), original, 'public recovery must not rewrite history or rerun a terminal mutation')
+	})
+}
+
+test('known typed authoring finding keeps its actionable message and corrective guidance', async () => {
+	const message = 'Provide a semantic JSON spec with schemaVersion, title, and slides.'
+	const finding = Object.assign(new Error(message), { code: 'SPEC_COMPILE_FAILED',
+		details: { field: 'spec', errors: [{ code: 'SPEC_REQUIRED', message, field: 'spec' }] } })
+	const envelope = errorForTest(finding, 'betterpptx.deck.generate_from_spec', {})
+	assertPublicSafe(envelope)
+	assert.equal(envelope.error.code, 'SPEC_COMPILE_FAILED')
+	assert.equal(envelope.error.message, message)
+	assert.equal(envelope.error.recoverable, true)
+	assert.equal(envelope.error.next_actions[0].type, 'provide_spec')
+	assert.equal(envelope.error.next_actions[0].tool, 'betterpptx.deck.generate_from_spec')
+	assert.equal(envelope.error.details.field, 'spec')
+	assert.equal(envelope.error.details.errors[0].code, 'SPEC_REQUIRED')
+	assert.equal(envelope.error.details.errors[0].message, message)
+	assert.match(envelope.error.details.errors[0].fix, /Provide a semantic JSON spec/)
+	const created = await storeForTest.createOrGetOperation({ installHash: ownerContext.installHash,
+		toolName: 'betterpptx.deck.generate_from_spec', idempotencyKey: 'historical-typed-finding', inputDigest: 'typed-finding' })
+	const operationId = created.operation.operationId
+	const claim = await storeForTest.claimOperation(operationId, { leaseOwner: 'typed-finding-fixture' })
+	await storeForTest.failOperation(operationId, { leaseToken: claim.lease.leaseToken,
+		error: { ...finding, message }, retryable: false })
+	const observed = await owner.call('betterpptx.operation.status', { operationId })
+	assert.equal(observed.ok, true)
+	assert.equal(observed.data.error.code, 'SPEC_COMPILE_FAILED')
+	assert.equal(observed.data.error.message, message)
+	assert.equal(observed.data.executionState, undefined, 'classified authoring findings must not be replaced with unknown provider outcomes')
+	assert.notEqual(observed.data.next?.type, 'recover_operation')
+})
+
 for (const [label, providerCode] of [['uncoded-validation', undefined], ['numeric-provider-3', 3], ['numeric-provider-4', 4], ['numeric-provider-14', 14], ['string-provider', 'UNAVAILABLE']]) {
 	test(`${label} completion failure: safe public envelope keeps owned recovery ID and forbids blind retry`, async () => {
 		const created = await storeForTest.createOrGetOperation({ installHash: ownerContext.installHash,
