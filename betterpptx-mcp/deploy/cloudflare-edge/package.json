@@ -4,6 +4,6 @@
 	"private": true,
 	"description": "Pinned deployment tooling for the BetterPPTX Cloudflare edge route.",
 	"devDependencies": {
-		"wrangler": "4.142.0"
+		"wrangler": "4.149.0"
 	}
 }
