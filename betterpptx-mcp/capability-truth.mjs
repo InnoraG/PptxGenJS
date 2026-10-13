@@ -226,6 +226,7 @@ function galleryTruth(entry) {
 }
 
 export function classifyCatalogEntry(entry = {}) {
+	if (entry.sourceKind === 'observed-motion-review') return truth('missing', 'not-applicable', ['sourceReview'], [], NOT_APPLICABLE_RESET)
 	if (entry.status === 'planned' || entry.implemented === false) {
 		return truth('missing', 'missing', [], [], NOT_APPLICABLE_RESET)
 	}

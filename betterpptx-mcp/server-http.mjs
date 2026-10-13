@@ -28,7 +28,11 @@ import * as fs from 'node:fs'
 import { fileURLToPath } from 'node:url'
 
 import express from 'express'
-import { createBetterPptxMcpServer } from './server.mjs'
+import { configureBetterPptxMcpPrivateStartup, createBetterPptxMcpServer } from './server.mjs'
+import { loadTrustedMotionPreparationRepository } from './motion-preparation-private-provider.mjs'
+import { loadTrustedMotionCandidateStartup } from './motion-candidate-private-provider.mjs'
+import {loadTrustedBuiltInPreparedMotionPublication} from './builtin-prepared-motion-provider.mjs'
+import { loadTrustedMotionSourceReviewCatalogs } from './motion-source-review-startup.mjs'
 import { setDownloadConfig, getEngineStats, runDurableOperationById } from './engine.mjs'
 import { TOOLS, normalizeToolNameProfile } from './tools.mjs'
 import { BETTERPPTX_BRAND, BETTERPPTX_PRODUCT, BETTERPPTX_SERVER_NAME } from './branding.mjs'
@@ -502,6 +506,15 @@ export async function startBetterPptxHttp(options = {}) {
 	if (process.env.BETTERPPTX_PUBLIC_BLACK_BOX === undefined && process.env.BETTERPPTX_BLACK_BOX === undefined) {
 		process.env.BETTERPPTX_PUBLIC_BLACK_BOX = process.env.BETTERPPTX_LOCAL_MAINTAINER === '1' ? '0' : '1'
 	}
+	const privateStartup = options.privateStartup === undefined
+		? await Promise.all([loadTrustedMotionPreparationRepository(), loadTrustedMotionCandidateStartup(), loadTrustedMotionSourceReviewCatalogs(), loadTrustedBuiltInPreparedMotionPublication()]).then(([repository, candidates, sourceReviews, builtInPrepared]) => ({
+			...(repository === undefined ? {} : { trustedMotionPreparationRepository: repository }),
+			...(candidates === undefined ? {} : { trustedMotionCandidateStartup: candidates }),
+			...(sourceReviews === undefined ? {} : { trustedMotionSourceReviewCatalogs: sourceReviews }),
+			...(builtInPrepared === undefined ? {} : { trustedBuiltInPreparedMotionPublication: builtInPrepared }),
+		}))
+		: options.privateStartup
+	configureBetterPptxMcpPrivateStartup(privateStartup)
 	const host = options.host ?? DEFAULT_HOST
 	const port = options.port ?? DEFAULT_PORT
 

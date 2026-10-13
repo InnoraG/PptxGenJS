@@ -255,6 +255,20 @@ export function interpretCapabilityIntent(intent = '') {
 }
 
 function enrich(entry) {
+	if (entry.sourceKind === 'observed-motion-review') return {
+		id:entry.id,canonicalName:entry.label,aliases:entry.aliases||[],family:entry.family,
+		audienceVisibleResult:'Review an observed source motion using measured timing and an explicitly authored description.',
+		suitableUses:['Compare review candidates before target preparation.'],unsuitableUses:['Use this catalog ID as an executable motion or prepared asset.'],
+		nativeCarrier:null,authoringRoutes:entry.route,jsonPaths:[],
+		inputContract:{capabilityMode:entry.capabilityMode,componentOwnership:['sourceReview'],overrideFields:[],resetBehavior:entry.resetBehavior},
+		outputContract:{requestedRepresentation:'source-review',plannedRepresentation:null,readback:['measured source timing','authored description basis','explicit unknowns','target preparation gaps']},
+		compatibility:{combinations:[],conflicts:[],ordering:'Source facts support review; target compatibility and preparation remain unresolved.'},
+		accessibility:'Preserve the complete scene message while reviewing supplemental motion.',costCategory:'review-only',
+		readiness:{implemented:false,publiclyAuthorable:false,executableContract:false,callerAvailable:'authorized review only',targetCompatible:'unknown',releaseQualified:false,verifiedInArtifact:false},
+		exampleIds:[],verificationEvidence:{registry:'source-review',qualificationRecord:null,artifact:'not-bound',timestamp:null,provenance:'measured-source-review',rule:'Source timing and authored descriptions do not qualify a semantic action or target playback.'},
+		selection:entry.selection,sourceReview:entry.sourceReview,measurements:entry.measurements,authoringGuidance:entry.authoringGuidance,selectable:entry.selectable,
+		...(entry.requirementFit ? {requirementFit:entry.requirementFit} : {}),
+	}
 	const facts = FAMILY_FACTS[entry.family] || FAMILY_FACTS.foundation
 	return {
 		id: entry.id,
@@ -277,6 +291,11 @@ function enrich(entry) {
 		verificationEvidence: { registry: entry.capabilityStatus || entry.status, qualificationRecord: null, artifact: 'not-yet-generated', timestamp: null, provenance: 'canonical-public-catalog', rule: 'Executable registry status is not release appearance, editability, or playback qualification.' },
 		selection: entry.selection,
 		...(entry.matchReasons ? { matchReasons: entry.matchReasons } : {}),
+		...(entry.requirementFit ? {requirementFit:entry.requirementFit} : {}),
+		...(entry.authoringGuidance ? {authoringGuidance:entry.authoringGuidance} : {}),
+		...(entry.measurements ? {measurements:entry.measurements} : {}),
+		...(typeof entry.selectable==='boolean'?{selectable:entry.selectable}:{}),
+		...(entry.qualification ? {qualification:entry.qualification} : {}),
 	}
 }
 
@@ -289,6 +308,7 @@ export function publicControlRegistry(args = {}) {
 	const limit = Math.max(1, Math.min(50, Number(args.limit || 12)))
 	const requestedOffset = Number(args.offset || 0)
 	const page = publicBaselineCatalog({
+		...(args.motionRequirements ? {motionRequirements:args.motionRequirements} : {}),
 		family,
 		families: requestedFamily ? [] : intent.relevantFamilies,
 		excludeFamilies: intent.exclusions,
@@ -309,6 +329,7 @@ export function publicControlRegistry(args = {}) {
 		interpretation: intent,
 		pagination: controlId ? { total: matchedEntries.length, offset: 0, limit: 1, returned: matchedEntries.length, nextOffset: null, registryVersion: PUBLIC_CONTROL_REGISTRY_VERSION } : page.pagination,
 		controls: matchedEntries.slice(0, controlId ? 1 : limit).map(enrich),
+		...(page.motionQuery ? {motionQuery:{...page.motionQuery,candidateComparisons:page.motionQuery.candidateComparisons.filter(candidate=>matchedEntries.slice(0,controlId?1:limit).some(entry=>entry.id===candidate.id)),comparisonScope:'returned-controls'}} : {}),
 		lessons: PUBLIC_AUTHORING_LESSONS.filter(lesson => !intent.exclusions.includes(lesson.family) && (!intent.lessonIds.length || intent.lessonIds.includes(lesson.id))).map(lesson => ({ id: lesson.id, family: lesson.family, result: lesson.result, aliases: lesson.aliases })),
 		...(queryRecovery ? { recovery: queryRecovery } : {}),
 		unfiltered: { tool: 'betterpptx.authoring.catalog', request: { view: 'controls', offset: 0, limit: 12 }, note: 'Omit intent/query/family to inspect the unfiltered registry.' },

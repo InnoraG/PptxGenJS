@@ -21,7 +21,7 @@ import { validateSmartArtBlock } from '../smartart-authoring-family-contract.mjs
 import { validateEquationBlock } from '../equation-authoring-family-contract.mjs'
 import { normalizePictureStyle, pictureStylePresetById } from '../picture-style-presets.mjs'
 import { model3dViewPresetById } from '../model3d-view-presets.mjs'
-import { normalizeModel3dOptions } from '../model3d-authoring-family-contract.mjs'
+import { normalizeModel3dOptions, normalizeModel3dControlsInSpec } from '../model3d-authoring-family-contract.mjs'
 import { model3dMotionFraming, validateModel3dMotionFramingOptions, motionFramingError } from '../model3d-motion-framing-contract.mjs'
 import { normalizeStaticPose, model3dStaticPose, normalizeStaticPoseScene, staticPoseError } from '../presenter-static-pose-contract.mjs'
 import { applyConnectorStyleComposition, applyEquationGalleryPreset, resolveLayoutThemeMasterSpec, resolveTransitionPreset } from '../source-api-gallery-presets.mjs'
@@ -2084,6 +2084,10 @@ function model3DOptionsForObject(object, assets, ctx = {}) {
 	validateModel3DViewOptions(authoredViewOptions, `slides[${object.slideIndex ?? '?' }].${object.objectName || 'model3d'}.view`)
 	const staticPose = model3dStaticPose(object)
 	const scene = normalizeStaticPoseScene(modelOptions.scene ?? object.scene, staticPose)
+	if (scene?.preparedVariantId != null) {
+		if (typeof ctx.validatePreparedScene !== 'function') throw new Error('Prepared scene validation is required for this model asset.')
+		ctx.validatePreparedScene(modelOptions.modelAsset || modelAsset, scene)
+	}
 	const motionFraming = model3dMotionFraming(object)
 	if (motionFraming !== undefined) validateModel3dMotionFramingOptions({ ...authoredViewOptions, model3dViewPresetId, scene, motionFraming }, 'model3d')
 	if (motionFraming && typeof ctx.validateMotionFraming === 'function') ctx.validateMotionFraming(modelOptions.modelAsset || modelAsset, { ...object.rect, ...modelOptions, scene, staticPose, motionFraming })
@@ -5655,7 +5659,7 @@ export function buildSpecOperationPlan(spec, options = {}) {
 	// readback plan, so the canonical digest remains portable while the caller can
 	// still see exactly how a legacy request was represented.
 	const contentNormalization = normalizeContentKindsInSpec(spec)
-	spec = contentNormalization.spec
+	spec = normalizeModel3dControlsInSpec(contentNormalization.spec)
 	validateNative3DFieldsInSpec(spec)
 	validateStaticPoseFieldsInSpec(spec)
 	validateMotionFramingFieldsInSpec(spec)

@@ -3,6 +3,8 @@
 // insertion", etc.) all lower to one executable model3d carrier, while the
 // separate asset-generation operations remain host commands in their own unit.
 import { MODEL3D_VIEW_PRESETS } from './model3d-view-presets.mjs'
+import { isDeepStrictEqual } from 'node:util'
+import { PREPARED_MOTION_SCENE_SCHEMA } from './prepared-motion-scene-contract.mjs'
 import { STATIC_POSE_PUBLIC_SCHEMA, normalizeStaticPose, normalizeStaticPoseScene } from './presenter-static-pose-contract.mjs'
 import { MODEL3D_MOTION_FRAMING_PUBLIC_SCHEMA, validateModel3dMotionFramingOptions } from './model3d-motion-framing-contract.mjs'
 
@@ -59,7 +61,7 @@ export const MODEL3D_OPTIONS_PUBLIC_SCHEMA = Object.freeze({
 		nativeOnly: { type: ['boolean', 'null'] },
 		rotate: finiteNumber(-360, 360),
 		flipH: { type: ['boolean', 'null'] }, flipV: { type: ['boolean', 'null'] },
-		shadow: { type: ['object', 'null'] }, scene: { type: ['object', 'null'], additionalProperties: false, properties: { animId: { type: ['integer', 'null'], minimum: 0 }, motionId: { ...STATIC_POSE_PUBLIC_SCHEMA.properties.motionId, description: 'Exact playback motion for an approved ordinary model with staticPose or its null reset. Playback begins at the original motion start; the static pose does not offset it.' }, length: { type: ['number', 'null'], minimum: 0 }, loop: { type: ['boolean', 'null'] } } },
+		shadow: { type: ['object', 'null'] }, scene: { type: ['object', 'null'], additionalProperties: false, properties: { animId: { type: ['integer', 'null'], minimum: 0 }, preparedVariantId: PREPARED_MOTION_SCENE_SCHEMA, motionId: { ...STATIC_POSE_PUBLIC_SCHEMA.properties.motionId, description: 'Exact playback motion for an approved ordinary model with staticPose or its null reset. Playback begins at the original motion start; the static pose does not offset it.' }, length: { type: ['number', 'null'], minimum: 0 }, loop: { type: ['boolean', 'null'] } } },
 		...MODEL3D_VIEW_OPTIONS_PUBLIC_SCHEMA.properties,
 	},
 })
@@ -107,4 +109,28 @@ export function normalizeModel3dOptions(value, path = 'model3d.options') {
 	const scene = normalizeStaticPoseScene(value.scene, value.staticPose)
 	validateModel3dMotionFramingOptions({ ...value, scene }, path)
 	return structuredClone(value)
+}
+
+// Public aliases lower to the same typed object fields before layout and on
+// portable export. Raw provider/library options remain outside this contract.
+export function normalizeModel3dControlsInSpec(input) {
+	const spec = structuredClone(input)
+	const visit = (value, path) => {
+		if (!value || typeof value !== 'object') return
+		if (Array.isArray(value)) { value.forEach((item, index) => visit(item, `${path}[${index}]`)); return }
+		if (value.kind === 'model3d') {
+			for (const alias of ['modelOptions', 'model3dOptions']) {
+				if (value[alias] == null) { delete value[alias]; continue }
+				const controls = normalizeModel3dOptions(value[alias], `${path}.${alias}`)
+				for (const [key, control] of Object.entries(controls)) {
+					if (Object.hasOwn(value, key) && !isDeepStrictEqual(value[key], control)) throw new Error(`${path}.${key} conflicts with ${alias}.${key}.`)
+					value[key] = control
+				}
+				delete value[alias]
+			}
+		}
+		for (const [key, child] of Object.entries(value)) visit(child, `${path}.${key}`)
+	}
+	visit(spec, 'spec')
+	return spec
 }

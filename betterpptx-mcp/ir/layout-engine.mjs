@@ -4509,7 +4509,7 @@ function autoScenePlayAnimation(scene) {
 	return anim
 }
 
-function planBlock({ spec, slide, slideIndex = 0, block, blockIndex, regions, regionRect = null, theme, warnings, handles, templateContract, preserveSourceGeometry = false, preserveAuthoredPrecision = false }) {
+function planBlock({ spec, slide, slideIndex = 0, block, blockIndex, regions, regionRect = null, theme, warnings, handles, templateContract, preserveSourceGeometry = false, preserveAuthoredPrecision = false, validatePreparedScene }) {
 	const objects = []
 	// Default elevation is a World temperament, not a universal decoration.
 	// Flat/quiet/outline Worlds explicitly resolve depth.shadow:'none'; preserve
@@ -5954,6 +5954,15 @@ function planBlock({ spec, slide, slideIndex = 0, block, blockIndex, regions, re
 		const motionFraming = model3dMotionFraming(block)
 		const modelOptions = motionFraming === undefined ? block.modelOptions : { ...(block.model3dOptions || {}), ...(block.modelOptions || {}) }
 		const scene = normalizeStaticPoseScene(modelOptions?.scene ?? block.scene, model3dStaticPose(block))
+		// Resolve the exact owner-prepared clip before choosing the automatic animation.
+		// Keep the public selector in model controls so authored exports stay portable.
+		let playbackScene = scene
+		if (scene?.preparedVariantId != null) {
+			if (typeof validatePreparedScene !== 'function') throw new Error('Prepared scene validation is required for this model asset.')
+			const referencedAsset = (spec.assets || []).find(asset => asset.name === block.assetRef)
+			playbackScene = validatePreparedScene(modelOptions?.modelAsset || block.modelAsset || block.model3DAsset || block.model || block.style?.modelAsset || referencedAsset?.handle || referencedAsset?.modelAsset, scene)
+			if (typeof playbackScene?.animId !== 'number' || !Number.isFinite(playbackScene.animId)) throw new Error('Prepared scene validation did not resolve a playable clip.')
+		}
 		const hasModelReference = Boolean(block.assetRef || block.modelAsset || block.model3DAsset || block.model)
 		if (block.scene && typeof block.scene === 'object' && Object.prototype.hasOwnProperty.call(block.scene, 'posterAnimId')) {
 			warnings.push({
@@ -6033,7 +6042,7 @@ function planBlock({ spec, slide, slideIndex = 0, block, blockIndex, regions, re
 			// Only authored animation or an explicitly selected embedded Scene plays.
 			// World motion vocabulary never becomes automatic model playback.
 			animation: block.animation !== undefined ? block.animation
-				: autoScenePlayAnimation(scene),
+				: autoScenePlayAnimation(playbackScene),
 			altText: block.altText || `3D model: ${slide.message || slide.title}`,
 		})
 		return objects
@@ -6924,7 +6933,7 @@ export function planDeckLayout(spec, options = {}) {
 		const namedRegionRects = namedRegionStackRects(effectiveContent, regions)
 		for (let i = 0; i < effectiveContent.length; i += 1) {
 			const blockTheme = { ...theme, ...visual.theme, textColorRoles, art: visual.art, card: cardAxisForSpec(spec, visual.art), surface: spec.theme?.surface || spec.styleIntent?.surface, composition, typeEmphasis, depth, motion, stage3d, iconTemperament, imageTreatment, mediaMotion, headFontFace: spec.theme?.headFontFace || spec.theme?.fontFace || visual.headFontFace, bodyFontFace: spec.theme?.bodyFontFace || spec.theme?.fontFace || visual.bodyFontFace }
-			const blockObjects = planBlock({ spec, slide, slideIndex, block: effectiveContent[i], blockIndex: i, regions, regionRect: stackRectFor(namedRegionRects, effectiveContent[i]), theme: blockTheme, warnings, handles, templateContract, preserveSourceGeometry, preserveAuthoredPrecision })
+			const blockObjects = planBlock({ spec, slide, slideIndex, block: effectiveContent[i], blockIndex: i, regions, regionRect: stackRectFor(namedRegionRects, effectiveContent[i]), theme: blockTheme, warnings, handles, templateContract, preserveSourceGeometry, preserveAuthoredPrecision, validatePreparedScene: options.validatePreparedScene })
 			objects.push(...blockObjects)
 			for (const object of blockObjects) addOverexpandedTextShapeWarning(warnings, slide.id, effectiveContent[i], object)
 		}

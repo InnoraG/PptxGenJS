@@ -1,3 +1,4 @@
+import {motionAuthoringGuidance,motionCandidateComparisons} from './motion-authoring-guidance.mjs'
 // Public, black-box projection of the complete existing-capability catalog.
 // This is intentionally derived from the same capability ledger used by the
 // private MVP inventory, but exposes only semantic labels, opaque catalog IDs,
@@ -15,6 +16,9 @@ import { publicPictureStylePresets } from './picture-style-presets.mjs'
 import { publicModel3dViewPresets } from './model3d-view-presets.mjs'
 import { publicSourceApiGalleryPresets } from './source-api-gallery-presets.mjs'
 import { publicAuthoringMotionCatalog } from './ir/authoring-motion-catalog.mjs'
+import { evaluateMotionCatalog, validateMotionRequirements } from './motion-catalog-requirements.mjs'
+import { publicMotionSourceReviews } from './motion-source-authoring-reviews.mjs'
+import {evaluateMotionWindowCatalog} from './motion-source-movement-timeline.mjs'
 import { AUTHORING_LAYOUT_INTENTS, LAYOUT_INTENT_CONTRACTS, listArtDirections } from './ir/layout-engine.mjs'
 import { applyCatalogTruth } from './capability-truth.mjs'
 import {
@@ -615,6 +619,8 @@ function buildEntries({ includePlanned = false, diagnostics = [], motionCatalogF
 			narrativeUses: motion.narrativeUses,
 			semanticTags: motion.semanticTags,
 			behavior: motion.behavior,
+			...(motion.measurements ? { measurements: {...motion.measurements,...(motion.measurements.schemaVersion==='betterpptx.public-motion-measurements.v1'&&motion.measurements.root?{rootJoint:motion.measurements.root}:{})} } : {}),
+			...(motion.qualification ? { qualification: motion.qualification } : {}),
 			availability: motion.availability,
 			selectable: motion.selectable,
 			selection: {
@@ -684,6 +690,7 @@ function buildEntries({ includePlanned = false, diagnostics = [], motionCatalogF
 			},
 		})
 	}
+  entries.push(...publicMotionSourceReviews())
   const seen = new Set()
   return entries.filter(entry => {
     if (seen.has(entry.id)) return false
@@ -697,10 +704,15 @@ function buildEntries({ includePlanned = false, diagnostics = [], motionCatalogF
 
 export function publicBaselineCatalog(args = {}, options = {}) {
 	const family = String(args.family || args.surface || '').trim().toLowerCase()
+	if(args.motionWindowRequirements!==undefined&&family!=='presenter-motion')throw Object.assign(new Error('Source movement windows require family presenter-motion.'),{code:'MOTION_REQUIREMENT_FAMILY_REQUIRED'})
+	if (args.motionRequirements !== undefined) {
+		validateMotionRequirements(args.motionRequirements)
+		if (family !== 'presenter-motion') throw Object.assign(new Error('Motion requirements require family presenter-motion.'), { code: 'MOTION_REQUIREMENT_FAMILY_REQUIRED' })
+	}
 	const query = String(args.query || args.q || '').trim().toLowerCase()
 	const requestedFamilies = [...new Set((Array.isArray(args.families) ? args.families : []).map(value => String(value).trim().toLowerCase()).filter(Boolean))]
 	const excludedFamilies = new Set((Array.isArray(args.excludeFamilies) ? args.excludeFamilies : []).map(value => String(value).trim().toLowerCase()).filter(Boolean))
-	const queryTerms = searchTokens(query)
+	const queryTerms = meaningfulSearchTerms([query])
 	const relevanceTerms = meaningfulSearchTerms([
 		...queryTerms,
 		...(Array.isArray(args.relevanceTerms) ? args.relevanceTerms : []),
@@ -713,7 +725,7 @@ export function publicBaselineCatalog(args = {}, options = {}) {
 		if (requestedFamilies.length && !requestedFamilies.includes(entry.family)) return false
 		if (excludedFamilies.has(entry.family)) return false
 		if (excludedFamilies.has('narration') && entry.selection?.semanticKind === 'narration') return false
-		if (!queryTerms.length) return true
+		if (!queryTerms.length) return !query
 		return queryTerms.every(term => containsTokenSequence(searchableFields(entry), term))
 	}).map(entry => {
 		const reasons = matchReasons(entry, relevanceTerms)
@@ -724,11 +736,15 @@ export function publicBaselineCatalog(args = {}, options = {}) {
 		const score = entry => (entry.matchReasons || []).reduce((total, reason) => total + ({ id: 8, semanticPath: 8, parameterId: 7, aliases: 6, label: 5, family: 2, intentFamily: 1 }[reason.matchedBy] || 1), 0)
 		return score(b) - score(a)
 	})
+  const evaluated = args.motionRequirements === undefined ? null : evaluateMotionCatalog(filtered, args.motionRequirements)
+  const pageEntries = evaluated?.entries || filtered
+  if(typeof options.captureFilteredEntries==='function')options.captureFilteredEntries(pageEntries)
   const limit = Math.max(1, Math.min(500, Number(args.limit) || 100))
   const offset = Math.max(0, Number(args.offset) || 0)
-	const entries = filtered.slice(offset, offset + limit)
+  const motionWindowQuery=args.motionWindowRequirements===undefined?null:evaluateMotionWindowCatalog(pageEntries,args.motionWindowRequirements,{offset})
+	const entries = pageEntries.slice(offset, offset + limit).map(entry => entry.family === 'presenter-motion' ? {...entry,authoringGuidance:motionAuthoringGuidance(entry)} : entry)
 	const nextOffset = offset + entries.length < filtered.length ? offset + entries.length : null
-	const payload = all.map(entry => ({ id: entry.id, family: entry.family, label: entry.label, status: entry.status, implemented: entry.implemented, capabilityMode: entry.capabilityMode, capabilityStatus: entry.capabilityStatus, selection: entry.selection }))
+	const payload = all.map(entry => ({ id: entry.id, family: entry.family, label: entry.label, status: entry.status, implemented: entry.implemented, capabilityMode: entry.capabilityMode, capabilityStatus: entry.capabilityStatus, selection: entry.selection, ...(entry.sourceKind === 'observed-motion-review' ? { measurements:entry.measurements,sourceReview:entry.sourceReview,description:entry.description } : {}) }))
 	const catalogFingerprint = `betterpptx-catalog-${sha256(stableJson({ ledgerSemanticHash: ledgerSemanticHash(buildCapabilityLedger(undefined, 'betterpptx-mcp')), entries: payload, diagnostics })).slice(0, 24)}`
   const familyCounts = all.reduce((counts, entry) => {
     counts[entry.family] = (counts[entry.family] || 0) + 1
@@ -759,6 +775,7 @@ export function publicBaselineCatalog(args = {}, options = {}) {
     catalogFingerprint,
 		catalogClosure: {
 			baselineEntries: all.filter(entry => entry.implemented).length,
+			sourceReviewEntries: all.filter(entry => entry.sourceKind === 'observed-motion-review').length,
 		  classifiedEntries: all.length,
 		  expectedServedEntriesWithPlanned: includePlanned ? all.length : null,
 		  classificationComplete: all.every(entry => entry.capabilityMode && entry.capabilityStatus),
@@ -769,6 +786,8 @@ export function publicBaselineCatalog(args = {}, options = {}) {
     },
 		pagination: { offset, limit, returned: entries.length, total: filtered.length, nextOffset, complete: nextOffset === null, query: query || null },
 		entries,
+		...(motionWindowQuery?{motionWindowQuery}:{}),
+		...(evaluated ? { motionQuery: {...evaluated.motionQuery,candidateComparisons:motionCandidateComparisons(entries),comparisonScope:'returned-page',nextOffset} } : {}),
 		...(emptyReason ? { emptyReason } : {}),
 		...(diagnostics.length ? { degradations: diagnostics } : {}),
 	}

@@ -892,6 +892,9 @@
       "required": ["presenterId", "motionId"],
       "description": "Exact semantic motion selected by the AI for one slide; raw animId values are forbidden.",
       "properties": {
+        "duration": {"type":["number","null"],"minimum":1,"maximum":86400000,"description":"Requested native playback-command duration in milliseconds; does not rewrite embedded clip keys."},
+        "delay": {"type":["number","null"],"minimum":0,"maximum":86400000,"description":"Requested native playback delay in milliseconds."},
+        "loop": {"type":["boolean","null"],"description":"False requests one native pass; true requests repetition. This does not qualify a source hold phase or native playback. Null or omission retains the existing default."},
         "presenterId": { "type": "string", "minLength": 1 },
         "motionId": { "type": "string", "pattern": "^motion\\." },
         "narrationCue": { "type": ["string", "object", "null"] }
@@ -3505,7 +3508,8 @@
         "ambientLight": { "type": ["object", "null"], "additionalProperties": false, "properties": { "illuminance": { "type": ["number", "null"], "minimum": 0, "maximum": 100 }, "color": { "$ref": "#/$defs/color3d" } } },
         "ptLights": { "type": ["array", "null"], "maxItems": 3, "items": { "type": "object", "additionalProperties": false, "properties": { "intensity": { "type": ["number", "null"], "minimum": 0, "maximum": 100 }, "color": { "$ref": "#/$defs/color3d" }, "pos": { "$ref": "#/$defs/bbox3d" } } } },
         "objViewport": { "type": ["integer", "null"], "minimum": 1, "maximum": 2147483647 }, "shadow": { "type": ["object", "null"] },
-        "scene": { "type": ["object", "null"], "additionalProperties": false, "properties": { "animId": { "type": ["integer", "null"], "minimum": 0 }, "motionId": { "$ref": "#/$defs/presenterStaticPose/properties/motionId", "description": "Exact playback motion for an approved ordinary model with staticPose or its null reset. Playback begins at the original motion start, independent of the stopped pose." }, "length": { "type": ["number", "null"], "minimum": 0 }, "loop": { "type": ["boolean", "null"] } } }
+        "scene": { "type": ["object", "null"], "additionalProperties": false, "properties": {
+        "preparedVariantId": {"type":["string","null"],"pattern":"^prepared_variant_[a-f0-9]{32}$","description":"Exact owner-prepared variant for this model asset; selects its single clip without a private animation index."}, "animId": { "type": ["integer", "null"], "minimum": 0 }, "motionId": { "$ref": "#/$defs/presenterStaticPose/properties/motionId", "description": "Exact playback motion for an approved ordinary model with staticPose or its null reset. Playback begins at the original motion start, independent of the stopped pose." }, "length": { "type": ["number", "null"], "minimum": 0 }, "loop": { "type": ["boolean", "null"] } } }
       }
     },
     "model3dMotionFraming": {

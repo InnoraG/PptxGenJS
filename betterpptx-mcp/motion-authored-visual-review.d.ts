@@ -1,0 +1,4 @@
+export type AuthoredVisualMotionReview={schemaVersion:'betterpptx.authored-visual-motion-review.v1';preparedVariantId:`prepared_variant_${string}`;preparedOutputSha256:string;preparationReceiptSha256:string;reviewReceiptSha256:string;sampleTimesMs:number[];captureCount:number;scope:'sampled-prepared-output-only';interpretationAuthority:'ai';nativeQualification:'unqualified'}
+export type PublicAuthoredVisualMotionReview={evidenceId:string;scope:AuthoredVisualMotionReview['scope'];interpretationAuthority:'ai';captureCount:number;sampleTimesMs:number[];nativeQualification:'unqualified';semanticQualification:'not-established';currentAssetAvailability:'not-assessed'}
+export function validateAuthoredVisualReview(value:unknown,observation:{clock:{durationMs:number}}):AuthoredVisualMotionReview
+export function publicAuthoredVisualReview(value:AuthoredVisualMotionReview):PublicAuthoredVisualMotionReview

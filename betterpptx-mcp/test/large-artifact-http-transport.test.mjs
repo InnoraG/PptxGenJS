@@ -28,6 +28,8 @@ const fixture = {
 }
 const mockUrl = `data:text/javascript,${encodeURIComponent(`
   export const calls = []
+  export function configureMotionPreparationRuntime() { throw new Error("Synthetic delivery must not configure motion preparation") }
+  export function configureBuiltInPreparedMotionRuntime() { throw new Error("Synthetic delivery must not configure built-in assets") }
   export function createMcpToolDispatcher() {
     return { call: async (name, args) => {
       calls.push({ name, args: structuredClone(args) })

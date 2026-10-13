@@ -1,8 +1,11 @@
+import {MOTION_WINDOW_REQUIREMENTS_SCHEMA} from './motion-source-movement-timeline.mjs'
+import {MOTION_COMPARISON_PREPARATION_TARGET_SCHEMA} from './motion-comparison-readiness.mjs'
 // BetterPPTX tool catalog
 // MCP tool definitions for a self-contained PPTX generation and editing engine.
 // The AI client does not need to call any external PPTX authoring library.
 
 import { SHAPE_FORMATTING_SCHEMA, SHAPE_PRESET_GEOMETRIES } from './native-formatting-contract.mjs'
+import { MOTION_REQUIREMENTS_SCHEMA } from './motion-catalog-requirements.mjs'
 import {
 	IMAGE_ASSET_SOURCE_SCHEMA,
 	IMAGE_FRAMING_SCHEMA,
@@ -40,6 +43,8 @@ import { SLIDE_CONTINUITIES_PUBLIC_SCHEMA, SLIDE_CONTINUITIES_READBACK_SCHEMA } 
 import { MODEL3D_PUBLIC_OPERATION_SCHEMAS } from './model3d-public-operation-contract.mjs'
 import { MEDIA_AVATAR_PUBLIC_OPERATION_SCHEMAS } from './media-avatar-public-operation-contract.mjs'
 import { premiumQuoteBindingPublicSchema } from './billing/premium-quote-contract.mjs'
+import { PUBLIC_CANDIDATE_TOOLS } from './motion-candidate-contract.mjs'
+import { MOTION_PREPARATION_TOOLS } from './motion-preparation-contract.mjs'
 
 // The node contract is recursive at runtime. For JSON-Schema consumers that
 // embed an item schema (where a fragment-local $ref would resolve against the
@@ -302,6 +307,8 @@ const SVG_CUSTOM_GEOMETRY_COMPILE_PROPS = {
 }
 
 export const TOOLS = [
+	...PUBLIC_CANDIDATE_TOOLS,
+	...MOTION_PREPARATION_TOOLS,
 	{
 		name: 'betterpptx.help.capabilities',
 		title: 'List BetterPPTX capabilities',
@@ -384,7 +391,10 @@ export const TOOLS = [
 		inputSchema: {
 			type: 'object',
 			properties: {
-				view: { type: 'string', enum: ['catalog', 'controls', 'lesson'], default: 'catalog', description: 'Catalog rows, enriched individual controls, or one teaching lesson.' },
+				motionRequirements: MOTION_REQUIREMENTS_SCHEMA,
+				preparationTarget: MOTION_COMPARISON_PREPARATION_TARGET_SCHEMA,
+				motionWindowRequirements: MOTION_WINDOW_REQUIREMENTS_SCHEMA,
+				view: { type: 'string', enum: ['catalog', 'controls', 'lesson', 'motion-comparisons'], default: 'catalog', description: 'Catalog rows, enriched individual controls, one teaching lesson, or compact motion comparison cards with exact full-evidence routes.' },
 				family: { type: 'string', description: 'Optional semantic family filter, such as charts, tables, smartart, shapes-gradients, media-images-avatar, model3d, equations, structural, motion-transitions-morph, or presenter-motion.' },
 				surface: { type: 'string', description: 'Alias for family.' },
 				intent: { type: 'string', maxLength: 512, description: 'Ordinary-language task intent such as design niceties, premium polish, dimensional headline, impressive readable screenshot, animate a process, animated table, presenter table, or more than fade. Explicit exclusions are preserved.' },

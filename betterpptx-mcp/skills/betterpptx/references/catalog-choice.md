@@ -44,3 +44,9 @@ Each specialized catalog returns `selectionManifestContract.selectorKeys`. Only 
 - Verify dry-run, commit, export/readback, and final validation preserve the exact selected IDs and AI-authored reasons.
 
 Do not query source files, private registries, filesystem locations, logs, or implementation details to make a choice.
+
+## Built-in presenter source motions
+
+The presenter-motion family also contains shared built-in source reviews. They expand the product library; a customer does not need a private candidate registry to discover or reuse them. A review ID is an evidence and discovery selector, not an executable motion ID. Use the ordinary catalog's motion requirements and motion-comparisons view to inspect action, hand, body movement, measured intervals, uncertainty, and exact target compatibility. An honest no-qualified-match result is valid; a name or sampled quiet interval does not prove pointing or a continuous hold.
+
+Use an advertised compatibleTargetModels handle with betterpptx.motion.preparation_profiles.list and an explicit original or skeletal-mirrored variant. A profile marked preparationMode:"reuse-only" belongs to the published library: inspect it until preparedOutput.state is "prepared", then use that output's modelAsset on a model3d block and its preparedVariantId in scene.preparedVariantId. Choose length and loop deliberately using the returned sourceClock. Do not submit a reuse-only profile to motion.prepare_variant or author a raw clip index. Unavailable targets or variants must remain no-match. Built-in asset reuse does not grant access to other customers' scenes or exports.

@@ -4,7 +4,7 @@ import { Server } from "@modelcontextprotocol/server";
 // betterpptx MCP server (stdio transport)
 import { TOOLS, canonicalToolName, normalizeToolNameProfile, rewriteToolNamesForProfile } from './tools.mjs'
 import { publicServerVersion, publicRuntimeManifest } from './public-manifest.mjs'
-import { createMcpToolDispatcher } from './engine.mjs'
+import { configureMotionPreparationRuntime, configureBuiltInPreparedMotionRuntime, createMcpToolDispatcher } from './engine.mjs'
 import { BETTERPPTX_PRODUCT, BETTERPPTX_SERVER_NAME } from './branding.mjs'
 import { createTraceId, getLoggerInfo, logEvent } from './logger.mjs'
 import { diagnosticRequestId, traceToolList, traceToolCall } from './diagnostic-trace.mjs'
@@ -12,6 +12,11 @@ import { isPublicBlackBoxMode, publicToolList } from './blackbox.mjs'
 import { MONETIZED_MCP_PROTOCOL_TOOLS } from './billing/monetized-mcp-adapter.mjs'
 import { resolveStdioSessionId } from './auth/stdio-session-identity.mjs'
 import { withSavedPresentationResourceLink } from './delivery/public-file-result.mjs'
+import { loadTrustedMotionPreparationRepository } from './motion-preparation-private-provider.mjs'
+import { initializeMotionCandidateDiscovery } from './motion-candidate-startup.mjs'
+import { assertMotionCandidateStartupConfiguration, loadTrustedMotionCandidateStartup } from './motion-candidate-private-provider.mjs'
+import { initializeMotionSourceReviewCatalogs, loadTrustedMotionSourceReviewCatalogs } from './motion-source-review-startup.mjs'
+import {loadTrustedBuiltInPreparedMotionPublication} from './builtin-prepared-motion-provider.mjs'
 
 export { resolveStdioSessionId }
 
@@ -124,7 +129,25 @@ async function withStdoutRedirected(fn) {
 	finally { console.log = orig.log; console.info = orig.info; console.warn = orig.warn }
 }
 
-export function createBetterPptxMcpServer(context = {}) {
+export function configureBetterPptxMcpPrivateStartup(privateStartup = {}) {
+	if (!privateStartup || typeof privateStartup !== 'object' || Array.isArray(privateStartup)
+		|| Object.keys(privateStartup).some(key => !['trustedMotionPreparationRepository', 'trustedMotionCandidateStartup', 'trustedMotionSourceReviewCatalogs', 'trustedBuiltInPreparedMotionPublication'].includes(key))) {
+		throw new TypeError('Private startup configuration is invalid.')
+	}
+	if (Object.hasOwn(privateStartup, 'trustedMotionCandidateStartup')) {
+		initializeMotionCandidateDiscovery(assertMotionCandidateStartupConfiguration(privateStartup.trustedMotionCandidateStartup))
+	}
+	if (Object.hasOwn(privateStartup, 'trustedMotionPreparationRepository')) {
+		configureMotionPreparationRuntime({ trustedRepository: privateStartup.trustedMotionPreparationRepository })
+	}
+	if (Object.hasOwn(privateStartup, 'trustedMotionSourceReviewCatalogs')) initializeMotionSourceReviewCatalogs(privateStartup.trustedMotionSourceReviewCatalogs)
+	if (Object.hasOwn(privateStartup, 'trustedBuiltInPreparedMotionPublication')) configureBuiltInPreparedMotionRuntime(privateStartup.trustedBuiltInPreparedMotionPublication)
+}
+
+export function createBetterPptxMcpServer(context = {}, privateStartup = {}) {
+	// Owner repositories enter only through this local startup boundary. They are
+	// never copied into request context, MCP arguments, logs, or public results.
+	configureBetterPptxMcpPrivateStartup(privateStartup)
 	const blackBox = context.blackBox ?? isPublicBlackBoxMode()
 	const toolNameProfile = normalizeToolNameProfile(context.toolNameProfile)
 	const logContext = {
@@ -217,7 +240,7 @@ export function createBetterPptxMcpServer(context = {}) {
 	return server
 }
 
-export async function runBetterPptxMcpStdio() {
+export async function runBetterPptxMcpStdio(privateStartup) {
 	// Safe-by-default, mirroring the HTTP entry: an stdio connector must not expose
 	// maintainer internals (local paths, pids, git, full primitive surface) to an
 	// untrusted client. Default to public black-box unless the operator explicitly
@@ -229,7 +252,15 @@ export async function runBetterPptxMcpStdio() {
 	// launcher may provide a trusted per-process identity for deterministic
 	// development runs; otherwise create one here.  Never fall back to the
 	// deliberately unbound stdio-default identity for resource-bearing calls.
-	const server = createBetterPptxMcpServer({ sessionId: resolveStdioSessionId() })
+	const configuredStartup = privateStartup === undefined
+		? await Promise.all([loadTrustedMotionPreparationRepository(), loadTrustedMotionCandidateStartup(), loadTrustedMotionSourceReviewCatalogs(), loadTrustedBuiltInPreparedMotionPublication()]).then(([repository, candidates, sourceReviews, builtInPrepared]) => ({
+			...(repository === undefined ? {} : { trustedMotionPreparationRepository: repository }),
+			...(candidates === undefined ? {} : { trustedMotionCandidateStartup: candidates }),
+			...(sourceReviews === undefined ? {} : { trustedMotionSourceReviewCatalogs: sourceReviews }),
+			...(builtInPrepared === undefined ? {} : { trustedBuiltInPreparedMotionPublication: builtInPrepared }),
+		}))
+		: privateStartup
+	const server = createBetterPptxMcpServer({ sessionId: resolveStdioSessionId() }, configuredStartup)
 	// Uploaded PPTX bytes travel through one newline-delimited JSON-RPC request.
 	// The base64 envelope is ~4/3 the binary size, so the SDK's default 10 MiB
 	// line buffer closed the session before deck.open_uploaded could validate a

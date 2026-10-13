@@ -1,0 +1,3 @@
+import type {MotionPreparedOutput,MotionVariant,MotionPreparationProfileDiscovery,MotionPreparationProfileQuery,TrustedResourceOwner,PreparationProfileId} from './motion-preparation-contract.mjs';
+export function validatePreparedOutput(value:unknown,variant:MotionVariant):MotionPreparedOutput;
+export function attachPreparedOutputs(result:MotionPreparationProfileDiscovery,query:MotionPreparationProfileQuery,owner:TrustedResourceOwner,lookup?: (query:MotionPreparationProfileQuery,owner:TrustedResourceOwner,profileId:PreparationProfileId)=>Promise<MotionPreparedOutput>):Promise<MotionPreparationProfileDiscovery>;

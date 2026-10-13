@@ -1,0 +1,9 @@
+import {TRUSTED_MOTION_PREPARATION_REPOSITORY_SCHEMA_VERSION} from './motion-preparation-repository-contract.mjs';
+
+export const MOTION_PREPARATION_PRIVATE_INPUT_CONTRACT_SCHEMA_VERSION='betterpptx.private-motion-preparation-inputs.v1';
+export const MOTION_PREPARATION_RESOURCE_BUNDLE_SCHEMA_VERSION='private-motion-preparation-resources.v1';
+export const MOTION_PREPARATION_PRIVATE_INPUT_CONTRACT=Object.freeze({
+ schemaVersion:MOTION_PREPARATION_PRIVATE_INPUT_CONTRACT_SCHEMA_VERSION,
+ repositorySchemaVersion:TRUSTED_MOTION_PREPARATION_REPOSITORY_SCHEMA_VERSION,
+ resourceBundleSchemaVersion:MOTION_PREPARATION_RESOURCE_BUNDLE_SCHEMA_VERSION,
+});

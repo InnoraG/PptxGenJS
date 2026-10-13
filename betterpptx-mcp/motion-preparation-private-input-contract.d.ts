@@ -1,0 +1,8 @@
+export type MotionPreparationResourceBundleSchemaVersion='private-motion-preparation-resources.v1';
+export declare const MOTION_PREPARATION_PRIVATE_INPUT_CONTRACT_SCHEMA_VERSION:'betterpptx.private-motion-preparation-inputs.v1';
+export declare const MOTION_PREPARATION_RESOURCE_BUNDLE_SCHEMA_VERSION:MotionPreparationResourceBundleSchemaVersion;
+export declare const MOTION_PREPARATION_PRIVATE_INPUT_CONTRACT:Readonly<{
+ schemaVersion:typeof MOTION_PREPARATION_PRIVATE_INPUT_CONTRACT_SCHEMA_VERSION;
+ repositorySchemaVersion:'betterpptx.trusted-motion-preparation-repository.v1';
+ resourceBundleSchemaVersion:MotionPreparationResourceBundleSchemaVersion;
+}>;

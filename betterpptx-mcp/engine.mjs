@@ -1,3 +1,8 @@
+import {motionCatalogRecovery} from './motion-catalog-recovery.mjs'
+import {validateMotionWindowRequirements,motionComparisonWindows} from './motion-source-movement-timeline.mjs'
+import {validateMotionComparisonTarget,motionComparisonTargetReadiness,motionComparisonCatalogReadiness} from './motion-comparison-readiness.mjs'
+import {motionComparisonPage} from './motion-comparison-view.mjs'
+import {captureQueuedMcpContinuation,isQueuedMcpContinuation} from './queued-mcp-continuation.mjs'
 // betterpptx engine
 // In-memory deck registry + tool implementations.
 // Calls into the bundled self-contained PPTX runtime.
@@ -25,7 +30,11 @@ import { prepareNarrationAudio, NARRATION_PREPARATION_SCHEMA_VERSION } from './n
 import { assertProductionBillingConfiguration, isProductionBillingEnvironment } from './billing/security-policy.mjs'
 import { createBillingDeliveryBarrier, withBillingDeliveryBarrier, currentBillingDeliveryBarrier, awaitBillingDelivery } from './billing/delivery-barrier.mjs'
 import { withResourceAuthorization, bindNewResourceOwner, currentResourceOwner, canAccessResource, assertResourceAccess, resourceOwnerOf, resourceOwnerCacheKey, resourceAuthorizationActive } from './auth/resource-authorization.mjs'
+import {createBuiltInPreparedMotionLibrary} from './builtin-prepared-motion-library.mjs'
+import {configureBuiltInPreparedMotionLibrary,builtInPreparedMotionLibrary,isPublishedBuiltInMotionHandle,assertPublishedBuiltInMotionBytes,hydratePublishedBuiltInMotion} from './builtin-prepared-motion-service.mjs'
+import {builtInMotionSourceReview} from './motion-source-authoring-reviews.mjs'
 import { createAssetGrantManager, AssetGrantError, requiresAssetGrant, assetGrantBundleBytes } from './auth/asset-grants.mjs'
+import { loadGeneratedAsset } from './storage/gen-asset-store.mjs'
 import { publicVoiceCatalog, probeSynthesisRuntime } from './narration/runtime-status.mjs'
 import { narratedProfileRequested } from './narration/tts-text.mjs'
 import { findNonNativeCaptionOverlayField, materializeClosedCaptionTracks, nonNativeCaptionOverlayIssue, normalizeAuthoredCue } from './ir/narration-contract.mjs'
@@ -86,7 +95,8 @@ import {
 	validateAddMediaAuthoringCore,
 } from './layout-media-entry-contract.mjs'
 import { applyModel3dViewPreset, model3dViewPresetById } from './model3d-view-presets.mjs'
-import { normalizeModel3dOptions } from './model3d-authoring-family-contract.mjs'
+import { normalizeModel3dOptions, normalizeModel3dControlsInSpec } from './model3d-authoring-family-contract.mjs'
+import { resolvePreparedMotionScene } from './prepared-motion-scene-contract.mjs'
 import { normalizeModel3dMotionFraming, model3dMotionFraming, motionFramingError } from './model3d-motion-framing-contract.mjs'
 import { computeModel3dMotionFraming } from './ir/model3d-motion-framing.mjs'
 import { normalizeStaticPose, model3dStaticPose, normalizeStaticPoseScene, staticPoseError } from './presenter-static-pose-contract.mjs'
@@ -181,7 +191,7 @@ import { evaluateWorkerJudgeResponse, invokeSemanticJudgeWorker } from './qualit
 import { parseStockHandle, resolveStockHandle, searchStock, stockProviderStatus } from './assets/stock-providers.mjs'
 import { generateImage as generateImageUnchecked, cacheGeneratedImage, getCachedGeneratedImage as getCachedGeneratedImageUnchecked, parseGenHandle, imageRequestHashFor, imageEnsembleSelectionHashFor, normalizeImageCapability, persistGeneratedImage, hydrateGeneratedImage as hydrateGeneratedImageUnchecked, persistGeneratedImageEnsembleSelection, loadGeneratedImageEnsembleSelection } from './assets/image-gen-providers.mjs'
 import { resolveGenAssetTenantIdentity } from './storage/gen-asset-store.mjs'
-import { generateRigged3d as generateRigged3dUnchecked, cacheGeneratedRigged3d, getCachedGeneratedRigged3d as getCachedGeneratedRigged3dUnchecked, parseGenRigged3dHandle, rigged3dHashFor, model3dGenProviderStatus, persistGeneratedRigged3d, hydrateGeneratedRigged3d as hydrateGeneratedRigged3dUnchecked } from './assets/model3d-gen-providers.mjs'
+import { generateRigged3d as generateRigged3dUnchecked, cacheGeneratedRigged3d, registerLocalRigged3d, getCachedGeneratedRigged3d as getCachedGeneratedRigged3dUnchecked, parseGenRigged3dHandle, rigged3dHashFor, model3dGenProviderStatus, persistGeneratedRigged3d, hydrateGeneratedRigged3d as hydrateGeneratedRigged3dUnchecked } from './assets/model3d-gen-providers.mjs'
 import { isPublicDefaultPresenterHandle } from './assets/default-presenter-roster.mjs'
 import { generatePersonalizedMeshyAvatar, meshyAvatarHashFor, meshyAvatarProviderStatus } from './assets/meshy-avatar-provider.mjs'
 import { resolveNative3dPipeline, publicProductionNative3dLicense } from './ir/native3d-policy.mjs'
@@ -213,6 +223,12 @@ const MCP_AUTHORING_CAPABILITY = Symbol('betterpptx.mcp-authoring-capability')
 // itself may allocate the underlying PptxGenJS object graph.
 const SPEC_COMPILER_CAPABILITY = Symbol('betterpptx.spec-compiler-capability')
 import { canonicalToolName, TOOLS } from './tools.mjs'
+import { dispatchMotionCandidateTool } from './motion-candidate-service.mjs'
+import { configureMotionPreparationService, dispatchMotionPreparation, dispatchMotionPreparationProfileList, dispatchMotionPreparationProfileCatalog } from './motion-preparation-service.mjs'
+import { createMotionPreparationRuntime } from './motion-preparation-runtime.mjs'
+import { createGeneratedMotionPreparationCache } from './motion-preparation-cache.mjs'
+import { createMotionPreparedFileDelivery } from './motion-preparation-delivery.mjs'
+import { hydratePreparedNativeAsset } from './motion-preparation-native-asset.mjs'
 import { publicRuntimeManifest, publicCapabilityDiscovery, PUBLIC_SEMANTIC_VERSION, TOOL_SCHEMA_VERSION } from './public-manifest.mjs'
 import { publicAuthoringCapabilityCatalog, publicCapabilityOverview, publicContentRepresentationContract, PUBLIC_COMBINED_CAPABILITY_EXAMPLES, PUBLIC_NARRATION_CAPABILITY_CONTRACT } from './authoring-capability-registry.mjs'
 import { publicBaselineCatalog } from './public-baseline-catalog.mjs'
@@ -712,6 +728,7 @@ const LONG_TOOL_TIMEOUT_MS = Math.max(TOOL_TIMEOUT_MS, Number(process.env.BETTER
 // before their transport times out; they can poll/replay the original result.
 const NARRATION_RESPONSE_TIMEOUT_MS = Math.min(LONG_TOOL_TIMEOUT_MS, Math.max(1000, Number(process.env.BETTERPPTX_NARRATION_RESPONSE_TIMEOUT_MS || 90000)))
 const LONG_RUNNING_TOOLS = new Set([
+	'betterpptx.motion.prepare_variant',
 	'betterpptx.assets.generate_rigged3d',
 	'betterpptx.assets.generate_model3d',
 	'betterpptx.sketchfab.import',
@@ -758,12 +775,16 @@ function lockedAssetHandle(kind, digest, ext = '') {
 // Private request authority, separate from the process-global content caches.
 // An execution receipt is server-created, never deserialized from tool arguments.
 let assetGrants = createAssetGrantManager()
-// Trusted white-box seam, never a request argument or an allow/bypass flag.
-// Tests still configure STORE=firestore and exercise the real grant protocol.
+// Trusted server bootstrap only. This configures the existing grant backend;
+// it never creates an owner, grants assets, or changes publication entitlement.
+export function configureAssetAuthorizationRuntime({ firestoreClient = null } = {}) {
+	if (resourceAuthorizationActive()) throw new Error('Asset runtime configuration cannot change inside a request.')
+	if (firestoreClient !== null && (typeof firestoreClient?.collection !== 'function' || typeof firestoreClient?.runTransaction !== 'function')) throw new TypeError('A transactional asset-store client is required.')
+	assetGrants = createAssetGrantManager({ firestoreClient })
+}
+// Backward-compatible test seam uses the same bootstrap and authorization path.
 export function setAssetGrantFirestoreClientForTest(client) {
-	if (resourceAuthorizationActive()) throw new Error('Asset test configuration cannot change inside a request.')
-	if (client !== null && (typeof client?.collection !== 'function' || typeof client?.runTransaction !== 'function')) throw new TypeError('A transactional test client is required.')
-	assetGrants = createAssetGrantManager({ firestoreClient: client })
+	return configureAssetAuthorizationRuntime({ firestoreClient: client })
 }
 const assetProductionReceipts = new AsyncLocalStorage()
 function enforceAssetOwnership() {
@@ -777,11 +798,11 @@ function privateAssetHandles(value) {
 		const item = queue.pop()
 		if (typeof item === 'string') {
 			if (/^(?:asset|gen|model3d):/i.test(item.trim())) {
-				if (requiresAssetGrant(item) && !isPublicDefaultPresenterHandle(item.trim())) handles.add(item.trim())
+				if (requiresAssetGrant(item) && !isPublicDefaultPresenterHandle(item.trim()) && !isPublishedBuiltInMotionHandle(item.trim())) handles.add(item.trim())
 			} else {
 				// HTML and other textual spec carriers can contain handles too.
 				for (const match of item.matchAll(/\b(?:asset|gen):\/\/[^\s"'<>\\\[\]{},;)]+/gi)) {
-					if (requiresAssetGrant(match[0]) && !isPublicDefaultPresenterHandle(match[0])) handles.add(match[0])
+					if (requiresAssetGrant(match[0]) && !isPublicDefaultPresenterHandle(match[0]) && !isPublishedBuiltInMotionHandle(match[0])) handles.add(match[0])
 				}
 			}
 		} else if (item && typeof item === 'object' && !seen.has(item) && !(item instanceof Uint8Array)) {
@@ -794,10 +815,26 @@ function privateAssetHandles(value) {
 async function authorizeAssetReferences(value) {
 	if (enforceAssetOwnership()) await assetGrants.authorize(privateAssetHandles(value))
 }
+// A shared profile's target selector describes compatibility. It does not
+// request the publisher's target bytes. The service validates the exact tuple;
+// all asset-bearing authoring calls retain the ordinary grant checks.
+function assetAuthorizationInput(tool, args) {
+	const library=builtInPreparedMotionLibrary()
+	if (tool==='betterpptx.motion.preparation_profiles.list' && args?.source?.kind==='review' && library?.hasReview(args.source.id)) {
+		const {targetModel,...rest}=args
+		return rest
+	}
+	if (tool==='betterpptx.authoring.catalog' && library?.isPublishedTarget(args?.preparationTarget?.targetModel)) {
+		const {targetModel,...target}=args.preparationTarget
+		return {...args,preparationTarget:target}
+	}
+	return args
+}
 function assertAssetReferencesSync(value) {
 	if (enforceAssetOwnership()) for (const handle of privateAssetHandles(value)) assetGrants.assertAccessSync(handle)
 }
 function assertAssetBytes(handle, bytes) {
+	if (isPublishedBuiltInMotionHandle(handle)) return assertPublishedBuiltInMotionBytes(handle,bytes)
 	if (enforceAssetOwnership() && !isPublicDefaultPresenterHandle(handle)) assetGrants.assertBytesSync(handle, bytes)
 	return bytes
 }
@@ -824,14 +861,26 @@ function generatedRigged3dBytes(entry) {
 	parts.metadata = Buffer.from(canonicalJsonForLockedHandle({ manifest: entry?.manifest || null, clipMap: entry?.clipMap || null }))
 	return assetGrantBundleBytes(parts)
 }
+async function loadPersistedGeneratedRigged3d(hash, tenant) {
+	const loaded = await loadGeneratedAsset({ tenantId: tenant, hash: String(hash || '') })
+	if (!loaded || loaded.record?.kind !== 'rigged3d' || loaded.record?.hash !== hash || !loaded.record?.meta) return null
+	const glb = loaded.blobs?.glb
+	if (!Buffer.isBuffer(glb) || !glb.length) return null
+	return {
+		...loaded.record.meta,
+		glbBase64: glb.toString('base64'),
+		previewBase64: loaded.blobs?.poster ? Buffer.from(loaded.blobs.poster).toString('base64') : null,
+	}
+}
 function ownedGeneratedCache(handle, read, bytesFor) {
 	const publicDefaultPresenter = isPublicDefaultPresenterHandle(handle)
-	if (enforceAssetOwnership() && !publicDefaultPresenter) {
+	const publishedMotion = isPublishedBuiltInMotionHandle(handle)
+	if (enforceAssetOwnership() && !publicDefaultPresenter && !publishedMotion) {
 		try { assetGrants.assertAccessSync(handle) }
 		catch (error) { if (error?.code === 'ASSET_NOT_FOUND') return null; throw error }
 	}
 	const entry = read()
-	if (entry && enforceAssetOwnership() && !publicDefaultPresenter) assertAssetBytes(handle, bytesFor(entry))
+	if (entry && (publishedMotion || enforceAssetOwnership() && !publicDefaultPresenter)) assertAssetBytes(handle, bytesFor(entry))
 	return entry
 }
 function getCachedGeneratedImage(hash) {
@@ -854,7 +903,21 @@ function hydrateGeneratedImage(hash, tenant) {
 	return hydrateOwnedGenerated(`gen://image/${hash}`, () => hydrateGeneratedImageUnchecked(hash, tenant), generatedImageBytes)
 }
 function hydrateGeneratedRigged3d(hash, tenant) {
-	return hydrateOwnedGenerated(`gen://rigged3d/${hash}`, () => hydrateGeneratedRigged3dUnchecked(hash, tenant), generatedRigged3dBytes)
+	if (isPublishedBuiltInMotionHandle(`gen://rigged3d/${hash}`)) return hydratePublishedBuiltInMotion(hash)
+	return hydrateOwnedGenerated(`gen://rigged3d/${hash}`, async () => {
+		const ordinary = await hydrateGeneratedRigged3dUnchecked(hash, tenant)
+		if (ordinary || !enforceAssetOwnership()) return ordinary
+		const prepared=await hydratePreparedNativeAsset({
+			hash, owner: currentResourceOwner(), currentOwner: currentResourceOwner, assetGrants,
+			load: loadPersistedGeneratedRigged3d, bundleBytes: generatedRigged3dBytes,
+			cache: (key, entry) => {
+				cacheGeneratedRigged3d({ ...entry, promptHash: key })
+				return getCachedGeneratedRigged3d(key)
+			},
+		})
+		if(prepared)return prepared
+		return null
+	}, generatedRigged3dBytes)
 }
 async function generateImage(args) {
 	if (enforceAssetOwnership()) await assetGrants.checkReady()
@@ -926,6 +989,19 @@ function resolveLockedAssetHandle(value) {
 
 function canonicalJsonForLockedHandle(value) {
 	return JSON.stringify(stableForHash(value))
+}
+
+export function configureBuiltInPreparedMotionRuntime({publication,loadAsset}) {
+	if (resourceAuthorizationActive()) throw new Error('Built-in motion assets must be configured at startup.')
+	for (const row of publication?.entries || []) {
+		const source=builtInMotionSourceReview(row.reviewId)
+		if (!source || source.sourceSha256!==row.sourceSha256) throw new Error('Built-in motion publication does not match its source catalog.')
+	}
+	const library=createBuiltInPreparedMotionLibrary({publication,loadAsset,bundleBytes:generatedRigged3dBytes,cache:(hash,entry)=>{
+		cacheGeneratedRigged3d({...entry,promptHash:hash})
+		return getCachedGeneratedRigged3dUnchecked(hash)
+	}})
+	configureBuiltInPreparedMotionLibrary(library)
 }
 
 function lockOpaqueNativeSnapshot(snapshot = {}) {
@@ -6849,7 +6925,20 @@ function handleAuthoringCapabilityCatalog(args = {}) {
 	return publicAuthoringCapabilityCatalog(args)
 }
 
-function handleAuthoringBaselineCatalog(args = {}) {
+async function handleAuthoringBaselineCatalog(args = {}, context = {}) {
+	if (args.motionWindowRequirements !== undefined && args.view !== 'motion-comparisons') throw Object.assign(new Error('Source movement windows require view motion-comparisons.'),{code:'MOTION_COMPARISON_SCOPE_INVALID'})
+	if (args.preparationTarget !== undefined && args.view !== 'motion-comparisons') throw Object.assign(new Error('Target preparation comparisons require view motion-comparisons.'),{code:'MOTION_COMPARISON_SCOPE_INVALID'})
+	if (args.view === 'motion-comparisons') {
+		if (args.controlId || args.intent) throw Object.assign(new Error('Motion comparison pages use family, query and motionRequirements; use controls for intent or an exact controlId.'),{code:'MOTION_COMPARISON_SCOPE_INVALID'})
+		if ((args.family || args.surface) && (args.family || args.surface) !== 'presenter-motion') throw Object.assign(new Error('Motion comparisons require family presenter-motion.'),{code:'MOTION_REQUIREMENT_FAMILY_REQUIRED'})
+		if (args.preparationTarget !== undefined) validateMotionComparisonTarget(args.preparationTarget,args.limit??12)
+		if (args.motionWindowRequirements !== undefined) validateMotionWindowRequirements(args.motionWindowRequirements)
+		let filteredEntries;const globalPreparation=args.preparationTarget?.scope==='filtered-catalog';
+		const catalog=publicBaselineCatalog({...args,family:'presenter-motion',limit:args.limit??12},globalPreparation?{captureFilteredEntries:entries=>{filteredEntries=entries}}:{})
+		let page=motionComparisonPage(catalog)
+		if (args.motionWindowRequirements !== undefined) page=motionComparisonWindows(page,catalog,args.motionWindowRequirements)
+		return args.preparationTarget === undefined ? page : globalPreparation?motionComparisonCatalogReadiness(page,filteredEntries,args.preparationTarget,context,dispatchMotionPreparationProfileCatalog,dispatchMotionPreparationProfileList):motionComparisonTargetReadiness(page,args.preparationTarget,context,dispatchMotionPreparationProfileList)
+	}
 	if (args.view === 'lesson' || args.lessonId) return publicAuthoringLesson(args.lessonId || args.query || args.q)
 	if (args.view === 'controls' || args.controlId || args.intent) return publicControlRegistry(args)
 	const catalog = publicBaselineCatalog({ ...args, limit: args.limit ?? 12 })
@@ -7014,6 +7103,7 @@ async function handleBillingEstimate(args = {}, context = {}) {
 		const resolved = await resolveCanonicalSpecSource(toolArgs)
 		toolArgs.spec = resolved.spec
 	}
+	if (toolName === 'betterpptx.deck.generate_from_spec' && toolArgs.spec && typeof toolArgs.spec === 'object' && !Array.isArray(toolArgs.spec)) await hydrateSpecGenAssets(toolArgs.spec, context)
 	const deckId = toolArgs.deckId || args.deckId
 	const preparedNarrationTimingBySlide = toolName === 'betterpptx.deck.generate_from_spec'
 		&& toolArgs?.spec && typeof toolArgs.spec === 'object' && !Array.isArray(toolArgs.spec)
@@ -7024,6 +7114,10 @@ async function handleBillingEstimate(args = {}, context = {}) {
 		args: { ...toolArgs, ...(deckId ? { deckId } : {}) },
 		entry: deckId ? getDeck(deckId) : null,
 		preparedNarrationTimingBySlide,
+		validatePreparedScene: (modelAsset, scene) => {
+			const parsed = parseGenRigged3dHandle(modelAsset)
+			return resolvePreparedMotionScene(parsed ? getCachedGeneratedRigged3d(parsed.hash) : null, scene)
+		},
 	})
 	const freeAllowance = await getFreeValueStatus(toolName, toolArgs, context, { purpose: 'estimate' })
 	if (!freeAllowance.eligible) return { ...estimate, freeAllowance }
@@ -7279,6 +7373,7 @@ async function handleMonetizedMcpPriceListing(args = {}, context = {}) {
 		? args.spec
 		: (toolArgs.spec && typeof toolArgs.spec === 'object' && !Array.isArray(toolArgs.spec) ? toolArgs.spec : null)
 	const hasSpecQuote = Boolean(quotedSpec)
+	if (hasSpecQuote) await hydrateSpecGenAssets(quotedSpec, context)
 	const { spec: _spec, premiumQuote: _premiumQuote, toolArgs: _toolArgs, args: _nestedArgs, ...listingArgs } = args
 	const quoteInputArgs = { ...toolArgs, ...(_nestedArgs && typeof _nestedArgs === 'object' ? _nestedArgs : {}), ...listingArgs }
 	delete quoteInputArgs.spec
@@ -7797,6 +7892,10 @@ function specCompileOptions(args = {}, context = {}) {
 		// concrete native catalog handle at compile time (visible in dryRun, stable on save).
 		resolveModel3d: selectCatalogModel3d,
 		validateStaticPose: (modelAsset, staticPose) => prepareStaticPoseForAsset(modelAsset, staticPose).report,
+		validatePreparedScene: (modelAsset, scene) => {
+			const parsed = parseGenRigged3dHandle(modelAsset)
+			return resolvePreparedMotionScene(parsed ? getCachedGeneratedRigged3d(parsed.hash) : null, scene)
+		},
 		validateMotionFraming: (modelAsset, options) => prepareMotionFramingForAsset(modelAsset, options).report,
 		...(args.slideSize && typeof args.slideSize === 'object' ? { slideSize: args.slideSize } : {}),
 		...(templateContract && typeof templateContract === 'object' ? { templateContract } : {}),
@@ -25887,13 +25986,15 @@ function exportedModel3DBlockFields(obj = {}) {
 		if (opts.motionFraming && ['camera', 'trans', 'objViewport'].includes(key)) continue
 		if (Object.prototype.hasOwnProperty.call(opts, key)) poseReplayFields[key] = _deepCloneData(opts[key])
 	}
+	// Replay the opaque prepared selector, never its resolved clip index.
+	if (poseReplayFields.scene?.preparedVariantId) delete poseReplayFields.scene.animId
 	return {
 		modelAsset,
 		...(Object.prototype.hasOwnProperty.call(opts, 'staticPose') ? { staticPose: _deepCloneData(opts.staticPose) } : {}),
 		...(Object.prototype.hasOwnProperty.call(opts, 'motionFraming') ? { motionFraming: _deepCloneData(opts.motionFraming) } : {}),
 		...(isPublicSpecAssetRef(posterAsset) ? { posterAsset } : {}),
 		...(selectedPreset ? { model3dViewPresetId: selectedPreset } : {}),
-		...(Object.prototype.hasOwnProperty.call(opts, 'staticPose') || Object.prototype.hasOwnProperty.call(opts, 'motionFraming') ? poseReplayFields : Object.keys(modelOptions).length ? { modelOptions } : {}),
+		...(Object.prototype.hasOwnProperty.call(opts, 'staticPose') || Object.prototype.hasOwnProperty.call(opts, 'motionFraming') || opts.scene?.preparedVariantId ? poseReplayFields : Object.keys(modelOptions).length ? { modelOptions } : {}),
 	}
 }
 
@@ -27885,7 +27986,7 @@ async function handleExportSpec(args) {
 			deckId: args.deckId,
 			authoringRoute: cloneForResult(entry.authoringRoute || null),
 			mode,
-			spec: cloneJson(selectedSpec),
+			spec: normalizeModel3dControlsInSpec(cloneJson(selectedSpec)),
 			specArtifact,
 			...(artifact ? { artifact } : {}),
 			privacy: {
@@ -34424,6 +34525,12 @@ async function handleAddModel3D(args, context = {}) {
 		const genParsed = parseGenRigged3dHandle(genSrc)
 		if (genParsed && !getCachedGeneratedRigged3d(genParsed.hash)) await hydrateGeneratedRigged3d(genParsed.hash, genAssetTenantFor(context))
 	}
+	if (options.scene?.preparedVariantId !== undefined) {
+		if (staticPose !== undefined) throw new Error('A prepared scene cannot use an ordinary staticPose selector.')
+		const parsed = parseGenRigged3dHandle(originalModelRef)
+		const preparedScene = resolvePreparedMotionScene(parsed ? getCachedGeneratedRigged3d(parsed.hash) : null, options.scene)
+		options.scene = preparedScene; resolvedOptions.scene = preparedScene
+	}
 	const poseValidation = staticPose || options.scene?.motionId ? prepareStaticPoseForAsset(originalModelRef, staticPose) : null
 	const posed = poseValidation?.buffer ? poseValidation : null
 	const rigged3dResolved = await materializeGeneratedRigged3dOptions(resolvedOptions, args.deckId)
@@ -40741,6 +40848,64 @@ const _deckSnapshotStore = createDeckSnapshotStore()
 const _lockedAssetStore = createLockedAssetStore()
 const _operationStore = createOperationStore()
 const _operationDispatcher = createOperationDispatcher()
+// Maintainer-owned startup composition; never a public tool or context option.
+// Product startup supplies only the private trusted registry. The worker and
+// cache are composed here from the engine's existing lease, grant and asset
+// stores so callers cannot substitute an unowned cache or output producer.
+export function configureMotionPreparationRuntime(configuration = {}) {
+	if (configuration?.testOnly === true) {
+		const { testOnly, ...dependencies } = configuration
+		configureMotionPreparationService({ ...dependencies, store: _operationStore, dispatcher: _operationDispatcher })
+		return
+	}
+	const catalogWidthEnvironment = process.env.BETTERPPTX_MOTION_CATALOG_METADATA_CONCURRENCY
+	const catalogMetadataConcurrency = configuration?.catalogMetadataConcurrency !== undefined ? configuration.catalogMetadataConcurrency
+		: catalogWidthEnvironment === undefined ? undefined : (/^([1-9]|[1-5][0-9]|6[0-4])$/.test(catalogWidthEnvironment) ? Number(catalogWidthEnvironment) : NaN)
+	if (!configuration || Object.keys(configuration).some(key => !['trustedRepository', 'deliverPreparedFiles', 'catalogMetadataConcurrency'].includes(key)) || !configuration.trustedRepository
+		|| (configuration.deliverPreparedFiles !== undefined && typeof configuration.deliverPreparedFiles !== 'boolean')
+		|| (catalogMetadataConcurrency !== undefined && (!Number.isSafeInteger(catalogMetadataConcurrency) || catalogMetadataConcurrency < 1 || catalogMetadataConcurrency > 64 || (typeof configuration.trustedRepository.resolvePreparationInputs !== 'function' && catalogMetadataConcurrency > 8)))) {
+		throw new TypeError('A private trusted motion-preparation registry is required.')
+	}
+	const cache = createGeneratedMotionPreparationCache({
+		currentResourceOwner,
+		assetGrants,
+		getCached: hash => getCachedGeneratedRigged3d(hash),
+		getStaged: hash => getCachedGeneratedRigged3dUnchecked(hash),
+		hydrate: hash => hydratePreparedNativeAsset({
+			hash, owner: currentResourceOwner(), currentOwner: currentResourceOwner, assetGrants,
+			load: loadPersistedGeneratedRigged3d, bundleBytes: generatedRigged3dBytes,
+			cache: (key, entry) => {
+				cacheGeneratedRigged3d({ ...entry, promptHash: key })
+				return getCachedGeneratedRigged3d(key)
+			},
+		}),
+		registerLocal: input => registerLocalRigged3d(input),
+		persist: (hash, tenant) => persistGeneratedRigged3d(hash, tenant),
+		bundleBytes: entry => generatedRigged3dBytes(entry),
+		produceOutput: async ({ operation, handle, bytes }) => {
+			const result = await assetGrants.produce({ operation, source: 'owned-derivation', requireReady: true }, receipt => {
+				receipt.capture(handle, bytes)
+				return { ok: true }
+			})
+			return result?.ok === true
+		},
+	})
+	const runtime = createMotionPreparationRuntime({ trustedRepository: configuration.trustedRepository, cache, catalogMetadataConcurrency })
+	const deliverPreparedArtifact = configuration.deliverPreparedFiles === false ? undefined
+		: createMotionPreparedFileDelivery({ cache, artifactStore: _artifactStore, currentResourceOwner, writeBytes: (target, bytes) => fs.writeFile(target, bytes) })
+	const resolvePreparedModelAsset = async ({ prepared, plan, owner, assertLease }) => {
+		await assertLease()
+		const modelAsset = await cache.readVerifiedModelAsset({ prepared, plan, owner })
+		await assertLease()
+		return modelAsset
+	}
+	configureMotionPreparationService({ ...runtime.dependencies, deliverPreparedArtifact, resolvePreparedModelAsset, store: _operationStore, dispatcher: _operationDispatcher,
+		captureRequestContinuation: (context, inputDigest, args) => {
+			if (!mcpAuthoringAuthorized(context)) { const error = new Error('The preparation request context is unavailable.'); error.code = 'OPERATION_REQUEST_INVALID'; throw error }
+			return captureQueuedMcpContinuation(context, inputDigest, idempotencyArgsHash(cloneForResult(args)))
+		},
+	})
+}
 export function setDownloadConfig({ base, root } = {}) {
 	if (base !== undefined) _downloadBase = String(base || '').replace(/\/+$/, '')
 	if (root !== undefined) _downloadRoot = root ? path.resolve(root) : ''
@@ -41696,6 +41861,10 @@ async function handleOperationRecent() {
 // ---------------------------------------------------------------------------
 
 const HANDLERS = {
+	'betterpptx.motion.preparation_profiles.list': (args, context) => dispatchMotionPreparationProfileList(args, context),
+	'betterpptx.motion.prepare_variant': (args, context) => dispatchMotionPreparation(args, context),
+	'betterpptx.motion.candidates.list': args => dispatchMotionCandidateTool('betterpptx.motion.candidates.list', args),
+	'betterpptx.motion.candidates.get': args => dispatchMotionCandidateTool('betterpptx.motion.candidates.get', args),
 	// ---- discovery
 	'betterpptx.help.capabilities': handleCapabilities,
 	'betterpptx.help.workflow': handleHelpWorkflow,
@@ -41859,6 +42028,7 @@ const HANDLERS = {
 const MAX_CONCURRENCY = Number(process.env.BETTERPPTX_MAX_CONCURRENCY || 4)
 const MAX_QUEUE = Number(process.env.BETTERPPTX_MAX_QUEUE || 64)
 const HEAVY_TOOLS = new Set([
+	'betterpptx.motion.prepare_variant',
 	'betterpptx.deck.save',
 	'betterpptx.deck.open_existing',
 	'betterpptx.deck.open_uploaded',
@@ -42390,6 +42560,7 @@ function isNonMutatingSpecGenerationInvocation(name, args = {}) {
 }
 
 function supportsDurableOperationLedger(name, args = {}) {
+	if (name === 'betterpptx.motion.prepare_variant') return false
 	if (!durableOperationStoreEnabled()) return false
 	if (!hasIdempotencyKey(args)) return false
 	if (isReadOnlyTool(name)) return false
@@ -42741,6 +42912,7 @@ export async function runDurableOperationById(operationId, { leaseOwner = '' } =
 		throw err
 	}
 	if (!claim.claimed) return publicDurableOperationStatus(claim.operation || existing)
+	const preparationContinuation = existing.toolName === 'betterpptx.motion.prepare_variant' && isQueuedMcpContinuation(request, existing, idempotencyArgsHash(request.args))
 	const workerContext = {
 		...(request.context || {}),
 		sessionId: request.context?.sessionId || `durable-worker:${id}`,
@@ -42748,7 +42920,7 @@ export async function runDurableOperationById(operationId, { leaseOwner = '' } =
 		// Admission checked this module-private capability before persisting it;
 		// JSON cannot retain Symbols. Restore it here, never from public arguments
 		// or a client-supplied string flag. All owner/quote/asset/save gates still run.
-		[MCP_AUTHORING_CAPABILITY]: true,
+		[MCP_AUTHORING_CAPABILITY]: existing.toolName !== 'betterpptx.motion.prepare_variant' || preparationContinuation,
 		__skipDurableOperationLedger: true,
 		__durableOperationWorker: true,
 		__claimedDurableOperation: { operation: claim.operation, lease: claim.lease },
@@ -42794,6 +42966,7 @@ function maintenanceResult(code, message) {
 
 function isReadOnlyTool(name) {
 	return MONETIZED_MCP_READ_ONLY_TOOLS.has(String(name || '')) ||
+		String(name || '') === 'betterpptx.motion.candidates.get' ||
 		READ_ONLY_TOOL_RE.test(String(name || ''))
 }
 
@@ -42908,6 +43081,8 @@ function publicNextActionsForError(code, details = {}) {
 	if (nestedSpecCode === 'PRESENTER_STAGE_TREATMENT_INVALID') {
 		return [{ type: 'choose_presenter_stage_treatment', tool: 'betterpptx.deck.generate_from_spec', description: 'Choose the exact unranked presenter.stageTreatment ID none or floor-ellipse, then rerun dryRun.' }]
 	}
+	const catalogRecovery=motionCatalogRecovery(nestedSpecCode||code)
+	if (catalogRecovery) return catalogRecovery
 	if (/^MOTION_/.test(code) || /^MOTION_/.test(String(nestedSpecCode || ''))) {
 		return [{ type: 'revise_motion_selection', tool: 'betterpptx.deck.generate_from_spec', description: 'Choose exact executable motion IDs returned by betterpptx.authoring.catalog, keep each presenter bundle at 18 or fewer, ensure every slide motion is in that bundle, then rerun dryRun.' }]
 	}
@@ -43537,7 +43712,7 @@ export async function callBetterPptxTool(name, args = {}, context = {}) {
 		return await withResourceAuthorization(context, () => {
 			enteredScope = true
 			return assetGrants.withAccess(async () => {
-				await authorizeAssetReferences(args)
+				await authorizeAssetReferences(assetAuthorizationInput(tool,args))
 				return callBetterPptxToolInScope(name, args, context)
 			})
 		}, { localMaintainer })
@@ -43628,7 +43803,14 @@ async function callBetterPptxToolInScope(name, args = {}, context = {}) {
 		if ((!isReadOnlyTool(internalName) || ['betterpptx.http.fetch', 'betterpptx.deck.preview', 'betterpptx.slide.preview'].includes(internalName)) && !internalName.startsWith('betterpptx.auth.') && !internalName.startsWith('betterpptx.billing.')) {
 			assertProductionBillingConfiguration()
 		}
-		await hydrateInstallBillingContext(context)
+		// Explicit planning phases do not reserve value or mutate a draft. They
+		// must remain inspectable without reading a wallet; commit, resolve,
+		// media preparation and save still use the original billing boundary.
+		const specPlanningOnly = internalName === 'betterpptx.deck.generate_from_spec'
+			&& ['dryRun', 'lockedDryRun'].includes(args.phase)
+		const capabilityReadOnly = internalName.startsWith('betterpptx.help.')
+			|| ['betterpptx.authoring.catalog', 'betterpptx.options.catalog', 'betterpptx.motion.preparation_profiles.list'].includes(internalName)
+		if (!specPlanningOnly && !capabilityReadOnly) await hydrateInstallBillingContext(context)
 	} catch (err) {
 		const result = buildToolErrorResult(err, internalName, args)
 		return finishToolCall(trace, internalName, result)

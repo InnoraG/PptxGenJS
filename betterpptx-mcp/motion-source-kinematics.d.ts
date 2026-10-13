@@ -1,0 +1,9 @@
+export type SourceKinematicsClock={durationMs:number;fps:number;frameCount:number;sampleCount:number;temporalCoverage:'every-integer-frame'}
+export type SourceLandmark='root'|'chest'|'head'|'leftHand'|'rightHand'
+export type SourceMovement={sampledPathShoulderSpans:number;netDisplacementShoulderSpans:number;rootRelativeSampledPathShoulderSpans:number}
+export type SourceReviewKinematics={schemaVersion:'betterpptx.source-sampled-kinematics.v1';sourceSha256:string;measurementArtifactSha256:string;clock:SourceKinematicsClock;referenceSpan:number;landmarks:Record<SourceLandmark,SourceMovement>;provenance:{adapterSha256:string;rigRestSha256:string;frameStart:number;frameEnd:number;landmarkNames:Record<SourceLandmark|'leftShoulder'|'rightShoulder',string>;coordinateFrame:{positions:'SOURCE_WORLD';basis:'ACTOR_GEOMETRIC_CONVENTION'|'SOURCE_NATIVE_CONVENTION';basisSignCalibrated:boolean;slideProjectionCalibrated:boolean}}}
+export const SOURCE_KINEMATICS_SCHEMA:'betterpptx.source-sampled-kinematics.v1'
+export const SOURCE_NATIVE_LANDMARK_MEASUREMENT_SCHEMA:'betterpptx.private-source-landmark-measurement.v1'
+export function deriveSourceReviewKinematics(measurement:unknown,input:{sourceSha256:string;measurementArtifactSha256:string;sourceObservation:{clock:SourceKinematicsClock}}):SourceReviewKinematics
+export function validateSourceReviewKinematics(value:unknown,sourceSha256:string,observation:{clock:SourceKinematicsClock}):SourceReviewKinematics
+export function publicSourceReviewKinematics(value:SourceReviewKinematics):{schemaVersion:typeof SOURCE_KINEMATICS_SCHEMA;evidenceId:string;basis:{coordinateSpace:'source-motion-space';unit:'measured-shoulder-spans';reference:string;sampling:'every-integer-frame';clock:SourceKinematicsClock;physicalUnits:'unverified';continuousPath:'not-established';rootRelativeFrame:string};landmarks:Record<Exclude<SourceLandmark,'root'>|'rootJoint',SourceMovement>;limitation:string}
