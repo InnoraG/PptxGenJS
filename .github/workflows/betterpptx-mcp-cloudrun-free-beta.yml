@@ -61,6 +61,7 @@ jobs:
         run: |
           npm run test:unit
           npm run test:authoring-augmentation --prefix betterpptx-mcp
+          node --test betterpptx-mcp/test/cloud-run-release-promotion.test.mjs
           node --test betterpptx-mcp/test/builtin-motion-source-review.test.mjs betterpptx-mcp/test/builtin-prepared-motion-library.test.mjs betterpptx-mcp/test/builtin-prepared-publication-codec.test.mjs betterpptx-mcp/test/builtin-prepared-asset-store.test.mjs betterpptx-mcp/test/model3d-control-alias-replay.test.mjs betterpptx-mcp/test/motion-comparison-readiness.test.mjs
           node --test betterpptx-mcp/test/durable-operation-phase-idempotency.test.mjs
           node --test betterpptx-mcp/test/production-free-publication-profile.test.mjs
@@ -319,6 +320,15 @@ jobs:
           gcloud scheduler jobs describe "$CLOUD_SCHEDULER_JOB" --project="$GCP_PROJECT_ID" --location="$GCP_REGION" --format=json > "$RUNNER_TEMP/scheduler-job.json"
           jq -e --arg uri "$scheduler_uri" --arg invoker "$SWEEPER_INVOKER_SERVICE_ACCOUNT" '.schedule == "0 * * * *" and .timeZone == "Etc/UTC" and .httpTarget.uri == $uri and .httpTarget.httpMethod == "POST" and .httpTarget.oauthToken.serviceAccountEmail == $invoker' "$RUNNER_TEMP/scheduler-job.json" >/dev/null
 
+      - name: Promote the exact ready worker and gateway release revisions
+        env:
+          IMAGE_REF: ${{ steps.pushed-image.outputs.image_ref }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node deploy/gcp/promote-exact-cloud-run-release.mjs --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --service "$CLOUD_RUN_WORKER" --image "$IMAGE_REF" --environment-key VERIFIED_WORKER_REVISION
+          node deploy/gcp/promote-exact-cloud-run-release.mjs --project "$GCP_PROJECT_ID" --region "$GCP_REGION" --service "$CLOUD_RUN_GATEWAY" --image "$IMAGE_REF" --environment-key VERIFIED_GATEWAY_REVISION
+
       - name: Verify private revisions, invocation boundaries, and OAuth configuration
         shell: bash
         run: |
@@ -411,6 +421,12 @@ jobs:
         shell: bash
         run: node betterpptx-mcp/verify-cloud-run-public-free-beta.mjs "$GATEWAY_URL"
 
+      - name: Verify all approved built-in source reviews on the routed gateway
+        shell: bash
+        run: |
+          set -euo pipefail
+          node deploy/gcp/verify-routed-presenter-catalog.mjs --url "$GATEWAY_URL" --expected-source-count 520
+
       - name: Check for owner-configured Cloudflare deployment credentials
         id: cloudflare-edge-auth
         shell: bash
@@ -459,8 +475,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          gateway_revision="$(gcloud run services describe "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format='value(status.latestReadyRevisionName)')"
-          worker_revision="$(gcloud run services describe "$CLOUD_RUN_WORKER" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format='value(status.latestReadyRevisionName)')"
+          gateway_revision="$VERIFIED_GATEWAY_REVISION"
+          worker_revision="$VERIFIED_WORKER_REVISION"
           {
             echo '### BetterPPTX Cloud Run free-publication beta'
             echo "- Source commit: \`$GITHUB_SHA\`"
