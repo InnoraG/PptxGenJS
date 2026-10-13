@@ -106,3 +106,4 @@ jobs:
             --build-arg BETTERPPTX_SOURCE_REVISION="$GITHUB_SHA" \
             --file deploy/docker/Dockerfile.mcp \
             --tag "betterpptx-mcp-ci:$GITHUB_SHA" .
+          docker run --rm -i --entrypoint node "betterpptx-mcp-ci:$GITHUB_SHA" --input-type=module < deploy/gcp/verify-container-current-export.mjs

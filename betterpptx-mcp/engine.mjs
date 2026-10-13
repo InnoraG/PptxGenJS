@@ -28040,7 +28040,14 @@ async function handleExportSpec(args) {
 			// (the user may have moved/resized it in PowerPoint).
 			const compiledObjectName = String(o.objectName || '')
 			const canonicalSlide = (entry.canonicalRecompileSpec?.slides || []).find(candidate => String(candidate?.id || '') === slideId)
-			const canonicalBlock = (canonicalSlide?.content || []).find(candidate => {
+			const mappedSource = slide._specProvenance?.[compiledObjectName]
+			const mappedName = String(mappedSource?.name || mappedSource?.objectName || '')
+			const canonicalContent = canonicalSlide?.content || []
+			const mappedMatches = mappedName ? canonicalContent.filter(candidate =>
+				String(candidate?.name || candidate?.objectName || '') === mappedName && candidate?.kind === mappedSource.kind) : []
+			// Commit binds exact native names to authored blocks. Use that association
+			// before legacy naming recovery, including dotted and colliding author IDs.
+			const canonicalBlock = mappedMatches.length === 1 ? mappedMatches[0] : mappedMatches.length > 1 ? null : canonicalContent.find(candidate => {
 				const authoredName = String(candidate?.name || candidate?.objectName || '')
 				return authoredName && (authoredName === compiledObjectName || compiledObjectName.includes(`.${authoredName}.`))
 			})

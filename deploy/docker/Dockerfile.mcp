@@ -30,6 +30,7 @@ ENV NODE_ENV=production \
     BETTERPPTX_TTS_URL=http://127.0.0.1:5000 \
     BETTERPPTX_VOICES_MANIFEST=/voices/runtime-manifest.json \
     BETTERPPTX_OUT_DIR=/out \
+    BETTERPPTX_LOCKED_ASSET_ROOT=/out/locked-assets \
     BETTERPPTX_NARRATION_MODE=production \
     BETTERPPTX_FFMPEG_PATH=/usr/bin/ffmpeg \
     BETTERPPTX_FFPROBE_PATH=/usr/bin/ffprobe \
