@@ -746,6 +746,9 @@ export function publicBaselineCatalog(args = {}, options = {}) {
 	const nextOffset = offset + entries.length < filtered.length ? offset + entries.length : null
 	const payload = all.map(entry => ({ id: entry.id, family: entry.family, label: entry.label, status: entry.status, implemented: entry.implemented, capabilityMode: entry.capabilityMode, capabilityStatus: entry.capabilityStatus, selection: entry.selection, ...(entry.sourceKind === 'observed-motion-review' ? { measurements:entry.measurements,sourceReview:entry.sourceReview,description:entry.description } : {}) }))
 	const catalogFingerprint = `betterpptx-catalog-${sha256(stableJson({ ledgerSemanticHash: ledgerSemanticHash(buildCapabilityLedger(undefined, 'betterpptx-mcp')), entries: payload, diagnostics })).slice(0, 24)}`
+	// Public navigation binds only published catalog facts, independently of
+	// private build fingerprints and diagnostic ledgers.
+	const catalogVersion = `catalog_version_${sha256(stableJson(all.map(entry => ({ id:entry.id,family:entry.family,label:entry.label,description:entry.description,selection:entry.selection,selectable:entry.selectable,measurements:entry.measurements,sourceReview:entry.sourceReview,compatibleTargets:entry.route?.preparationDiscovery?.compatibleTargetModels })))).slice(0,32)}`
   const familyCounts = all.reduce((counts, entry) => {
     counts[entry.family] = (counts[entry.family] || 0) + 1
     return counts
@@ -773,6 +776,7 @@ export function publicBaselineCatalog(args = {}, options = {}) {
       privateImplementationDetailsHidden: true,
     },
     catalogFingerprint,
+    catalogVersion,
 		catalogClosure: {
 			baselineEntries: all.filter(entry => entry.implemented).length,
 			sourceReviewEntries: all.filter(entry => entry.sourceKind === 'observed-motion-review').length,

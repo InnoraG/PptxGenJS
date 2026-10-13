@@ -23,6 +23,7 @@ test('ordinary MCP discovery shares the full built-in library between customers 
   const records=Array.from({length:520},(_,n)=>record(`builtin-${n}`,'builtinmotionfixture'))
   const startup={trustedMotionSourceReviewCatalogs:[
     {resourceOwner:publisher,records,catalogScope:'built-in'},
+    {resourceOwner:publisher,records:structuredClone(records)},
     {resourceOwner:publisher,records:[record('private-review','privatepublisherfixture')]},
   ]}
   const ids=[]
@@ -43,6 +44,12 @@ test('ordinary MCP discovery shares the full built-in library between customers 
       assert.equal(catalog.motionQuery.status,'no-proven-match')
       assert.equal(catalog.motionQuery.counts.reviewRequired,520)
       assert.ok(catalog.controls.every(row=>row.selectable===false))
+      const comparisons=await call({view:'motion-comparisons',family:'presenter-motion',query:'builtinmotionfixture',limit:8})
+      const nextPage=await call({view:'motion-comparisons',family:'presenter-motion',query:'builtinmotionfixture',offset:8,limit:8})
+      assert.match(comparisons.catalogVersion,/^catalog_version_[a-f0-9]{32}$/)
+      assert.equal(nextPage.catalogVersion,comparisons.catalogVersion)
+      assert.equal(comparisons.catalogFingerprint,undefined)
+      assert.equal(comparisons.pagination.total,520)
       ids.push(catalog.controls.map(row=>row.id))
       assert.doesNotMatch(JSON.stringify(catalog),/sourceSha256|resourceOwner|file:/)
       const privateCatalog=await call({view:'controls',family:'presenter-motion',query:'privatepublisherfixture',limit:8})

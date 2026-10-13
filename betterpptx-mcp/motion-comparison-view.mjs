@@ -15,7 +15,7 @@ export function motionComparisonPage(catalog){
   }
  })
  const query=catalog.motionQuery
- return {schemaVersion:'betterpptx.motion-comparison-page.v1',catalogFingerprint:catalog.catalogFingerprint,pagination:catalog.pagination,candidates,
+ return {schemaVersion:'betterpptx.motion-comparison-page.v1',catalogVersion:catalog.catalogVersion,catalogFingerprint:catalog.catalogFingerprint,pagination:catalog.pagination,candidates,
   ...(query?{motionQuery:{schemaVersion:query.schemaVersion,status:query.status,requirements:query.requirements,counts:query.counts,provenMatchReferences:query.provenMatchReferences,provenMatchReferencesTruncated:query.provenMatchReferencesTruncated,selectionAuthority:'ai',automaticSelection:false,qualificationScope:'requested-properties-only'}}:{}),
   detailRoute:{tool:'betterpptx.authoring.catalog',request:{view:'controls',family:'presenter-motion'},catalogIdArgument:'controlId',note:'Copy one candidate catalogId into controlId for complete evidence, constraints and authoring guidance. detailEvidencePath refers to that full control record.'},
   preparationRoute:{tool:'betterpptx.motion.preparation_profiles.list',sourceKind:'review',sourceId:'candidate.catalogId',requires:['targetModel','variant'],doesNotSelect:true,note:'Only observed review candidates use this source kind; preparation and execution availability remain separate.'},

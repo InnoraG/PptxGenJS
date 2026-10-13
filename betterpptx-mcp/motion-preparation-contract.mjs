@@ -2,12 +2,10 @@ import {createResultOutputSchema} from './mcp-result-envelope.mjs';
 
 const object=(properties,required=Object.keys(properties))=>({type:'object',additionalProperties:false,properties,required});
 const MODEL={type:'string',pattern:'^gen://rigged3d/[a-f0-9]{40}$'};
-const SOURCE=object({kind:{type:'string',enum:['candidate','model','review']},id:{type:'string'}});
-SOURCE.oneOf=[
- {properties:{kind:{const:'candidate'},id:{pattern:'^candidate_[a-f0-9]{32}$'}}},
- {properties:{kind:{const:'model'},id:MODEL}},
- {properties:{kind:{const:'review'},id:{pattern:'^cap_[a-f0-9]{20}$'}}},
-];
+// Keep the transport shape simple: connector schema normalizers can select the
+// first oneOf branch before evaluating its discriminator. The execution path
+// still validates each kind/identifier pair before looking up any source.
+const SOURCE=object({kind:{type:'string',enum:['candidate','model','review']},id:{type:'string',pattern:'^(?:candidate_[a-f0-9]{32}|cap_[a-f0-9]{20}|gen://rigged3d/[a-f0-9]{40})$',description:'Match kind with its candidate_, cap_, or gen://rigged3d/ identifier. Invalid kind/identifier combinations are rejected before discovery.'}});
 export const MOTION_PREPARATION_PROFILE_LIST_INPUT_SCHEMA=object({
  source:SOURCE,targetModel:MODEL,variant:{type:'string',enum:['original','skeletal-mirrored']},
 });

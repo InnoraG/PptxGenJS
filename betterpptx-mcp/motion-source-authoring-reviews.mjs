@@ -3,6 +3,7 @@ import {validateSourceReviewKinematics,publicSourceReviewKinematics} from './mot
 import {validateSourceMovementTimeline,publicSourceMovementTimeline} from './motion-source-movement-timeline.mjs'
 import {validateAuthoredVisualReview,publicAuthoredVisualReview} from './motion-authored-visual-review.mjs'
 import { createHash } from 'node:crypto'
+import { isDeepStrictEqual } from 'node:util'
 import { resourceAuthorizationActive, resourceOwnerOf, canAccessResource } from './auth/resource-authorization.mjs'
 import { validateObservation } from './motion-candidate-runtime.mjs'
 import {builtInPreparedMotionLibrary} from './builtin-prepared-motion-service.mjs'
@@ -66,7 +67,11 @@ const reviewVisible = item => item.catalogScope === 'built-in'
 export function publicMotionSourceReviews() {
   // Shared product descriptions support discovery. Private descriptions stay
   // filtered before projection, search, counts and fingerprints.
-  return [...reviews.values()].filter(reviewVisible).map(item => {
+  const values=[...reviews.values()],binding=item=>[item.resourceOwner.kind,item.resourceOwner.id,item.record.sourceSha256].join(':')
+  const published=new Map(values.filter(item=>item.catalogScope==='built-in').map(item=>[binding(item),item.record]))
+  // The publisher's historical ingestion record remains privately addressable,
+  // but identical published facts appear once in ordinary product discovery.
+  return values.filter(item=>reviewVisible(item)&&(item.catalogScope==='built-in'||!isDeepStrictEqual(item.record,published.get(binding(item))))).map(item => {
     const r=item.record, observation=structuredClone(r.sourceObservation)
     const id=reviewId(item)
     return {
