@@ -199,7 +199,7 @@ export async function queueUsageForReservation(args = {}) {
 }
 
 export async function preflightBillingReservation({ name, args = {}, context = {}, entry = null, billingEntitlement = null, store = null, refreshBalance = refreshProviderBalanceForCustomer, verifyNoChargeReuse = null } = {}) {
-	const classification = classifyBillingTool(name)
+	const classification = classifyBillingTool(name, args)
 	if (!isBillingReservationEnforced()) return { active: false, reason: 'reservation-not-enforced', classification }
 	if (context.__freeValueAuthorization?.status === 'reserved' || context.__freeValueAuthorization?.status === 'committed') {
 		return {

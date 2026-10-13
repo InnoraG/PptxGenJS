@@ -209,7 +209,7 @@ export function buildPremiumPresentationQuote({
 	nowMs = Date.now(),
 } = {}) {
 	const name = String(toolName || 'betterpptx.deck.save')
-	const classification = classifyBillingTool(name)
+	const classification = classifyBillingTool(name, args)
 	const resolvedDeckVersion = deckVersion !== null && deckVersion !== undefined
 		? Number(deckVersion)
 		: entry && entry.deckVersion !== null && entry.deckVersion !== undefined

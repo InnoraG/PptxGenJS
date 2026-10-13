@@ -212,7 +212,7 @@ function operationKey({ name, args = {}, context = {} }) {
 }
 
 export function estimateBillingForTool({ name, args = {}, result = {}, entry = null, rateCard = currentRateCard() } = {}) {
-	const classification = classifyBillingTool(name)
+	const classification = classifyBillingTool(name, args)
 	const metrics = classification.category === 'checkpoint'
 		? collectDeckBillingMetrics(entry, result)
 		: {}

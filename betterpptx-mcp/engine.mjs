@@ -42597,13 +42597,13 @@ function durableOperationLeaseMs(name) {
 function durableOperationInput(name, args = {}, context = {}) {
 	const deckId = String(args.deckId || '')
 	const expectedDeckVersion = suppliedDeckVersion(args)
-	const request = durableOperationQueuedMode() ? {
-		args: cloneForResult(args || {}),
-		context: {
-			installHash: context.installHash || '',
-			resourceIdentityHash: context.resourceIdentityHash || '',
-			sessionId: context.sessionId || '',
-		},
+	const inputDigest = idempotencyArgsHash(args)
+	const executionArgs = durableOperationQueuedMode() ? cloneForResult(args || {}) : null
+	const request = executionArgs ? {
+		args: executionArgs,
+		...(mcpAuthoringAuthorized(context)
+			? captureQueuedMcpContinuation(context, inputDigest, idempotencyArgsHash(executionArgs))
+			: { context: { installHash: context.installHash || '', resourceIdentityHash: context.resourceIdentityHash || '', sessionId: context.sessionId || '' } }),
 	} : null
 	return {
 		installHash: String(context.installHash || context.resourceIdentityHash || context.billingCustomerHash || context.sessionId || 'anonymous'),
@@ -42611,7 +42611,7 @@ function durableOperationInput(name, args = {}, context = {}) {
 		deckId,
 		deckHash: deckId ? digestOperationPayload({ deckId }) : '',
 		expectedDeckVersion: Number.isNaN(expectedDeckVersion) ? null : expectedDeckVersion,
-		inputDigest: idempotencyArgsHash(args),
+		inputDigest,
 		pricingInputDigest: '',
 		queueClass: HEAVY_TOOLS.has(name) ? 'heavy' : 'default',
 		idempotencyKey: getIdempotencyKey(args),
@@ -42901,6 +42901,12 @@ export async function runDurableOperationById(operationId, { leaseOwner = '' } =
 		err.code = 'OPERATION_REQUEST_IDENTITY_MISMATCH'
 		throw err
 	}
+	const requestContinuation = isQueuedMcpContinuation(request, existing, idempotencyArgsHash(request.args))
+	if (request.mcpContinuation && !requestContinuation) {
+		const err = new Error('The stored operation continuation does not match its admitted request.')
+		err.code = 'OPERATION_REQUEST_INVALID'
+		throw err
+	}
 	let claim
 	try {
 		claim = await _operationStore.claimOperation(id, {
@@ -42912,9 +42918,13 @@ export async function runDurableOperationById(operationId, { leaseOwner = '' } =
 		throw err
 	}
 	if (!claim.claimed) return publicDurableOperationStatus(claim.operation || existing)
-	const preparationContinuation = existing.toolName === 'betterpptx.motion.prepare_variant' && isQueuedMcpContinuation(request, existing, idempotencyArgsHash(request.args))
+	const preparationContinuation = existing.toolName === 'betterpptx.motion.prepare_variant' && requestContinuation
 	const workerContext = {
-		...(request.context || {}),
+		...(requestContinuation ? request.context : {
+			installHash: request.context?.installHash || '',
+			resourceIdentityHash: request.context?.resourceIdentityHash || '',
+			sessionId: request.context?.sessionId || '',
+		}),
 		sessionId: request.context?.sessionId || `durable-worker:${id}`,
 		// Only the authenticated private worker may resume a server-owned request.
 		// Admission checked this module-private capability before persisting it;

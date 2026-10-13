@@ -34,7 +34,7 @@ Object.assign(process.env, {
 const { createMcpToolDispatcher, callBetterPptxTool, runDurableOperationById, getDeck } = await import('../engine.mjs')
 const { withResourceAuthorization } = await import('../auth/resource-authorization.mjs')
 const { createOperationStore } = await import('../storage/operation-store.mjs')
-const ownerContext = { installHash: `install_${'a'.repeat(64)}`, sessionId: 'queued-author-owner' }
+const ownerContext = { installHash: `install_${'a'.repeat(64)}`, sessionId: 'queued-author-owner', resourceIdentityHash: 'a'.repeat(64), quotaIdentityHash: 'c'.repeat(64), authenticated: true, authenticationBasis: 'verified-bearer' }
 const foreignContext = { installHash: `install_${'b'.repeat(64)}`, sessionId: 'queued-author-foreign' }
 const owner = createMcpToolDispatcher({ ...ownerContext, blackBox: true })
 const foreign = createMcpToolDispatcher({ ...foreignContext, blackBox: true })
@@ -110,7 +110,8 @@ async function queue(args) {
 	const stored = (await records())[operationId]
 	assert.equal(stored.state, 'queued')
 	assert.deepEqual(stored.request.args, args, 'the actual queued request must survive JSON serialization unchanged')
-	assert.equal(stored.request.context.installHash, ownerContext.installHash)
+	assert.deepEqual(stored.request.context, ownerContext)
+	assert.equal(stored.request.mcpContinuation.schemaVersion, 'betterpptx.private-queued-mcp-continuation.v2')
 	assert.equal(Object.getOwnPropertySymbols(stored.request.context).length, 0)
 	assert.ok(!JSON.stringify(stored.request.context).includes('MCP_AUTHORING_CAPABILITY'))
 	return operationId
@@ -215,4 +216,17 @@ test('trusted queued worker still rejects missing and tampered exact-spec quotes
 	assert.equal(tampered.state, 'failed')
 	assert.equal(tampered.error?.code, 'QUOTE_BINDING_MISMATCH', JSON.stringify(tampered))
 	assert.equal((await records())[tamperedId].result?.deckId, undefined)
+})
+
+test('ordinary queued authoring rejects a tampered captured authentication context before claiming', async () => {
+ const args = commitArgs('queued-assurance-tamper')
+ args.quoteBinding = await quoteFor(args)
+ const operationId = await queue(args)
+ const disk = JSON.parse(await fs.readFile(operationFile, 'utf8'))
+ disk.operations[operationId].request.context.quotaIdentityHash = 'f'.repeat(64)
+ await fs.writeFile(operationFile, JSON.stringify(disk))
+ await assert.rejects(() => runDurableOperationById(operationId, {leaseOwner:'tampered-assurance-worker'}), {code:'OPERATION_REQUEST_INVALID'})
+ const unchanged = (await records())[operationId]
+ assert.equal(unchanged.state, 'queued')
+ assert.equal(unchanged.attempt, 0)
 })

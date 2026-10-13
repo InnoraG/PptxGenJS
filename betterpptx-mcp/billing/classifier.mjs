@@ -1,3 +1,5 @@
+import { isFreePublicationBillingProfile } from './security-policy.mjs'
+
 const FREE_TOOL_RE = /\.(capabilities|version|status|voices|job_status|list|summary|inspect|inspect_layouts|editability_report|analyze_reference|compare_reference|validate|validate_design|validate_accessibility|validate_narration|validate_avatar_narration|list_shapes|inspect_shapes|read_file|read_json|list_dir|find|catalog|recommend|sample_palette|list_xml_groups|polygon_to_custgeom|simplify_path|from_svg|fetch|explain_plan|portal)$/
 
 const FREE_TOOLS = new Set([
@@ -45,13 +47,23 @@ const HEAVY_TOOLS = new Set([
 	'betterpptx.sketchfab.import',
 ])
 
-export function classifyBillingTool(name) {
+// Pricing does not grant access: engine ownership and actual-byte checks remain.
+function existingModelInsertion(args = {}) {
+ const options = args.options && typeof args.options === 'object' ? args.options : {}
+ const handle = options.modelAsset ?? args.modelAsset
+ const raw = ['glbFile', 'glbData', 'glbBase64', 'glbBuffer', 'modelUrl', 'url', 'path', 'data', 'filePath']
+ if (raw.some(key => args[key] != null || options[key] != null)) return false
+ return typeof handle === 'string' && (/^gen:\/\/(?:trellis\/)?rigged3d\/[a-f0-9]{8,64}$/.test(handle) || /^model3d:\/\/microsoft-stock\/[a-f0-9]{16}\/[a-zA-Z0-9_-]+$/.test(handle))
+}
+
+export function classifyBillingTool(name, args = {}) {
 	const tool = String(name || '')
 	if (!tool) return { category: 'free', billable: false, mode: 'free', reason: 'missing-tool-name' }
 	if (FREE_TOOLS.has(tool) || tool.startsWith('betterpptx.auth.') || tool.startsWith('betterpptx.billing.') || FREE_TOOL_RE.test(tool)) {
 		return { category: 'free', billable: false, mode: 'free', reason: 'control-or-readonly' }
 	}
 	if (CHECKPOINT_TOOLS.has(tool)) return { category: 'checkpoint', billable: true, mode: 'deck.save', reason: 'value-delivery-checkpoint' }
+	if (tool === 'betterpptx.slide.add_model3d' && isFreePublicationBillingProfile() && existingModelInsertion(args)) return { category: 'draft-accrual', billable: false, mode: 'draft-accrual', reason: 'existing-model-free-authoring' }
 	if (HEAVY_TOOLS.has(tool)) return { category: 'heavy', billable: true, mode: 'immediate-heavy', reason: 'resource-heavy-operation' }
 	if (/^betterpptx\.(deck|slide|shape|table|chart|smartart|media|image|io|library|custom_geometry)\./.test(tool)) {
 		return { category: 'draft-accrual', billable: false, mode: 'draft-accrual', reason: 'ordinary-edit-loop' }
