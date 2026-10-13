@@ -100,6 +100,7 @@ const engineStub = `data:text/javascript,${encodeURIComponent(`
 `)}`
 const serverStub = `data:text/javascript,${encodeURIComponent(`
   export const PUBLIC_INSTRUCTIONS = ''
+  export const configureBetterPptxMcpPrivateStartup = startup => { if (!startup || Object.keys(startup).length) throw new Error('Unexpected catalog bootstrap in synthetic download test') }
   export const createBetterPptxMcpServer = () => { throw new Error('MCP execution forbidden') }
 `)}`
 const hooks = registerHooks({ resolve(specifier, context, nextResolve) {
