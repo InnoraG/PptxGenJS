@@ -1,130 +1,175 @@
-# Using betterpptx-mcp from https://claude.ai
+# Using BetterPPTX from Claude (claude.ai, Desktop, mobile, Cowork, Claude Code)
 
-claude.ai supports external MCP servers via **Custom Connectors**. The
-stdio transport is a local-only protocol, so we expose the same server
-over **HTTP / Streamable HTTP** and tunnel it to a public URL. The current
-production-friendly setup uses a stable URL with the secret in the path:
-`https://<stable-host>/s/<secret>/mcp`.
+BetterPPTX is a remote MCP server with **OAuth 2.0 sign-in and lazy
+authentication**: anyone can connect, initialize and list tools; a tool that
+acts on the user's account asks them to sign in the first time Claude calls it.
+The same server serves ChatGPT; each client gets the challenge dialect it
+understands (see [Client dialects](#client-dialects)).
+
+The obsolete path-secret (`/s/<secret>/mcp`) and "No authentication" setup is
+gone: the public service requires a verified account for protected execution.
 
 ```
-┌──────────────────┐    HTTPS    ┌──────────────┐    HTTP    ┌───────────────────────┐
-│  https://claude  │ ──────────► │ stable tunnel│ ─────────► │  betterpptx-mcp-http   │
-│        .ai       │             │  (tunnel)    │            │  localhost:3344/mcp   │
-└──────────────────┘             └──────────────┘            └───────────────────────┘
+Claude ──HTTPS──► https://<host>/mcp ───────────────► BetterPPTX MCP (server-http.mjs)
+  │                    │ 401 + WWW-Authenticate            │
+  │                    ▼                                    │
+  ├──► /.well-known/oauth-protected-resource/mcp  (resource = https://<host>/mcp)
+  ├──► /identity/realms/betterpptx/.well-known/oauth-authorization-server
+  └──► /identity/... authorize (passkey) → token  (Keycloak, realm betterpptx)
 ```
+
+Spec references: <https://claude.com/docs/connectors/building/authentication>
+and <https://claude.com/docs/connectors/building/lazy-authentication>.
 
 ---
 
-## 1. Start the stable public service
+## 1. Add the connector
 
-Use `betterpptx-mcp/deploy/production.env` plus the deploy scripts. In the current
-stable mode, `BETTERPPTX_PUBLIC_BASE` is the public host and
-`BETTERPPTX_URL_SECRET` is embedded in the connector URL path:
+| Surface | Steps |
+|---|---|
+| claude.ai / Desktop / mobile / Cowork | **Customize → Connectors → Add custom connector**, URL `https://<host>/mcp`. Leave the advanced OAuth client fields empty: Claude identifies itself with its hosted Client ID Metadata Document. |
+| Claude Code | `claude mcp add --transport http betterpptx https://<host>/mcp`, then `/mcp` in a session to sign in when prompted. |
 
-```text
-https://<BETTERPPTX_PUBLIC_BASE-host>/s/<BETTERPPTX_URL_SECRET>/mcp
+The URL must be exactly `https://<host>/mcp` (no trailing slash): Claude
+requires the protected resource metadata `resource` to equal it.
+
+What the user sees: tools work immediately for discovery and public tools; the
+first protected call (generate/save/export/read a deck, billing, operation
+status, `resources/read`) shows an inline **Connect** card. After the passkey
+sign-in and consent, Claude retries the same call with the new token.
+
+---
+
+## 2. The server contract
+
+### Lazy-auth gate (before the MCP SDK)
+
+`authGuard` in `server-http.mjs` runs before the Streamable HTTP transport, on
+the parsed JSON-RPC body:
+
+- Anonymous only for discovery (`initialize`, `tools/list`, `resources/list`,
+  `prompts/list`, `ping`, …) and the explicitly public tools
+  (`auth/public-identity-policy.mjs` → `tool-security.mjs`).
+- Anything else without a valid token (including any batch containing a
+  protected member, and calls inside an existing session) gets:
+
+```http
+HTTP/1.1 401 Unauthorized
+WWW-Authenticate: Bearer realm="BetterPPTX", resource_metadata="https://<host>/.well-known/oauth-protected-resource/mcp", scope="betterpptx", error_description="..."
 ```
 
-Sanity-check the public host:
+  With an invalid/expired token the challenge also carries
+  `error="invalid_token"` (Claude refreshes, then re-authorizes). A token
+  without the `betterpptx` scope gets `403` + `error="insufficient_scope"`.
+
+### Discovery documents
+
+| URL | `resource` | Who uses it |
+|---|---|---|
+| `/.well-known/oauth-protected-resource/mcp` | `https://<host>/mcp` | Claude (from the 401 pointer, or path-suffixed probing) |
+| `/.well-known/oauth-protected-resource` | `https://<host>` | ChatGPT (qualified origin form, RFC 9728 root document) |
+
+Both list `authorization_servers: ["https://<host>/identity/realms/betterpptx"]`
+and `scopes_supported: ["betterpptx"]`.
+
+The authorization-server metadata (served by the identity proxy,
+`auth/identity-proxy.mjs`, and the fallback in `mcp-v2/oauth.mjs`) advertises
+`client_id_metadata_document_supported: true`,
+`token_endpoint_auth_methods_supported: ["private_key_jwt", "none"]`,
+`code_challenge_methods_supported: ["S256"]`, no `registration_endpoint`.
+Claude picks CIMD only when both the CIMD flag and `"none"` are present.
+
+### Pre-registered clients (Keycloak realm `betterpptx`)
+
+| client_id (CIMD URL) | Type | Redirect URIs |
+|---|---|---|
+| `https://chatgpt.com/oauth/client.json` | confidential, `private_key_jwt` (RS256, pinned JWKS) | `https://chatgpt.com/connector_platform_oauth_redirect` |
+| `https://claude.ai/oauth/mcp-oauth-client-metadata` | public, `none` | `https://claude.ai/api/mcp/auth_callback` |
+| `https://claude.ai/oauth/claude-code-client-metadata` | public, `none` | `http://localhost/callback`, `http://127.0.0.1/callback` |
+
+All require S256 PKCE, consent, `fullScopeAllowed=false`, default scope
+`betterpptx` only, and use realm refresh-token rotation
+(`revokeRefreshToken=true`, `refreshTokenMaxReuse=0`): a replayed or revoked
+refresh token fails with `invalid_grant`. Keycloak 26.7 matches the two
+loopback URIs with the port ignored (RFC 8252 §7.3, also for `localhost`) and
+the path exact, so Claude Code's ephemeral ports work without wildcards.
+
+Create/align the Claude clients (idempotent, additive; asserts the ChatGPT
+client is unchanged; validates each live CIMD document before writing):
 
 ```bash
-$ curl https://<stable-host>/health
-{"status":"ok","service":"betterpptx-mcp",...}
+node betterpptx-mcp/deploy/identity/activate-claude-public-clients.mjs
 ```
 
----
+New installs can also stage them in the import file:
+`provision.mjs configure-client --client-id <CIMD URL> --redirect <URI>`.
+`deploy/identity/verify-local.mjs` checks them when present.
 
-## 2. Expose localhost via HTTPS
+### Access-token verification
 
-Preferred options:
+`auth/verified-identity.mjs` (Keycloak profile) requires: pinned issuer and
+JWKS, `typ: Bearer`, `azp` exactly one of `BETTERPPTX_OAUTH_CLIENT_ID`
+(space-separated exact list; the self-hosted config sets all three client IDs),
+exactly one `aud` equal to `BETTERPPTX_OAUTH_AUDIENCE` (the origin, which the
+realm audience mapper issues) or one of `BETTERPPTX_OAUTH_ADDITIONAL_AUDIENCES`
+(same-origin only; the self-hosted config adds `https://<host>/mcp`), scope
+`betterpptx`, lifetime ≤ 600 s. The account principal is derived from
+`iss` + `sub` only, so the same person keeps their decks across ChatGPT,
+claude.ai and Claude Code.
 
-- Tailscale Funnel: stable `https://<device>.<tailnet>.ts.net`, no domain needed.
-- Cloudflare named tunnel: stable hostname on your own domain.
-- Existing HTTPS hosting/reverse proxy.
+Keycloak ignores the RFC 8707 `resource` parameter Claude sends; the audience
+comes from the realm mapper. The verifier already accepts the `/mcp` form, so
+the mapper can later be switched to it without breaking issued tokens.
 
-Cloudflared quick tunnels are still useful for one-off demos, but their
-`trycloudflare.com` URLs are ephemeral and must not be saved as durable connector
-configuration.
+### Client dialects
 
----
+`auth/client-profile.mjs` decides only the *shape* of a refusal, never access:
 
-## 3. Register the connector in claude.ai
+- **openai** (ChatGPT: `x-openai-session`/`x-openai-subject` headers,
+  `User-Agent: openai-mcp/…`, or an `openai`/`chatgpt` clientInfo name): protected
+  `tools/call` refusals stay `200` + `isError` + `_meta["mcp/www_authenticate"]`,
+  root `resource_metadata`, origin-form resource, and AS metadata listing only
+  `private_key_jwt` — byte-for-byte the qualified ChatGPT contract.
+- **standard** (everyone else, including Claude): transport `401` as above.
 
-1. Go to **<https://claude.ai>** → click your profile → **Settings**.
-2. Open **Connectors** (or "Integrations").
-3. Click **Add custom connector** (or "Browse custom connectors" → "Connect").
-4. Fill in:
-
-   | Field                | Value                                                          |
-   |----------------------|----------------------------------------------------------------|
-   | **Name**             | `betterpptx-mcp` (or whatever you like)                          |
-   | **Description**      | `Generate, edit, and animate PowerPoint via MCP`                |
-   | **Remote MCP URL**   | `https://<stable-host>/s/<secret>/mcp`                          |
-   | **Authentication**   | choose **No authentication**                                    |
-   | **Token / value**    | leave empty; the secret is already in the URL path              |
-
-5. Click **Connect**. claude.ai will hit the MCP URL with `initialize`,
-   read back the tool catalogue, and you'll see all `betterpptx.*`
-   tools listed in the connector's permission card.
-
-6. In any new chat, enable the connector via the **🔌 connectors** button
-   on the composer. Ask Claude to *"build me a 3-slide PPT about
-   {your topic} using gradients and a morph transition between slides 2 and 3"*
-   — Claude will call the tools over HTTPS and return the saved `.pptx`
-   `downloadUrl`.
+A client that spoofs a profile only receives a different, equally protected
+refusal.
 
 ---
 
-## 4. Production hardening checklist
-
-Before you ship this as a paid SaaS:
-
-- [ ] Replace the in-memory deck registry with per-tenant storage (Redis / SQLite).
-- [ ] Replace path-secret access with **OAuth 2.0** for per-user auth and revocation.
-- [ ] Mount `/mcp` behind a real reverse proxy with TLS (nginx / Caddy / Cloudflare).
-- [ ] Add per-token rate limiting (e.g. `express-rate-limit`).
-- [ ] Persist generated `.pptx` artefacts to S3 / R2 + return signed URLs.
-- [ ] Restrict CORS to the production claude.ai origin only (already restricted in `server-http.mjs`).
-- [ ] Add observability — log each tool call with tenantId + tokens consumed.
-- [ ] Add a soft cap on slide count / image bytes per request.
-
----
-
-## 5. Troubleshooting
-
-| Symptom                                       | Likely cause                                                                                            |
-|-----------------------------------------------|----------------------------------------------------------------------------------------------------------|
-| claude.ai says "Could not connect"             | Tunnel not running, or URL doesn't end with `/mcp`. The full URL must point at the `/mcp` endpoint.       |
-| 401 on every request                           | The connector is using the wrong `/s/<secret>/mcp` path, or the server is running in Bearer mode instead of path-secret mode. |
-| "No valid session ID" 400                      | claude.ai sent a non-initialize request without a session. Restart the connector in claude.ai.            |
-| Tools list is empty                            | The server crashed during initialize. Check the server's stderr — usually a pptxgenjs import error.       |
-| Tool call returns `Bad Request: Mcp-Session-Id`| Some intermediary is stripping the `mcp-session-id` header. Make sure your tunnel passes headers through.|
-
----
-
-## 6. Quick self-test
-
-There are built-in smoke tests that exercise the HTTP transport without needing
-claude.ai:
+## 3. Self-test
 
 ```bash
-$ node betterpptx-mcp/smoke-http.mjs
-====================================================
-  betterpptx-mcp HTTP transport smoke-test
-====================================================
-  ✓ POST /mcp without token → 401
-  ✓ initialize → session …
-  ✓ tools/list → 35 tools
-  ✓ tools/call (capabilities) → brand=betterpptx-mcp
-  ✓ deck.new → deck_…
-  ✓ deck.save → outputs/BetterPptxMcp_HTTPSmoke_….pptx (… bytes, 1 slides)
-  ✓ DELETE /mcp → 200
-  SMOKE: PASS
+# protected call without a token → 401 + resource_metadata …/oauth-protected-resource/mcp
+curl -si https://<host>/mcp -H 'Content-Type: application/json' \
+  -H 'Accept: application/json, text/event-stream' \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tools/call","params":{"name":"betterpptx.deck.save","arguments":{"deckId":"x"}}}'
+
+# resource must equal the connector URL
+curl -s https://<host>/.well-known/oauth-protected-resource/mcp
+
+# CIMD + public-client support
+curl -s https://<host>/identity/realms/betterpptx/.well-known/oauth-authorization-server
 ```
 
-For the stable public connector, prefer:
+Unit/integration coverage: `test/public-verified-identity-http.test.mjs`
+(run with `--experimental-test-module-mocks`), `test/verified-identity.test.mjs`,
+`test/identity-proxy.test.mjs`, `test/mcp-v2-protocol.test.mjs`,
+`deploy/identity/provision.test.mjs`.
 
-```bash
-$ node betterpptx-mcp/verify-public.mjs
-$ node betterpptx-mcp/verify-download.mjs
-```
+---
+
+## 4. Troubleshooting
+
+| Symptom | Likely cause |
+|---|---|
+| "Couldn't reach the MCP server", identity sees no traffic | No `401`/`resource_metadata`, or `/.well-known/*` not routed to the MCP server. |
+| "Please sign in" text in chat instead of a **Connect** card | The request was classified as the ChatGPT dialect (200 + `isError`). Check for stray `x-openai-*` headers or an `openai-mcp` User-Agent added by a proxy. |
+| Sign-in loop / "resource mismatch" | Connector URL not exactly `https://<host>/mcp`, or a cached PRM (Claude caches discovery ~5 min). |
+| Keycloak "Client not found" | Claude clients not activated: run `activate-claude-public-clients.mjs`. |
+| Keycloak "Invalid parameter: redirect_uri" | Redirect differs from the CIMD-declared URIs (hosted callback, or loopback `/callback`). |
+| Token accepted by Keycloak but MCP returns 401 | `azp` not in `BETTERPPTX_OAUTH_CLIENT_ID`, or `aud` not origin / `/mcp`. |
+| Refresh fails | Refresh tokens rotate; a reused one returns `invalid_grant` and Claude re-authorizes. |
+
+Anthropic egress for allowlists: `160.79.104.0/21`. Claude gives discovery and
+token endpoints 10 s (refresh 30 s).

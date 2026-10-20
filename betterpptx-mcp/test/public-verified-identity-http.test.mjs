@@ -210,6 +210,18 @@ test('public HTTP trusts only verified OAuth principals', { timeout: 120_000 }, 
 		const encoded = JSON.stringify(result.body)
 		assert.equal(encoded.includes(tokenA) || encoded.includes(tokenB) || encoded.includes(principalA.installHash), false)
 	}
+	// Claude (and any standard MCP client) starts sign-in only on a transport 401
+	// whose resource_metadata names the /mcp document whose resource is the endpoint.
+	function assertTransportAuthenticationRequired(result, { tokenSupplied = false } = {}) {
+		assertAuthenticationRequired(result)
+		const challenge = result.response.headers.get('www-authenticate')
+		assert.match(challenge, /^Bearer /)
+		assert.match(challenge, /resource_metadata="https:\/\/presentations\.example\.test\/\.well-known\/oauth-protected-resource\/mcp"/)
+		assert.match(challenge, /scope="betterpptx"/)
+		if (tokenSupplied) assert.match(challenge, /error="invalid_token"/)
+		else assert.doesNotMatch(challenge, /error=/)
+	}
+	const chatgptUserAgent = { 'user-agent': 'openai-mcp/1.0.0' }
 	const tool = (name, args = {}) => message('tools/call', { name, arguments: args })
 	const protectedMessages = [
 		tool('betterpptx.deck.generate_from_spec', { spec: { title: 'Blocked fixture', slides: [] }, idempotencyKey: 'blocked-generate' }),
@@ -228,6 +240,13 @@ test('public HTTP trusts only verified OAuth principals', { timeout: 120_000 }, 
 		assert.equal(resource.resource, audience)
 		assert.deepEqual(resource.authorization_servers, [issuer])
 		assert.ok(resource.code_challenge_methods_supported.includes('S256'))
+		// Path-suffixed document: the exact connector URL for Claude, origin for ChatGPT.
+		const endpointResource = await (await fetch(`${base}/.well-known/oauth-protected-resource/mcp`)).json()
+		assert.equal(endpointResource.resource, `${audience}/mcp`)
+		assert.deepEqual(endpointResource.authorization_servers, [issuer])
+		assert.deepEqual(endpointResource.scopes_supported, ['betterpptx'])
+		const chatgptResource = await (await fetch(`${base}/.well-known/oauth-protected-resource/mcp`, { headers: chatgptUserAgent })).json()
+		assert.equal(chatgptResource.resource, audience)
 
 		for (const pathname of [
 			'/.well-known/oauth-authorization-server',
@@ -242,7 +261,9 @@ test('public HTTP trusts only verified OAuth principals', { timeout: 120_000 }, 
 			assert.equal(metadata.issuer, issuer)
 			assert.equal(metadata.client_id_metadata_document_supported, true)
 			assert.equal(metadata.authorization_response_iss_parameter_supported, true)
-			assert.deepEqual(metadata.token_endpoint_auth_methods_supported, ['private_key_jwt'])
+			assert.deepEqual(metadata.token_endpoint_auth_methods_supported, ['private_key_jwt', 'none'])
+			const chatgptMetadata = await (await fetch(`${base}${pathname}`, { headers: chatgptUserAgent })).json()
+			assert.deepEqual(chatgptMetadata.token_endpoint_auth_methods_supported, ['private_key_jwt'])
 			assert.deepEqual(metadata.token_endpoint_auth_signing_alg_values_supported, ['RS256'])
 			assert.ok(metadata.code_challenge_methods_supported.includes('S256'))
 			assert.deepEqual(metadata.scopes_supported, ['openid', 'betterpptx'])
@@ -278,10 +299,12 @@ test('public HTTP trusts only verified OAuth principals', { timeout: 120_000 }, 
 
 	await t.test('anonymous and spoofed headers cannot write, estimate, export, read resources or inspect operations', async () => {
 		for (const body of protectedMessages) {
-			for (const headers of [{}, spoofed]) {
+			for (const headers of [{}, spoofed, chatgptUserAgent]) {
 				const result = await send(body, headers)
-				if (body.method === 'tools/call') assertMcpAuthenticationRequired(result)
-				else assertAuthenticationRequired(result)
+				const chatgpt = headers === spoofed || headers === chatgptUserAgent
+				if (body.method === 'tools/call' && chatgpt) assertMcpAuthenticationRequired(result)
+				else if (chatgpt) assertAuthenticationRequired(result)
+				else assertTransportAuthenticationRequired(result)
 			}
 		}
 		assert.equal(allowanceReads.length, 0)
@@ -335,9 +358,14 @@ test('public HTTP trusts only verified OAuth principals', { timeout: 120_000 }, 
 			'not-a-token',
 		]
 		const readsBefore = allowanceReads.length
-		for (const token of invalid) assertMcpAuthenticationRequired(await send(tool('betterpptx.auth.status'), {
-			...spoofed, authorization: `Bearer ${token}`,
-		}))
+		for (const token of invalid) {
+			assertMcpAuthenticationRequired(await send(tool('betterpptx.auth.status'), {
+				...spoofed, authorization: `Bearer ${token}`,
+			}))
+			assertTransportAuthenticationRequired(await send(tool('betterpptx.auth.status'), {
+				authorization: `Bearer ${token}`,
+			}), { tokenSupplied: true })
+		}
 		assert.equal(allowanceReads.length, readsBefore)
 	})
 

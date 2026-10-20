@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-import { chatgptClientId, chatgptJwksUrl } from './provision.mjs';
+import { chatgptClientId, chatgptJwksUrl, claudeCodeClientId, claudeHostedClientId, defaultRedirects } from './provision.mjs';
 import { identityPublicOrigin } from './public-origin.mjs';
 
 const base = 'http://127.0.0.1:8180/identity';
@@ -78,6 +78,19 @@ try {
   assert.deepEqual(client.redirectUris, ['https://chatgpt.com/connector_platform_oauth_redirect']);
   assert.equal(client.directAccessGrantsEnabled, false);
   assert.equal(client.implicitFlowEnabled, false);
+  // Claude's CIMD clients are optional until activated, but must be PKCE public clients when present.
+  const claudeClients = [];
+  for (const clientId of [claudeHostedClientId, claudeCodeClientId]) {
+    const [claude] = await admin('/clients?clientId=' + encodeURIComponent(clientId));
+    if (!claude) continue;
+    assert.equal(claude.publicClient, true);
+    assert.equal(claude.attributes['pkce.code.challenge.method'], 'S256');
+    assert.deepEqual([...claude.redirectUris].sort(), defaultRedirects(clientId).sort());
+    assert.equal(claude.directAccessGrantsEnabled, false);
+    assert.equal(claude.implicitFlowEnabled, false);
+    assert.deepEqual((await admin(`/clients/${encodeURIComponent(claude.id)}/default-client-scopes`)).map(scope => scope.name), ['betterpptx']);
+    claudeClients.push(clientId);
+  }
   const resourceScope = clientScopes.find(scope => scope.name === 'betterpptx');
   assert.ok(resourceScope?.id);
   const resourceMappers = await admin(`/client-scopes/${encodeURIComponent(resourceScope.id)}/protocol-mappers/models`);
@@ -92,7 +105,7 @@ try {
   });
   assert.equal(snapshot.browserFlow, 'betterpptx-passkey-only');
   assert.ok(snapshot.authenticationFlows.some(flow => flow.alias === 'betterpptx-passkey-only'));
-	console.log(JSON.stringify({ status: 'passed', issuer, browserFlow: realm.browserFlow, requiredAuthenticator: executions[0].providerId, enrollmentAction: enrollment.alias, applicationUserCount: users, sampledUserCount: applicationUsers.length, usersWithEmail: applicationUsers.filter(user => Boolean(user.email)).length, passwordlessCredentialCount: credentialCounts.reduce((sum, count) => sum + count, 0), smtpConfigured: Boolean(realm.smtpServer?.host), clientAuthentication: 'private_key_jwt+S256-PKCE', accessTokenSeconds: realm.accessTokenLifespan, sessionIdleDays: realm.ssoSessionIdleTimeout / 86400, sessionMaxDays: realm.ssoSessionMaxLifespan / 86400, refreshTokenRotation: 'strict', accessTokenSubjectMapper: 'verified', partialExportVerified: true, secretValuesPrinted: false }, null, 2));
+	console.log(JSON.stringify({ status: 'passed', issuer, browserFlow: realm.browserFlow, requiredAuthenticator: executions[0].providerId, enrollmentAction: enrollment.alias, applicationUserCount: users, sampledUserCount: applicationUsers.length, usersWithEmail: applicationUsers.filter(user => Boolean(user.email)).length, passwordlessCredentialCount: credentialCounts.reduce((sum, count) => sum + count, 0), smtpConfigured: Boolean(realm.smtpServer?.host), clientAuthentication: 'private_key_jwt+S256-PKCE', claudePublicClients: claudeClients.length, accessTokenSeconds: realm.accessTokenLifespan, sessionIdleDays: realm.ssoSessionIdleTimeout / 86400, sessionMaxDays: realm.ssoSessionMaxLifespan / 86400, refreshTokenRotation: 'strict', accessTokenSubjectMapper: 'verified', partialExportVerified: true, secretValuesPrinted: false }, null, 2));
 } catch {
   console.error(`Local identity verification failed during ${phase}; inspect health and configuration privately. No sensitive response was printed.`);
   process.exitCode = 1;

@@ -61,8 +61,19 @@ function readConfig(env) {
 	requireCheck(dpop === undefined || dpop === '0' || dpop === '1', 503)
 	const profile = env.BETTERPPTX_OAUTH_TOKEN_PROFILE === undefined ? 'rfc9068' : env.BETTERPPTX_OAUTH_TOKEN_PROFILE
 	requireCheck(profile === 'rfc9068' || profile === 'keycloak', 503)
-	const clientId = env.BETTERPPTX_OAUTH_CLIENT_ID
-	requireCheck(profile !== 'keycloak' || nonemptyString(clientId), 503)
+	// Space-separated exact authorized parties (one pre-registered client each,
+	// e.g. ChatGPT's and Claude's CIMD URLs). No prefix or pattern matching.
+	const clientIdText = env.BETTERPPTX_OAUTH_CLIENT_ID
+	requireCheck(profile !== 'keycloak' || (nonemptyString(clientIdText, 8192) && /^\S+(?: \S+)*$/.test(clientIdText)), 503)
+	const clientIds = profile === 'keycloak' ? clientIdText.split(' ') : []
+	requireCheck(clientIds.every(value => nonemptyString(value)), 503)
+	// Additional exact resource audiences on the SAME origin as the primary one,
+	// e.g. the /mcp endpoint form of the resource. A token must still name
+	// exactly one audience, and it must be one of these.
+	const extraText = env.BETTERPPTX_OAUTH_ADDITIONAL_AUDIENCES
+	requireCheck(extraText === undefined || extraText === '' || (nonemptyString(extraText, 8192) && /^\S+(?: \S+)*$/.test(extraText)), 503)
+	const audiences = [audience, ...(extraText ? extraText.split(' ') : [])]
+	for (const value of audiences) requireCheck(httpsEndpoint(value).origin === audienceOrigin, 503)
 	const acr = env.BETTERPPTX_OAUTH_REQUIRED_ACR
 	requireCheck(acr === undefined || nonemptyString(acr), 503)
 	const amr = env.BETTERPPTX_OAUTH_REQUIRED_AMR
@@ -71,7 +82,7 @@ function readConfig(env) {
 	requireCheck(capacity === undefined || (typeof capacity === 'string' && /^[1-9][0-9]*$/.test(capacity)), 503)
 	const replayCapacity = capacity === undefined ? MAX_REPLAY_ENTRIES : Number(capacity)
 	requireCheck(Number.isSafeInteger(replayCapacity) && replayCapacity <= MAX_REPLAY_ENTRIES, 503)
-	return { issuer, audience, audienceOrigin, jwksUrl, secret, requireDpop: dpop === '1', acr, clientId,
+	return { issuer, audience, audiences: [...new Set(audiences)], audienceOrigin, jwksUrl, secret, requireDpop: dpop === '1', acr, clientIds: new Set(clientIds),
 		profile, tokenTyp: profile === 'keycloak' ? 'JWT' : 'at+jwt',
 		requiredClaims: [...COMMON_CLAIMS, ...(profile === 'keycloak' ? ['typ', 'azp'] : ['client_id'])],
 		amr: amr === undefined ? [] : amr.split(' '), replayCapacity }
@@ -118,8 +129,9 @@ function validDate(value) {
 	return Number.isSafeInteger(value) && value >= 0
 }
 
-function exactAudience(value, expected) {
-	return value === expected || (Array.isArray(value) && value.length === 1 && value[0] === expected)
+function exactAudience(value, accepted) {
+	const single = Array.isArray(value) ? (value.length === 1 ? value[0] : undefined) : value
+	return typeof single === 'string' && accepted.includes(single)
 }
 
 function checkAccessClaims(payload, config, now) {
@@ -130,14 +142,14 @@ function checkAccessClaims(payload, config, now) {
 	// header. The signed access-token discriminator is mandatory in this profile.
 	if (config.profile === 'keycloak') {
 		requireCheck(payload.typ === 'Bearer')
-		requireCheck(payload.azp === config.clientId)
+		requireCheck(config.clientIds.has(payload.azp))
 	}
 	// A single exact audience; no multi-resource or substring audience matching.
 	// RFC 7519 permits aud to be either a string or an array. Keycloak may emit
 	// a singleton array even when exactly one resource audience is configured.
 	// Accept that standards-equivalent form while still rejecting every token
 	// that names zero, multiple, or different resources.
-	requireCheck(payload.iss === config.issuer && exactAudience(payload.aud, config.audience))
+	requireCheck(payload.iss === config.issuer && exactAudience(payload.aud, config.audiences))
 	requireCheck(validDate(payload.exp) && validDate(payload.iat)
 		&& payload.iat <= now && payload.exp > now && payload.exp > payload.iat
 		&& payload.exp - payload.iat <= 600)
@@ -186,12 +198,12 @@ function safeFailureDiagnostic(req, config) {
 		result.audienceShape = typeof payload.aud === 'string' ? 'string'
 			: Array.isArray(payload.aud) ? 'array' : payload.aud === undefined ? 'missing' : 'other'
 		result.audienceCount = typeof payload.aud === 'string' ? 1 : Array.isArray(payload.aud) ? payload.aud.length : 0
-		result.audienceMatchesExactly = exactAudience(payload.aud, config.audience)
+		result.audienceMatchesExactly = exactAudience(payload.aud, config.audiences)
 		result.accessTokenTypeMatches = config.profile === 'keycloak'
 			? payload.typ === 'Bearer' : header.typ === 'at+jwt'
 		result.clientClaimPresent = nonemptyString(payload[config.profile === 'keycloak' ? 'azp' : 'client_id'])
 		result.clientClaimMatches = config.profile === 'keycloak'
-			? payload.azp === config.clientId : result.clientClaimPresent
+			? config.clientIds.has(payload.azp) : result.clientClaimPresent
 		result.subjectPresent = nonemptyString(payload.sub)
 		result.tokenIdPresent = nonemptyString(payload.jti)
 		result.scopeIsString = typeof payload.scope === 'string'
@@ -287,8 +299,10 @@ function consumeProof(proof, capacity, now) {
  * query or fragment; BETTERPPTX_INSTALL_HMAC_SECRET: dedicated >=32-character secret.
  * Optional env: BETTERPPTX_OAUTH_REQUIRE_DPOP ('0' or '1', default '0'),
  * BETTERPPTX_OAUTH_TOKEN_PROFILE ('rfc9068' by default, or explicitly 'keycloak'),
- * and BETTERPPTX_OAUTH_CLIENT_ID for the exact authorized-party value required
- * by the Keycloak profile.
+ * and BETTERPPTX_OAUTH_CLIENT_ID for the exact authorized-party value(s)
+ * required by the Keycloak profile (space-separated exact client IDs).
+ * BETTERPPTX_OAUTH_ADDITIONAL_AUDIENCES: space-separated exact audiences on the
+ * primary audience's origin (e.g. its /mcp endpoint form); still one per token.
  * BETTERPPTX_OAUTH_REQUIRED_ACR (exact string), BETTERPPTX_OAUTH_REQUIRED_AMR
  * (space-separated methods, ALL required), BETTERPPTX_OAUTH_DPOP_REPLAY_MAX_ENTRIES
  * (1..10000, default 10000; counts all verifier instances in this module).
@@ -357,7 +371,7 @@ export function createVerifiedIdentityVerifier({ env = process.env, keyResolver 
 					try { return await resolveKey(header, jws) } catch (error) {
 						throw new IdentityError(error?.code === 'ERR_JWKS_NO_MATCHING_KEY' ? 401 : 503)
 					}
-				}, { algorithms: ALGORITHMS, issuer: config.issuer, audience: config.audience,
+				}, { algorithms: ALGORITHMS, issuer: config.issuer, audience: config.audiences,
 					typ: config.tokenTyp, requiredClaims: config.requiredClaims, clockTolerance: 0, maxTokenAge: 600 })
 				checkAccessClaims(payload, config, Math.floor(Date.now() / 1000))
 				const scope = authorizedScope(payload, config)

@@ -445,6 +445,38 @@ test('explicit Keycloak profile requires signed Bearer discriminator and azp; ne
 	assert.equal((await v.verifyRequest(dpopRequest(bound, await dpop(bound)))).installHash, identity.installHash)
 })
 
+test('Keycloak profile accepts an exact list of pre-registered clients and same-origin resource audiences', async () => {
+	const clients = ['https://chatgpt.com/oauth/client.json', 'https://claude.ai/oauth/mcp-oauth-client-metadata',
+		'https://claude.ai/oauth/claude-code-client-metadata']
+	const v = verifier({ BETTERPPTX_OAUTH_TOKEN_PROFILE: 'keycloak', BETTERPPTX_OAUTH_CLIENT_ID: clients.join(' '),
+		BETTERPPTX_OAUTH_ADDITIONAL_AUDIENCES: `${audience}/mcp` })
+	const kcAccess = (claims = {}) => access({ client_id: undefined, typ: 'Bearer', azp: clients[1], ...claims }, { typ: 'JWT' })
+	const principals = new Set()
+	for (const azp of clients) principals.add((await v.verifyRequest(request(await kcAccess({ azp })))).installHash)
+	// The account principal is client-independent: the same person keeps their decks.
+	assert.equal(principals.size, 1)
+	for (const aud of [audience, `${audience}/mcp`, [`${audience}/mcp`]]) {
+		assert.equal((await v.verifyRequest(request(await kcAccess({ aud })))).authenticated, true)
+	}
+	for (const claims of [
+		{ azp: 'https://claude.ai/oauth' }, { azp: `${clients[1]} ` }, { azp: clients.join(' ') },
+		{ azp: 'https://claude.ai/oauth/mcp-oauth-client-metadata/extra' },
+		{ aud: [audience, `${audience}/mcp`] }, { aud: `${audience}/mcp/` }, { aud: `${audience}/other` },
+		{ aud: 'https://evil.example.test/mcp' },
+	]) await rejects(v.verifyRequest(request(await kcAccess(claims))))
+	// Additional audiences must stay on the primary origin; malformed lists disable the verifier.
+	for (const overrides of [
+		{ BETTERPPTX_OAUTH_ADDITIONAL_AUDIENCES: 'https://evil.example.test/mcp' },
+		{ BETTERPPTX_OAUTH_ADDITIONAL_AUDIENCES: 'http://api.example.test/mcp' },
+		{ BETTERPPTX_OAUTH_ADDITIONAL_AUDIENCES: `${audience}/mcp  ${audience}` },
+		{ BETTERPPTX_OAUTH_CLIENT_ID: ` ${clients[0]}` },
+		{ BETTERPPTX_OAUTH_CLIENT_ID: `${clients[0]}  ${clients[1]}` },
+	]) {
+		const disabled = verifier({ BETTERPPTX_OAUTH_TOKEN_PROFILE: 'keycloak', BETTERPPTX_OAUTH_CLIENT_ID: clients.join(' '), ...overrides })
+		assert.equal(disabled.configured, false)
+	}
+})
+
 test('DPoP binds /mcp, /files and /pay paths while JWT audience stays on the resource origin', async () => {
 	const token = await access({ cnf: { jkt } })
 	const v = verifier()

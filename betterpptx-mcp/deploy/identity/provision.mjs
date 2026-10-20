@@ -8,6 +8,22 @@ import { applyIdentityOriginToRealm, identityPublicOrigin } from './public-origi
 const here = dirname(fileURLToPath(import.meta.url));
 export const chatgptClientId = 'https://chatgpt.com/oauth/client.json';
 export const chatgptJwksUrl = 'https://chatgpt.com/oauth/jwks.json';
+// Claude's Anthropic-hosted CIMD documents. Hosted apps (claude.ai, Desktop,
+// mobile, Cowork) share one fixed callback; Claude Code uses RFC 8252 loopback
+// redirects on an ephemeral port. Keycloak 26.7 already matches the registered
+// loopback URIs (127.0.0.1 AND localhost) with the port ignored and the path
+// exact, so the CIMD's own redirect_uris are registered verbatim (no wildcard).
+export const claudeHostedClientId = 'https://claude.ai/oauth/mcp-oauth-client-metadata';
+export const claudeCodeClientId = 'https://claude.ai/oauth/claude-code-client-metadata';
+export const claudeHostedRedirect = 'https://claude.ai/api/mcp/auth_callback';
+export const claudeCodeRedirects = Object.freeze(['http://localhost/callback', 'http://127.0.0.1/callback']);
+const claudeClients = {
+  [claudeHostedClientId]: { name: 'Claude', redirects: [claudeHostedRedirect] },
+  [claudeCodeClientId]: { name: 'Claude Code', redirects: [...claudeCodeRedirects] },
+};
+export const supportedClientIds = Object.freeze([chatgptClientId, ...Object.keys(claudeClients)]);
+export const isClaudeClient = clientId => Object.hasOwn(claudeClients, clientId);
+export const defaultRedirects = clientId => isClaudeClient(clientId) ? [...claudeClients[clientId].redirects] : [];
 const secretNames = ['postgres-password', 'bootstrap-admin-password', 'install-hmac-secret'];
 const dependents = {
   'postgres-password': ['postgres', 'keycloak'],
@@ -29,13 +45,14 @@ export function parseArgs(args) {
     if (!['--redirect', '--client-id', '--name', '--from-file', '--sid'].includes(flag) || !value || value.startsWith('--')) fail('Invalid option or missing option value.');
     if (flag !== '--redirect' && seen.has(flag)) fail('Duplicate option.');
     seen.add(flag);
-    if (flag === '--redirect') result.redirects.push(validateRedirect(value));
+    if (flag === '--redirect') result.redirects.push(value);
     if (flag === '--client-id') result.clientId = value;
     if (flag === '--name') result.name = value;
     if (flag === '--from-file') result.fromFile = resolve(value);
     if (flag === '--sid') result.sid = value;
   }
-  if (result.clientId !== chatgptClientId) fail('This client profile requires the fixed official ChatGPT client ID.');
+  if (!supportedClientIds.includes(result.clientId)) fail('Unsupported client ID; use the official ChatGPT or Claude CIMD URL.');
+  result.redirects = result.redirects.map(uri => validateRedirect(uri, result.clientId));
   if (command === 'status' && rest.length) fail('status accepts no options.');
   if (command === 'grant-docker-reader') {
     if (rest.length !== 2 || !/^S-1-5-21-[0-9-]+$/.test(result.sid ?? '')) fail('grant-docker-reader requires the verified Docker Desktop owner --sid.');
@@ -48,7 +65,9 @@ export function parseArgs(args) {
   return result;
 }
 
-export function validateRedirect(value) {
+export function validateRedirect(value, clientId = chatgptClientId) {
+  // Loopback redirects exist only for Claude Code and only as its CIMD declares.
+  if (clientId === claudeCodeClientId && claudeCodeRedirects.includes(value)) return value;
   let uri;
   try { uri = new URL(value); } catch { fail('Redirect must be an absolute HTTPS URI.'); }
   // Reject ambiguous forms; keep the exact URI supplied by the app management UI.
@@ -61,6 +80,7 @@ export function validateRedirect(value) {
 
 export function makeClient(clientId, redirects) {
   if (!redirects.length) fail('An OAuth client requires exact redirect URIs.');
+  if (isClaudeClient(clientId)) return makeClaudeClient(clientId, redirects);
   if (clientId !== chatgptClientId) fail('This client profile requires the fixed official ChatGPT client ID.');
   return {
     clientId, name: 'BetterPPTX ChatGPT', protocol: 'openid-connect', enabled: true,
@@ -91,6 +111,55 @@ export function makeClient(clientId, redirects) {
   };
 }
 
+// Claude's CIMD clients authenticate as public clients (token_endpoint_auth_method
+// "none"): PKCE S256 is mandatory, there is no secret, and refresh tokens rotate
+// under the realm's revokeRefreshToken/refreshTokenMaxReuse=0 policy (a replayed
+// or revoked refresh token fails with invalid_grant).
+function makeClaudeClient(clientId, redirects) {
+  const allowed = claudeClients[clientId].redirects;
+  for (const uri of redirects) {
+    validateRedirect(uri, clientId);
+    if (!allowed.includes(uri)) fail('Claude redirects must be exactly those its official metadata declares.');
+  }
+  return {
+    clientId, name: claudeClients[clientId].name, protocol: 'openid-connect', enabled: true,
+    publicClient: true,
+    standardFlowEnabled: true, implicitFlowEnabled: false,
+    directAccessGrantsEnabled: false, serviceAccountsEnabled: false,
+    authorizationServicesEnabled: false, fullScopeAllowed: false,
+    consentRequired: true, redirectUris: [...redirects], webOrigins: [],
+    defaultClientScopes: ['betterpptx'], optionalClientScopes: [],
+    attributes: {
+      'pkce.code.challenge.method': 'S256',
+      'exclude.issuer.from.auth.response': 'false',
+      'access.token.header.type.rfc9068': 'false',
+      'access.token.signed.response.alg': 'RS256',
+      'access.token.lifespan': '300',
+      'use.refresh.tokens': 'true',
+      'oauth2.device.authorization.grant.enabled': 'false',
+      'oidc.ciba.grant.enabled': 'false',
+      'standard.token.exchange.enabled': 'false',
+      'oauth2.jwt.authorization.grant.enabled': 'false',
+    },
+  };
+}
+
+export function validateClaudeMetadata(metadata, clientId, redirects) {
+  if (!isClaudeClient(clientId) || metadata?.client_id !== clientId ||
+      metadata.token_endpoint_auth_method !== 'none' ||
+      !metadata.grant_types?.includes('authorization_code') || !metadata.grant_types?.includes('refresh_token') ||
+      !metadata.response_types?.includes('code') || !Array.isArray(metadata.redirect_uris) ||
+      !redirects.length || !redirects.every(uri => metadata.redirect_uris.includes(uri))) {
+    fail('Official Claude metadata does not match the pinned public CIMD profile or requested redirects; review it before provisioning.');
+  }
+}
+
+export async function fetchClientMetadata(clientId) {
+  const response = await fetch(clientId, { redirect: 'error', signal: AbortSignal.timeout(15000) });
+  if (!response.ok) fail('Official client metadata is unavailable; no client was written.');
+  return response.json();
+}
+
 export function validateChatgptMetadata(metadata, redirects) {
   if (metadata.client_id !== chatgptClientId || metadata.jwks_uri !== chatgptJwksUrl ||
 	  metadata.token_endpoint_auth_method !== 'private_key_jwt' ||
@@ -103,10 +172,10 @@ export function validateChatgptMetadata(metadata, redirects) {
   }
 }
 
-async function verifyChatgpt(redirects) {
-  const response = await fetch(chatgptClientId, { redirect: 'error', signal: AbortSignal.timeout(15000) });
-  if (!response.ok) fail('Official ChatGPT client metadata is unavailable; no client was written.');
-  validateChatgptMetadata(await response.json(), redirects);
+async function verifyOfficialClient(clientId, redirects) {
+  const metadata = await fetchClientMetadata(clientId);
+  if (isClaudeClient(clientId)) validateClaudeMetadata(metadata, clientId, redirects);
+  else validateChatgptMetadata(metadata, redirects);
 }
 
 function protectRoot(root) {
@@ -179,7 +248,7 @@ export function provision(options, root = join(here, '.private')) {
     const path = join(root, 'import', 'betterpptx-realm.json');
     if (lstatSync(path).isSymbolicLink()) fail('Unsafe realm import file.');
     const realm = JSON.parse(readFileSync(path, 'utf8'));
-    if (realm.clients.length) fail('An application client is already staged; update a deployed client through private administration.');
+    if (realm.clients.some(client => client.clientId === options.clientId)) fail('This application client is already staged; update a deployed client through private administration.');
     realm.clients.push(makeClient(options.clientId, options.redirects));
     chmodSync(path, 0o600);
     writeFileSync(path, json(realm), { mode: 0o600 });
@@ -206,7 +275,7 @@ export function provision(options, root = join(here, '.private')) {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   try {
     const options = parseArgs(process.argv.slice(2));
-    if (options.redirects.length) await verifyChatgpt(options.redirects);
+    if (options.redirects.length) await verifyOfficialClient(options.clientId, options.redirects);
     console.log(json(provision(options)));
   } catch (error) {
     // Filesystem errors can contain owner-selected paths: do not dump stacks or input contents.

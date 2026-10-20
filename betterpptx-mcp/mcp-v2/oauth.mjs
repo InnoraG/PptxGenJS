@@ -2,6 +2,7 @@ import { advertisedPublicTools } from '../public-manifest.mjs'
 import { BETTERPPTX_PRODUCT } from '../branding.mjs'
 import { MCP_SUPPORTED_PROTOCOL_VERSIONS, MCP_V2_PROTOCOL_VERSION } from './protocol.mjs'
 import { mcpV2ToolScopes } from './catalog.mjs'
+import { tokenEndpointAuthMethods } from '../auth/client-profile.mjs'
 
 function originFrom(publicBase, fallback = '') {
 	const text = String(publicBase || fallback || '').trim().replace(/\/+$/, '')
@@ -13,13 +14,16 @@ export function oauthProtectedResourceMetadata({
 	mcpPath = '/mcp',
 	authMode = 'none',
 	requestOrigin = '',
+	resourceForm = 'origin',
 } = {}) {
 	const origin = originFrom(publicBase, requestOrigin)
 	const endpoint = origin ? `${origin}${mcpPath.startsWith('/') ? mcpPath : `/${mcpPath}`}` : mcpPath
 	// ChatGPT treats the protected resource as the canonical MCP server origin
 	// and sends this exact value through authorization and token requests. Keep
 	// the transport endpoint separate: /mcp remains where JSON-RPC is served.
-	const resource = authMode === 'oauth' && origin ? origin : endpoint
+	// The path-suffixed document (RFC 9728 3.1) instead names the endpoint
+	// itself, which Claude requires to equal the connector URL exactly.
+	const resource = authMode === 'oauth' && origin && resourceForm !== 'endpoint' ? origin : endpoint
 	const issuer = String(process.env.BETTERPPTX_OAUTH_ISSUER || '').trim().replace(/\/+$/, '')
 	const metadata = {
 		resource,
@@ -35,7 +39,7 @@ export function oauthProtectedResourceMetadata({
 	return metadata
 }
 
-export function oauthAuthorizationServerMetadata() {
+export function oauthAuthorizationServerMetadata({ profile = 'standard' } = {}) {
 	const issuer = String(process.env.BETTERPPTX_OAUTH_ISSUER || '').trim().replace(/\/+$/, '')
 	if (!issuer) return null
 	const selfHosted = process.env.BETTERPPTX_OAUTH_TOKEN_PROFILE === 'keycloak'
@@ -58,7 +62,10 @@ export function oauthAuthorizationServerMetadata() {
 		response_modes_supported: ['query'],
 		grant_types_supported: ['authorization_code', 'refresh_token'],
 		code_challenge_methods_supported: ['S256'],
-		token_endpoint_auth_methods_supported: selfHosted ? ['private_key_jwt'] : ['none', 'client_secret_post'],
+		// private_key_jwt: ChatGPT's signed CIMD client. none: Claude's public
+		// CIMD clients (PKCE S256 only). Each pre-registered client still accepts
+		// exactly its own method; the list is the union, not a per-client choice.
+		token_endpoint_auth_methods_supported: selfHosted ? tokenEndpointAuthMethods(profile) : ['none', 'client_secret_post'],
 		...(selfHosted ? { token_endpoint_auth_signing_alg_values_supported: ['RS256'] } : {}),
 		// The ChatGPT CIMD URL is pinned and validated by the private provisioner
 		// before the corresponding exact client/callback is activated.
@@ -109,15 +116,17 @@ function quotedChallengeValue(value) {
 export function wwwAuthenticateHeader({
 	publicBase = '',
 	requestOrigin = '',
+	resourcePath = '',
 	realm = BETTERPPTX_PRODUCT,
 	scope = '',
 	error = '',
 	errorDescription = '',
 } = {}) {
 	const origin = originFrom(publicBase, requestOrigin)
-	const metadataUrl = origin
-		? `${origin}/.well-known/oauth-protected-resource`
-		: '/.well-known/oauth-protected-resource'
+	// resourcePath selects the path-suffixed document (e.g. /mcp) whose resource
+	// is the endpoint URL; omitted, the root document names the origin.
+	const suffix = resourcePath ? `/${String(resourcePath).replace(/^\/+/, '')}` : ''
+	const metadataUrl = `${origin}/.well-known/oauth-protected-resource${suffix}`
 	const fields = [
 		`realm="${quotedChallengeValue(realm)}"`,
 		`resource_metadata="${quotedChallengeValue(metadataUrl)}"`,

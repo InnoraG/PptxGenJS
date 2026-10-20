@@ -3,7 +3,10 @@ import { test } from 'node:test';
 import { existsSync, readFileSync, mkdtempSync, rmSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { chatgptClientId, chatgptJwksUrl, makeClient, parseArgs, provision, validateChatgptMetadata, validateRedirect } from './provision.mjs';
+import {
+  chatgptClientId, chatgptJwksUrl, claudeCodeClientId, claudeCodeRedirects, claudeHostedClientId, claudeHostedRedirect,
+  makeClient, parseArgs, provision, validateChatgptMetadata, validateClaudeMetadata, validateRedirect,
+} from './provision.mjs';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const redirect = 'https://chatgpt.com/connector_platform_oauth_redirect';
@@ -47,6 +50,53 @@ test('signed ChatGPT CIMD profile requires exact redirects, pinned JWKS and S256
   assert.deepEqual(client.redirectUris, [redirect]);
 });
 
+const claudeMetadata = {
+  [claudeHostedClientId]: { client_id: claudeHostedClientId, client_name: 'Claude', redirect_uris: [claudeHostedRedirect],
+    grant_types: ['authorization_code', 'refresh_token', 'urn:ietf:params:oauth:grant-type:jwt-bearer'], response_types: ['code'], token_endpoint_auth_method: 'none' },
+  [claudeCodeClientId]: { client_id: claudeCodeClientId, client_name: 'Claude Code', redirect_uris: [...claudeCodeRedirects],
+    grant_types: ['authorization_code', 'refresh_token'], response_types: ['code'], token_endpoint_auth_method: 'none' },
+};
+
+test('Claude CIMD clients are PKCE-S256 public clients with exactly the declared redirects', () => {
+  for (const [clientId, redirects] of [[claudeHostedClientId, [claudeHostedRedirect]], [claudeCodeClientId, [...claudeCodeRedirects]]]) {
+    validateClaudeMetadata(claudeMetadata[clientId], clientId, redirects);
+    const client = makeClient(clientId, redirects);
+    assert.equal(client.publicClient, true);
+    assert.equal(client.clientAuthenticatorType, undefined);
+    assert.equal(client.secret, undefined);
+    assert.equal(client.attributes['pkce.code.challenge.method'], 'S256');
+    assert.equal(client.attributes['jwks.url'], undefined);
+    assert.equal(client.attributes['use.refresh.tokens'], 'true');
+    assert.equal(client.consentRequired, true);
+    assert.equal(client.fullScopeAllowed, false);
+    assert.equal(client.directAccessGrantsEnabled, false);
+    assert.equal(client.implicitFlowEnabled, false);
+    assert.equal(client.serviceAccountsEnabled, false);
+    assert.deepEqual(client.defaultClientScopes, ['betterpptx']);
+    assert.deepEqual(client.redirectUris, redirects);
+    for (const invalid of [
+      { ...claudeMetadata[clientId], client_id: 'https://claude.ai/oauth/other' },
+      { ...claudeMetadata[clientId], token_endpoint_auth_method: 'client_secret_post' },
+      { ...claudeMetadata[clientId], grant_types: ['authorization_code'] },
+      { ...claudeMetadata[clientId], redirect_uris: [] },
+    ]) assert.throws(() => validateClaudeMetadata(invalid, clientId, redirects));
+  }
+  // Loopback is only for Claude Code and only in its declared port-less form; Keycloak
+  // matches it with the port ignored. Wildcards, other paths and other clients are refused.
+  assert.equal(validateRedirect('http://localhost/callback', claudeCodeClientId), 'http://localhost/callback');
+  for (const [value, clientId] of [
+    ['http://localhost/callback', chatgptClientId], ['http://127.0.0.1/callback', claudeHostedClientId],
+    ['http://localhost:*', claudeCodeClientId], ['http://localhost/other', claudeCodeClientId],
+  ]) assert.throws(() => validateRedirect(value, clientId));
+  assert.throws(() => makeClient(claudeHostedClientId, ['https://claude.ai/elsewhere']));
+  assert.throws(() => makeClient(claudeCodeClientId, [claudeHostedRedirect]));
+  assert.throws(() => parseArgs(['init', '--client-id', 'https://claude.ai/oauth/unknown', '--redirect', claudeHostedRedirect]));
+  assert.deepEqual(parseArgs(['configure-client', '--client-id', claudeCodeClientId, '--redirect', 'http://127.0.0.1/callback']).redirects,
+    ['http://127.0.0.1/callback']);
+  // The ChatGPT signed-client profile cannot be downgraded to a public client.
+  assert.equal(makeClient(chatgptClientId, [redirect]).publicClient, false);
+});
+
 test('provisioning preserves credentials, stages rotations, and supports no-client bootstrap', () => {
   const temp = mkdtempSync(join(here, '.test-private-'));
   const root = join(temp, 'private');
@@ -85,6 +135,11 @@ test('provisioning preserves credentials, stages rotations, and supports no-clie
     assert.equal(subjectMapper.protocolMapper, 'oidc-sub-mapper');
     assert.equal(subjectMapper.config['access.token.claim'], 'true');
     assert.throws(() => provision(parseArgs(['configure-client', '--redirect', redirect]), root));
+    provision(parseArgs(['configure-client', '--client-id', claudeHostedClientId, '--redirect', claudeHostedRedirect]), root);
+    const withClaude = JSON.parse(readFileSync(join(root, 'import', 'betterpptx-realm.json'), 'utf8'));
+    assert.deepEqual(withClaude.clients.map(client => [client.clientId, client.publicClient]),
+      [[chatgptClientId, false], [claudeHostedClientId, true]]);
+    assert.throws(() => provision(parseArgs(['configure-client', '--client-id', claudeHostedClientId, '--redirect', claudeHostedRedirect]), root));
     const rotation = provision(parseArgs(['stage-secret', '--name', 'postgres-password']), root);
     assert.equal(rotation.activationRequired, true);
     assert.equal(readFileSync(passwordPath, 'utf8').trim(), password);

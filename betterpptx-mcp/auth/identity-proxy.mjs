@@ -1,4 +1,5 @@
 import http from 'node:http'
+import { authChallengeProfile, tokenEndpointAuthMethods } from './client-profile.mjs'
 
 const discoveryPath = '/identity/realms/betterpptx/.well-known/openid-configuration'
 
@@ -9,18 +10,20 @@ function setDiscoveryCors(res) {
 	res.setHeader('Access-Control-Max-Age', '86400')
 }
 
-export function augmentIdentityDiscovery(value) {
+export function augmentIdentityDiscovery(value, { profile = 'standard' } = {}) {
 	if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid identity discovery document.')
 	// Dynamic registration and the provider's broader built-in token methods are
-	// deliberately not exposed by the public identity proxy. Publish the one
-	// client contract that is actually accepted: ChatGPT CIMD with a signed
-	// client assertion and S256 PKCE.
+	// deliberately not exposed by the public identity proxy. Publish only the
+	// pre-registered CIMD contracts that are actually accepted, all with S256
+	// PKCE: ChatGPT's signed client assertion (private_key_jwt) and Claude's
+	// public clients (none). Claude selects CIMD only when both
+	// client_id_metadata_document_supported and "none" are advertised.
 	const { registration_endpoint: _privateRegistrationEndpoint, ...publicDiscovery } = value
 	return {
 		...publicDiscovery,
 		client_id_metadata_document_supported: true,
 		authorization_response_iss_parameter_supported: true,
-		token_endpoint_auth_methods_supported: ['private_key_jwt'],
+		token_endpoint_auth_methods_supported: tokenEndpointAuthMethods(profile),
 		token_endpoint_auth_signing_alg_values_supported: ['RS256'],
 		grant_types_supported: ['authorization_code', 'refresh_token'],
 		response_types_supported: ['code'],
@@ -96,7 +99,8 @@ export function createIdentityProxy({ publicBase, port = 8180 } = {}) {
 			response.on('end', () => {
 				if (req.method === 'HEAD') return res.end()
 				try {
-					const body = JSON.stringify(augmentIdentityDiscovery(JSON.parse(Buffer.concat(chunks).toString('utf8'))))
+					const body = JSON.stringify(augmentIdentityDiscovery(JSON.parse(Buffer.concat(chunks).toString('utf8')),
+						{ profile: authChallengeProfile(req) }))
 					res.setHeader('Content-Type', 'application/json; charset=utf-8')
 					res.setHeader('Content-Length', Buffer.byteLength(body))
 					res.end(body)

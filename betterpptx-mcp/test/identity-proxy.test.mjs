@@ -49,24 +49,28 @@ test('identity proxy exposes only realm sign-in and overwrites all proxy trust h
 		assert.equal(authorizationMetadata.issuer, 'https://example.test/identity/realms/betterpptx')
 		assert.equal(authorizationMetadata.client_id_metadata_document_supported, true)
 		assert.equal(authorizationMetadata.token_endpoint_auth_methods_supported[0], 'private_key_jwt')
+		assert.deepEqual(discovery.token_endpoint_auth_methods_supported, ['private_key_jwt', 'none'])
+		const openaiDiscovery = await (await fetch(`${base}/identity/realms/betterpptx/.well-known/openid-configuration`, { headers: { 'user-agent': 'openai-mcp/1.0.0' } })).json()
+		assert.deepEqual(openaiDiscovery.token_endpoint_auth_methods_supported, ['private_key_jwt'])
 		const preflight = await fetch(`${base}/identity/realms/betterpptx/.well-known/openid-configuration`, { method: 'OPTIONS' })
 		assert.equal(preflight.status, 204)
 		assert.equal(preflight.headers.get('access-control-allow-origin'), '*')
 		for (const route of ['/admin/', '/realms/master/protocol/openid-connect/token', '/realms/betterpptx/clients-registrations/openid-connect', '/realms/betterpptx/account', '/resources/%61dmin']) {
 			assert.equal((await fetch(`${base}/identity${route}`)).status, 404, route)
 		}
-		assert.equal(seen.length, 3)
+		assert.equal(seen.length, 4)
 	} finally {
 		await Promise.all([front, upstream].map(server => new Promise(resolve => server.close(resolve))))
 	}
 })
 
-test('identity discovery exposes one coherent CIMD signed-client contract', () => {
+test('identity discovery exposes the ChatGPT signed and Claude public CIMD contracts', () => {
 	const original = { issuer: 'https://example.test/identity/realms/betterpptx', custom: 'retained', registration_endpoint: 'https://example.test/private-registration', token_endpoint_auth_methods_supported: ['client_secret_post'], code_challenge_methods_supported: ['plain'] }
 	const result = augmentIdentityDiscovery(original)
 	assert.equal(result.custom, 'retained')
 	assert.equal(result.client_id_metadata_document_supported, true)
-	assert.deepEqual(result.token_endpoint_auth_methods_supported, ['private_key_jwt'])
+	assert.deepEqual(result.token_endpoint_auth_methods_supported, ['private_key_jwt', 'none'])
+	assert.deepEqual(augmentIdentityDiscovery(original, { profile: 'openai' }).token_endpoint_auth_methods_supported, ['private_key_jwt'])
 	assert.deepEqual(result.token_endpoint_auth_signing_alg_values_supported, ['RS256'])
 	assert.deepEqual(result.code_challenge_methods_supported, ['S256'])
 	assert.equal(result.registration_endpoint, undefined)
@@ -80,8 +84,13 @@ test('local identity bootstrap is opt-in, pins resource configuration and does n
 	assert.equal(loadSelfHostedIdentityConfiguration(env), true)
 	assert.equal(env.BETTERPPTX_OAUTH_ISSUER, 'https://example.test/identity/realms/betterpptx')
 	assert.equal(env.BETTERPPTX_OAUTH_AUDIENCE, 'https://example.test')
+	assert.equal(env.BETTERPPTX_OAUTH_ADDITIONAL_AUDIENCES, 'https://example.test/mcp')
 	assert.equal(env.BETTERPPTX_OAUTH_TOKEN_PROFILE, 'keycloak')
-	assert.equal(env.BETTERPPTX_OAUTH_CLIENT_ID, 'https://chatgpt.com/oauth/client.json')
+	assert.deepEqual(env.BETTERPPTX_OAUTH_CLIENT_ID.split(' '), [
+		'https://chatgpt.com/oauth/client.json',
+		'https://claude.ai/oauth/mcp-oauth-client-metadata',
+		'https://claude.ai/oauth/claude-code-client-metadata',
+	])
 	assert.equal(env.BETTERPPTX_AUTH, 'oauth')
 	for (const value of ['http://example.test', 'https://example.test/path', 'https://owner:password@example.test']) {
 		assert.throws(() => loadSelfHostedIdentityConfiguration({ ...env, BETTERPPTX_PUBLIC_BASE: value }))

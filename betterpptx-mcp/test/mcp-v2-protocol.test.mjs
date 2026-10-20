@@ -366,7 +366,9 @@ test('self-hosted OAuth metadata advertises zero-touch CIMD and issuer-derived d
 		const metadata = oauthAuthorizationServerMetadata()
 		assert.equal(metadata.client_id_metadata_document_supported, true)
 		assert.equal(metadata.authorization_response_iss_parameter_supported, true)
-		assert.deepEqual(metadata.token_endpoint_auth_methods_supported, ['private_key_jwt'])
+		// Claude selects CIMD only when "none" (public client) is also advertised.
+		assert.deepEqual(metadata.token_endpoint_auth_methods_supported, ['private_key_jwt', 'none'])
+		assert.deepEqual(oauthAuthorizationServerMetadata({ profile: 'openai' }).token_endpoint_auth_methods_supported, ['private_key_jwt'])
 		assert.deepEqual(metadata.token_endpoint_auth_signing_alg_values_supported, ['RS256'])
 		assert.ok(metadata.code_challenge_methods_supported.includes('S256'))
 		assert.deepEqual(metadata.scopes_supported, ['openid', 'betterpptx'])

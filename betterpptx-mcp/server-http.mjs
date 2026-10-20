@@ -56,6 +56,7 @@ import { recordDownloadTelemetry, recordForwarderSweeperTelemetry } from './tele
 import { InstallIdentityError, connectorIdentityFromHeaders, installIdentityFromHeaders } from './auth/install-identity.mjs'
 import { createVerifiedIdentityVerifier } from './auth/verified-identity.mjs'
 import { anonymousMcpRequestAllowed, publicIdentityPolicy } from './auth/public-identity-policy.mjs'
+import { authChallengeProfile } from './auth/client-profile.mjs'
 import { createIdentityProxy } from './auth/identity-proxy.mjs'
 import { httpClientRateLimitKey, httpRateLimitConfig, developmentLogViewerAllowed } from './auth/http-admission.mjs'
 import { isProductionBillingEnvironment, isFreePublicationBillingProfile, assertProductionBillingConfiguration } from './billing/security-policy.mjs'
@@ -1213,22 +1214,27 @@ export async function startBetterPptxHttp(options = {}) {
 	function wellKnownOrigin(req) {
 		return publicBase || `${req.protocol}://${req.get('host') || `${host}:${port}`}`
 	}
-	function sendProtectedResourceMetadata(req, res) {
+	// RFC 9728: the root document names the origin (ChatGPT's qualified
+	// resource); the path-suffixed document names the MCP endpoint, which Claude
+	// requires to equal the connector URL. ChatGPT keeps the origin form on both.
+	const sendProtectedResourceMetadata = resourceForm => (req, res) => {
 		res.setHeader('Cache-Control', 'no-store')
 		res.json(oauthProtectedResourceMetadata({
 			publicBase,
 			mcpPath,
 			authMode,
 			requestOrigin: wellKnownOrigin(req),
+			resourceForm: authChallengeProfile(req) === 'openai' ? 'origin' : resourceForm,
 		}))
 	}
-	app.get('/.well-known/oauth-protected-resource', sendProtectedResourceMetadata)
-	app.get('/.well-known/oauth-protected-resource/mcp', sendProtectedResourceMetadata)
+	app.get('/.well-known/oauth-protected-resource', sendProtectedResourceMetadata('origin'))
+	app.get(`/.well-known/oauth-protected-resource${mcpPath}`, sendProtectedResourceMetadata('endpoint'))
+	if (mcpPath !== '/mcp') app.get('/.well-known/oauth-protected-resource/mcp', sendProtectedResourceMetadata('origin'))
 	if (authMode === 'path') {
-		app.get(`/.well-known/oauth-protected-resource/s/${urlSecret}/mcp`, sendProtectedResourceMetadata)
+		app.get(`/.well-known/oauth-protected-resource/s/${urlSecret}/mcp`, sendProtectedResourceMetadata('endpoint'))
 	}
 	function sendAuthorizationServerMetadata(req, res) {
-		const metadata = oauthAuthorizationServerMetadata()
+		const metadata = oauthAuthorizationServerMetadata({ profile: authChallengeProfile(req) })
 		if (!metadata) return res.status(404).json({ error: { code: 'OAUTH_AUTHORIZATION_SERVER_NOT_CONFIGURED', message: 'No authorization server is configured for this deployment.' } })
 		res.setHeader('Cache-Control', 'no-store')
 		return res.json(metadata)
@@ -1427,8 +1433,12 @@ export async function startBetterPptxHttp(options = {}) {
 
 	// Public protected requests require a verified account regardless of legacy
 	// URL/token options. Anonymous access is restricted to explicit discovery.
+	// ChatGPT's connector platform gets its tool-result challenge (200 + _meta).
+	// Every other client gets the transport-level 401 below, which is the only
+	// signal Claude honors; this middleware runs before the MCP SDK transport.
 	function sendMcpAuthenticationChallenge(req, res, { status = 401 } = {}) {
 		const message = req.body
+		if (authChallengeProfile(req) !== 'openai') return false
 		if (req.method !== 'POST' || !message || typeof message !== 'object' || Array.isArray(message)
 			|| message.method !== 'tools/call' || !Object.hasOwn(message, 'id')) return false
 		const suppliedToken = /^Bearer\s+\S+/i.test(String(req.headers.authorization || ''))
@@ -1474,10 +1484,13 @@ export async function startBetterPptxHttp(options = {}) {
 			})
 			res.setHeader('Cache-Control', 'no-store')
 			if (status !== 503 && sendMcpAuthenticationChallenge(req, res, { status })) return
+			// RFC 6750 3.1: a request that carried no credentials gets no error code.
+			const suppliedCredentials = Boolean(req.headers.authorization)
 			res.setHeader('WWW-Authenticate', wwwAuthenticateHeader({
 				publicBase,
+				resourcePath: authChallengeProfile(req) === 'openai' ? '' : mcpPath,
 				scope: 'betterpptx',
-				error: status === 403 ? 'insufficient_scope' : 'invalid_token',
+				error: status === 403 ? 'insufficient_scope' : suppliedCredentials || status === 503 ? 'invalid_token' : '',
 				errorDescription: status === 503
 					? 'Verified sign-in is temporarily unavailable.'
 					: 'A valid BetterPPTX account access token is required.',
