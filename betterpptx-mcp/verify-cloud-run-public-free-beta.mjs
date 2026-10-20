@@ -36,6 +36,20 @@ const health = await fetch(`${base}/health`, { headers: { Accept: 'application/j
 assert.equal(health.status, 200, `Cloud Run health must be 200, got ${health.status}.`)
 const healthBody = await health.text()
 assert(!/service.?account|secret.?manager|filesystem|process.?id|repository|stack.?trace/i.test(healthBody), 'Public health must not disclose implementation details.')
+// Sign-in is served by the same release: discovery must name the canonical
+// issuer and the endpoints must be reachable through this base.
+const issuer = 'https://betterpptx.xmcpx.com/identity/realms/betterpptx'
+const discoveryResponse = await fetch(`${base}/identity/realms/betterpptx/.well-known/oauth-authorization-server`, { headers: { Accept: 'application/json' } })
+assert.equal(discoveryResponse.status, 200, `Sign-in discovery must be 200, got ${discoveryResponse.status}.`)
+const discovery = await discoveryResponse.json()
+assert.equal(discovery.issuer, issuer, 'Sign-in discovery must name the canonical issuer.')
+assert.deepEqual(discovery.code_challenge_methods_supported, ['S256'], 'Sign-in must require S256 PKCE.')
+assert.equal(discovery.registration_endpoint, undefined, 'Dynamic client registration must stay disabled.')
+const jwksResponse = await fetch(`${base}/identity/realms/betterpptx/protocol/openid-connect/certs`)
+assert.equal(jwksResponse.status, 200, `Sign-in keys must be published, got ${jwksResponse.status}.`)
+const jwks = await jwksResponse.json()
+assert(Array.isArray(jwks.keys) && jwks.keys.length > 0 && jwks.keys.every(key => !('d' in key)), 'Only public signing keys may be published.')
+assert.equal((await fetch(`${base}/identity/admin/`)).status, 404, 'No identity administration surface may be public.')
 
 const initialized = await rpc({
 	jsonrpc: '2.0',

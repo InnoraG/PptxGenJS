@@ -65,7 +65,8 @@ function readConfig(env) {
 	// e.g. ChatGPT's and Claude's CIMD URLs). No prefix or pattern matching.
 	const clientIdText = env.BETTERPPTX_OAUTH_CLIENT_ID
 	requireCheck(profile !== 'keycloak' || (nonemptyString(clientIdText, 8192) && /^\S+(?: \S+)*$/.test(clientIdText)), 503)
-	const clientIds = profile === 'keycloak' ? clientIdText.split(' ') : []
+	// The RFC 9068 profile applies the same exact list to client_id when set.
+	const clientIds = profile === 'keycloak' || nonemptyString(clientIdText, 8192) ? clientIdText.split(' ') : []
 	requireCheck(clientIds.every(value => nonemptyString(value)), 503)
 	// Additional exact resource audiences on the SAME origin as the primary one,
 	// e.g. the /mcp endpoint form of the resource. A token must still name
@@ -143,6 +144,8 @@ function checkAccessClaims(payload, config, now) {
 	if (config.profile === 'keycloak') {
 		requireCheck(payload.typ === 'Bearer')
 		requireCheck(config.clientIds.has(payload.azp))
+	} else if (config.clientIds.size) {
+		requireCheck(config.clientIds.has(payload.client_id))
 	}
 	// A single exact audience; no multi-resource or substring audience matching.
 	// RFC 7519 permits aud to be either a string or an array. Keycloak may emit
@@ -203,7 +206,8 @@ function safeFailureDiagnostic(req, config) {
 			? payload.typ === 'Bearer' : header.typ === 'at+jwt'
 		result.clientClaimPresent = nonemptyString(payload[config.profile === 'keycloak' ? 'azp' : 'client_id'])
 		result.clientClaimMatches = config.profile === 'keycloak'
-			? config.clientIds.has(payload.azp) : result.clientClaimPresent
+			? config.clientIds.has(payload.azp)
+			: result.clientClaimPresent && (!config.clientIds.size || config.clientIds.has(payload.client_id))
 		result.subjectPresent = nonemptyString(payload.sub)
 		result.tokenIdPresent = nonemptyString(payload.jti)
 		result.scopeIsString = typeof payload.scope === 'string'

@@ -58,6 +58,7 @@ import { createVerifiedIdentityVerifier } from './auth/verified-identity.mjs'
 import { anonymousMcpRequestAllowed, publicIdentityPolicy } from './auth/public-identity-policy.mjs'
 import { authChallengeProfile } from './auth/client-profile.mjs'
 import { createIdentityProxy } from './auth/identity-proxy.mjs'
+import { builtInIdentityEnabled, builtInIdentityKeyResolver, createAuthorizationServer, ISSUER_PATH } from './auth/oauth-server.mjs'
 import { httpClientRateLimitKey, httpRateLimitConfig, developmentLogViewerAllowed } from './auth/http-admission.mjs'
 import { isProductionBillingEnvironment, isFreePublicationBillingProfile, assertProductionBillingConfiguration } from './billing/security-policy.mjs'
 import { configuredCryptoPacks } from './billing/crypto-packs.mjs'
@@ -529,7 +530,7 @@ export async function startBetterPptxHttp(options = {}) {
 	const wantOpen = options.open === true || process.env.BETTERPPTX_AUTH === 'none'
 	let authMode, token
 	const verifiedIdentityRequired = isPublicBlackBoxMode() || process.env.BETTERPPTX_AUTH === 'oauth'
-	const identityVerifier = verifiedIdentityRequired ? createVerifiedIdentityVerifier({ keyResolver: options.identityKeyResolver }) : null
+	const identityVerifier = verifiedIdentityRequired ? createVerifiedIdentityVerifier({ keyResolver: options.identityKeyResolver ?? builtInIdentityKeyResolver() }) : null
 	const verifiedRequests = new WeakMap()
 	if (verifiedIdentityRequired) { authMode = 'oauth'; token = '' }
 	else if (wantOpen) { authMode = 'none'; token = '' }
@@ -647,7 +648,18 @@ export async function startBetterPptxHttp(options = {}) {
 		index: 'index.html',
 	}))
 	app.use(rateLimitMiddleware)
-	if (process.env.BETTERPPTX_SELF_HOSTED_IDENTITY === '1') {
+	if (builtInIdentityEnabled()) {
+		// Cloud production: the authorization server runs in this process (scale
+		// to zero with it), mounted before the body parsers like the proxy below.
+		const authorizationServer = createAuthorizationServer({ publicBase, logger: logEvent })
+		if (authorizationServer) {
+			app.use(authorizationServer.router)
+			// RFC 8414 / OIDC path-insertion discovery forms for an issuer with a path.
+			app.get([`/.well-known/oauth-authorization-server${ISSUER_PATH}`, `/.well-known/openid-configuration${ISSUER_PATH}`], authorizationServer.sendDiscovery)
+		} else {
+			app.use('/identity', (_req, res) => res.status(503).set('Cache-Control', 'no-store').json({ error: 'Sign-in is temporarily unavailable.' }))
+		}
+	} else if (process.env.BETTERPPTX_SELF_HOSTED_IDENTITY === '1') {
 		app.use('/identity', createIdentityProxy({ publicBase, port: Number(process.env.BETTERPPTX_IDENTITY_PORT || 8180) }))
 	}
 	const jsonLimit = process.env.BETTERPPTX_JSON_LIMIT || '40mb'

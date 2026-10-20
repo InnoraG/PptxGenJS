@@ -29,6 +29,30 @@ test('identity traffic goes to the configured proxied origin unchanged', async (
 	}
 })
 
+test('with the cloud-run identity route, sign-in traffic goes to the pinned Cloud Run gateway', async () => {
+	const originalFetch = globalThis.fetch
+	let received
+	globalThis.fetch = async request => {
+		received = request
+		return new Response('gateway-identity', { status: 200 })
+	}
+	try {
+		const request = new Request('https://betterpptx.xmcpx.com/identity/realms/betterpptx/protocol/openid-connect/token', {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': 'openai-mcp/1.0.0' },
+			body: 'grant_type=authorization_code&code=one-time-code',
+		})
+		const response = await worker.fetch(request, { BETTERPPTX_CLOUD_RUN_ORIGIN: runOrigin, BETTERPPTX_IDENTITY_ROUTE: 'cloud-run' })
+		assert.equal(response.status, 200)
+		assert.equal(await response.text(), 'gateway-identity')
+		assert.equal(received.url, `${runOrigin}/identity/realms/betterpptx/protocol/openid-connect/token`)
+		assert.equal(received.headers.get('user-agent'), 'openai-mcp/1.0.0')
+		assert.equal(await received.text(), 'grant_type=authorization_code&code=one-time-code')
+	} finally {
+		globalThis.fetch = originalFetch
+	}
+})
+
 test('MCP requests preserve streamed contract fields and use the pinned Cloud Run origin', async () => {
 	const originalFetch = globalThis.fetch
 	let received

@@ -42,10 +42,11 @@ function cloudRunRequest(request, origin) {
 export default {
 	async fetch(request, env) {
 		const incoming = new URL(request.url)
-		if (isIdentityRequest(incoming.pathname)) {
-			// Keep the currently qualified, narrowly allowlisted identity origin
-			// behind the existing proxied DNS/tunnel while the account database is
-			// migrated. Route fetch(request) goes to the configured origin.
+		if (isIdentityRequest(incoming.pathname) && env?.BETTERPPTX_IDENTITY_ROUTE !== 'cloud-run') {
+			// Legacy/rollback: the narrowly allowlisted identity origin behind the
+			// proxied DNS record. Route fetch(request) goes to the configured origin.
+			// With BETTERPPTX_IDENTITY_ROUTE=cloud-run, the Cloud Run gateway's own
+			// identity proxy serves /identity from the private provider instead.
 			return fetch(request)
 		}
 
