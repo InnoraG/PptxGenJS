@@ -179,9 +179,9 @@ jobs:
           test "${BETTERPPTX_OAUTH_CLIENT_IDS%% *}" = "$BETTERPPTX_OAUTH_CLIENT_ID"
           discovery="$RUNNER_TEMP/betterpptx-oidc-discovery.json"
           jwks="$RUNNER_TEMP/betterpptx-oidc-jwks.json"
-          curl --fail --silent --show-error --max-time 20 "$BETTERPPTX_OAUTH_ISSUER/.well-known/openid-configuration" -o "$discovery"
+          curl --fail --silent --show-error --max-time 90 --retry 3 --retry-all-errors --retry-delay 5 "$BETTERPPTX_OAUTH_ISSUER/.well-known/openid-configuration" -o "$discovery"
           jq -e --arg issuer "$BETTERPPTX_OAUTH_ISSUER" --arg jwks "$BETTERPPTX_OAUTH_JWKS_URL" '.issuer == $issuer and .jwks_uri == $jwks' "$discovery" >/dev/null
-          curl --fail --silent --show-error --max-time 20 "$BETTERPPTX_OAUTH_JWKS_URL" -o "$jwks"
+          curl --fail --silent --show-error --max-time 90 --retry 3 --retry-all-errors --retry-delay 5 "$BETTERPPTX_OAUTH_JWKS_URL" -o "$jwks"
           jq -e '(.keys | type == "array") and (.keys | length > 0)' "$jwks" >/dev/null
 
       - name: Build and push the immutable image
@@ -518,7 +518,7 @@ jobs:
           node betterpptx-mcp/verify-cloud-run-public-free-beta.mjs "$BETTERPPTX_PUBLIC_BASE"
           node betterpptx-mcp/verify-cloud-run-custom-domain-identity.mjs "$GATEWAY_URL" "$BETTERPPTX_PUBLIC_BASE"
           discovery="$RUNNER_TEMP/betterpptx-edge-oidc-discovery.json"
-          curl --fail --silent --show-error --max-time 20 "$BETTERPPTX_OAUTH_ISSUER/.well-known/openid-configuration" -o "$discovery"
+          curl --fail --silent --show-error --max-time 90 --retry 3 --retry-all-errors --retry-delay 5 "$BETTERPPTX_OAUTH_ISSUER/.well-known/openid-configuration" -o "$discovery"
           jq -e --arg issuer "$BETTERPPTX_OAUTH_ISSUER" --arg jwks "$BETTERPPTX_OAUTH_JWKS_URL" '.issuer == $issuer and .jwks_uri == $jwks' "$discovery" >/dev/null
           echo 'The custom domain passed public MCP/OAuth-boundary checks and retains the configured identity issuer.' >> "$GITHUB_STEP_SUMMARY"
 
