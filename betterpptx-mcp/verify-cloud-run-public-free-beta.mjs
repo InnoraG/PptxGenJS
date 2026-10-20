@@ -1,7 +1,10 @@
 import assert from 'node:assert/strict'
 
 const base = String(process.argv[2] || process.env.BETTERPPTX_VERIFY_CLOUD_RUN_URL || '').trim().replace(/\/+$/, '')
-if (!(/^https:\/\/[a-z0-9-]+\.a\.run\.app$/i.test(base) || base === 'https://betterpptx.xmcpx.com')) {
+// The configured canonical product host (one of the approved BetterPPTX hosts).
+const publicBase = String(process.env.BETTERPPTX_PUBLIC_BASE || (/\.run\.app$/.test(base) ? '' : base) || 'https://betterpptx.xmcpx.com').replace(/\/+$/, '')
+if (!/^https:\/\/betterpptx\.(xmcpx\.com|x4ai\.si)$/.test(publicBase)) throw new Error('BETTERPPTX_PUBLIC_BASE must be an approved BetterPPTX host.')
+if (!(/^https:\/\/[a-z0-9-]+\.a\.run\.app$/i.test(base) || base === publicBase)) {
 	throw new Error('Pass the exact public Cloud Run service URL or the configured BetterPPTX custom domain.')
 }
 
@@ -38,7 +41,7 @@ const healthBody = await health.text()
 assert(!/service.?account|secret.?manager|filesystem|process.?id|repository|stack.?trace/i.test(healthBody), 'Public health must not disclose implementation details.')
 // Sign-in is served by the same release: discovery must name the canonical
 // issuer and the endpoints must be reachable through this base.
-const issuer = 'https://betterpptx.xmcpx.com/identity/realms/betterpptx'
+const issuer = `${publicBase}/identity/realms/betterpptx`
 const discoveryResponse = await fetch(`${base}/identity/realms/betterpptx/.well-known/oauth-authorization-server`, { headers: { Accept: 'application/json' } })
 assert.equal(discoveryResponse.status, 200, `Sign-in discovery must be 200, got ${discoveryResponse.status}.`)
 const discovery = await discoveryResponse.json()

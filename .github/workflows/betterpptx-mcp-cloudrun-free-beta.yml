@@ -138,6 +138,8 @@ jobs:
         GCP_MISSION_CONTROL_OWNER_EMAIL: ${{ vars.GCP_MISSION_CONTROL_OWNER_EMAIL }}
         CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
         BETTERPPTX_PUBLIC_BASE: ${{ vars.BETTERPPTX_PUBLIC_BASE }}
+        # Optional space-separated retired hosts; the Worker 308-redirects them to the canonical host.
+        BETTERPPTX_LEGACY_HOSTS: ${{ vars.BETTERPPTX_LEGACY_HOSTS }}
         BETTERPPTX_OAUTH_ISSUER: ${{ vars.BETTERPPTX_OAUTH_ISSUER }}
         BETTERPPTX_OAUTH_AUDIENCE: ${{ vars.BETTERPPTX_OAUTH_AUDIENCE }}
         BETTERPPTX_OAUTH_JWKS_URL: ${{ vars.BETTERPPTX_OAUTH_JWKS_URL }}
@@ -171,18 +173,16 @@ jobs:
           test -n "$GCP_DEPLOY_SERVICE_ACCOUNT"
           test -n "$GCP_MISSION_CONTROL_OWNER_EMAIL"
           [[ "$GCP_MISSION_CONTROL_OWNER_EMAIL" =~ ^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$ ]]
-          test "$BETTERPPTX_PUBLIC_BASE" = "https://betterpptx.xmcpx.com"
+          # Approved canonical product hosts (the OAuth issuer and resource derive from it).
+          [[ "$BETTERPPTX_PUBLIC_BASE" =~ ^https://betterpptx\.(xmcpx\.com|x4ai\.si)$ ]]
           test "$BETTERPPTX_OAUTH_ISSUER" = "$BETTERPPTX_PUBLIC_BASE/identity/realms/betterpptx"
           test "$BETTERPPTX_OAUTH_AUDIENCE" = "$BETTERPPTX_PUBLIC_BASE"
           test "$BETTERPPTX_OAUTH_JWKS_URL" = "$BETTERPPTX_OAUTH_ISSUER/protocol/openid-connect/certs"
           # The single-client repository variable must remain the first (ChatGPT) entry.
           test "${BETTERPPTX_OAUTH_CLIENT_IDS%% *}" = "$BETTERPPTX_OAUTH_CLIENT_ID"
-          discovery="$RUNNER_TEMP/betterpptx-oidc-discovery.json"
-          jwks="$RUNNER_TEMP/betterpptx-oidc-jwks.json"
-          curl --fail --silent --show-error --max-time 90 --retry 3 --retry-all-errors --retry-delay 5 "$BETTERPPTX_OAUTH_ISSUER/.well-known/openid-configuration" -o "$discovery"
-          jq -e --arg issuer "$BETTERPPTX_OAUTH_ISSUER" --arg jwks "$BETTERPPTX_OAUTH_JWKS_URL" '.issuer == $issuer and .jwks_uri == $jwks' "$discovery" >/dev/null
-          curl --fail --silent --show-error --max-time 90 --retry 3 --retry-all-errors --retry-delay 5 "$BETTERPPTX_OAUTH_JWKS_URL" -o "$jwks"
-          jq -e '(.keys | type == "array") and (.keys | length > 0)' "$jwks" >/dev/null
+          # The authorization server is part of this release (auth/oauth-server.mjs),
+          # so discovery and JWKS are verified after deployment on the run.app URL
+          # and on the custom domain, not fetched from the previous release here.
 
       - name: Build and push the immutable image
         id: image
@@ -493,7 +493,7 @@ jobs:
             echo 'ready=false' >> "$GITHUB_OUTPUT"
             {
               echo '### Custom-domain route not changed'
-              echo 'Cloud Run is live and its run.app endpoint passed public OAuth-boundary checks. The xmcpx.com Worker route was left untouched because the Cloudflare account ID or owner-managed Secret Manager token is not ready.'
+              echo 'Cloud Run is live and its run.app endpoint passed public OAuth-boundary checks. The custom-domain Worker route was left untouched because the Cloudflare account ID or owner-managed Secret Manager token is not ready.'
             } >> "$GITHUB_STEP_SUMMARY"
           fi
 
@@ -507,7 +507,17 @@ jobs:
           echo "::add-mask::$token"
           npm ci --prefix betterpptx-mcp/deploy/cloudflare-edge
           cd betterpptx-mcp/deploy/cloudflare-edge
-          CLOUDFLARE_API_TOKEN="$token" CLOUDFLARE_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID" npx wrangler deploy --var "BETTERPPTX_CLOUD_RUN_ORIGIN:$GATEWAY_URL" --var "BETTERPPTX_GCS_BUCKET:$BETTERPPTX_GCS_BUCKET" --var "BETTERPPTX_GCS_PREFIX:artifacts" --var "BETTERPPTX_IDENTITY_ROUTE:cloud-run"
+          # Routes follow the configured canonical host plus any legacy hosts.
+          canonical_host="${BETTERPPTX_PUBLIC_BASE#https://}"
+          node -e '
+            const fs = require("fs")
+            const config = JSON.parse(fs.readFileSync("wrangler.jsonc", "utf8"))
+            const hosts = process.argv.slice(1).filter(Boolean)
+            for (const host of hosts) if (!/^betterpptx\.[a-z0-9-]+\.[a-z]{2,}$/.test(host)) throw new Error("Unsupported route host")
+            config.routes = [...new Set(hosts)].map(host => ({ pattern: `${host}/*`, zone_name: host.split(".").slice(-2).join(".") }))
+            fs.writeFileSync("wrangler.jsonc", JSON.stringify(config, null, 2))
+          ' "$canonical_host" $BETTERPPTX_LEGACY_HOSTS
+          CLOUDFLARE_API_TOKEN="$token" CLOUDFLARE_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID" npx wrangler deploy --var "BETTERPPTX_CLOUD_RUN_ORIGIN:$GATEWAY_URL" --var "BETTERPPTX_GCS_BUCKET:$BETTERPPTX_GCS_BUCKET" --var "BETTERPPTX_GCS_PREFIX:artifacts" --var "BETTERPPTX_IDENTITY_ROUTE:cloud-run" --var "BETTERPPTX_CANONICAL_HOST:$canonical_host"
           unset token
 
       - name: Verify the custom-domain MCP and preserved OAuth issuer

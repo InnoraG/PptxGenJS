@@ -51,7 +51,7 @@ export const MISSION_CONTROL_SECRET_DEFINITIONS = Object.freeze([
 		id: 'cloudflare_worker_deploy_token',
 		displayName: 'Cloudflare Worker Deployment Token',
 		kind: 'cloudflare-api-token',
-		description: 'Owner-created in Cloudflare. Grant Workers Scripts edit on this account and Workers Routes edit only on the xmcpx.com zone. Store and update the value here; status testing confirms the token is active but does not enumerate its permissions.',
+		description: 'Owner-created in Cloudflare. Grant Workers Scripts edit on this account and Workers Routes edit only on the BetterPPTX product zone(s) (x4ai.si; xmcpx.com while it redirects). Store and update the value here; status testing confirms the token is active but does not enumerate its permissions.',
 		secretName: 'betterpptx-cloudflare-worker-deploy-token',
 		envName: 'BETTERPPTX_CLOUDFLARE_WORKER_DEPLOY_TOKEN',
 		alternateEnvNames: [],

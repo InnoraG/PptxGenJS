@@ -143,3 +143,22 @@ test('origin errors do not disclose internal details', async () => {
 		globalThis.fetch = originalFetch
 	}
 })
+
+test('a non-canonical routed host permanently redirects to the canonical product host', async () => {
+	const originalFetch = globalThis.fetch
+	let upstreamCalls = 0
+	globalThis.fetch = async () => { upstreamCalls += 1; return new Response('unexpected') }
+	try {
+		const env = { BETTERPPTX_CLOUD_RUN_ORIGIN: runOrigin, BETTERPPTX_CANONICAL_HOST: 'betterpptx.x4ai.si', BETTERPPTX_IDENTITY_ROUTE: 'cloud-run' }
+		const response = await worker.fetch(new Request('https://betterpptx.xmcpx.com/mcp?x=1', { method: 'POST', body: '{}' }), env)
+		assert.equal(response.status, 308)
+		assert.equal(response.headers.get('location'), 'https://betterpptx.x4ai.si/mcp?x=1')
+		assert.equal(upstreamCalls, 0)
+		globalThis.fetch = async request => { upstreamCalls += 1; return new Response('ok') }
+		const canonical = await worker.fetch(new Request('https://betterpptx.x4ai.si/health'), env)
+		assert.equal(await canonical.text(), 'ok')
+		assert.equal(upstreamCalls, 1)
+	} finally {
+		globalThis.fetch = originalFetch
+	}
+})

@@ -6,7 +6,7 @@ const publicBase = String(process.argv[3] || '').trim().replace(/\/+$/, '')
 if (!/^https:\/\/[a-z0-9-]+\.a\.run\.app$/i.test(origin)) {
 	throw new Error('Pass the exact verified Cloud Run run.app origin first.')
 }
-if (publicBase !== 'https://betterpptx.xmcpx.com') {
+if (!/^https:\/\/betterpptx\.(xmcpx\.com|x4ai\.si)$/.test(publicBase)) {
 	throw new Error('Pass the configured BetterPPTX custom domain second.')
 }
 

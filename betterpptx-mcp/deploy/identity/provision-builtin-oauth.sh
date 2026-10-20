@@ -57,6 +57,9 @@ if [[ -z "$key_name" ]]; then
     --allowed-referrers="https://$PUBLIC_HOST/*" >/dev/null 2>&1
   key_name="$(gcloud services api-keys list --project="$PROJECT" --filter='displayName=betterpptx-signin-browser' --format='value(name)' | head -1)"
 fi
+# Each provisioned host is added to the key's referrer allowlist (additive).
+referrers="$(gcloud services api-keys describe "$key_name" --format=json | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const k=JSON.parse(s);const r=new Set(k.restrictions?.browserKeyRestrictions?.allowedReferrers||[]);r.add(`https://${process.argv[1]}/*`);process.stdout.write([...r].join(","))})' "$PUBLIC_HOST")"
+gcloud services api-keys update "$key_name" --allowed-referrers="$referrers" --quiet >/dev/null 2>&1
 has_version betterpptx-signin-api-key || gcloud services api-keys get-key-string "$key_name" --format='value(keyString)' | tr -d '\r\n' \
   | gcloud secrets versions add betterpptx-signin-api-key --project="$PROJECT" --data-file=- >/dev/null
 

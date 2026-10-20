@@ -105,3 +105,37 @@ Caps: Cloud Run `maxScale` (gateway 3, worker 2). Modal is not involved.
   Google, once enabled) are the sign-in methods.
 * The local `codex/provenance-cleanup` working tree is preserved untouched and
   snapshotted to the local-only ref `refs/backup/provenance-cleanup-20261020`.
+
+## Host cutover: betterpptx.xmcpx.com → betterpptx.x4ai.si (owner-confirmed 2026-10-20)
+
+The host is configuration: GitHub environment variables (`betterpptx-canary`)
+drive the release; the OAuth issuer/resource/audiences derive from
+`BETTERPPTX_PUBLIC_BASE`. The Worker serves the canonical host and 308-redirects
+`BETTERPPTX_LEGACY_HOSTS` to it. Since the product was not live, no principal or
+passkey migration is needed (the issuer change gives everyone a new principal).
+
+Owner prerequisites (credential walls):
+1. Add the `x4ai.si` site to Cloudflare account `862e1473…` (Free plan). Check
+   the imported DNS records against Spaceship's (mail/MX and any other
+   services on `x4ai.si` must be preserved).
+2. At Spaceship, switch `x4ai.si` nameservers to the two Cloudflare
+   nameservers; wait until the zone shows **Active**.
+3. In Cloudflare DNS add `betterpptx` as a **proxied** record (e.g. `AAAA 100::`;
+   the Worker answers, there is no origin).
+4. Give the deploy token Workers Routes:Edit on `x4ai.si` too (or create a new
+   one) and store it in Mission Control (`betterpptx-cloudflare-worker-deploy-token`).
+
+Then (done by the operator):
+5. `BETTERPPTX_PUBLIC_HOST=betterpptx.x4ai.si bash betterpptx-mcp/deploy/identity/provision-builtin-oauth.sh`
+   (Identity Platform authorized domain + browser-key referrer; done 2026-10-20).
+6. Set environment variables: `BETTERPPTX_PUBLIC_BASE=https://betterpptx.x4ai.si`,
+   `BETTERPPTX_OAUTH_ISSUER=…/identity/realms/betterpptx`,
+   `BETTERPPTX_OAUTH_AUDIENCE=https://betterpptx.x4ai.si`,
+   `BETTERPPTX_OAUTH_JWKS_URL=…/protocol/openid-connect/certs`,
+   `BETTERPPTX_LEGACY_HOSTS=betterpptx.xmcpx.com`.
+7. Run the release (discovery, JWKS and the custom-domain identity are verified
+   after deployment).
+8. Re-add the ChatGPT app and Claude connectors with `https://betterpptx.x4ai.si/mcp`.
+
+Rollback: set the variables back to xmcpx.com (and clear `BETTERPPTX_LEGACY_HOSTS`)
+and re-run the release.

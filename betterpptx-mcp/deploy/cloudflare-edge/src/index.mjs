@@ -18,6 +18,11 @@ function cloudRunOrigin(raw) {
 	}
 }
 
+function canonicalHost(raw) {
+	const value = String(raw || '').trim().toLowerCase()
+	return /^[a-z0-9-]+(\.[a-z0-9-]+)+$/.test(value) ? value : null
+}
+
 function cloudRunRequest(request, origin) {
 	const incoming = new URL(request.url)
 	const target = new URL(`${incoming.pathname}${incoming.search}`, origin)
@@ -42,6 +47,16 @@ function cloudRunRequest(request, origin) {
 export default {
 	async fetch(request, env) {
 		const incoming = new URL(request.url)
+		// One canonical product host (the OAuth issuer and resource derive from
+		// it). Any other routed host, e.g. a retired domain, redirects there with
+		// the method and body preserved.
+		const canonical = canonicalHost(env?.BETTERPPTX_CANONICAL_HOST)
+		if (canonical && incoming.hostname !== canonical) {
+			return new Response(null, {
+				status: 308,
+				headers: { Location: `https://${canonical}${incoming.pathname}${incoming.search}`, 'Cache-Control': NO_STORE },
+			})
+		}
 		if (isIdentityRequest(incoming.pathname) && env?.BETTERPPTX_IDENTITY_ROUTE !== 'cloud-run') {
 			// Legacy/rollback: the narrowly allowlisted identity origin behind the
 			// proxied DNS record. Route fetch(request) goes to the configured origin.
