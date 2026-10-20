@@ -36,7 +36,7 @@ test('Cloudflare deployment token is owner-managed, non-auto-rotatable, and reda
 	assert.equal(definition.secretName, 'betterpptx-cloudflare-worker-deploy-token')
 	assert.deepEqual(definition.actions, { reveal: true, update: true, rotate: false, test: true })
 	assert.match(definition.description, /Workers Scripts edit/)
-	assert.match(definition.description, /Workers Routes edit only on the xmcpx\.com zone/)
+	assert.match(definition.description, /Workers Routes edit only on the BetterPPTX product zone\(s\) \(x4ai\.si; xmcpx\.com while it redirects\)/)
 	assert.ok(definition.dependentServices.includes('betterpptx-cloudrun-deploy'))
 
 	const updated = await updateMissionControlSecret(id, { value: token, confirm: `UPDATE ${id}` })
