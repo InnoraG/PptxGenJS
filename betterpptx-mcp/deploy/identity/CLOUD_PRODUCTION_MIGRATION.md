@@ -24,7 +24,17 @@ client ─▶ Cloudflare Worker (betterpptx.xmcpx.com/*, BETTERPPTX_IDENTITY_ROU
                         ├─ state: Firestore collections betterpptx_oauth_* (TTL on expiresAt)
                         ├─ keys: Secret Manager (RS256 JWKS, cookie keys)
                         └─ account sign-in: Google Identity Platform (email link; Google optional)
+gateway + worker ─(service identity)─▶ Cloud Run betterpptx-narration (private, min 0, max 2)
+                        Piper 1.8.0 runtime (narration/piper-http-runtime.py) + the 24 approved
+                        voices pinned in narration/voices/runtime-manifest.production.json
 ```
+
+Narration: the release workflow builds the narration image only when the
+pinned voice set, runtime or Dockerfile changes (image tag = their digest).
+`deploy/narration/prepare-build-context.mjs` downloads the approved voices
+(MD5-checked) and requires every file to match the pinned SHA-256. The gateway
+and worker reach it with `BETTERPPTX_TTS_AUTH=cloud-run` (metadata-server ID
+token); only the public runtime identity may invoke it.
 
 * Issuer, endpoint paths and resource metadata keep the established layout:
   `https://betterpptx.xmcpx.com/identity/realms/betterpptx`,
@@ -50,6 +60,8 @@ client ─▶ Cloudflare Worker (betterpptx.xmcpx.com/*, BETTERPPTX_IDENTITY_ROU
 
 ## One-time owner steps
 
+0. `bash betterpptx-mcp/deploy/narration/provision-narration-runtime.sh` —
+   narration runtime identity (done 2026-10-20).
 1. `bash betterpptx-mcp/deploy/identity/provision-builtin-oauth.sh` — signing
    and cookie keys, Identity Platform email-link sign-in + authorized domain,
    referrer-restricted browser key, Firestore TTL policies. (Done 2026-10-20.)
@@ -79,6 +91,8 @@ the Worker route; with `cloud-run` routing no request reaches the tunnel.
 |---|---|---|
 | Gateway + worker Cloud Run (min 0) | $0 | per request (unchanged) |
 | Authorization server | $0 (in the gateway) | negligible CPU per sign-in |
+| Narration runtime (min 0, 2 vCPU / 4 GiB) | $0 | ~$0.0001 per vCPU-second while synthesizing (a deck's narration ≈ cents) |
+| Narration image storage | ~$0.20 (≈1.8 GB per voice-set version; cleanup policy) | — |
 | Firestore OAuth records | $0 (free tier: 50k reads / 20k writes per day) | ~5–10 writes per sign-in |
 | Identity Platform | $0 | free up to 49,999 monthly active users (email/social) |
 | Secret Manager | ~$0.20 (3 secrets) | $0.03 per 10k accesses |
@@ -89,7 +103,5 @@ Caps: Cloud Run `maxScale` (gateway 3, worker 2). Modal is not involved.
 
 * Passkeys (WebAuthn) are not part of the first release; email link (and
   Google, once enabled) are the sign-in methods.
-* Hosted narration: production never used the local Piper; cloud TTS is a
-  separate feature decision.
 * The local `codex/provenance-cleanup` working tree is preserved untouched and
   snapshotted to the local-only ref `refs/backup/provenance-cleanup-20261020`.

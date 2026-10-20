@@ -1,0 +1,1703 @@
+{
+	"schemaVersion": 1,
+	"generatedAt": "2026-09-04T15:45:43.315Z",
+	"sourceManifest": "narration/voices/manifest.json",
+	"requiredLanguages": [
+		"bg_BG",
+		"cs_CZ",
+		"da_DK",
+		"de_DE",
+		"el_GR",
+		"en_US",
+		"es_MX",
+		"fa_IR",
+		"fi_FI",
+		"fr_FR",
+		"hu_HU",
+		"lv_LV",
+		"ne_NP",
+		"nl_BE",
+		"no_NO",
+		"pl_PL",
+		"pt_BR",
+		"ro_RO",
+		"ru_RU",
+		"sk_SK",
+		"sq_AL",
+		"sv_SE",
+		"uk_UA",
+		"ur_PK"
+	],
+	"requiredGenders": [],
+	"genderCoverage": {
+		"requiredGenders": [
+			"female",
+			"male"
+		],
+		"localeCount": 24,
+		"pairComplete": false,
+		"locales": [
+			{
+				"locale": "bg_BG",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "bg_BG-dimitar-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "cs_CZ",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "cs_CZ-jirka-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "da_DK",
+				"availableGenders": [],
+				"missingGenders": [
+					"female",
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {}
+			},
+			{
+				"locale": "de_DE",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "de_DE-thorsten-high",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "el_GR",
+				"availableGenders": [
+					"female"
+				],
+				"missingGenders": [
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {
+					"female": [
+						{
+							"voiceId": "el_GR-rapunzelina-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "en_US",
+				"availableGenders": [
+					"female"
+				],
+				"missingGenders": [
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {
+					"female": [
+						{
+							"voiceId": "en_US-ljspeech-high",
+							"genderSource": "model-card",
+							"genderConfidence": "verified"
+						}
+					]
+				}
+			},
+			{
+				"locale": "es_MX",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "es_MX-claude-high",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "fa_IR",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "fa_IR-ganji-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "fi_FI",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "fi_FI-harri-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "fr_FR",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "fr_FR-gilles-low",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "hu_HU",
+				"availableGenders": [
+					"female"
+				],
+				"missingGenders": [
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {
+					"female": [
+						{
+							"voiceId": "hu_HU-anna-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "lv_LV",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "lv_LV-aivars-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "ne_NP",
+				"availableGenders": [],
+				"missingGenders": [
+					"female",
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {}
+			},
+			{
+				"locale": "nl_BE",
+				"availableGenders": [],
+				"missingGenders": [
+					"female",
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {}
+			},
+			{
+				"locale": "no_NO",
+				"availableGenders": [],
+				"missingGenders": [
+					"female",
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {}
+			},
+			{
+				"locale": "pl_PL",
+				"availableGenders": [],
+				"missingGenders": [
+					"female",
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {}
+			},
+			{
+				"locale": "pt_BR",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "pt_BR-cadu-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "ro_RO",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "ro_RO-mihai-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "ru_RU",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "ru_RU-denis-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "sk_SK",
+				"availableGenders": [
+					"female"
+				],
+				"missingGenders": [
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {
+					"female": [
+						{
+							"voiceId": "sk_SK-lili-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "sq_AL",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "sq_AL-edon-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "sv_SE",
+				"availableGenders": [],
+				"missingGenders": [
+					"female",
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {}
+			},
+			{
+				"locale": "uk_UA",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "uk_UA-mykyta-high",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "ur_PK",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "ur_PK-fasih-medium",
+							"genderSource": "model-card",
+							"genderConfidence": "verified"
+						}
+					]
+				}
+			}
+		],
+		"localesWithPair": [],
+		"localesMissingPair": [
+			{
+				"locale": "bg_BG",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "bg_BG-dimitar-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "cs_CZ",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "cs_CZ-jirka-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "da_DK",
+				"availableGenders": [],
+				"missingGenders": [
+					"female",
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {}
+			},
+			{
+				"locale": "de_DE",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "de_DE-thorsten-high",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "el_GR",
+				"availableGenders": [
+					"female"
+				],
+				"missingGenders": [
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {
+					"female": [
+						{
+							"voiceId": "el_GR-rapunzelina-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "en_US",
+				"availableGenders": [
+					"female"
+				],
+				"missingGenders": [
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {
+					"female": [
+						{
+							"voiceId": "en_US-ljspeech-high",
+							"genderSource": "model-card",
+							"genderConfidence": "verified"
+						}
+					]
+				}
+			},
+			{
+				"locale": "es_MX",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "es_MX-claude-high",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "fa_IR",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "fa_IR-ganji-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "fi_FI",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "fi_FI-harri-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "fr_FR",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "fr_FR-gilles-low",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "hu_HU",
+				"availableGenders": [
+					"female"
+				],
+				"missingGenders": [
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {
+					"female": [
+						{
+							"voiceId": "hu_HU-anna-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "lv_LV",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "lv_LV-aivars-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "ne_NP",
+				"availableGenders": [],
+				"missingGenders": [
+					"female",
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {}
+			},
+			{
+				"locale": "nl_BE",
+				"availableGenders": [],
+				"missingGenders": [
+					"female",
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {}
+			},
+			{
+				"locale": "no_NO",
+				"availableGenders": [],
+				"missingGenders": [
+					"female",
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {}
+			},
+			{
+				"locale": "pl_PL",
+				"availableGenders": [],
+				"missingGenders": [
+					"female",
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {}
+			},
+			{
+				"locale": "pt_BR",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "pt_BR-cadu-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "ro_RO",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "ro_RO-mihai-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "ru_RU",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "ru_RU-denis-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "sk_SK",
+				"availableGenders": [
+					"female"
+				],
+				"missingGenders": [
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {
+					"female": [
+						{
+							"voiceId": "sk_SK-lili-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "sq_AL",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "sq_AL-edon-medium",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "sv_SE",
+				"availableGenders": [],
+				"missingGenders": [
+					"female",
+					"male"
+				],
+				"pairComplete": false,
+				"sources": {}
+			},
+			{
+				"locale": "uk_UA",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "uk_UA-mykyta-high",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
+						}
+					]
+				}
+			},
+			{
+				"locale": "ur_PK",
+				"availableGenders": [
+					"male"
+				],
+				"missingGenders": [
+					"female"
+				],
+				"pairComplete": false,
+				"sources": {
+					"male": [
+						{
+							"voiceId": "ur_PK-fasih-medium",
+							"genderSource": "model-card",
+							"genderConfidence": "verified"
+						}
+					]
+				}
+			}
+		]
+	},
+	"voices": [
+		{
+			"id": "bg_BG-dimitar-medium",
+			"name": "dimitar",
+			"language": "bg",
+			"locale": "bg_BG",
+			"localeName": "Bulgarian, Bulgaria",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/bg/bg_BG/dimitar/medium/bg_BG-dimitar-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/bg/bg_BG/dimitar/medium/bg_BG-dimitar-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/bg/bg_BG/dimitar/medium/MODEL_CARD",
+			"modelMd5": "fc1ce62a4f04f089e22b8c3a13bde28a",
+			"configMd5": "5fb4aa5e5b20d4ed515d40f0b4ce16f0",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
+			"finetunedFrom": "U.S. English lessac voice (medium quality)",
+			"lineageReview": true,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+			"gender": "male",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"male"
+			],
+			"modelPath": "/voices/bg_BG-dimitar-medium.onnx",
+			"configPath": "/voices/bg_BG-dimitar-medium.onnx.json",
+			"modelSha256": "4972fe764468e8501416407ad81662de94cc6c9cdc680fcf807daef04e319f13",
+			"configSha256": "ec9a9abdd17384d3db225e83085b2f68b790b112f058417c3a8a2ac58b79e7f0"
+		},
+		{
+			"id": "cs_CZ-jirka-medium",
+			"name": "jirka",
+			"language": "cs",
+			"locale": "cs_CZ",
+			"localeName": "Czech, Czech Republic",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/cs/cs_CZ/jirka/medium/cs_CZ-jirka-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/cs/cs_CZ/jirka/medium/cs_CZ-jirka-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/cs/cs_CZ/jirka/medium/MODEL_CARD",
+			"modelMd5": "da2deb0a3f93226a3f9b6e40d43c46ca",
+			"configMd5": "2762e45c5b084694093c683a5da7cf94",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
+			"finetunedFrom": "U.S. English lessac voice (medium quality)",
+			"lineageReview": true,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+			"gender": "male",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"male"
+			],
+			"modelPath": "/voices/cs_CZ-jirka-medium.onnx",
+			"configPath": "/voices/cs_CZ-jirka-medium.onnx.json",
+			"modelSha256": "cbd5c900acacc8e8cbecd64347abb8de39c00a9d3104bed06fee92e4f319efc8",
+			"configSha256": "fb38b1799b7354808227c065efa97b1ffa2b0cde59505babb56a36d35af9c637"
+		},
+		{
+			"id": "da_DK-talesyntese-medium",
+			"name": "talesyntese",
+			"language": "da",
+			"locale": "da_DK",
+			"localeName": "Danish, Denmark",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/da/da_DK/talesyntese/medium/da_DK-talesyntese-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/da/da_DK/talesyntese/medium/da_DK-talesyntese-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/da/da_DK/talesyntese/medium/MODEL_CARD",
+			"modelMd5": "9c05494a3e0c1136337581e01222395d",
+			"configMd5": "8a56843f52992e490f062e68c14fa193",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-21/",
+			"finetunedFrom": "U.S. English lessac voice (medium quality)",
+			"lineageReview": true,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+			"gender": "unknown",
+			"genderSource": "unresolved",
+			"genderConfidence": "unresolved",
+			"availableGenders": [],
+			"modelPath": "/voices/da_DK-talesyntese-medium.onnx",
+			"configPath": "/voices/da_DK-talesyntese-medium.onnx.json",
+			"modelSha256": "b9271efd25f7b8494bbd28d48dd675c8c119daa284f3ee488008935f515f1241",
+			"configSha256": "89fe13bd251406cc0088570d103ea7ac35823211d8466faf913268ab8506f41b"
+		},
+		{
+			"id": "de_DE-thorsten-high",
+			"name": "thorsten",
+			"language": "de",
+			"locale": "de_DE",
+			"localeName": "German, Germany",
+			"quality": "high",
+			"numSpeakers": 1,
+			"isDefaultForLocale": false,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/de_DE-thorsten-high.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/MODEL_CARD",
+			"modelMd5": "256505fe58fb8b9d6ed78b83f6b8a9d2",
+			"configMd5": "e81686e00a9d825e2488ead660bec6fd",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://github.com/thorstenMueller/Thorsten-Voice",
+			"finetunedFrom": "U.S. English lessac voice (high quality)",
+			"lineageReview": true,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+			"gender": "male",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"male"
+			],
+			"modelPath": "/voices/de_DE-thorsten-high.onnx",
+			"configPath": "/voices/de_DE-thorsten-high.onnx.json",
+			"modelSha256": "9df1c43c61149ef9b39e618e2b861fbe41e1fcea9390b2dac62e8761573ea4f1",
+			"configSha256": "6de734444e4c3f9e33b7ebe2746dbc19b71e85f613e79c65acf623200b99a76a"
+		},
+		{
+			"id": "el_GR-rapunzelina-medium",
+			"name": "rapunzelina",
+			"language": "el",
+			"locale": "el_GR",
+			"localeName": "Greek, Greece",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/el/el_GR/rapunzelina/medium/el_GR-rapunzelina-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/el/el_GR/rapunzelina/medium/el_GR-rapunzelina-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/el/el_GR/rapunzelina/medium/MODEL_CARD",
+			"modelMd5": "265f2f9be00aa5ce81abc1f022145e42",
+			"configMd5": "ba83ba13667e14e2f97fbc9d950f9583",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://www.kaggle.com/datasets/bryanpark/greek-single-speaker-speech-dataset",
+			"finetunedFrom": null,
+			"lineageReview": false,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+			"gender": "female",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"female"
+			],
+			"modelPath": "/voices/el_GR-rapunzelina-medium.onnx",
+			"configPath": "/voices/el_GR-rapunzelina-medium.onnx.json",
+			"modelSha256": "3ca9fb3092215ee92edfc019b43feb0115ff4dfe638eb34474833ab1de840952",
+			"configSha256": "3a6182ec7c7550e14ef15e5d9badbb18f973a434086ac9658a1b10991fd192f8"
+		},
+		{
+			"id": "en_US-ljspeech-high",
+			"name": "ljspeech",
+			"language": "en",
+			"locale": "en_US",
+			"localeName": "English, United States",
+			"quality": "high",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ljspeech/high/en_US-ljspeech-high.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ljspeech/high/en_US-ljspeech-high.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ljspeech/high/MODEL_CARD",
+			"modelMd5": "dad093b5d2cff6a5fda99883ceda09d1",
+			"configMd5": "de98fc398ddead60fb82d93bfafb3ad1",
+			"rawLicense": "public domain",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://keithito.com/LJ-Speech-Dataset/",
+			"finetunedFrom": null,
+			"lineageReview": false,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-human-approved-2026-05-30",
+			"reviewedAt": "2026-05-30",
+			"notes": "; approved as default CC0 no-lineage v1 narration voice; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+			"gender": "female",
+			"genderSource": "model-card",
+			"genderConfidence": "verified",
+			"availableGenders": [
+				"female"
+			],
+			"modelPath": "/voices/en_US-ljspeech-high.onnx",
+			"configPath": "/voices/en_US-ljspeech-high.onnx.json",
+			"modelSha256": "5d4f08ba6a2a48c44592eed3ce56bf85e9de3dd4e20df90541ae68a8310c029a",
+			"configSha256": "7e1f4634af596d83cca997fb7a931ba80b70f8a316a2655ee69c55365e0ace14"
+		},
+		{
+			"id": "es_MX-claude-high",
+			"name": "claude",
+			"language": "es",
+			"locale": "es_MX",
+			"localeName": "Spanish, Mexico",
+			"quality": "high",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/claude/high/es_MX-claude-high.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/claude/high/es_MX-claude-high.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/claude/high/MODEL_CARD",
+			"modelMd5": "cb1966e0ff20ca3aa010f6c9a0ce296a",
+			"configMd5": "36882201922fabb409f18d284af3eddd",
+			"rawLicense": "apache-2.0",
+			"license": "Apache-2.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://huggingface.co/spaces/HirCoir/Piper-TTS-Spanish",
+			"finetunedFrom": null,
+			"lineageReview": false,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+			"gender": "male",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"male"
+			],
+			"modelPath": "/voices/es_MX-claude-high.onnx",
+			"configPath": "/voices/es_MX-claude-high.onnx.json",
+			"modelSha256": "3ef40a71ea63852cd8ab7e6fa7d2ecdcfa67a0b47c9c48e3f10e02ee02083ea0",
+			"configSha256": "1afc81f703c0e4cb3b4d7c0dca096b8b54a98806807f0170cf5eb5557723c12d"
+		},
+		{
+			"id": "fa_IR-ganji-medium",
+			"name": "ganji",
+			"language": "fa",
+			"locale": "fa_IR",
+			"localeName": "Farsi, Iran",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fa/fa_IR/ganji/medium/fa_IR-ganji-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fa/fa_IR/ganji/medium/fa_IR-ganji-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fa/fa_IR/ganji/medium/MODEL_CARD",
+			"modelMd5": "b50577af60b986135b37edaeaabb01b9",
+			"configMd5": "717462455e6abf8a4b8ea2365faaa41c",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://tts.datacula.com/",
+			"finetunedFrom": "fa_IR Amir voice (medium quality)",
+			"lineageReview": false,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+			"gender": "male",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"male"
+			],
+			"modelPath": "/voices/fa_IR-ganji-medium.onnx",
+			"configPath": "/voices/fa_IR-ganji-medium.onnx.json",
+			"modelSha256": "6a98504bb77dc2fd3a863c977d37e67a6a525fdf661917385d569a3ff78e6cae",
+			"configSha256": "9d3e0c0cf00156d8bf38fb7f96bdfbcb21911b37e062a328da0632e3c2cbc465"
+		},
+		{
+			"id": "fi_FI-harri-medium",
+			"name": "harri",
+			"language": "fi",
+			"locale": "fi_FI",
+			"localeName": "Finnish, Finland",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": false,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fi/fi_FI/harri/medium/fi_FI-harri-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fi/fi_FI/harri/medium/fi_FI-harri-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fi/fi_FI/harri/medium/MODEL_CARD",
+			"modelMd5": "8e96b9e765f8db3e910943520aa0f475",
+			"configMd5": "d944b7607e545ee3a0d06887c3e4ccc4",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://www.kaggle.com/bryanpark/finnish-single-speaker-speech-dataset",
+			"finetunedFrom": "U.S. English lessac voice (medium quality)",
+			"lineageReview": true,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+			"gender": "male",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"male"
+			],
+			"modelPath": "/voices/fi_FI-harri-medium.onnx",
+			"configPath": "/voices/fi_FI-harri-medium.onnx.json",
+			"modelSha256": "a44167faa34caed940e4fcad139fcc35922266b2593bcebe77701774c0fb2389",
+			"configSha256": "3f9c9f76f74adf1fbe7279e41eea17d6610757e45effd6808bbea6be74b8916d"
+		},
+		{
+			"id": "fr_FR-gilles-low",
+			"name": "gilles",
+			"language": "fr",
+			"locale": "fr_FR",
+			"localeName": "French, France",
+			"quality": "low",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/gilles/low/fr_FR-gilles-low.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/gilles/low/fr_FR-gilles-low.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/gilles/low/MODEL_CARD",
+			"modelMd5": "f984386d1f0927597f09a3ec10b11b5d",
+			"configMd5": "38b1775fef8b9de50f15f63c5d8b8643",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://www.kaggle.com/datasets/bryanpark/french-single-speaker-speech-dataset",
+			"finetunedFrom": "U.S. English Ryan voice (low quality)",
+			"lineageReview": false,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-human-approved-2026-05-30",
+			"reviewedAt": "2026-05-30",
+			"notes": "; approved as default CC0 no-lineage v1 narration voice; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+			"gender": "male",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"male"
+			],
+			"modelPath": "/voices/fr_FR-gilles-low.onnx",
+			"configPath": "/voices/fr_FR-gilles-low.onnx.json",
+			"modelSha256": "5cd711846720e261c2a176f6924c198a7424d0a75dd4b0a5357a5fb9cb739285",
+			"configSha256": "5a47cc0789e91267d17666bbec842dd92950669271a09023eb6970ee364cf88a"
+		},
+		{
+			"id": "hu_HU-anna-medium",
+			"name": "anna",
+			"language": "hu",
+			"locale": "hu_HU",
+			"localeName": "Hungarian, Hungary",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/hu/hu_HU/anna/medium/hu_HU-anna-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/hu/hu_HU/anna/medium/hu_HU-anna-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/hu/hu_HU/anna/medium/MODEL_CARD",
+			"modelMd5": "3796f9fa28bd8d390d17828e2e2e952d",
+			"configMd5": "ae63867e2c2cb6695555a17bdee8b751",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
+			"finetunedFrom": "U.S. English lessac voice (medium quality)",
+			"lineageReview": true,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+			"gender": "female",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"female"
+			],
+			"modelPath": "/voices/hu_HU-anna-medium.onnx",
+			"configPath": "/voices/hu_HU-anna-medium.onnx.json",
+			"modelSha256": "968c0c3a66cb667811242cc88653bff9247395fc7a0517fbeef7d8c08cdae62a",
+			"configSha256": "ccf967d8db8018c9d8ffdb0edc8814ffcb6b75273bb0d84337317240f710283a"
+		},
+		{
+			"id": "lv_LV-aivars-medium",
+			"name": "aivars",
+			"language": "lv",
+			"locale": "lv_LV",
+			"localeName": "Latvian, Latvia",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/lv/lv_LV/aivars/medium/lv_LV-aivars-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/lv/lv_LV/aivars/medium/lv_LV-aivars-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/lv/lv_LV/aivars/medium/MODEL_CARD",
+			"modelMd5": "5b48c6f958aea5b7e9ff34f6a10882dd",
+			"configMd5": "7264f291326a66e8055e3a48fdd0bf55",
+			"rawLicense": "CC0 1.0 Universal",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://huggingface.co/RaivisDejus/Piper-lv_LV-Aivars-medium",
+			"finetunedFrom": null,
+			"lineageReview": false,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+			"gender": "male",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"male"
+			],
+			"modelPath": "/voices/lv_LV-aivars-medium.onnx",
+			"configPath": "/voices/lv_LV-aivars-medium.onnx.json",
+			"modelSha256": "9d855a47c22e2b94795be9e0eb9e8c4c02ce251dc89461dede94de20ff08bd8e",
+			"configSha256": "08ae2c297be8aa04f15f3f97b7ffeae0146b30b0bd8f7baebcdc46bc2c2f33dc"
+		},
+		{
+			"id": "ne_NP-chitwan-medium",
+			"name": "chitwan",
+			"language": "ne",
+			"locale": "ne_NP",
+			"localeName": "Nepali, Nepal",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ne/ne_NP/chitwan/medium/ne_NP-chitwan-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ne/ne_NP/chitwan/medium/ne_NP-chitwan-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ne/ne_NP/chitwan/medium/MODEL_CARD",
+			"modelMd5": "74cdb5b32816c366af74b55ed7494e25",
+			"configMd5": "7ddc520e24a862016f6d22cde4b70ac1",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
+			"finetunedFrom": "U.S. English lessac voice (medium quality)",
+			"lineageReview": true,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+			"gender": "unknown",
+			"genderSource": "unresolved",
+			"genderConfidence": "unresolved",
+			"availableGenders": [],
+			"modelPath": "/voices/ne_NP-chitwan-medium.onnx",
+			"configPath": "/voices/ne_NP-chitwan-medium.onnx.json",
+			"modelSha256": "f7ba6b0927688f92717e93ca52bc06f5783ce8edc765d5f85365acef1d41822c",
+			"configSha256": "18d523b03b201422d14e2892cc750a81208d2e45158a9c6a7e4e06a500930dee"
+		},
+		{
+			"id": "nl_BE-rdh-medium",
+			"name": "rdh",
+			"language": "nl",
+			"locale": "nl_BE",
+			"localeName": "Dutch, Belgium",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_BE/rdh/medium/nl_BE-rdh-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_BE/rdh/medium/nl_BE-rdh-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_BE/rdh/medium/MODEL_CARD",
+			"modelMd5": "33d3469d745677ec4d7e96eb4145b09e",
+			"configMd5": "4a7629a2d00a62e72b8692f7a19135f1",
+			"rawLicense": "CC0 1.0 Universal",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://github.com/r-dh/dutch-vl-tts",
+			"finetunedFrom": null,
+			"lineageReview": false,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+			"gender": "unknown",
+			"genderSource": "unresolved",
+			"genderConfidence": "unresolved",
+			"availableGenders": [],
+			"modelPath": "/voices/nl_BE-rdh-medium.onnx",
+			"configPath": "/voices/nl_BE-rdh-medium.onnx.json",
+			"modelSha256": "fb1a9d89ff53dbd510c5d10bd1365c36a5f76249c3ca603076646fd778003db1",
+			"configSha256": "65deb256664d22099b0db5bb36d96237a3e32e43885c6ce4ee6811e6c04a8d79"
+		},
+		{
+			"id": "no_NO-talesyntese-medium",
+			"name": "talesyntese",
+			"language": "no",
+			"locale": "no_NO",
+			"localeName": "Norwegian, Norway",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/talesyntese/medium/no_NO-talesyntese-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/talesyntese/medium/no_NO-talesyntese-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/talesyntese/medium/MODEL_CARD",
+			"modelMd5": "9fc876e7edc6593086b4f2f34889f44b",
+			"configMd5": "94b938e1bd319e6a084dc8380fb53619",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-15/",
+			"finetunedFrom": null,
+			"lineageReview": false,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+			"gender": "unknown",
+			"genderSource": "unresolved",
+			"genderConfidence": "unresolved",
+			"availableGenders": [],
+			"modelPath": "/voices/no_NO-talesyntese-medium.onnx",
+			"configPath": "/voices/no_NO-talesyntese-medium.onnx.json",
+			"modelSha256": "b763aebe02e72c4628c4074c4b8b448f05ffe523b975bfcd58e2c5d531270c13",
+			"configSha256": "b0eb0491fc8bf9843d2beac8acf8773b6cf59274316406b36ff579ae8a1909d5"
+		},
+		{
+			"id": "pl_PL-darkman-medium",
+			"name": "darkman",
+			"language": "pl",
+			"locale": "pl_PL",
+			"localeName": "Polish, Poland",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/darkman/medium/pl_PL-darkman-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/darkman/medium/pl_PL-darkman-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/darkman/medium/MODEL_CARD",
+			"modelMd5": "27bf2d71e934b112657544fd0b100a7a",
+			"configMd5": "1c13180312cca98cb75ca39b31972056",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
+			"finetunedFrom": "U.S. English lessac voice (medium quality)",
+			"lineageReview": true,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+			"gender": "unknown",
+			"genderSource": "unresolved",
+			"genderConfidence": "unresolved",
+			"availableGenders": [],
+			"modelPath": "/voices/pl_PL-darkman-medium.onnx",
+			"configPath": "/voices/pl_PL-darkman-medium.onnx.json",
+			"modelSha256": "db505438a5364e8e2e0242c4324130a873ed660dfbe8d9689cef428ffb1b645f",
+			"configSha256": "70f999f11fa8ad13d3ef779041ee93c9f38be5abdbacdfad42449712fe91c81b"
+		},
+		{
+			"id": "pt_BR-cadu-medium",
+			"name": "cadu",
+			"language": "pt",
+			"locale": "pt_BR",
+			"localeName": "Portuguese, Brazil",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/cadu/medium/pt_BR-cadu-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/cadu/medium/pt_BR-cadu-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/cadu/medium/MODEL_CARD",
+			"modelMd5": "6f3a6e23694c9088e3696a15191af2cc",
+			"configMd5": "3d35f13df6a2f7dc9b7b7924befbe7bb",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
+			"finetunedFrom": "U.S. English lessac voice (medium quality)",
+			"lineageReview": true,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+			"gender": "male",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"male"
+			],
+			"modelPath": "/voices/pt_BR-cadu-medium.onnx",
+			"configPath": "/voices/pt_BR-cadu-medium.onnx.json",
+			"modelSha256": "765f0809a6ea9035d4a6d0d008dbf8876e68b2dd32029312672fa8f405bdb535",
+			"configSha256": "5fe03aa3d4901880554905b12075713cd552598c8a350455a1ec73f8b4e6be19"
+		},
+		{
+			"id": "ro_RO-mihai-medium",
+			"name": "mihai",
+			"language": "ro",
+			"locale": "ro_RO",
+			"localeName": "Romanian, Romania",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ro/ro_RO/mihai/medium/ro_RO-mihai-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ro/ro_RO/mihai/medium/ro_RO-mihai-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ro/ro_RO/mihai/medium/MODEL_CARD",
+			"modelMd5": "45f4253916c93d3d05ad3fe1b07ea4f3",
+			"configMd5": "f820f8ba65a8646c68792be581b85144",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
+			"finetunedFrom": "U.S. English lessac voice (medium quality)",
+			"lineageReview": true,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+			"gender": "male",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"male"
+			],
+			"modelPath": "/voices/ro_RO-mihai-medium.onnx",
+			"configPath": "/voices/ro_RO-mihai-medium.onnx.json",
+			"modelSha256": "e0608bbbd53c80267c09ece681b09f5199f54e792356684c8073738e5f15d29f",
+			"configSha256": "8cc0c9f077dc0cec3c25a6a055ec8046db8e40a2510591582f2c9c869f4bc47e"
+		},
+		{
+			"id": "ru_RU-denis-medium",
+			"name": "denis",
+			"language": "ru",
+			"locale": "ru_RU",
+			"localeName": "Russian, Russia",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/denis/medium/ru_RU-denis-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/denis/medium/ru_RU-denis-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/denis/medium/MODEL_CARD",
+			"modelMd5": "76c2f14e521fef3ed574f97ad492728e",
+			"configMd5": "e3df5957c07647cab05cf9910ef3ede0",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
+			"finetunedFrom": "U.S. English lessac voice (medium quality)",
+			"lineageReview": true,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+			"gender": "male",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"male"
+			],
+			"modelPath": "/voices/ru_RU-denis-medium.onnx",
+			"configPath": "/voices/ru_RU-denis-medium.onnx.json",
+			"modelSha256": "15fab56e11a097858ee115545d0f697fc2a316c41a291a5362349fb870411b0a",
+			"configSha256": "831c860dac0b5073eaa81610a0a638ec23d90a6cf8e5f871b4485c2cec3767c8"
+		},
+		{
+			"id": "sk_SK-lili-medium",
+			"name": "lili",
+			"language": "sk",
+			"locale": "sk_SK",
+			"localeName": "Slovak, Slovakia",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sk/sk_SK/lili/medium/sk_SK-lili-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sk/sk_SK/lili/medium/sk_SK-lili-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sk/sk_SK/lili/medium/MODEL_CARD",
+			"modelMd5": "836e078518042448bda8416a8ea52984",
+			"configMd5": "e49cbd13cb5ce5b8f7e1c1479ec2cc91",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
+			"finetunedFrom": "U.S. English lessac voice (medium quality)",
+			"lineageReview": true,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+			"gender": "female",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"female"
+			],
+			"modelPath": "/voices/sk_SK-lili-medium.onnx",
+			"configPath": "/voices/sk_SK-lili-medium.onnx.json",
+			"modelSha256": "d8e21603e0165252849efe0bcb3fbffd1b3193c36bd1f556e1106911e8015526",
+			"configSha256": "b7c474eba411913f9feb65b9da322463e8698e7b200d2b757f6e684802951333"
+		},
+		{
+			"id": "sq_AL-edon-medium",
+			"name": "edon",
+			"language": "sq",
+			"locale": "sq_AL",
+			"localeName": "Albanian, Albania",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sq/sq_AL/edon/medium/sq_AL-edon-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sq/sq_AL/edon/medium/sq_AL-edon-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sq/sq_AL/edon/medium/MODEL_CARD",
+			"modelMd5": "01888cba8f112271d2cdb6c9de17aae7",
+			"configMd5": "ceae64fc2a4411475ef23ebd307d1c53",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://huggingface.co/edonseki/folsh.ai",
+			"finetunedFrom": "U.S. English lessac voice (medium quality)",
+			"lineageReview": true,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
+			"gender": "male",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"male"
+			],
+			"modelPath": "/voices/sq_AL-edon-medium.onnx",
+			"configPath": "/voices/sq_AL-edon-medium.onnx.json",
+			"modelSha256": "5d0ae8af36a00ac6813517b2af47bc4cda42e88ece04f6076ae3b0f5479c57c8",
+			"configSha256": "e9ee77beea52d8042bca589448bb48033ac0f7c1d86daee84ad1d5692d1270f7"
+		},
+		{
+			"id": "sv_SE-nst-medium",
+			"name": "nst",
+			"language": "sv",
+			"locale": "sv_SE",
+			"localeName": "Swedish, Sweden",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sv/sv_SE/nst/medium/sv_SE-nst-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sv/sv_SE/nst/medium/sv_SE-nst-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sv/sv_SE/nst/medium/MODEL_CARD",
+			"modelMd5": "20266cf58e93ca2140444b77398aea04",
+			"configMd5": "3a95d9b88bb3214bf4d0d7fcf8a1aea9",
+			"rawLicense": "CC0",
+			"license": "CC0-1.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-17/",
+			"finetunedFrom": null,
+			"lineageReview": false,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+			"gender": "unknown",
+			"genderSource": "unresolved",
+			"genderConfidence": "unresolved",
+			"availableGenders": [],
+			"modelPath": "/voices/sv_SE-nst-medium.onnx",
+			"configPath": "/voices/sv_SE-nst-medium.onnx.json",
+			"modelSha256": "df011f56825a59dd1efc080c38a65a1ef70407e60f63050e9246f43a3d7e471e",
+			"configSha256": "d45dd74cbb4eca58694bf04a97e243044092476f28a55ae26424f0653086980a"
+		},
+		{
+			"id": "uk_UA-mykyta-high",
+			"name": "mykyta",
+			"language": "uk",
+			"locale": "uk_UA",
+			"localeName": "Ukrainian, Ukraine",
+			"quality": "high",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/uk/uk_UA/mykyta/high/uk_UA-mykyta-high.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/uk/uk_UA/mykyta/high/uk_UA-mykyta-high.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/uk/uk_UA/mykyta/high/MODEL_CARD",
+			"modelMd5": "a044d3c12c99ed7c4b687900b0545a6a",
+			"configMd5": "4de596951b9faee6842ccc69a17b38a0",
+			"rawLicense": "Apache 2.0",
+			"license": "Apache-2.0",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://github.com/egorsmkv/ukrainian-tts-datasets",
+			"finetunedFrom": null,
+			"lineageReview": false,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+			"gender": "male",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"male"
+			],
+			"modelPath": "/voices/uk_UA-mykyta-high.onnx",
+			"configPath": "/voices/uk_UA-mykyta-high.onnx.json",
+			"modelSha256": "081d253cd246d7d4d698c6dd147b74cad498dafd213527887a3a490519138243",
+			"configSha256": "b5db6b4efb02d4a0e8f128253fd64e82dfa72d1105e9060b0c6fd9610eec6a4f"
+		},
+		{
+			"id": "ur_PK-fasih-medium",
+			"name": "fasih",
+			"language": "ur",
+			"locale": "ur_PK",
+			"localeName": "Urdu, Pakistan",
+			"quality": "medium",
+			"numSpeakers": 1,
+			"isDefaultForLocale": true,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ur/ur_PK/fasih/medium/ur_PK-fasih-medium.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ur/ur_PK/fasih/medium/ur_PK-fasih-medium.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ur/ur_PK/fasih/medium/MODEL_CARD",
+			"modelMd5": "275113cbb8ffb29e3f8d51d53d266318",
+			"configMd5": "e9d386b28cc8da844e6342325e04608b",
+			"rawLicense": "mit",
+			"license": "MIT",
+			"commercialUse": "allowed",
+			"datasetUrl": null,
+			"finetunedFrom": null,
+			"lineageReview": false,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "codex-owner-directed-2026-06-06",
+			"reviewedAt": "2026-06-06",
+			"notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+			"gender": "male",
+			"genderSource": "model-card",
+			"genderConfidence": "verified",
+			"availableGenders": [
+				"male"
+			],
+			"modelPath": "/voices/ur_PK-fasih-medium.onnx",
+			"configPath": "/voices/ur_PK-fasih-medium.onnx.json",
+			"modelSha256": "46d590b90fbb41e4d4f2c54ded44874917f8b11b6e0500de2a89e5d3731b5917",
+			"configSha256": "cfcf484a50b4036cb55675b6bbcdb9ddb9061ac10a51cfb2b3ce8391213205ec"
+		}
+	]
+}

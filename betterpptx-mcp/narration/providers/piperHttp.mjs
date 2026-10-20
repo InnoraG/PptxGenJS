@@ -1,4 +1,5 @@
 import { recordResourceUsage } from '../../billing/resource-meter.mjs'
+import { createMetadataIdentityTokenSource } from '../../auth/cloud-run-id-token.mjs'
 
 const DEFAULT_TIMEOUT_MS = Number(process.env.BETTERPPTX_TTS_TIMEOUT_MS || 300000)
 
@@ -24,11 +25,24 @@ export function createPiperHttpProvider() {
 		const parsed = new URL(base)
 		if (parsed.pathname && parsed.pathname !== '/') synthUrl = base
 	} catch {}
+	// BETTERPPTX_TTS_AUTH=cloud-run: the runtime is a private Cloud Run service;
+	// each call carries this process's service identity (metadata server).
+	let identityToken = null
+	if (process.env.BETTERPPTX_TTS_AUTH === 'cloud-run') {
+		const target = new URL(base)
+		if (target.protocol !== 'https:' || !target.hostname.endsWith('.run.app')) {
+			throw new Error('Cloud Run narration authentication requires an HTTPS run.app runtime URL.')
+		}
+		identityToken = createMetadataIdentityTokenSource(target.origin)
+	}
+	async function authorized(headers) {
+		return identityToken ? { ...headers, 'X-Serverless-Authorization': `Bearer ${await identityToken()}` } : headers
+	}
 	return {
 		name: 'piper-http',
 		async probe(timeoutMs = 2500) {
 			try {
-				const res = await fetchWithTimeout(`${base}/voices`, { headers: { Accept: 'application/json' } }, timeoutMs)
+				const res = await fetchWithTimeout(`${base}/voices`, { headers: await authorized({ Accept: 'application/json' }) }, timeoutMs)
 				return res.ok === true
 			} catch {
 				return false
@@ -36,7 +50,7 @@ export function createPiperHttpProvider() {
 		},
 		async listVoices() {
 			recordResourceUsage({ externalCalls: 1 })
-			const res = await fetchWithTimeout(`${base}/voices`, { headers: { Accept: 'application/json' } }, 8000)
+			const res = await fetchWithTimeout(`${base}/voices`, { headers: await authorized({ Accept: 'application/json' }) }, identityToken ? 60000 : 8000)
 			if (!res.ok) throw new Error(`Piper /voices failed: HTTP ${res.status}`)
 			return await res.json()
 		},
@@ -54,7 +68,7 @@ export function createPiperHttpProvider() {
 			try {
 				res = await fetchWithTimeout(synthUrl, {
 					method: 'POST',
-					headers: { 'Content-Type': 'application/json', Accept: 'audio/wav, application/json' },
+					headers: await authorized({ 'Content-Type': 'application/json', Accept: 'audio/wav, application/json' }),
 					body: JSON.stringify(body),
 				})
 			} catch (cause) {
