@@ -5,7 +5,8 @@
 		"declarationDir": "./out/defs",
 		"lib": [
 			"dom",
-			"es2020"
+			"es2020",
+			"es2022.error"
 		],
 		"module": "es2020",
 		"moduleResolution": "node",
