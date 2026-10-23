@@ -2172,7 +2172,12 @@ async function publishFinalizedSpecArtifact(deckId, entry, { fileName, outputDir
 	if (!spec) return null
 	const descriptor = { ...selected }
 	delete descriptor.spec
-	const title = String(fileName || spec.title || `betterpptx_${deckId}_finalized`).replace(/\.json$/i, '')
+	return publishSpecArtifactFile(deckId, spec, descriptor, { fileName, outputDir, fallbackName: `betterpptx_${deckId}_finalized` })
+}
+
+// Writes one spec as a portable .betterpptx-spec.json download artifact.
+async function publishSpecArtifactFile(deckId, spec, descriptor, { fileName, outputDir, fallbackName } = {}) {
+	const title = String(fileName || spec.title || fallbackName || `betterpptx_${deckId}`).replace(/\.json$/i, '')
 	const artifact = await _artifactStore.prepareArtifactTarget({
 		fileName: `${title}.betterpptx-spec.json`,
 		outputDir,
@@ -10560,7 +10565,20 @@ function assertJsonSpecSlideEntryPatchSemantics(entry, spec = {}) {
 	const reorderDirectives = []
 	for (const [specSlideIndex, slideSpec] of (Array.isArray(spec.slides) ? spec.slides : []).entries()) {
 		if (!slideSpec || typeof slideSpec !== 'object' || Array.isArray(slideSpec)) throw new Error(`slides[${specSlideIndex}] must be an object.`)
-		const targetIndex = validateSlideIndex(patchSlideIndexForSpecSlide(slideSpec, specSlideIndex), `slides[${specSlideIndex}] target`, availableSlideCount)
+		const targetIndex = patchSlideIndexForSpecSlide(slideSpec, specSlideIndex)
+		if (!Number.isInteger(targetIndex) || targetIndex < 0 || targetIndex >= availableSlideCount) {
+			const slideLabel = slideSpec.id != null ? ` (id "${String(slideSpec.id)}")` : ''
+			const error = new Error(`slides[${specSlideIndex}]${slideLabel} targets slide index ${targetIndex}, but the deck has ${availableSlideCount} slide(s). commitMode:"patch" only edits existing slides (matched by position or slideIndex). To add slides, send only the new slides with commitMode:"append", then patch them; or use patchPlan.duplicateSlides.`)
+			error.code = 'PATCH_SLIDE_NOT_FOUND'
+			error.details = {
+				status: 'patch_slide_not_found',
+				field: `slides[${specSlideIndex}]`,
+				requestedSlideIndex: targetIndex,
+				deckSlideCount: availableSlideCount,
+				correction: { commitMode: 'append', slides: 'only the new slide objects' },
+			}
+			throw error
+		}
 		if (has(slideSpec, 'layoutName') && slideSpec.layoutName !== null && (typeof slideSpec.layoutName !== 'string' || !slideSpec.layoutName.trim())) throw new Error(`slides[${specSlideIndex}].layoutName must be a non-empty string, null, or omitted.`)
 		if (has(slideSpec, 'masterName') && slideSpec.masterName !== null && (typeof slideSpec.masterName !== 'string' || !slideSpec.masterName.trim())) throw new Error(`slides[${specSlideIndex}].masterName must be a non-empty string, null, or omitted.`)
 		for (const field of ['hidden', 'showMasterShapes', 'showMasterBackground']) if (has(slideSpec, field)) validateNullableBoolean(slideSpec[field], `slides[${specSlideIndex}].${field}`)
@@ -11940,6 +11958,17 @@ async function handleGenerateFromSpec(args = {}, context = {}) {
 	}
 	if (commitMode === 'patch') {
 		args.spec = preserveExplicitNullableSlideResets(authorSubmittedSpec, args.spec)
+		// Run the commit-time slide-entry checks during dryRun too, so a patch that
+		// would add or miss slides fails here with a correction instead of passing
+		// dryRun and failing at commit.
+		if (args.deckId && decks.has(args.deckId)) {
+			try {
+				assertJsonSpecSlideEntryPatchSemantics(getDeck(args.deckId), args.spec)
+			} catch (error) {
+				if (error.code) throw error
+				throwSpecCompileFailed(error.message, { errors: [{ code: 'PATCH_SPEC_INVALID', severity: 'error', message: error.message }] })
+			}
+		}
 	}
 	// EDITION 'retain-unless-edited' — on a full recompile against an existing deck, drop
 	// the preservation handle of any block whose semantic fields the AI edited since
@@ -28309,12 +28338,20 @@ async function handleExportSpec(args) {
 		slides,
 	}
 	storeExportedSpecBaseline(entry, spec, 'deck.export_spec')
+	const artifact = args.download === true
+		? await publishSpecArtifactFile(args.deckId, spec, specArtifactDescriptor(spec, { stage: 'current', entry, phase: 'export', commitMode: 'patch' }), {
+			fileName: args.fileName,
+			outputDir: args.outputDir,
+			fallbackName: `betterpptx_${args.deckId}_current`,
+		})
+		: undefined
 	return {
 		ok: true,
 		deckId: args.deckId,
 		authoringRoute: cloneForResult(entry.authoringRoute || null),
 		exportedAt,
 		spec,
+		...(artifact ? { artifact } : {}),
 		staticPoses: slides.flatMap((slide, slideIndex) => (slide.content || []).filter(block => block.kind === 'model3d' && block.staticPose != null).map(block => ({ slideIndex, objectName: block.objectName, ...block.staticPose, appliesTo: 'stopped-edit-view', playbackStartOffsetApplied: false }))),
 		editabilityMap: detail === 'summary'
 			? editabilityMap.map(item => ({
@@ -30712,9 +30749,69 @@ function _applyDirectTableInfrastructurePatch(options, patch) {
 	for (const [key, value] of Object.entries(patch)) {
 		if (publicOwned.has(key) || TABLE_SELECTOR_FIELDS.includes(key)) continue
 		if (value === null) delete options[key]
+		else if (TABLE_GEOMETRY_KEYS.has(key)) options[key] = _tableGeometryToEmu(value)
 		else if (value !== undefined) options[key] = _deepCloneData(value)
 	}
 	return options
+}
+
+// addTable stores x/y/w/h in EMU and the table grid divides options.w directly,
+// while public patches author geometry in inches. Store patched geometry in the
+// same unit, or an 11.5in table splits into gridCol w="4" (4 EMU) columns.
+const TABLE_GEOMETRY_KEYS = new Set(['x', 'y', 'w', 'h'])
+const TABLE_MIN_COLUMN_EMU = 45720 // 0.05in
+
+function _tableGeometryToEmu(value) {
+	if (typeof value !== 'number' || !Number.isFinite(value)) return _deepCloneData(value)
+	// Values above 100 are already EMU (the library's inch2Emu convention).
+	return Math.abs(value) > 100 ? Math.round(value) : Math.round(value * 914400)
+}
+
+function _tableGridColumnWidthsEmu(table) {
+	const options = table?.options || {}
+	const rawGrid = options._rawGridColXmls
+	if (Array.isArray(rawGrid) && rawGrid.length) {
+		return rawGrid.map(xml => Number(String(xml).match(/\bw="(-?\d+)"/)?.[1] ?? NaN))
+	}
+	const firstRow = table?.arrTabRows?.[0] || []
+	const columnCount = firstRow.reduce((sum, cell) => sum + (Number.isInteger(cell?.options?.colspan) ? cell.options.colspan : 1), 0)
+	if (!columnCount) return []
+	const toEmu = value => typeof value === 'number' && value > 100 ? value : Math.round(914400 * Number(value))
+	if (Array.isArray(options.colW)) {
+		return Array.from({ length: columnCount }, (_, index) => {
+			const width = toEmu(options.colW[index])
+			return Number.isFinite(width) ? width : (typeof options.w === 'number' ? options.w : 1) / columnCount
+		}).map(Math.round)
+	}
+	if (options.colW) return Array(columnCount).fill(Number(options.colW))
+	if (options.w) return Array(columnCount).fill(Math.round((typeof options.w === 'number' ? options.w : 1) / columnCount))
+	return Array(columnCount).fill(914400)
+}
+
+function tableGeometryValidationIssues(entry) {
+	const issues = []
+	;(entry?.pptx?.slides || []).forEach((slide, slideOffset) => {
+		;(slide?._slideObjects || []).forEach((object, shapeIndex) => {
+			if (object?._type !== 'table') return
+			const widths = _tableGridColumnWidthsEmu(object)
+			const collapsed = widths.map((width, column) => ({ column, width })).filter(item => !(item.width >= TABLE_MIN_COLUMN_EMU))
+			if (!collapsed.length) return
+			const objectName = object.options?.objectName || null
+			issues.push({
+				severity: 'error',
+				code: 'TABLE_COLUMN_WIDTH_COLLAPSED',
+				message: `Table ${objectName ? `"${objectName}" ` : ''}on slide ${slideOffset + 1} has ${collapsed.length} column(s) narrower than 0.05in (gridCol w=${collapsed.map(item => item.width).join(', ')} EMU); the table renders as a sliver.`,
+				slideNumber: slideOffset + 1,
+				shapeName: objectName || undefined,
+				shapeIndex,
+				suggestion: 'Re-send the table with rect/bbox in inches (for example {"w": 11.5}) or explicit tableOptions.colW in inches, one entry per column.',
+				fix: 'Re-send the table through deck.generate_from_spec commitMode:"patch" with rect/bbox in inches or tableOptions.colW in inches, one entry per column.',
+				autoFixAvailable: false,
+				context: { columnWidthsEmu: widths, minimumColumnEmu: TABLE_MIN_COLUMN_EMU },
+			})
+		})
+	})
+	return issues
 }
 
 function _tableFallbackOptions(table) {
@@ -38541,6 +38638,13 @@ async function handleValidate(args) {
 	const entry = getDeck(args.deckId)
 	const { pptx } = entry
 	const result = pptx.validate({ mode: args.mode || 'normal', autoFix: !!args.autoFix })
+	const tableIssues = tableGeometryValidationIssues(entry)
+	if (tableIssues.length && result && typeof result === 'object') {
+		result.issues = [...(Array.isArray(result.issues) ? result.issues : []), ...tableIssues]
+		result.issueCount = Number(result.issueCount || 0) + tableIssues.length
+		result.errorCount = Number(result.errorCount || 0) + tableIssues.length
+		result.valid = false
+	}
 	const morphPreviewCoverage = collectMorphPreviewCoverage(entry)
 	result.morphPreviewCoverage = morphPreviewCoverage
 	result.authoringRoute = cloneForResult(entry.authoringRoute || null)

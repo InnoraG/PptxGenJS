@@ -1831,8 +1831,21 @@ function authorStyleFromOptions(options) {
 	return out
 }
 
+// Text-only effects that AI clients also put directly on the content block
+// (content[].textFill). The patch path already honors them there, so the
+// create path must too rather than silently dropping them.
+const BLOCK_LEVEL_TEXT_STYLE_KEYS = ['textFill', 'textOutline', 'textShadow', 'textGlow']
+
+function blockLevelTextStyle(block) {
+	const out = {}
+	if (block && typeof block === 'object') {
+		for (const key of BLOCK_LEVEL_TEXT_STYLE_KEYS) if (block[key] !== undefined) out[key] = block[key]
+	}
+	return out
+}
+
 function effectiveBlockStyle(block, theme = null) {
-	const out = { ...authorStyleFromOptions(block?.options), ...(block?.style && typeof block.style === 'object' ? block.style : {}) }
+	const out = { ...authorStyleFromOptions(block?.options), ...blockLevelTextStyle(block), ...(block?.style && typeof block.style === 'object' ? block.style : {}) }
 	if (out.color === undefined && out.textColorRole && theme?.textColorRoles?.roles) {
 		const normalizedRole = String(out.textColorRole).trim().toLowerCase().replace(/[\s_]+/g, '-')
 		const roleKey = TEXT_COLOR_ROLE_ALIASES[normalizedRole]

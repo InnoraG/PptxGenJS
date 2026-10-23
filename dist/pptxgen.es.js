@@ -1,4 +1,4 @@
-/* PptxGenJS 4.0.1 @ 2026-09-25T18:19:21.864Z */
+/* PptxGenJS 4.0.1 @ 2026-10-23T17:03:22.857Z */
 import JSZip from 'jszip';
 import { DOMParser, XMLSerializer } from '@xmldom/xmldom';
 
@@ -28850,6 +28850,308 @@ function generateGUID() {
 }
 
 /**
+ * PptxGenJS: UnicodeMath (linear format) build-up
+ *
+ * Converts the common subset of UnicodeMath linear format into the equation
+ * template tree rendered by gen-equations, so `COP=Q_h/W` becomes a native
+ * fraction with a subscripted numerator instead of one literal math run.
+ *
+ * Supported: subscripts `_`, superscripts `^` (and both together), fractions
+ * `/` (numerator and denominator are the operands between surrounding
+ * operators), radicals `√x` / `√(n&x)`, n-ary operators `∑ ∏ ∫ …` with limits,
+ * bracket groups `( ) [ ] { } | |`, and invisible grouping `〖 〗`. Parentheses
+ * that only delimit a script or fraction operand are removed, as in
+ * PowerPoint's own build-up. Anything else stays as literal math text.
+ */
+const OPEN_TO_CLOSE = { '(': ')', '[': ']', '{': '}', '〖': '〗', '⟨': '⟩', '⌊': '⌋', '⌈': '⌉' };
+const CLOSERS = new Set(Object.values(OPEN_TO_CLOSE));
+const NARY = new Set(['∑', '∏', '∐', '∫', '∬', '∭', '∮', '∯', '∰', '⋀', '⋁', '⋂', '⋃', '⨀', '⨁', '⨂']);
+const INTEGRALS = new Set(['∫', '∬', '∭', '∮', '∯', '∰']);
+// Binary/relational operators and separators end a fraction operand.
+const OPERATORS = new Set([
+    '=', '+', '-', '−', '±', '∓', '×', '·', '⋅', '∙', '÷', '*', '<', '>', '≤', '≥', '≠', '≈', '≡', '∼', '≃', '≅', '∝',
+    '→', '←', '↔', '⇒', '⇐', '⇔', '↦', '∈', '∉', '⊂', '⊃', '⊆', '⊇', '∪', '∩', '∧', '∨', ',', ';', ':', '!', '∘', '⊕', '⊗',
+]);
+const FUNCTION_NAMES = new Set(['sin', 'cos', 'tan', 'cot', 'sec', 'csc', 'sinh', 'cosh', 'tanh', 'arcsin', 'arccos', 'arctan', 'log', 'ln', 'lg', 'exp', 'lim', 'max', 'min', 'sup', 'inf', 'det', 'deg', 'gcd', 'mod', 'arg', 'dim', 'ker', 'Pr']);
+function isDigit(ch) {
+    return ch >= '0' && ch <= '9';
+}
+function isSpace(ch) {
+    return ch === ' ' || ch === ' ';
+}
+function isLetter(ch) {
+    return ch.toLowerCase() !== ch.toUpperCase();
+}
+class UnicodeMathParser {
+    constructor(source) {
+        this.index = 0;
+        this.chars = Array.from(source);
+    }
+    parse() {
+        const node = this.expression(new Set());
+        // Unmatched closers are kept as literal text rather than dropped.
+        const rest = [];
+        while (this.index < this.chars.length) {
+            rest.push(this.chars[this.index++]);
+            const more = this.expression(new Set());
+            if (more !== '')
+                rest.push(more);
+        }
+        return rest.length ? row([node, ...rest]) : node;
+    }
+    peek(offset = 0) {
+        return this.chars[this.index + offset];
+    }
+    /** expression := operand (operator operand)* until a closer in `stop`. */
+    expression(stop) {
+        const items = [];
+        while (this.index < this.chars.length) {
+            const ch = this.peek();
+            if (stop.has(ch))
+                break;
+            if (isSpace(ch)) {
+                // Spaces between operands are kept as authored text.
+                this.index++;
+                items.push(ch);
+                continue;
+            }
+            if (OPERATORS.has(ch)) {
+                this.index++;
+                items.push(ch);
+                continue;
+            }
+            if (CLOSERS.has(ch)) {
+                // A stray closer that the caller is not waiting for: literal text.
+                if (!stop.size)
+                    break;
+                this.index++;
+                items.push(ch);
+                continue;
+            }
+            const before = this.index;
+            items.push(this.fractionTerm(stop));
+            if (this.index === before)
+                items.push(this.chars[this.index++]);
+        }
+        return row(items);
+    }
+    /** term := factors ('/' factors)* — UnicodeMath fractions bind tighter than operators. */
+    fractionTerm(stop) {
+        let numerator = this.factors(stop);
+        while (this.peek(this.spacesAhead()) === '/') {
+            this.index += this.spacesAhead() + 1;
+            this.index += this.spacesAhead();
+            const denominator = this.factors(stop);
+            numerator = { kind: 'fraction', numerator: unwrapOperand(numerator), denominator: unwrapOperand(denominator) };
+        }
+        return numerator;
+    }
+    factors(stop) {
+        const items = [];
+        while (this.index < this.chars.length) {
+            const ch = this.peek();
+            if (stop.has(ch) || ch === '/' || isSpace(ch) || OPERATORS.has(ch))
+                break;
+            if (CLOSERS.has(ch))
+                break;
+            const before = this.index;
+            items.push(this.scripted());
+            if (this.index === before)
+                break;
+        }
+        return row(items);
+    }
+    /** factor with optional `_sub` / `^sup` scripts. */
+    scripted() {
+        const ch = this.peek();
+        if (NARY.has(ch))
+            return this.nary();
+        const start = this.index;
+        const base = this.primary();
+        // Scripts on a letter run apply to its last letter (mc^2 is m·c²), unless
+        // the run is a function name.
+        if ((this.peek() === '_' || this.peek() === '^') && typeof base === 'string' && Array.from(base).length > 1 && isLetter(base[0])) {
+            this.index = start + Array.from(base).length - 1;
+            const lead = this.chars.slice(start, this.index).join('');
+            const last = this.chars[this.index++];
+            return row([lead, this.attachScripts(last)]);
+        }
+        return this.attachScripts(base);
+    }
+    spacesAhead() {
+        let count = 0;
+        while (this.peek(count) !== undefined && isSpace(this.peek(count)))
+            count++;
+        return count;
+    }
+    attachScripts(base) {
+        let sub;
+        let sup;
+        while (this.peek() === '_' || this.peek() === '^') {
+            const marker = this.chars[this.index++];
+            const arg = this.scriptArgument();
+            if ((marker === '_' && sub !== undefined) || (marker === '^' && sup !== undefined)) {
+                // A repeated script (x_a_b) nests onto the already-scripted base.
+                base = scriptNode(base, sub, sup);
+                sub = undefined;
+                sup = undefined;
+            }
+            if (marker === '_')
+                sub = arg;
+            else
+                sup = arg;
+        }
+        return scriptNode(base, sub, sup);
+    }
+    /** Script operand: a bracketed group (parentheses removed), a signed number, or one alphanumeric run. */
+    scriptArgument() {
+        const ch = this.peek();
+        if (ch === undefined)
+            return '';
+        if ((ch === '-' || ch === '−' || ch === '+') && this.peek(1) !== undefined && (isDigit(this.peek(1)) || isLetter(this.peek(1)))) {
+            this.index++;
+            return row([ch, this.primary()]);
+        }
+        if (ch === '∞') {
+            this.index++;
+            return ch;
+        }
+        return unwrapOperand(this.primary());
+    }
+    nary() {
+        const symbol = this.chars[this.index++];
+        let lower;
+        let upper;
+        while (this.peek() === '_' || this.peek() === '^') {
+            const marker = this.chars[this.index++];
+            const arg = this.scriptArgument();
+            if (marker === '_')
+                lower = arg;
+            else
+                upper = arg;
+        }
+        this.index += this.spacesAhead();
+        // `▒` (U+2592) explicitly introduces the n-ary body.
+        if (this.peek() === '▒')
+            this.index++;
+        const body = this.index < this.chars.length && !OPERATORS.has(this.peek()) && !CLOSERS.has(this.peek()) && this.peek() !== '|'
+            ? unwrapOperand(this.fractionTerm(new Set()))
+            : '';
+        return Object.assign(Object.assign(Object.assign({ kind: 'nary', symbol, limitLocation: INTEGRALS.has(symbol) ? 'subSup' : 'undOvr' }, (lower === undefined ? { hideSub: true } : { lower })), (upper === undefined ? { hideSup: true } : { upper })), { body });
+    }
+    primary() {
+        const ch = this.peek();
+        if (ch === undefined)
+            return '';
+        if (OPEN_TO_CLOSE[ch])
+            return this.group(ch, OPEN_TO_CLOSE[ch]);
+        if (ch === '|' || ch === '‖')
+            return this.group(ch, ch);
+        if (ch === '√' || ch === '∛' || ch === '∜') {
+            this.index++;
+            const degree = ch === '∛' ? '3' : ch === '∜' ? '4' : undefined;
+            if (this.peek() === '(') {
+                const start = this.index;
+                const group = this.group('(', ')');
+                if (typeof group === 'string')
+                    return Object.assign(Object.assign({ kind: 'radical' }, (degree ? { degree } : {})), { radicand: group });
+                // `√(n&x)` is the UnicodeMath form of an n-th root.
+                const text = this.chars.slice(start + 1, this.index - 1);
+                const ampersand = text.indexOf('&');
+                if (ampersand >= 0 && degree === undefined) {
+                    return {
+                        kind: 'radical',
+                        degree: new UnicodeMathParser(text.slice(0, ampersand).join('')).parse(),
+                        radicand: new UnicodeMathParser(text.slice(ampersand + 1).join('')).parse(),
+                    };
+                }
+                return Object.assign(Object.assign({ kind: 'radical' }, (degree ? { degree } : {})), { radicand: unwrapOperand(group) });
+            }
+            return Object.assign(Object.assign({ kind: 'radical' }, (degree ? { degree } : {})), { radicand: unwrapOperand(this.attachScripts(this.primary())) });
+        }
+        if (isDigit(ch) || (ch === '.' && this.peek(1) !== undefined && isDigit(this.peek(1)))) {
+            let text = '';
+            while (this.peek() !== undefined && (isDigit(this.peek()) || (this.peek() === '.' && this.peek(1) !== undefined && isDigit(this.peek(1)))))
+                text += this.chars[this.index++];
+            return text;
+        }
+        if (isLetter(ch)) {
+            let text = '';
+            while (this.peek() !== undefined && isLetter(this.peek()))
+                text += this.chars[this.index++];
+            if (FUNCTION_NAMES.has(text))
+                return { kind: 'text', text, italic: false };
+            return text;
+        }
+        this.index++;
+        return ch;
+    }
+    group(open, close) {
+        const start = this.index;
+        this.index++;
+        const inner = this.expression(new Set([close]));
+        if (this.peek() !== close) {
+            // Unbalanced: keep the opener as literal text.
+            this.index = start + 1;
+            return open;
+        }
+        this.index++;
+        if (open === '〖')
+            return { kind: 'group', items: [inner] };
+        return { kind: 'delimiter', left: open, right: close, items: [inner] };
+    }
+}
+function row(items) {
+    const flat = [];
+    for (const item of items) {
+        if (item === '' || item === undefined || item === null)
+            continue;
+        if (typeof item === 'object' && item.kind === 'row' && Array.isArray(item.items))
+            flat.push(...item.items);
+        else
+            flat.push(item);
+    }
+    // Merge adjacent plain strings so text stays in as few math runs as possible.
+    const merged = [];
+    for (const item of flat) {
+        const last = merged[merged.length - 1];
+        if (typeof item === 'string' && typeof last === 'string')
+            merged[merged.length - 1] = last + item;
+        else
+            merged.push(item);
+    }
+    if (merged.length === 0)
+        return '';
+    if (merged.length === 1)
+        return merged[0];
+    return { kind: 'row', items: merged };
+}
+/** PowerPoint removes the parentheses that only delimit a script or fraction operand. */
+function unwrapOperand(node) {
+    if (node && typeof node === 'object' && node.kind === 'delimiter' && node.left === '(' && node.right === ')' && Array.isArray(node.items) && node.items.length === 1)
+        return node.items[0];
+    if (node && typeof node === 'object' && node.kind === 'group' && Array.isArray(node.items) && node.items.length === 1)
+        return node.items[0];
+    return node;
+}
+function scriptNode(base, sub, sup) {
+    if (sub !== undefined && sup !== undefined)
+        return { kind: 'subsup', base, subscript: sub, exponent: sup };
+    if (sub !== undefined)
+        return { kind: 'subscript', base, subscript: sub };
+    if (sup !== undefined)
+        return { kind: 'superscript', base, exponent: sup };
+    return base;
+}
+/**
+ * Build up a UnicodeMath linear-format string into an equation template tree.
+ * Plain text without build-up operators comes back as the same string.
+ */
+function buildUpUnicodeMath(source) {
+    return new UnicodeMathParser(String(source !== null && source !== void 0 ? source : '')).parse();
+}
+
+/**
  * PptxGenJS: Native PowerPoint equation generation
  */
 const NS_A14 = 'http://schemas.microsoft.com/office/drawing/2010/main';
@@ -29059,7 +29361,7 @@ function wrapOMathPara(oMathXml, opts) {
     return `<m:oMathPara xmlns:m="${NS_M}"><m:oMathParaPr><m:jc m:val="${mathJc(opts.align)}"/></m:oMathParaPr>${oMathXml}</m:oMathPara>`;
 }
 function equationOmml(opts) {
-    var _a;
+    var _a, _b;
     const sourceFormat = opts.sourceFormat || (typeof opts.source === 'object' ? 'template' : 'plain');
     if (sourceFormat === 'omml') {
         if (typeof opts.source !== 'string')
@@ -29074,7 +29376,12 @@ function equationOmml(opts) {
     if (sourceFormat === 'template') {
         return wrapOMathPara(`<m:oMath>${renderTemplate(opts.source, opts)}</m:oMath>`, opts);
     }
-    return wrapOMathPara(`<m:oMath>${mathText(String((_a = opts.source) !== null && _a !== void 0 ? _a : ''), opts)}</m:oMath>`, opts);
+    // UnicodeMath is linear format: build it up (scripts, fractions, radicals, n-ary)
+    // the way PowerPoint does when the professional display is selected.
+    if (sourceFormat === 'unicodeMath' && opts.display !== 'linear') {
+        return wrapOMathPara(`<m:oMath>${renderTemplate(buildUpUnicodeMath(String((_a = opts.source) !== null && _a !== void 0 ? _a : '')), opts)}</m:oMath>`, opts);
+    }
+    return wrapOMathPara(`<m:oMath>${mathText(String((_b = opts.source) !== null && _b !== void 0 ? _b : ''), opts)}</m:oMath>`, opts);
 }
 function nativeShapeXml(slideItemObj, ctx, omml) {
     var _a;

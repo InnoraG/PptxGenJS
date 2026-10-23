@@ -1624,7 +1624,12 @@ function styleTableHeader(rows, dark, opts = {}) {
 			// A rule header is typographic: underline only. The fill that
 			// normalizeTableRows seeds for ordinary header strings is not author
 			// intent and must not override the World data-language contract.
-			if (style === 'rule' && engineDefaultFill) delete c.options.fill
+			// The white ink seeded with that fill goes too, or the header renders
+			// white-on-background (invisible) on light worlds.
+			if (style === 'rule' && engineDefaultFill) {
+				delete c.options.fill
+				c.options.color = headerColor
+			}
 		}
 		return c
 	}) : row))

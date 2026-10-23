@@ -2273,7 +2273,7 @@ export const TOOLS = [
 				deckId: { type: 'string' },
 				mode: { type: 'string', enum: ['current', 'authoredInput', 'effectivePrecompile'], default: 'current', description: 'current reconstructs the deck; authoredInput returns the parsed submitted JSON; effectivePrecompile returns the exact deterministic object immediately before plan compilation.' },
 				deckVersion: { type: 'number', description: 'Optional historical deck version for an immutable authored/effective artifact.' },
-				download: { type: 'boolean', default: false, description: 'Publish the selected immutable authoring spec as a portable JSON download artifact.' },
+				download: { type: 'boolean', default: false, description: 'Publish the exported spec (any mode, including current) as a portable JSON download artifact.' },
 				fileName: { type: 'string', description: 'Optional public filename for the JSON download artifact.' },
 				title: { type: 'string', description: 'Optional title override for the exported spec.' },
 				detail: { type: 'string', enum: ['summary', 'full'], default: 'summary', description: 'summary returns compact editability rows; full includes the full public editability map.' },
