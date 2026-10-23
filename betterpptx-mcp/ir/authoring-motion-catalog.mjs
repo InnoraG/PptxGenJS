@@ -523,14 +523,14 @@ export function resolveAuthoringMotionSelectionForCatalog(catalog, motionIds, { 
 			errors.push({ code: 'MOTION_ID_INVALID', motionId, reason: 'Every selected motion position must contain one exact motion.* ID.' })
 			continue
 		}
-		if (seen.has(motionId)) errors.push({ code: 'MOTION_ID_DUPLICATE', motionId, reason: 'Select each motion at most once per presenter bundle.' })
+		if (seen.has(motionId)) errors.push({ code: 'MOTION_ID_DUPLICATE', motionId, reason: `${motionId} is selected more than once; select each motion at most once per presenter bundle.` })
 		seen.add(motionId)
 		const row = byId.get(motionId)
 		if (!row) {
-			errors.push({ code: 'MOTION_ID_UNKNOWN', motionId, reason: 'Choose an ID returned by the public motion catalog.' })
+			errors.push({ code: 'MOTION_ID_UNKNOWN', motionId, reason: `${motionId} is not in the motion catalog; choose an ID returned by the public motion catalog.` })
 			continue
 		}
-		if (!allowPlanned && !row.selectable) errors.push({ code: 'MOTION_NOT_EXECUTABLE', motionId, reason: 'This motion is tracked in the catalog but is not yet an executable product capability.' })
+		if (!allowPlanned && !row.selectable) errors.push({ code: 'MOTION_NOT_EXECUTABLE', motionId, reason: `${motionId} is tracked in the catalog but is not yet an executable product capability; choose a selectable motion from betterpptx.authoring.catalog.` })
 	}
 	if (seen.size > maximum) errors.push({ code: 'MOTION_BUNDLE_LIMIT_EXCEEDED', maximum, requested: seen.size, reason: `Choose at most ${maximum} unique motions for one presenter bundle.` })
 	const selected = [...seen].map(id => byId.get(id)).filter(Boolean)

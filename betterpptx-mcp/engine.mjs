@@ -113,7 +113,7 @@ import {
 } from './connector-style-contract.mjs'
 import { CONNECTOR_EFFECT_FIELDS, connectorEffectsPublicReadback, patchConnectorEffects } from './connector-effects-contract.mjs'
 import { patchTextFill, textFillCompatibilityOptions } from './text-fill-contract.mjs'
-import { aspectLayoutPresetForSpec, buildSpecOperationPlan as buildSpecOperationPlanUnchecked, compactSpecPlan, operationResolutionRequirement, publicSpecCapabilityMatrix, autoSyncBuildCues, canonicalNarrationCue, NARRATION_CUE_ANCHOR_METHOD, TOOL_RESPONSE_VERSION, lowerHtmlAuthoringSurface, applyPowerpointNiceties, validateModel3DViewOptions, findPresenterPerformanceCollision, slideHasExplicitNarration } from './ir/spec-compiler.mjs'
+import { aspectLayoutPresetForSpec, buildSpecOperationPlan as buildSpecOperationPlanUnchecked, compactSpecPlan, operationResolutionRequirement, publicSpecCapabilityMatrix, autoSyncBuildCues, canonicalNarrationCue, NARRATION_CUE_ANCHOR_METHOD, TOOL_RESPONSE_VERSION, lowerHtmlAuthoringSurface, applyPowerpointNiceties, validateModel3DViewOptions, findPresenterPerformanceCollision, slideHasExplicitNarration, avatarArgsForObject } from './ir/spec-compiler.mjs'
 import { assertRuntimeEditableItemPair } from './ir/continuity-native-payload.mjs'
 import { assertSlideContinuityCommitMode } from './ir/slide-continuity-contract.mjs'
 import { finalizeContinuityReservations, reconcileFailedContinuityReservations } from './billing/spec-continuity-settlement.mjs'
@@ -192,7 +192,7 @@ import { parseStockHandle, resolveStockHandle, searchStock, stockProviderStatus 
 import { generateImage as generateImageUnchecked, cacheGeneratedImage, getCachedGeneratedImage as getCachedGeneratedImageUnchecked, parseGenHandle, imageRequestHashFor, imageEnsembleSelectionHashFor, normalizeImageCapability, persistGeneratedImage, hydrateGeneratedImage as hydrateGeneratedImageUnchecked, persistGeneratedImageEnsembleSelection, loadGeneratedImageEnsembleSelection } from './assets/image-gen-providers.mjs'
 import { resolveGenAssetTenantIdentity } from './storage/gen-asset-store.mjs'
 import { generateRigged3d as generateRigged3dUnchecked, cacheGeneratedRigged3d, registerLocalRigged3d, getCachedGeneratedRigged3d as getCachedGeneratedRigged3dUnchecked, parseGenRigged3dHandle, rigged3dHashFor, model3dGenProviderStatus, persistGeneratedRigged3d, hydrateGeneratedRigged3d as hydrateGeneratedRigged3dUnchecked } from './assets/model3d-gen-providers.mjs'
-import { isPublicDefaultPresenterHandle } from './assets/default-presenter-roster.mjs'
+import { isPublicDefaultPresenterHandle, PUBLIC_PRESENTER_IDENTITIES } from './assets/default-presenter-roster.mjs'
 import { generatePersonalizedMeshyAvatar, meshyAvatarHashFor, meshyAvatarProviderStatus } from './assets/meshy-avatar-provider.mjs'
 import { resolveNative3dPipeline, publicProductionNative3dLicense } from './ir/native3d-policy.mjs'
 import { publicVerificationPolicy, resolveVerificationPolicy, VERIFICATION_POLICIES, previewInfrastructureAvailable, publicGeneratedImagePolicy, generatedImageUnavailableInProductionError } from './verification-policy.mjs'
@@ -556,7 +556,7 @@ function publicKineticPolicy() {
 		engineRole: 'expose-validate-and-execute',
 		catalogTool: 'betterpptx.authoring.catalog',
 		selectionContract: {
-			presenters: [{ presenterId: 'host', selectedMotionIds: ['motion.ordinary.talk', 'motion.kinetic.magical-reveal'] }],
+			presenters: [{ presenterId: 'host', selectedMotionIds: ['motion.ordinary.present', 'motion.ordinary.point'] }],
 		},
 		presenterPerformance: PRESENTER_PERFORMANCE_CONTRACT,
 		interactionPlanRule: 'The AI chooses semantic motion/interaction intent. The engine mechanically solves only runtime timing, contact, packaging, and geometry required to execute the choice; raw animation indexes and target geometry remain private.',
@@ -5434,7 +5434,7 @@ function compactPublicToolRecipe(args = {}) {
 				{ step: 7, type: 'template', tool: 'betterpptx.avatar.render_job', missingInputs: ['authorized uploaded source image', 'consentAffirmed:true', 'script plus eligible voice/language or supplied audio', 'quality and timing choices', 'idempotencyKey'], when: 'Start only after identity consent, the audio route, and the bounded allowance or explicit paid authorization are satisfied. The request must contain the actual user-approved inputs; no placeholder is executable.' },
 				{ step: 8, type: 'template', tool: 'betterpptx.avatar.job_status', missingInputs: ['jobId returned by the same render_job call'], when: 'Poll with bounded retries using the returned stable job ID until the supported terminal state is reached.' },
 				{ step: 9, type: 'result-check', source: 'betterpptx.avatar.job_status', requiredState: 'status:"succeeded"', requiredOutput: ['video.ref', 'video.posterRef', 'video.durationMs', 'video.extn'], when: 'Use the completed job response as the only source for the opaque asset, poster, and measured media metadata. Audio-track presence is verified from the completed media during attachment/package validation; a queued or failed job cannot be attached.' },
-				{ step: 10, type: 'template', tool: 'betterpptx.avatar.attach_result', missingInputs: ['deckId', 'slideIndex', 'script', 'exactly one of the succeeded jobId or its returned avatarAsset'], when: 'Attach the completed audiovisual asset. The route resolves the returned poster and writes the semantic video/playback/timing representation; do not invent an attachment tool or field.' },
+				{ step: 10, type: 'template', tool: 'betterpptx.deck.generate_from_spec', request: { deckId: '<deckId>', commitMode: 'patch', phase: 'dryRun', spec: avatarAttachPatchSpec(0, { jobId: '<succeeded jobId>', script: '<the spoken script>', rect: { x: 9, y: 1.5, w: 3.5, h: 3.5 } }) }, missingInputs: ['deckId', 'slideIndex', 'script', 'rect in slide inches', 'exactly one of the succeeded jobId or its returned avatarAsset (video.ref)'], when: 'Attach the completed audiovisual asset with slides[].avatarNarration in a patch: dryRun, then commit. The compiler resolves the returned poster and writes the semantic video/playback/timing representation. The same avatarNarration block also works in createNew and append specs. Attaching is placement only; the render was billed by render_job.' },
 				{ step: 11, type: 'template', tool: 'betterpptx.deck.validate_avatar_narration', missingInputs: ['deckId'], when: 'Verify video/audio tracks, measured duration metadata, relationships, poster, notes, timing commands, and slide advance without claiming PowerPoint visual or perceptual lip-sync review.' },
 				{ step: 12, type: 'environment-policy-step', tool: 'betterpptx.deck.save', missingInputs: ['deckId', 'idempotencyKey'], when: verification.rendererRequiredForSave ? 'Save only after current-version validation and complete release PowerPoint preview of the frozen package.' : 'Save after current-version deterministic validation; production intentionally does not require hosted PowerPoint preview and records renderPerformed:false.' },
 			],
@@ -5446,9 +5446,11 @@ function compactPublicToolRecipe(args = {}) {
 			},
 			attachment: {
 				status: 'public',
-				tool: 'betterpptx.avatar.attach_result',
-				requiredFields: ['deckId', 'slideIndex', 'script'],
-				assetSelector: 'exactly one of jobId or avatarAsset',
+				tool: 'betterpptx.deck.generate_from_spec',
+				field: 'slides[].avatarNarration',
+				requiredFields: ['deckId', 'slides[].slideIndex', 'avatarNarration.script', 'avatarNarration.rect'],
+				assetSelector: 'exactly one of avatarNarration.jobId or avatarNarration.avatarAsset',
+				directAttachTool: 'betterpptx.avatar.attach_result returns AVATAR_ATTACH_SPEC_ROUTE with this exact patch request; it does not edit decks directly.',
 				jobIdSource: 'betterpptx.avatar.render_job → betterpptx.avatar.job_status',
 				avatarAssetSource: 'video.ref from a succeeded job status response',
 				posterRule: 'The completed job supplies the poster; public clients do not provide a host filesystem path or guess a cover field.',
@@ -9427,6 +9429,44 @@ function hasExplicitNullableSlideReset(patch = {}) {
 	return NULLABLE_SLIDE_PATCH_FIELDS.some(field => Object.prototype.hasOwnProperty.call(patch, field) && patch[field] === null)
 }
 
+// Research-only roster identities exist for maintainers but have no public asset
+// grant; naming one publicly used to fail later as an anonymous "asset handle
+// is unavailable". Reject it by field with the identities that do work.
+const RESEARCH_ONLY_PRESENTER_IDENTITIES = new Set(['mena'])
+
+function assertPublicPresenterIdentities(spec = {}) {
+	const checks = [
+		['presenter.identity', spec?.presenter?.identity],
+		...(Array.isArray(spec?.presenters?.cast) ? spec.presenters.cast.map((entry, index) => [`presenters.cast[${index}].identity`, entry?.identity]) : []),
+		...(Array.isArray(spec?.slides) ? spec.slides.map((slide, index) => [`slides[${index}].presenter.identity`, slide?.presenter?.identity]) : []),
+	]
+	for (const [field, value] of checks) {
+		if (typeof value !== 'string' || !RESEARCH_ONLY_PRESENTER_IDENTITIES.has(value.trim().toLowerCase())) continue
+		throwSpecCompileFailed(`${field} ${JSON.stringify(value)} is not available in this deployment. Choose one of: ${['auto', ...PUBLIC_PRESENTER_IDENTITIES].join(', ')}.`, {
+			errors: [{ code: 'PRESENTER_IDENTITY_UNAVAILABLE', severity: 'error', field, message: `${field} ${JSON.stringify(value)} is not available in this deployment. Choose one of: ${['auto', ...PUBLIC_PRESENTER_IDENTITIES].join(', ')}.` }],
+		})
+	}
+}
+
+// slides[].avatarNarration with a completed render (jobId from a succeeded
+// avatar.render_job, or its video.ref as avatarAsset) attaches that video to an
+// existing slide in patch mode. Without either, an objectName reframes media
+// the deck already has. Returns null when the directive is a reframe.
+function jsonSpecPatchAvatarAttachArgs(deckId, specSlide = {}, slideIndex = 0) {
+	const directive = specSlide.avatarNarration
+	if (!directive || typeof directive !== 'object' || directive.enabled === false) return null
+	if (directive.reuseExisting === true || (!directive.jobId && !directive.avatarAsset && !directive.lockedVideo?.handle)) return null
+	if (directive.jobId && (directive.avatarAsset || directive.lockedVideo?.handle)) {
+		const error = new Error(`slides[].avatarNarration for slide ${slideIndex} must name exactly one completed render: jobId or avatarAsset, not both.`)
+		error.code = 'AVATAR_ATTACH_SOURCE_AMBIGUOUS'
+		error.details = { status: 'avatar_attach_source_ambiguous', field: 'avatarNarration', slideIndex }
+		throw error
+	}
+	const slideId = String(specSlide.id || `slide-${slideIndex + 1}`)
+	const objectName = directive.objectName || `${slideId}.avatar.video`
+	return { deckId, slideIndex, ...avatarArgsForObject({ ...directive, objectName, script: directive.script || directive.text || '' }) }
+}
+
 function patchSlideIndexForSpecSlide(slide = {}, fallbackIndex = 0) {
 	const candidates = [
 		slide.slideIndex,
@@ -9775,7 +9815,10 @@ function buildJsonSpecPatchOperationPlan(args = {}, compiled = {}) {
 		const avatarDirective = specSlide.avatarNarration && typeof specSlide.avatarNarration === 'object'
 			? specSlide.avatarNarration
 			: null
-		if (avatarDirective && avatarDirective.enabled !== false) {
+		const avatarAttachArgs = jsonSpecPatchAvatarAttachArgs(args.deckId, specSlide, targetSlideIndex)
+		if (avatarAttachArgs) {
+			pushOperation('betterpptx.avatar.attach_result', avatarAttachArgs, { slideIndex: targetSlideIndex, field: 'avatarNarration' })
+		} else if (avatarDirective && avatarDirective.enabled !== false) {
 			const avatarObjectName = avatarDirective.objectName || avatarDirective.target?.objectName
 			if (!avatarObjectName) {
 				unsupported.push({ slideIndex: targetSlideIndex, kind: 'avatarNarration', reason: 'semantic avatarNarration patch requires the existing media objectName' })
@@ -10935,7 +10978,12 @@ async function applyJsonSpecPatchCommit(args = {}, baseData = {}, compiled = {},
 		const avatarDirective = specSlide.avatarNarration && typeof specSlide.avatarNarration === 'object'
 			? specSlide.avatarNarration
 			: null
-		if (avatarDirective && avatarDirective.enabled !== false) {
+		const avatarAttachArgs = jsonSpecPatchAvatarAttachArgs(args.deckId, specSlide, targetSlideIndex)
+		if (avatarAttachArgs) {
+			// The completed render was billed by avatar.render_job; attaching it is
+			// placement only, so it runs under the attach tool, not a second render.
+			results.push(await runPatch('betterpptx.avatar.attach_result', attachArgs => handleAvatarAttachResult(attachArgs, context), avatarAttachArgs))
+		} else if (avatarDirective && avatarDirective.enabled !== false) {
 			const avatarObjectName = avatarDirective.objectName || avatarDirective.target?.objectName
 			if (avatarObjectName) {
 				results.push(await runPatch('betterpptx.slide.update_media', handleUpdateMedia, {
@@ -11360,7 +11408,7 @@ function authoringExcellenceSpecIssues(spec = {}, args = {}) {
 				code: 'DIRECTOR_RAW_MOTION_MAPPING_FORBIDDEN',
 				message: 'Public presenter motion uses exact semantic motion IDs from the authoring catalog; raw clip maps, animation indexes, and scene commands are private realization details.',
 				path: `${path}.${key}`,
-				suggestions: [{ motionTime: { kineticSelection: { presenters: [{ presenterId: 'host', selectedMotionIds: ['motion.ordinary.talk'] }] } }, presenterMotion: { presenterId: 'host', motionId: 'motion.ordinary.talk' } }],
+				suggestions: [{ motionTime: { kineticSelection: { presenters: [{ presenterId: 'host', selectedMotionIds: ['motion.ordinary.present'] }] } }, presenterMotion: { presenterId: 'host', motionId: 'motion.ordinary.present' } }],
 			})
 		}
 	}
@@ -11956,6 +12004,7 @@ async function handleGenerateFromSpec(args = {}, context = {}) {
 			errors: [{ code: error.code, severity: 'error', message: error.message }],
 		})
 	}
+	if (isPublicBlackBoxMode()) assertPublicPresenterIdentities(args.spec)
 	if (commitMode === 'patch') {
 		args.spec = preserveExplicitNullableSlideResets(authorSubmittedSpec, args.spec)
 		// Run the commit-time slide-entry checks during dryRun too, so a patch that
@@ -36753,10 +36802,15 @@ async function handleDeckAddNarration(args) {
 }
 
 function avatarVideoBox(args = {}) {
+	// The spec compiler requires avatarNarration.rect and passes it as options
+	// x/y/w/h: the ellipse-centered cover is applied inside that authored frame.
+	const options = args.options || {}
+	if (['x', 'y', 'w', 'h'].every(key => typeof options[key] === 'number' && Number.isFinite(options[key])) && options.w > 0 && options.h > 0) {
+		return { x: options.x, y: options.y, w: options.w, h: options.h }
+	}
 	return {
-		// Shared accepted talking-head window: engine-owned ellipse with
-		// centered cover. Semantic clients do not author this geometry, and
-		// primitive callers cannot move it into a rectangular presenter frame.
+		// Default talking-head window when no frame was authored: ellipse with
+		// centered cover in the bottom-right corner.
 		x: 10.993,
 		y: 5.160,
 		w: 2.25,
@@ -42395,9 +42449,46 @@ function throwJsonSpecAuthoringRequired(name) {
 	throw err
 }
 
+// The smallest patch spec that attaches a completed talking-head render.
+function avatarAttachPatchSpec(slideIndex, avatarNarration) {
+	return {
+		schemaVersion: 'betterpptx.deck-spec.v1',
+		authoringContract: { workflow: 'ai-sovereign-v1', creativeAuthority: 'ai', directorMode: 'off', verificationMode: 'complete', geometryAuthority: 'ai', placementPolicy: 'ai-authored-geometry-v1', coordinateSystem: 'inches' },
+		slides: [{ slideIndex, avatarNarration }],
+	}
+}
+
+// A completed talking-head render reaches a slide through the spec compiler.
+// Name the exact replacement call instead of the generic direct-authoring error.
+function throwAvatarAttachSpecRouteRequired(args = {}) {
+	const slideIndex = Number.isInteger(Number(args.slideIndex)) ? Number(args.slideIndex) : 0
+	const source = args.jobId ? { jobId: String(args.jobId) } : args.avatarAsset ? { avatarAsset: String(args.avatarAsset) } : { jobId: '<succeeded avatar.render_job jobId>' }
+	const avatarNarration = {
+		...source,
+		script: args.script != null ? String(args.script) : '<the spoken script>',
+		rect: { x: 9, y: 1.5, w: 3.5, h: 3.5 },
+		...(args.options?.objectName ? { objectName: String(args.options.objectName) } : {}),
+	}
+	const err = new Error(`Attach completed talking-head videos through betterpptx.deck.generate_from_spec: commitMode:"patch" with slides:[{ slideIndex: ${slideIndex}, avatarNarration: { ${Object.keys(source)[0]}, script, rect } }] (dryRun, then commit). avatar.attach_result does not edit decks directly.`)
+	err.code = 'AVATAR_ATTACH_SPEC_ROUTE'
+	err.details = {
+		status: 'avatar_attach_spec_route',
+		blockedTool: 'betterpptx.avatar.attach_result',
+		nextAction: {
+			recommendedTool: 'betterpptx.deck.generate_from_spec',
+			reason: 'Patch the slide with slides[].avatarNarration; the compiler attaches the completed video, poster, playback, and timing.',
+			request: { deckId: args.deckId, commitMode: 'patch', phase: 'dryRun', spec: avatarAttachPatchSpec(slideIndex, avatarNarration) },
+		},
+	}
+	throw err
+}
+
 function assertJsonSpecOnlyAuthoring(name, args = {}) {
 	if (FORBIDDEN_DIRECT_DECK_CREATORS.has(name)) throwJsonSpecAuthoringRequired(name)
+	// render_job only labels the job with deckId/slideIndex; it never edits the deck.
+	if (name === 'betterpptx.avatar.render_job') return
 	if (!args?.deckId || !isMutatingTool(name)) return
+	if (name === 'betterpptx.avatar.attach_result') throwAvatarAttachSpecRouteRequired(args)
 	if (!JSON_SPEC_LIFECYCLE_MUTATIONS.has(name)) throwJsonSpecAuthoringRequired(name)
 	if (name !== 'betterpptx.deck.save') return
 	const entry = decks.get(args.deckId)
@@ -42416,6 +42507,8 @@ function isDeckScopedMutationTool(name, args = {}) {
 		const phase = String(args.phase || (args.dryRun === true ? 'dryRun' : 'commit')).toLowerCase()
 		if (args.dryRun === true || phase === 'dryrun' || phase === 'lockeddryrun' || phase === 'resolve') return false
 	}
+	// render_job only labels the job with deckId; the deck is untouched.
+	if (name === 'betterpptx.avatar.render_job') return false
 	return !!args?.deckId && isMutatingTool(name)
 }
 
@@ -43316,7 +43409,7 @@ function publicNextActionsForError(code, details = {}) {
 		case 'AVATAR_JOB_REQUIRED':
 			return [
 				{ type: 'start_job', tool: 'betterpptx.avatar.render_job', description: 'Start an avatar render job, poll it, then attach the completed result.' },
-				{ type: 'attach_result', tool: 'betterpptx.avatar.attach_result', description: 'Attach the completed avatar video after the job succeeds.' },
+				{ type: 'attach_result', tool: 'betterpptx.deck.generate_from_spec', description: 'After the job succeeds, attach it with commitMode:"patch" and slides[].avatarNarration { jobId, script, rect }.' },
 			]
 		case 'NARRATION_SYNTHESIS_RUNTIME_UNAVAILABLE':
 		case 'NARRATION_SYNTHESIS_RUNTIME_TIMEOUT':

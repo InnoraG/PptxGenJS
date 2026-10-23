@@ -826,7 +826,7 @@ export function artDirectionSelectionForSpec(spec = {}) {
 	if (raw && typeof raw === 'object' && !Array.isArray(raw)) return { kind: 'bespoke', key: 'bespoke', raw, explicit: true }
 	const key = String(raw ?? '').toLowerCase().trim().replace(/\s+/g, '-')
 	if (!key) return { kind: 'omitted', key: null, raw, explicit: false }
-	return { kind: ART_DIRECTIONS[key] ? 'named' : 'unsupported', key, raw, explicit: true }
+	return ART_DIRECTIONS[key] ? { kind: 'named', key, raw, explicit: true } : { kind: 'unsupported', key, raw, explicit: true, supported: Object.keys(ART_DIRECTIONS) }
 }
 
 export const WORLD_CAPABILITY_PROFILES = Object.freeze({

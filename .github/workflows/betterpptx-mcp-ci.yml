@@ -86,6 +86,7 @@ jobs:
           node --test betterpptx-mcp/test/local-artifact-ownership.test.mjs
           node --test betterpptx-mcp/test/compiler-validation-readback.test.mjs
           node --test betterpptx-mcp/test/blind-client-engine-regressions.test.mjs
+          node --test betterpptx-mcp/test/blind-client-presenter-avatar-regressions.test.mjs
           node --test betterpptx-mcp/test/gcs-artifact-lifetime.test.mjs
           node --test betterpptx-mcp/test/durable-operation-download-authority-replay.test.mjs
           node --test betterpptx-mcp/test/production-non-rendering-save.test.mjs

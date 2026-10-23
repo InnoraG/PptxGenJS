@@ -309,6 +309,25 @@ export function assertAvatarJobAccess(job, context = {}) {
 	} catch { throw unavailable() }
 }
 
+// Public error for a failed job: known codes say why and what to do next;
+// anything else stays generic so private failure details never leak.
+const AVATAR_JOB_FAILURES = {
+	AVATAR_UNAVAILABLE: ['Talking-head rendering is not available in this environment.', 'Use voice-only narration (slides[].narration) or a native 3D presenter instead.'],
+	AVATAR_LICENSE_REVIEW_REQUIRED: ['Talking-head rendering is not enabled in this deployment.', 'Use voice-only narration (slides[].narration) or a native 3D presenter instead; retrying will not help.'],
+	AVATAR_SHARED_STORE_REQUIRED: ['Talking-head rendering is temporarily unavailable.', 'Retry later, or continue with voice-only narration (slides[].narration).'],
+	AVATAR_SELFIE_REQUIRED: ['Talking-head generation requires a face image uploaded in the render request.', 'Start a new render_job with avatar.image and avatar.consentAffirmed:true.'],
+	AVATAR_CONSENT_REQUIRED: ['Uploaded presenter images require explicit consent confirmation.', 'Start a new render_job with avatar.consentAffirmed:true after the user confirms permission to use the face.'],
+	MEDIA_UNSUPPORTED_INPUT: ['The source media is not supported.', 'Upload the face as a PNG or JPEG image and start a new render_job.'],
+	MEDIA_PROBE_FAILED: ['The rendered media could not be verified.', 'Start a new render_job with a different source image or audio.'],
+	MEDIA_NORMALIZE_FAILED: ['The rendered media could not be normalized for PowerPoint.', 'Start a new render_job with a different source image or audio.'],
+}
+
+export function publicAvatarJobError(code) {
+	const value = String(code || 'AVATAR_FAILED')
+	const known = AVATAR_JOB_FAILURES[value]
+	return known ? { code: value, message: `Avatar job failed: ${known[0]}`, fix: known[1] } : { code: value, message: 'Avatar job failed.' }
+}
+
 export function publicAvatarJob(job, context) {
 	if (!job) throw unavailable()
 	if (resourceAuthorizationActive() || hasOwnerBinding(job) || context) assertAvatarJobAccess(job, context)
@@ -321,7 +340,7 @@ export function publicAvatarJob(job, context) {
 		completedAt: job.completedAt || null,
 		video: video ? Object.fromEntries(['ref', 'posterRef', 'durationMs', 'extn', 'cacheHit']
 			.filter(key => Object.hasOwn(video, key)).map(key => [key, video[key]])) : null,
-		error: job.error ? { code: job.error.code, message: 'Avatar job failed.' } : null,
+		error: job.error ? publicAvatarJobError(job.error.code) : null,
 	}
 	if (process.env.BETTERPPTX_PRIVATE_METROLOGY === '1' && Array.isArray(job.result?.providerExecutionIds)) {
 		result.providerExecutionIds = job.result.providerExecutionIds

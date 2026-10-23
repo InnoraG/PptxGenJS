@@ -43,7 +43,7 @@ import { applyEffectsArray, normalizeBlur, normalizeFillOverlay, normalizeGlow, 
 import { normalizeSlideBackground } from '../slide-background-contract.mjs'
 import { materializeGeneratedTextureFill } from './generated-texture.mjs'
 import { cuesToSynthesisSegments, mapCueProsody, narratedProfileRequested, normalizeNarrationForTts } from '../narration/tts-text.mjs'
-import { authoredCuesFromNarration, buildNarrationCueLedger, findNonNativeCaptionOverlayField, materializeClosedCaptionTracks, NATIVE_MEDIA_CAPTION_CAPABILITY, nonNativeCaptionOverlayIssue, normalizeAuthoredCue } from './narration-contract.mjs'
+import { authoredCuesFromNarration, buildNarrationCueLedger, narrationCueLedgerWarnings, findNonNativeCaptionOverlayField, materializeClosedCaptionTracks, NATIVE_MEDIA_CAPTION_CAPABILITY, nonNativeCaptionOverlayIssue, normalizeAuthoredCue } from './narration-contract.mjs'
 import { inlineImageDimensions } from './inline-image-dimensions.mjs'
 import { validateImageAccessibilityOptions, validateImageAltText } from '../image-accessibility-catalog.mjs'
 import { validateImageAssetSource, validateNarrationProvider, validatePictureAdjuncts } from '../media-image-formatting-contract.mjs'
@@ -387,8 +387,10 @@ function ensureAuthoringMotionPresenterDeclarations(spec) {
 	const cast = spec?.presenters?.cast
 	if (Array.isArray(cast) && cast.length) return spec
 	if (directives.length !== 1) {
-		const error = new Error('Multiple presenter motion selections require matching presenters.cast entries.')
+		const ids = directives.map(entry => JSON.stringify(entry.presenterId)).join(', ')
+		const error = new Error(`motionTime.kineticSelection.presenters lists ${directives.length} presenters (${ids}), which requires one presenters.cast[] entry per presenterId. With a single top-level presenter, use one selection whose presenterId equals presenter.id${spec?.presenter?.id ? ` (${JSON.stringify(spec.presenter.id)})` : ''}.`)
 		error.code = 'MOTION_PRESENTER_UNKNOWN'
+		error.field = 'motionTime.kineticSelection.presenters'
 		throw error
 	}
 	const presenter = spec.presenter === true ? {} : (spec.presenter && typeof spec.presenter === 'object' ? spec.presenter : {})
@@ -414,7 +416,13 @@ function preparePresenterPerformances(spec) {
 		const field = `slides[${index}].presenterPerformance`
 		const performance = normalizePresenterPerformance(slide.presenterPerformance, field)
 		const actor = cast.length ? cast.find(entry => String(entry?.id) === performance.actor) : (performance.actor === actorId ? spec.presenter : null)
-		if (!actor || actor.enabled === false) throw performanceError('PERFORMANCE_PRESENTER_UNAVAILABLE', `Performance actor ${performance.actor} needs an enabled presenter or matching cast declaration.`, field)
+		if (!actor || actor.enabled === false) {
+			const actorIds = cast.length ? cast.map(entry => String(entry?.id)) : [actorId]
+			const cause = !actor
+				? `${field}.actor must name ${cast.length ? 'a presenters.cast[].id' : 'presenter.id'} (${actorIds.map(id => JSON.stringify(id)).join(', ')})${[spec.presenter?.identity, ...cast.map(entry => entry?.identity)].includes(performance.actor) ? `; ${JSON.stringify(performance.actor)} is a presenter identity, not an actor id` : ''}.`
+				: `the presenter ${JSON.stringify(performance.actor)} is disabled${Array.isArray(spec.presenter?.onSlides) && !spec.presenter.onSlides.includes(index) ? ` and presenter.onSlides does not include this slide (index ${index})` : ''}.`
+			throw performanceError('PERFORMANCE_PRESENTER_UNAVAILABLE', `Performance actor ${performance.actor} needs an enabled presenter or matching cast declaration: ${cause}`, field)
+		}
 		if (actor.pixelFrame || actor._visualReferenceFrame || slide.presenter?.pixelFrame || slide.presenter?._visualReferenceFrame) throw performanceError('PERFORMANCE_PLACEMENT_CONFLICT', 'A continuous performance uses AI-authored slide-inch geometry. Remove presenter pixelFrame and author presenterPerformance.frame plus exact travel[].center positions.', field)
 		if (actor.kinetic || actor.mode === 'kinetic' || actor.kineticClips) throw performanceError('PERFORMANCE_MOTION_SELECTION_CONFLICT', 'A continuous performance selects exact public motion IDs. Remove the older kinetic clip directive for this actor.', field)
 		if (actor.staticPose != null || slide.presenter?.staticPose != null) throw performanceError('PERFORMANCE_OWNERSHIP_CONFLICT', 'A static pose cannot own the same presenter as a continuous performance.', field)
@@ -2531,7 +2539,7 @@ function avatarRenderPolicyArgs(object = {}) {
 	}
 }
 
-function avatarArgsForObject(object) {
+export function avatarArgsForObject(object) {
 	const timing = object.timing || object.timeline || object.narrationTiming || {}
 	const authoredRect = contractRect(object.rect || object.bbox || object.options)
 	const lockedVideoHandle = object.lockedVideo?.handle || object.avatarAsset
@@ -2555,8 +2563,10 @@ function avatarArgsForObject(object) {
 		// Shape/crop mechanics remain deterministic, while the containing frame is
 		// authored by the AI and passed through unchanged.
 		rounding: true,
-		renderMode: lockedVideoHandle ? 'completedAsset' : renderPolicyArgs.renderMode,
+		renderMode: lockedVideoHandle || object.jobId ? 'completedAsset' : renderPolicyArgs.renderMode,
 		avatarAsset: lockedVideoHandle,
+		// A succeeded avatar.render_job id attaches its completed video and poster.
+		jobId: lockedVideoHandle ? undefined : object.jobId,
 		cover: object.cover || lockedPosterHandle,
 		durationMs: object.lockedVideo?.durationMs || object.durationMs,
 		cues: object.cues ?? timing.cues,
@@ -3741,7 +3751,7 @@ function narrationHasSegmentAudio(src) {
 
 export function slideHasExplicitNarration(specSlide = {}) {
 	const n = specSlide.narration || specSlide.voiceover
-	if (n && typeof n === 'object' && n.enabled !== false && (narrationCombinedScript(n) || n.audio || n.audioRef || narrationHasSegmentAudio(n) || n.synthesizeAudio === false)) return true
+	if (n && typeof n === 'object' && n.enabled !== false && (narrationCombinedScript(n) || n.audio || n.audioRef || n.preparedNarration || narrationHasSegmentAudio(n) || n.synthesizeAudio === false)) return true
 	const avatar = specSlide.avatarNarration
 	if (avatar && typeof avatar === 'object' && avatar.enabled !== false && (narrationCombinedScript(avatar) || avatar.audio || avatar.lockedVideo || avatar.avatarAsset)) return true
 	const block = slideNarrationContentBlock(specSlide)
@@ -5191,6 +5201,7 @@ function aiWorldSelectionForSpec(spec = {}) {
 				: selection.kind === 'neutral' ? 'neutral-explicit'
 					: selection.kind === 'unsupported' ? 'unsupported' : 'neutral-omission',
 		selectedWorld,
+		...(selection.kind === 'unsupported' ? { requestedWorld: selection.raw, supportedWorlds: selection.supported } : {}),
 		explicitSelection: selection.explicit,
 		certificationEligible: selection.kind !== 'unsupported',
 		certificationScope: 'aesthetic-selection-only; not a release certificate or a substitute for current-version validation',
@@ -5999,7 +6010,7 @@ export function buildSpecOperationPlan(spec, options = {}) {
 		const narratedDurationForConflict = explicitNarr
 			? (lockedNarrationTiming?.realDurationMs ?? narrationEstMs)
 			: null
-		const performanceFits = performanceTiming && authority.narrationClockActive
+		const performanceFits = performanceTiming && authority.narrationClockActive && Number.isFinite(narratedDurationForConflict)
 			? narratedDurationForConflict >= performanceTiming.endMs
 			: null
 		const dwellMs = authority.performanceClockActive
@@ -6007,7 +6018,7 @@ export function buildSpecOperationPlan(spec, options = {}) {
 			: authority.narrationClockActive
 				? (lockedNarrationTiming?.dwellMs ?? null)
 				: authority.autoplayMs ?? authority.slideAdvanceMs ?? null
-		if (performanceFits === false) throw performanceError('PERFORMANCE_NARRATION_TOO_SHORT', `The narration on ${slide.slideId} ends before the authored presenter performance. Narration remains the effective clock; lengthen the narration or shorten the performance.`, `slides[${slide.slideIndex}].presenterPerformance`)
+		if (performanceFits === false) throw performanceError('PERFORMANCE_NARRATION_TOO_SHORT', `The narration on ${slide.slideId} ends at ${Math.round(narratedDurationForConflict)}ms (${lockedNarrationTiming?.realDurationMs != null ? 'measured audio' : 'estimated from the narration text'}), before the authored presenter performance ends at ${Math.round(performanceTiming.endMs)}ms. Narration remains the effective clock; lengthen the narration or shorten the performance actions.`, `slides[${slide.slideIndex}].presenterPerformance`)
 		if (authority.conflicts.length) {
 			compiledWarnings.push({
 				slideId: slide.slideId,
@@ -6165,7 +6176,7 @@ export function buildSpecOperationPlan(spec, options = {}) {
 		severity: directorWorkflow ? 'error' : 'warning',
 		message: 'The built-in presenter was selected by a legacy compatibility fallback rather than an explicit AI identity choice.',
 		reason: 'Presenter identity is a visible creative decision owned by the authoring AI. Deterministic compatibility selection may keep an old spec executable, but cannot certify AI-owned first-time-right authorship.',
-		fix: 'Inspect the unranked built-in presenter options and set presenter.identity to "joe", "louise", "pete", or "mena" explicitly, then rerun dryRun.',
+		fix: 'Inspect the unranked built-in presenter options and set presenter.identity to "joe", "louise", or "pete" explicitly, then rerun dryRun.',
 		evidence: { selectionMode: 'auto-fallback', selectedIdentity: spec.presenter.identity || null, certificationEligible: false },
 		source: 'presenter-selection',
 	}] : []
@@ -6177,10 +6188,11 @@ export function buildSpecOperationPlan(spec, options = {}) {
 	const worldSelectionWarnings = worldSelection.selectionStatus !== 'unsupported' ? [] : [{
 		code: 'ART_DIRECTION_UNSUPPORTED',
 		severity: 'error',
-		message: 'The explicit art-direction selector is unsupported; no aesthetic substitution was applied.',
+		message: `styleIntent.artDirection ${JSON.stringify(worldSelection.requestedWorld)} is not a supported World; no aesthetic substitution was applied. Supported: ${(worldSelection.supportedWorlds || []).join(', ')}.`,
 		reason: 'An explicit unsupported choice cannot silently become a named or neutral preset.',
-		fix: 'Use a supported named World, an inline bespoke object, or omission/null with authored styling.',
-		evidence: { selectionStatus: worldSelection.selectionStatus, certificationEligible: false },
+		fix: 'Set styleIntent.artDirection to one of the supported Worlds, an inline bespoke object, or omission/null with authored styling.',
+		path: 'styleIntent.artDirection',
+		evidence: { selectionStatus: worldSelection.selectionStatus, requested: worldSelection.requestedWorld, supported: worldSelection.supportedWorlds, certificationEligible: false },
 	}]
 	slideContinuities = bindSlideContinuitiesToMeasuredDeckClock(slideContinuities, spec, timingSpine)
 	const htmlRepresentationFindings = [
@@ -6190,6 +6202,7 @@ export function buildSpecOperationPlan(spec, options = {}) {
 		...htmlFontSubstitutionFindings(spec),
 		...narrationProfileFindings(spec),
 	]
+	const narrationCueLedger = buildNarrationCueLedger(spec)
 	const warnings = [
 		...(plan.warnings || []).map(compactWarning),
 		...layoutValidation.issues.filter(issue => issue.severity !== 'error').map(compactWarning),
@@ -6201,6 +6214,7 @@ export function buildSpecOperationPlan(spec, options = {}) {
 		...htmlRepresentationFindings.filter(issue => issue.severity !== 'error').map(compactWarning),
 		...autoPresenterSelectionIssues.filter(issue => issue.severity !== 'error'),
 		...presenterRuntimeIssues.filter(issue => issue.severity !== 'error'),
+		...narrationCueLedgerWarnings(narrationCueLedger),
 	]
 	const errors = [
 		...worldSelectionWarnings.filter(issue => issue.severity === 'error'),
@@ -6260,7 +6274,7 @@ export function buildSpecOperationPlan(spec, options = {}) {
 		lockedPlanDigest,
 		planDigest: estimatedPlanDigest,
 		planId: lockedPlanDigest || estimatedPlanDigest,
-		narrationCueLedger: buildNarrationCueLedger(spec),
+		narrationCueLedger,
 		title: spec.title,
 		slideCount: plan.slides.length,
 		objectCount: plan.slides.reduce((sum, slide) => sum + slide.objects.length, 0),
