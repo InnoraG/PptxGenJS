@@ -5,5 +5,8 @@
 	"description": "Pinned deployment tooling for the BetterPPTX Cloudflare edge route.",
 	"devDependencies": {
 		"wrangler": "4.149.0"
+	},
+	"overrides": {
+		"undici": "7.30.1"
 	}
 }
