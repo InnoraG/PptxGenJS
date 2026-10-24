@@ -149,6 +149,8 @@ export function normalizeAuthoredCue(cue) {
 		if (Number.isFinite(duration) && duration >= 0) next.durationMs = duration <= 180 ? Math.round(duration * 1000) : Math.round(duration)
 	}
 	if (next.target == null && Array.isArray(next.focus) && next.focus[0]) next.target = next.focus[0]
+	// AI clients often key a cue by the object it reveals, as timeline steps do.
+	if (next.target == null && next.objectName) next.target = next.objectName
 	if (next.text == null && (next.script || next.phrase)) next.text = next.script || next.phrase
 	if (next.atPhrase == null && next.atMs == null && next.delay == null && next.text) next.atPhrase = String(next.text).trim()
 	return next
@@ -170,6 +172,7 @@ export function buildNarrationCueLedger(spec = {}) {
 	let acceptedCueCount = 0
 	let resolvedCueTargets = 0
 	let unresolvedCueTargets = 0
+	let untargetedCues = 0
 	const slides = []
 	;(spec.slides || []).forEach((slide, slideIndex) => {
 		const names = new Set((slide.content || []).map(block => asText(block?.name || block?.objectName)).filter(Boolean))
@@ -183,23 +186,36 @@ export function buildNarrationCueLedger(spec = {}) {
 		let accepted = 0
 		let resolved = 0
 		let unresolved = 0
+		const untargetedCueIds = []
+		const unresolvedTargets = []
 		for (const cue of authored) {
 			if (cue.atMs == null && !cue.atPhrase && !cue.atWord && cue.delay == null) continue
 			accepted += 1
 			const target = asText(cue.target)
-			if (!target) continue
+			if (!target) {
+				// Cues with spoken text may still resolve a target by focus text later;
+				// a bare time marker never animates anything.
+				if (!cue.text && !cue.atPhrase && !cue.atWord) untargetedCueIds.push(asText(cue.id) || `#${accepted}`)
+				continue
+			}
 			if (names.has(target) || [...names].some(name => name.split('.').includes(target) || target.split(/\s+/).some(part => name.toLowerCase().includes(part.toLowerCase())))) resolved += 1
-			else unresolved += 1
+			else {
+				unresolved += 1
+				unresolvedTargets.push(target)
+			}
 		}
 		acceptedCueCount += accepted
 		resolvedCueTargets += resolved
 		unresolvedCueTargets += unresolved
+		untargetedCues += untargetedCueIds.length
 		slides.push({
 			slideId: slide.id,
 			authoredCueCount: authored.length,
 			acceptedCueCount: accepted,
 			resolvedCueTargets: resolved,
 			unresolvedCueTargets: unresolved,
+			...(untargetedCueIds.length ? { untargetedCueIds } : {}),
+			...(unresolvedTargets.length ? { unresolvedTargets } : {}),
 		})
 	})
 	return {
@@ -208,6 +224,7 @@ export function buildNarrationCueLedger(spec = {}) {
 		preservedNarrationCues: acceptedCueCount,
 		resolvedCueTargets,
 		unresolvedCueTargets,
+		untargetedCues,
 		cueSegmentSynthesis: acceptedCueCount > 0,
 		appliedCueTargets: resolvedCueTargets,
 		cueCount: acceptedCueCount,
@@ -305,3 +322,26 @@ export const NATIVE_MEDIA_CAPTION_CAPABILITY = Object.freeze({
 		status: 'removed',
 	}),
 })
+
+// Dry-run warnings for narration cues that animate nothing: no target, or a
+// target that names no object on the slide.
+export function narrationCueLedgerWarnings(ledger = {}) {
+	const warnings = []
+	for (const slide of ledger.slides || []) {
+		if (slide.untargetedCueIds?.length) warnings.push({
+			code: 'NARRATION_CUE_TARGET_MISSING',
+			severity: 'warning',
+			slideId: slide.slideId,
+			message: `Narration cue(s) ${slide.untargetedCueIds.join(', ')} on ${slide.slideId} have no target, so they mark a time but animate nothing.`,
+			fix: 'Set each cue.target to a content[].name on the same slide (with type/effect), or remove the cue.',
+		})
+		if (slide.unresolvedTargets?.length) warnings.push({
+			code: 'NARRATION_CUE_TARGET_MISSING',
+			severity: 'warning',
+			slideId: slide.slideId,
+			message: `Narration cue target(s) ${slide.unresolvedTargets.join(', ')} on ${slide.slideId} match no content[].name on that slide.`,
+			fix: 'Point cue.target at a stable content[].name on the same slide, or remove the cue.',
+		})
+	}
+	return warnings
+}

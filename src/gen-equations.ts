@@ -5,6 +5,7 @@
 import { EquationProps, EquationTemplate, ISlideObject } from './core-interfaces'
 import { encodeXmlEntities, genXmlColorSelection } from './gen-utils'
 import { genXmlCNvPr } from './gen-accessibility'
+import { buildUpUnicodeMath } from './gen-unicode-math'
 
 const NS_A14 = 'http://schemas.microsoft.com/office/drawing/2010/main'
 const NS_M = 'http://schemas.openxmlformats.org/officeDocument/2006/math'
@@ -243,6 +244,12 @@ function equationOmml(opts: EquationProps): string {
 
 	if (sourceFormat === 'template') {
 		return wrapOMathPara(`<m:oMath>${renderTemplate(opts.source as EquationTemplate, opts)}</m:oMath>`, opts)
+	}
+
+	// UnicodeMath is linear format: build it up (scripts, fractions, radicals, n-ary)
+	// the way PowerPoint does when the professional display is selected.
+	if (sourceFormat === 'unicodeMath' && opts.display !== 'linear') {
+		return wrapOMathPara(`<m:oMath>${renderTemplate(buildUpUnicodeMath(String(opts.source ?? '')), opts)}</m:oMath>`, opts)
 	}
 
 	return wrapOMathPara(`<m:oMath>${mathText(String(opts.source ?? ''), opts)}</m:oMath>`, opts)

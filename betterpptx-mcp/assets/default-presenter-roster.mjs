@@ -183,6 +183,7 @@ const ASSETS = Object.freeze({
 })
 const handles = new Map()
 const PUBLIC_DEFAULT_IDENTITIES = new Set(['joe', 'louise', 'pete'])
+export const PUBLIC_PRESENTER_IDENTITIES = Object.freeze([...PUBLIC_DEFAULT_IDENTITIES])
 const PUBLIC_DEFAULT_DERIVED_HANDLES = new Set()
 
 // Built-in release-roster assets are product catalog content, not user-produced

@@ -533,12 +533,12 @@ export function expandPresenterPerformances(spec, options = {}) {
 				const norm = grab.normalizedPosition
 				const desired = { x: box.x + box.w / 2 - projectedHandX(norm) * renderedH, y: box.y + box.h / 2 + (norm.yAboveFloor - 0.5) * renderedH }
 				const aligned = { x: clamp(desired.x, frameW / 2 + 0.05, SW - frameW / 2 - 0.05), y: clamp(desired.y, frameH / 2 + 0.05, SH - frameH / 2 - 0.05) }
-				if (Math.hypot(aligned.x - desired.x, aligned.y - desired.y) > 0.0001) carryError(`Carry target ${interaction.target} is outside the selected hand's reachable stage.`, 'PERFORMANCE_TARGET_UNREACHABLE')
+				if (Math.hypot(aligned.x - desired.x, aligned.y - desired.y) > 0.0001) carryError(`Carry target ${interaction.target} is outside the selected hand's reachable stage: its center is ${inchPoint({ x: box.x + box.w / 2, y: box.y + box.h / 2 })}; ${reachableRegionHint(desired, aligned, { x: box.x + box.w / 2, y: box.y + box.h / 2 })}`, 'PERFORMANCE_TARGET_UNREACHABLE')
 				const previousStage = [...anchors.values()].filter(key => key.atMs <= grab.atMs).sort((a, b) => b.atMs - a.atMs)[0]?.stage
 				if (authoredTravel.length) {
 					const authored = authoredCenterAt(grab.atMs)
 					const residual = Math.hypot(authored.x - desired.x, authored.y - desired.y)
-					if (residual > 0.05) carryError(`Carry target ${interaction.target} does not meet the authored hand path at grab time.`, 'PERFORMANCE_TARGET_UNREACHABLE')
+					if (residual > 0.05) carryError(`Carry target ${interaction.target} does not meet the authored hand path at grab time: the presenter center is ${inchPoint(authored)} at ${Math.round(grab.atMs)}ms but must be ${inchPoint(desired)}. Set the travel[] center at that time to ${inchPoint(desired)}, or move the target.`, 'PERFORMANCE_TARGET_UNREACHABLE')
 					anchors.set(grab.atMs, { atMs: grab.atMs, x: authored.x, y: authored.y, stage: previousStage, target: interaction.target })
 				} else {
 					for (const key of [...anchors.values()].filter(key => key.atMs >= grab.atMs).sort((a, b) => a.atMs - b.atMs)) {
@@ -576,7 +576,7 @@ export function expandPresenterPerformances(spec, options = {}) {
 			const aligned = { x: clamp(desired.x, frameW / 2 + 0.05, SW - frameW / 2 - 0.05), y: clamp(desired.y, frameH / 2 + 0.05, SH - frameH / 2 - 0.05) }
 			const residual = Math.hypot(aligned.x - desired.x, aligned.y - desired.y)
 			if (residual > Math.min(SW, SH) * 0.07) {
-				const error = new Error(`Performance target ${interaction.target} is outside the presenter's reachable stage. Place it in a central or body region, or use a pointing action.`)
+				const error = new Error(`Performance target ${interaction.target} (${interaction.verb}) is outside the presenter's reachable stage: the contact point is ${inchPoint(targetPoint)}; ${reachableRegionHint(desired, aligned, targetPoint)}${interaction.verb === 'point-at' ? '' : ' Or use a point-at interaction.'}`)
 				error.code = 'PERFORMANCE_TARGET_UNREACHABLE'
 				error.evidence = { actionId: interaction.actionId, contactAtMs: p.startMs + localContactMs, contactHand: contact.hand, normalizedHand: { ...norm }, targetPoint, desiredCenter: desired, resolvedCenter: aligned, residual, renderedHeight: renderedH }
 				throw error
@@ -585,7 +585,7 @@ export function expandPresenterPerformances(spec, options = {}) {
 				const authored = authoredCenterAt(localContactMs)
 				const authoredResidual = Math.hypot(authored.x - desired.x, authored.y - desired.y)
 				if (authoredResidual > 0.05) {
-					const error = new Error(`Performance target ${interaction.target} does not meet the authored presenter path at contact time.`)
+					const error = new Error(`Performance target ${interaction.target} does not meet the authored presenter path at contact time: the travel[] center is ${inchPoint(authored)} at ${Math.round(localContactMs)}ms but contact needs ${inchPoint(desired)}. Set the travel[] center at that time to ${inchPoint(desired)}, or move the target.`)
 					error.code = 'PERFORMANCE_TARGET_UNREACHABLE'
 					error.evidence = { actionId: interaction.actionId, contactAtMs: p.startMs + localContactMs, authoredCenter: { x: authored.x, y: authored.y }, targetPoint, residual: authoredResidual }
 					throw error
@@ -798,6 +798,18 @@ function visualReferencePresenterFrame(spec, slide) {
 }
 
 // Which slides the presenter appears on. 'all' | 'opener+closer' | [indexes].
+function inchPoint(point) {
+	return `(x ${Number(point.x).toFixed(2)}, y ${Number(point.y).toFixed(2)}) in`
+}
+
+// Unreachable contact: the presenter would have to stand at `desired`, but the
+// stage clamps it to `aligned`. Shifting the target by the same offset puts it
+// back within reach, so name that position in slide inches.
+function reachableRegionHint(desired, aligned, targetPoint) {
+	const suggested = { x: targetPoint.x + (aligned.x - desired.x), y: targetPoint.y + (aligned.y - desired.y) }
+	return `reaching it would put the presenter center at ${inchPoint(desired)}, beyond the stage limit ${inchPoint(aligned)}. Move the target so that point is near ${inchPoint(suggested)}.`
+}
+
 export function targetSlideIndexes(onSlides, count) {
 	if (Array.isArray(onSlides)) return onSlides.map(n => Number(n)).filter(n => Number.isInteger(n) && n >= 0 && n < count)
 	const key = String(onSlides || 'all').toLowerCase()

@@ -826,7 +826,7 @@ export function artDirectionSelectionForSpec(spec = {}) {
 	if (raw && typeof raw === 'object' && !Array.isArray(raw)) return { kind: 'bespoke', key: 'bespoke', raw, explicit: true }
 	const key = String(raw ?? '').toLowerCase().trim().replace(/\s+/g, '-')
 	if (!key) return { kind: 'omitted', key: null, raw, explicit: false }
-	return { kind: ART_DIRECTIONS[key] ? 'named' : 'unsupported', key, raw, explicit: true }
+	return ART_DIRECTIONS[key] ? { kind: 'named', key, raw, explicit: true } : { kind: 'unsupported', key, raw, explicit: true, supported: Object.keys(ART_DIRECTIONS) }
 }
 
 export const WORLD_CAPABILITY_PROFILES = Object.freeze({
@@ -1831,8 +1831,21 @@ function authorStyleFromOptions(options) {
 	return out
 }
 
+// Text-only effects that AI clients also put directly on the content block
+// (content[].textFill). The patch path already honors them there, so the
+// create path must too rather than silently dropping them.
+const BLOCK_LEVEL_TEXT_STYLE_KEYS = ['textFill', 'textOutline', 'textShadow', 'textGlow']
+
+function blockLevelTextStyle(block) {
+	const out = {}
+	if (block && typeof block === 'object') {
+		for (const key of BLOCK_LEVEL_TEXT_STYLE_KEYS) if (block[key] !== undefined) out[key] = block[key]
+	}
+	return out
+}
+
 function effectiveBlockStyle(block, theme = null) {
-	const out = { ...authorStyleFromOptions(block?.options), ...(block?.style && typeof block.style === 'object' ? block.style : {}) }
+	const out = { ...authorStyleFromOptions(block?.options), ...blockLevelTextStyle(block), ...(block?.style && typeof block.style === 'object' ? block.style : {}) }
 	if (out.color === undefined && out.textColorRole && theme?.textColorRoles?.roles) {
 		const normalizedRole = String(out.textColorRole).trim().toLowerCase().replace(/[\s_]+/g, '-')
 		const roleKey = TEXT_COLOR_ROLE_ALIASES[normalizedRole]

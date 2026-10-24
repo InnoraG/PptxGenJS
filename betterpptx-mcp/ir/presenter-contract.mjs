@@ -96,11 +96,41 @@ function presenterTargetIndexes(onSlides, slideCount) {
 	return Array.from({ length: count }, (_, index) => index)
 }
 
+// onSlides lists 0-based slide indexes, but AI clients often send slide ids.
+// Map ids to indexes; an entry that is neither must fail by name, because
+// dropping it silently disables the presenter and a later error blames the actor.
+function resolvePresenterSlideRefs(onSlides, slides, field) {
+	if (!Array.isArray(onSlides)) return onSlides
+	const indexById = new Map(slides.map((slide, index) => [String(slide?.id ?? ''), index]).filter(([id]) => id))
+	const unknown = []
+	const resolved = onSlides.map(entry => {
+		if (typeof entry === 'number') return entry
+		const value = String(entry ?? '').trim()
+		if (indexById.has(value)) return indexById.get(value)
+		if (/^-?\d+$/.test(value)) return Number(value)
+		unknown.push(entry)
+		return null
+	})
+	if (unknown.length) {
+		const error = new Error(`${field} must list 0-based slide indexes or slide ids; ${unknown.map(item => JSON.stringify(item)).join(', ')} matches no slide. Valid ids: ${[...indexById.keys()].join(', ') || '(none)'}.`)
+		error.code = 'PRESENTER_ON_SLIDES_INVALID'
+		error.field = field
+		throw error
+	}
+	return resolved
+}
+
 // Apply the authored representation policy before 3D expansion and avatar
 // resolution. This is deliberately provider-neutral: it only chooses which
 // product lane is allowed on each slide and never names a worker/model.
 export function applyPresenterRepresentationPolicy(spec = {}) {
 	if (!spec || typeof spec !== 'object' || Array.isArray(spec) || !Array.isArray(spec.slides)) return spec
+	if (Array.isArray(spec.presenter?.onSlides)) {
+		spec = { ...spec, presenter: { ...spec.presenter, onSlides: resolvePresenterSlideRefs(spec.presenter.onSlides, spec.slides, 'presenter.onSlides') } }
+	}
+	if (Array.isArray(spec.presenters?.onSlides)) {
+		spec = { ...spec, presenters: { ...spec.presenters, onSlides: resolvePresenterSlideRefs(spec.presenters.onSlides, spec.slides, 'presenters.onSlides') } }
+	}
 	const policy = normalizePresenterPolicy(spec.presenterPolicy)
 	const hasPresenterDirective = spec.presenter && typeof spec.presenter === 'object' && spec.presenter.enabled !== false
 	const presenterTargets = new Set()

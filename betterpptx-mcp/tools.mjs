@@ -917,7 +917,7 @@ export const TOOLS = [
 							type: 'object',
 							description: 'Optional editable native 3-D presenter. The AI chooses identity, motion, stage treatment, and exact geometry. Use rect/bbox in ai-authored-geometry-v1 or pixelFrame in the visual-reference pixel route. Engine-owned presenter placement is deactivated.',
 							properties: {
-								identity: { type: 'string', enum: ['auto', 'joe', 'louise', 'pete', 'mena'] },
+								identity: { type: 'string', enum: ['auto', 'joe', 'louise', 'pete'] },
 								id: { type: 'string', minLength: 1, description: 'Stable presenter id used by motionTime.kineticSelection and slides[].presenterMotion.' },
 								pixelFrame: PRESENTER_PIXEL_FRAME_TOOL_SCHEMA,
 								rect: { type: 'object', required: ['x', 'y', 'w', 'h'], additionalProperties: false, properties: { x: { type: 'number' }, y: { type: 'number' }, w: { type: 'number', exclusiveMinimum: 0 }, h: { type: 'number', exclusiveMinimum: 0 } }, description: 'Exact AI-authored presenter frame in slide inches.' },
@@ -1607,7 +1607,7 @@ export const TOOLS = [
 	{
 		name: 'betterpptx.avatar.attach_result',
 		title: 'Attach completed Avatar talking-head video',
-		description: 'Attach a succeeded Avatar talking-head video job or completed opaque audiovisual asset to a slide. Provide deckId, slideIndex, script, and exactly one of jobId or avatarAsset; the route resolves the returned poster, writes the editable video frame/playback/timing contract, embeds the video audio once, and preserves the script in speaker notes. This is audiovisual media, not editable native 3D geometry.',
+		description: 'Prefer betterpptx.deck.generate_from_spec commitMode:"patch" with slides:[{ slideIndex, avatarNarration: { jobId (or avatarAsset), script, rect } }]: decks are edited only through the spec compiler, so this tool returns AVATAR_ATTACH_SPEC_ROUTE with that exact patch request. The attach resolves the returned poster, writes the editable video frame/playback/timing contract, embeds the video audio once, and preserves the script in speaker notes. This is audiovisual media, not editable native 3D geometry.',
 		inputSchema: {
 			type: 'object',
 			required: ['deckId', 'slideIndex', 'script'],
@@ -2276,7 +2276,7 @@ export const TOOLS = [
 				deckId: { type: 'string' },
 				mode: { type: 'string', enum: ['current', 'authoredInput', 'effectivePrecompile'], default: 'current', description: 'current reconstructs the deck; authoredInput returns the parsed submitted JSON; effectivePrecompile returns the exact deterministic object immediately before plan compilation.' },
 				deckVersion: { type: 'number', description: 'Optional historical deck version for an immutable authored/effective artifact.' },
-				download: { type: 'boolean', default: false, description: 'Publish the selected immutable authoring spec as a portable JSON download artifact.' },
+				download: { type: 'boolean', default: false, description: 'Publish the exported spec (any mode, including current) as a portable JSON download artifact.' },
 				fileName: { type: 'string', description: 'Optional public filename for the JSON download artifact.' },
 				title: { type: 'string', description: 'Optional title override for the exported spec.' },
 				detail: { type: 'string', enum: ['summary', 'full'], default: 'summary', description: 'summary returns compact editability rows; full includes the full public editability map.' },
