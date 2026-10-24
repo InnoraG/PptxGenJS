@@ -13,7 +13,7 @@ const { createMcpToolDispatcher, getDeck } = await import('../engine.mjs')
 const { TOOLS } = await import('../tools.mjs')
 const { publicAvatarJobError } = await import('../avatar/jobs.mjs')
 const { applyPresenterRepresentationPolicy } = await import('../ir/presenter-contract.mjs')
-const { resolveAuthoringMotionSelection } = await import('../ir/authoring-motion-catalog.mjs')
+const { resolveAuthoringMotionSelectionForCatalog } = await import('../ir/authoring-motion-catalog.mjs')
 const { slideHasExplicitNarration } = await import('../ir/spec-compiler.mjs')
 const { buildNarrationCueLedger, narrationCueLedgerWarnings } = await import('../ir/narration-contract.mjs')
 
@@ -131,9 +131,16 @@ test('presenter.onSlides accepts slide ids and names an unknown entry', () => {
 })
 
 test('motion selection errors name the motion', () => {
-	const result = resolveAuthoringMotionSelection(['motion.ordinary.talk', 'motion.ordinary.nope'])
+	// Which rows are held depends on the runtime provider policy and local proof
+	// ledgers, so use a fixed catalog rather than the environment's.
+	const catalog = { catalogVersion: 'test', catalogFingerprint: 'test', sourceResolutionFingerprint: 'test', records: [
+		{ motionId: 'motion.ordinary.held', selectable: false },
+		{ motionId: 'motion.ordinary.present', selectable: true },
+	] }
+	const result = resolveAuthoringMotionSelectionForCatalog(catalog, ['motion.ordinary.held', 'motion.ordinary.nope', 'motion.ordinary.present'])
 	const notExecutable = result.errors.find(error => error.code === 'MOTION_NOT_EXECUTABLE')
-	assert.match(notExecutable.reason, /^motion\.ordinary\.talk /)
+	assert.match(notExecutable.reason, /^motion\.ordinary\.held /)
+	assert.equal(result.errors.some(error => error.motionId === 'motion.ordinary.present'), false)
 	assert.match(result.errors.find(error => error.code === 'MOTION_ID_UNKNOWN').reason, /^motion\.ordinary\.nope /)
 })
 
