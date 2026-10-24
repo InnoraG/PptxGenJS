@@ -53,7 +53,7 @@ try { fs.rmSync(process.env.BETTERPPTX_BILLING_LEDGER_FILE, { force: true }) } c
 expect(classifyBillingTool('betterpptx.auth.status').category === 'free', 'Auth status should be free/control.', {})
 expect(classifyBillingTool('betterpptx.slide.add_text').category === 'draft-accrual', 'Ordinary slide edits should be draft-accrual.', {})
 expect(classifyBillingTool('betterpptx.deck.save').category === 'checkpoint', 'Deck save should be checkpoint-billed.', {})
-expect(classifyBillingTool('betterpptx.narration.synthesize').category === 'heavy', 'Narration synthesis should be heavy.', {})
+expect(classifyBillingTool('betterpptx.narration.get_voice_timing').category === 'heavy', 'Narration synthesis should be heavy.', {})
 
 const simple = estimateBillingForTool({
 	name: 'betterpptx.deck.save',
@@ -112,7 +112,7 @@ expect(saveRecorded.recorded === true, 'Save dry-run operation should be recorde
 expect(saveRecorded.fact.estimatedCredits === medium.estimatedCredits, 'Recorded save estimate should match medium estimate.', { saveRecorded, medium })
 
 const heavyRecorded = await recordBillingDryRunOperation({
-	name: 'betterpptx.narration.synthesize',
+	name: 'betterpptx.narration.get_voice_timing',
 	args: { text: 'Narration '.repeat(1200), idempotencyKey: 'tts-1' },
 	context,
 	result: { audioHandle: 'asset://generated/audio/verify' },

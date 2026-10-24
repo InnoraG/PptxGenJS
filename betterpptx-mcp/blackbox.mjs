@@ -71,7 +71,7 @@ export const PUBLIC_PRODUCT_TOOLS = new Set([
 	'betterpptx.equation.catalog',
 	'betterpptx.smartart.catalog',
 	'betterpptx.narration.voices',
-	'betterpptx.narration.synthesize',
+	'betterpptx.narration.get_voice_timing',
 	'betterpptx.avatar.render_job',
 	'betterpptx.avatar.job_status',
 	'betterpptx.avatar.attach_result',
@@ -216,17 +216,12 @@ export const PUBLIC_SPEC_FIRST_TOOLS = new Set([
 	'betterpptx.equation.catalog',
 	'betterpptx.smartart.catalog',
 	'betterpptx.narration.voices',
-	'betterpptx.narration.synthesize',
-	// Asset preparation remains MCP-mediated and does not mutate a deck. A cold
-	// client may render an avatar asynchronously, then place the returned opaque
-	// handle inside the single generate_from_spec deck-authoring transaction.
-	'betterpptx.avatar.render_job',
-	'betterpptx.avatar.job_status',
-	'betterpptx.avatar.attach_result',
+	'betterpptx.narration.get_voice_timing',
+	// Talking-head video, custom presenter personas and stock 3D models are
+	// built by deck.generate_from_spec itself (phase:"resolve" and commit), so
+	// their standalone media routes are internal and not listed.
 	'betterpptx.assets.upload',
 	'betterpptx.assets.inspect',
-	'betterpptx.assets.generate_model3d',
-	'betterpptx.assets.generate_rigged3d',
 	'betterpptx.deck.generate_from_spec',
 	'betterpptx.deck.recent',
 	'betterpptx.deck.director_status',

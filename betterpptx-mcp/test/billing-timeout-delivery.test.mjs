@@ -54,7 +54,7 @@ test('timed-out synthesis retains its funds, completes billing, and replays acro
 		await store.creditCustomer({ customerHash: installHash, eventId: 'test-seed', idempotencyKey: 'test-seed', amountCredits: 100, source: 'owner_goodwill' })
 		const mcp = createMcpToolDispatcher({ installHash, sessionId: 'request-one', blackBox: true, __skipDurableOperationLedger: !queued && !durableInline, __skipDurableDeckPersistence: true })
 		const args = { text: `Isolated timeout fixture ${path.basename(root)}.`, voice: 'en_US-ljspeech-high', idempotencyKey: 'timed-out-preparation' }
-		const first = await mcp.call('betterpptx.narration.synthesize', args)
+		const first = await mcp.call('betterpptx.narration.get_voice_timing', args)
 		assert.equal(first.ok, false, JSON.stringify(first))
 		assert.equal(first.error.code, queued ? 'OPERATION_PENDING' : 'TOOL_TIMEOUT', JSON.stringify(first))
 		if (durableInline) {
@@ -74,7 +74,7 @@ test('timed-out synthesis retains its funds, completes billing, and replays acro
 		finishProvider()
 		let replay
 		for (let attempt = 0; attempt < 40; attempt++) {
-			replay = await mcp.call('betterpptx.narration.synthesize', args, { sessionId: 'new-request-after-reconnect' })
+			replay = await mcp.call('betterpptx.narration.get_voice_timing', args, { sessionId: 'new-request-after-reconnect' })
 			if (replay.ok || replay.error?.code !== 'OPERATION_PENDING') break
 			await new Promise(resolve => setTimeout(resolve, 100))
 		}

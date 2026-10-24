@@ -57,7 +57,7 @@ export const CANONICAL_FOUNDATION_OPERATION_NAMES = Object.freeze([
 	'betterpptx.help.capabilities',
 	'betterpptx.help.tool_recipe',
 	'betterpptx.help.workflow',
-	'betterpptx.narration.synthesize',
+	'betterpptx.narration.get_voice_timing',
 	'betterpptx.operation.recent',
 	'betterpptx.operation.read_file',
 	'betterpptx.operation.status',

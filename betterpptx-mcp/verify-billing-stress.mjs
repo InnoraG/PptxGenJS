@@ -146,7 +146,7 @@ const heavyAttempts = await Promise.all(Array.from({ length: 6 }, async (_item, 
 		return {
 			ok: true,
 			gate: await preflightBillingReservation({
-				name: 'betterpptx.narration.synthesize',
+				name: 'betterpptx.narration.get_voice_timing',
 				args: { text: 'Narration '.repeat(500), idempotencyKey: `heavy-${index}` },
 				context,
 				billingEntitlement: heavyCustomer,
@@ -173,7 +173,7 @@ const noIdemRetry = await preflightBillingReservation({ name: 'betterpptx.deck.s
 expect(noIdemRetry.idempotent === true && noIdemFirst.reservation.reservationId === noIdemRetry.reservation.reservationId, 'Server-side deterministic operation id should protect identical retry without client idempotency key.', { noIdemFirst, noIdemRetry })
 
 const failCustomer = entitlement('cus_verify_stress_release', 100)
-const failGate = await preflightBillingReservation({ name: 'betterpptx.narration.synthesize', args: { text: 'fail before value', idempotencyKey: 'release' }, context, billingEntitlement: failCustomer, store })
+const failGate = await preflightBillingReservation({ name: 'betterpptx.narration.get_voice_timing', args: { text: 'fail before value', idempotencyKey: 'release' }, context, billingEntitlement: failCustomer, store })
 await releaseBillingReservation({ gate: failGate, reason: 'stress-pre-value-failure', store })
 customer = await store.getCustomer(failCustomer.billingCustomerHash)
 balance = effectiveBalanceSnapshot(customer)

@@ -55,7 +55,7 @@ test('initial server guidance stays compact and delegates detailed design teachi
 	assert.match(PUBLIC_INSTRUCTIONS, /host slide skill or local generator does not/)
 	assert.match(publicToolByName.get('betterpptx.help.workflow').description, /usable without a host-provided slide skill/)
 	assert.match(publicToolByName.get('betterpptx.authoring.capabilities').description, /Director assistance is optional/)
-	assert.match(publicToolByName.get('betterpptx.narration.synthesize').description, /TOOL_TIMEOUT.*betterpptx\.operation\.status/)
+	assert.match(publicToolByName.get('betterpptx.narration.get_voice_timing').description, /TOOL_TIMEOUT.*betterpptx\.operation\.status/)
 	assert.doesNotMatch(PUBLIC_INSTRUCTIONS, /assisted semantic|PowerPoint reopen.*require/i)
 })
 
@@ -242,7 +242,7 @@ test('progressive-discovery examples and narration detail use the served schemas
 	// Synthesis is a first-class, explicitly discoverable stage. The recipe must
 	// describe it as a template/preparation call, not hide it behind terminology
 	// the caller would already need to know.
-	assert.match(JSON.stringify(fullRecipe), /betterpptx\.narration\.synthesize/i)
+	assert.match(JSON.stringify(fullRecipe), /betterpptx\.narration\.get_voice_timing/i)
 	validateOutput('betterpptx.help.tool_recipe', recipeResult)
 	validateOutput('betterpptx.help.tool_recipe', fullRecipeResult)
 

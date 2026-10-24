@@ -14,7 +14,7 @@ import { publicVerificationPolicy } from './verification-policy.mjs'
 // Increment whenever the server-advertised public tool records change,
 // including descriptions or metadata covered by PUBLIC_TOOL_SCHEMA_DIGEST_COVERAGE.
 // The capability registry has its own independent revision and digest.
-export const TOOL_SCHEMA_VERSION = '2026-10-23.2'
+export const TOOL_SCHEMA_VERSION = '2026-10-24.1'
 const PACKAGE_SEMANTIC_VERSION = String(JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version || '').trim()
 const CONFIGURED_SEMANTIC_VERSION = String(process.env.BETTERPPTX_PUBLIC_VERSION || '').trim()
 if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(PACKAGE_SEMANTIC_VERSION)) {
@@ -25,12 +25,12 @@ if (CONFIGURED_SEMANTIC_VERSION && CONFIGURED_SEMANTIC_VERSION !== PACKAGE_SEMAN
 }
 export const PUBLIC_SEMANTIC_VERSION = PACKAGE_SEMANTIC_VERSION
 export const PUBLIC_SCHEMA_CHANGE = Object.freeze({
-	previousToolSchemaVersion: '2026-10-23.1',
-	compatibility: 'additive',
+	previousToolSchemaVersion: '2026-10-23.2',
+	compatibility: 'breaking',
 	changes: [
-		'spec presenter.identity no longer lists the owner-gated mena research persona.',
-		'betterpptx.avatar.attach_result points to the deck.generate_from_spec patch route for attaching a completed talking-head video.',
-		'betterpptx.deck.export_spec download:true publishes the exported spec in every mode, including current.',
+		'betterpptx.narration.synthesize is renamed betterpptx.narration.get_voice_timing; the previous name still resolves but is no longer listed.',
+		'Talking-head video, custom presenter personas and stock 3-D models are built by betterpptx.deck.generate_from_spec: slides[].avatarNarration and the new presenter.persona.fromImages render during phase:"resolve", and model3d blocks resolve a stock query at commit. betterpptx.avatar.render_job, avatar.job_status, avatar.attach_result, assets.generate_model3d and assets.generate_rigged3d are no longer public tools.',
+		'Identity media rendered through phase:"resolve" draws on the same rolling identity-media allowance as the former standalone routes.',
 	],
 })
 export const PUBLIC_CAPABILITY_DIGEST_COVERAGE = 'Canonical SHA-256 over all stable public family fields and contracts, extended layers, persona terminology/contracts, motion, narration, and combined examples; live readiness and measured inventories are excluded.'

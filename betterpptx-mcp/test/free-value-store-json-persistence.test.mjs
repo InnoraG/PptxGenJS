@@ -229,7 +229,7 @@ for (const provider of ['local', 'firestore']) {
 		const context = { installHash: alice, authenticated: true, sessionId: 'allowance-json-owner' }
 		const routes = [
 			['betterpptx.deck.save', { deckId: 'deck-one', deckVersion: 1 }, 'deck-publication'],
-			['betterpptx.narration.synthesize', { segments: [{ script: 'Measured narration.' }] }, 'narration-preparation'],
+			['betterpptx.narration.get_voice_timing', { segments: [{ script: 'Measured narration.' }] }, 'narration-preparation'],
 			['betterpptx.avatar.render_job', { audioHandle: 'asset://audio' }, 'talking-head-generation'],
 			['betterpptx.assets.generate_rigged3d', { imageHandles: ['asset://front', 'asset://side'] }, 'rigged3d-persona-generation'],
 		]

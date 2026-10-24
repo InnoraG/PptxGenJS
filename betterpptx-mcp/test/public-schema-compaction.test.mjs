@@ -53,7 +53,7 @@ test('compaction keeps the top-level contract and leaves validation-relevant fac
 	assert.ok(generate.properties.spec.properties.slides.items.properties.presenterPerformance.oneOf?.some(branch => branch.properties), 'presenter performances are advertised in depth')
 	assert.ok(generate.properties.spec.properties.slides.items.properties.interactions.items.properties.verb.enum.includes('point-at'), 'presenter interactions are advertised in depth')
 	const description = byName.get('betterpptx.deck.generate_from_spec').description
-	for (const feature of ['animated-table', 'narration.synthesize', 'avatar.render_job', '3-D presenter', 'surface animated-table']) {
+	for (const feature of ['animated-table', 'narration.get_voice_timing', 'avatarNarration', 'presenter.persona', '3-D presenter', 'surface animated-table']) {
 		assert.ok(description.includes(feature), `generate_from_spec advertises ${feature}`)
 	}
 	assert.match(generate.description, /schemaFor/)

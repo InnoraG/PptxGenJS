@@ -251,7 +251,7 @@ function specializedTools(family) {
   if (family === 'tables') result.push('betterpptx.table.recommend')
   if (family === 'smartart') result.push('betterpptx.smartart.catalog')
   if (family === 'equations') result.push('betterpptx.equation.catalog')
-  if (family === 'media-images-avatar') result.push('betterpptx.assets.upload', 'betterpptx.assets.search_stock', 'betterpptx.avatar.render_job', 'betterpptx.narration.voices')
+  if (family === 'media-images-avatar') result.push('betterpptx.assets.upload', 'betterpptx.assets.search_stock', 'betterpptx.narration.voices', 'betterpptx.narration.get_voice_timing')
   if (family === 'model3d') result.push('betterpptx.assets.catalog')
   return result
 }

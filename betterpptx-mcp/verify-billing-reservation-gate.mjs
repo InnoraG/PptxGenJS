@@ -178,7 +178,7 @@ await expectBillingError('BILLING_SETUP_INCOMPLETE', () => preflightBillingReser
 const failPaid = entitlement('cus_verify_gate_release')
 await seedCredits(failPaid.billingCustomerHash, 30, 'grant_verify_gate_release')
 const failGate = await preflightBillingReservation({
-	name: 'betterpptx.narration.synthesize',
+	name: 'betterpptx.narration.get_voice_timing',
 	args: { text: 'Narration '.repeat(500), idempotencyKey: 'tts-release' },
 	context,
 	billingEntitlement: failPaid,

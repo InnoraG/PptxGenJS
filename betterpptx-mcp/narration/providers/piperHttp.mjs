@@ -88,7 +88,7 @@ export function createPiperHttpProvider() {
 				error.retryable = res.status >= 500
 				error.details = {
 					status: res.status >= 500 ? 'runtime_unavailable' : 'runtime_request_rejected',
-					nextAction: { tool: res.status >= 500 ? 'betterpptx.narration.voices' : 'betterpptx.narration.synthesize', request: {} },
+					nextAction: { tool: res.status >= 500 ? 'betterpptx.narration.voices' : 'betterpptx.narration.get_voice_timing', request: {} },
 					retryable: res.status >= 500,
 				}
 				throw error

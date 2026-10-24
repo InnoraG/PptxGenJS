@@ -545,11 +545,11 @@ export function buildSpecPremiumPresentationQuote({
 			: [{
 				code: 'NARRATION_PREPARATION_REQUIRED',
 				message: 'Prepare and measure every narrated segment before treating this as the final executable quote.',
-				nextAction: { tool: 'betterpptx.narration.synthesize', reason: 'Create the reusable measured narration manifest, then request this quote again.' },
+				nextAction: { tool: 'betterpptx.narration.get_voice_timing', reason: 'Create the reusable measured narration manifest, then request this quote again.' },
 			}],
 		next: preparationReady
 			? { tool: 'betterpptx.deck.generate_from_spec', reason: 'Authorize the quoted operation, then generate using the exact preparedNarration manifest.' }
-			: { tool: 'betterpptx.narration.synthesize', reason: 'Prepare measured narration before requesting the final quote.' },
+			: { tool: 'betterpptx.narration.get_voice_timing', reason: 'Prepare measured narration before requesting the final quote.' },
 	}
 }
 

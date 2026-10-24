@@ -76,7 +76,7 @@ test('narration preparation keeps odd-millisecond gaps aligned to complete PCM f
 })
 
 test('public synthesis schema exposes preparation fields and hides provider internals', () => {
-	const tool = publicToolList(TOOLS, { fullSchemas: true }).find(candidate => candidate.name === 'betterpptx.narration.synthesize')
+	const tool = publicToolList(TOOLS, { fullSchemas: true }).find(candidate => candidate.name === 'betterpptx.narration.get_voice_timing')
 	assert.ok(tool)
 	const inputKeys = Object.keys(tool.inputSchema.properties || {})
 	assert.ok(inputKeys.includes('text'))

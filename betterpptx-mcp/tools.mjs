@@ -535,7 +535,7 @@ export const TOOLS = [
 		inputSchema: {
 			type: 'object',
 			properties: {
-				toolName: { type: 'string', default: 'betterpptx.deck.save', description: 'BetterPPTX tool to estimate, such as betterpptx.deck.save or betterpptx.narration.synthesize.' },
+				toolName: { type: 'string', default: 'betterpptx.deck.save', description: 'BetterPPTX tool to estimate, such as betterpptx.deck.save or betterpptx.narration.get_voice_timing.' },
 				deckId: { type: 'string', description: 'Optional deck handle for save estimates.' },
 				toolArgs: { type: 'object', description: 'Optional public-safe arguments for the tool being estimated.', additionalProperties: true },
 			},
@@ -750,7 +750,7 @@ export const TOOLS = [
 		name: 'betterpptx.deck.generate_from_spec',
 		title: 'Author and compile a governed PowerPoint JSON spec',
 		description: PUBLIC_BLACK_BOX_SCHEMA
-			? 'Validate, create, or revise a native-editable PowerPoint from a BetterPPTX JSON specification. phase:"dryRun" checks the proposed deck without creating it; phase:"commit" creates or revises a deck under the applicable authorization. The specification carries authored geometry, styling, media, and timing. The result reports validation findings, effective native representations, and deck identity when committed. Beyond standard slides it compiles: animated-table (independently editable rows, columns, or cells revealed through native timing, usable as presenter targets); narration with native audio and measured cues on one autoplay clock (narration.voices, narration.synthesize, deck.validate_narration); talking-head video from an authorized image and narration (avatar.render_job, avatar.attach_result); an editable native 3-D presenter with gestures, continuous performances, and stage movement (spec.presenter, slides[].presenterPerformance, slides[].scene); layered entrance, emphasis, motion-path, and exit motion; cross-slide continuities and triggered interactions. Exact contracts: help.tool_recipe surface animated-table, narration, avatar, 3d-presenter, or layered-motion.'
+			? 'Validate, create, or revise a native-editable PowerPoint from a BetterPPTX JSON specification. phase:"dryRun" checks the proposed deck without creating it; phase:"commit" creates or revises a deck under the applicable authorization. The specification carries authored geometry, styling, media, and timing. The result reports validation findings, effective native representations, and deck identity when committed. Beyond standard slides it compiles: animated-table (independently editable rows, columns, or cells revealed through native timing, usable as presenter targets); narration with native audio and measured cues on one autoplay clock (narration.voices, narration.get_voice_timing, deck.validate_narration); talking-head video generated from an authorized face image and the prepared narration (slides[].avatarNarration, rendered during phase:"resolve"); an editable native 3-D presenter with gestures, continuous performances, and stage movement, either a built-in persona or a custom persona built from authorized photos (spec.presenter.identity or presenter.persona, slides[].presenterPerformance, slides[].scene); native 3-D objects selected from licensed stock by query (content kind model3d); layered entrance, emphasis, motion-path, and exit motion; cross-slide continuities and triggered interactions. Exact contracts: help.tool_recipe surface animated-table, narration, avatar, 3d-presenter, or layered-motion.'
 			: 'The sole presentation construction and editing front door. Use ai-sovereign-v1 when the AI must retain sole creative authority with creativeAuthority=ai, directorMode=off, and verificationMode=complete. In this workflow Content/Story, Visual/Design, and Motion/Time Director domains are optional, no Director stage blocks authoring, and the engine may report but may not creatively rewrite explicit choices. Use authoring-excellence-director-v1 only when structured assistance is desired. Both workflows share the typed native object model, deterministic dryRun/resolve/commit phases, package safety, accessibility, selection, media, timing, and current-version validation. Exact AI geometry uses geometryAuthority=ai with placementPolicy=ai-authored-geometry-v1. Raw PowerPoint XML, opaque native-preservation payloads, private runtime mappings, direct primitives, and maintainer bypasses remain unavailable.',
 		inputSchema: {
 			type: 'object',
@@ -917,7 +917,19 @@ export const TOOLS = [
 							type: 'object',
 							description: 'Optional editable native 3-D presenter. The AI chooses identity, motion, stage treatment, and exact geometry. Use rect/bbox in ai-authored-geometry-v1 or pixelFrame in the visual-reference pixel route. Engine-owned presenter placement is deactivated.',
 							properties: {
-								identity: { type: 'string', enum: ['auto', 'joe', 'louise', 'pete'] },
+								identity: { type: 'string', enum: ['auto', 'joe', 'louise', 'pete'], description: 'Built-in presenter persona. Use persona.fromImages instead for a custom persona.' },
+								persona: {
+									type: 'object',
+									additionalProperties: false,
+									required: ['fromImages', 'experimentalConfirmed'],
+									description: 'Custom presenter persona built from authorized full-body photos supplied by the caller during phase:"resolve" (identity media: requires consent for the pictured person, counts toward the identity-media allowance). The built rigged model is locked into presenter.model; commit never substitutes a built-in presenter.',
+									properties: {
+										fromImages: { type: 'array', minItems: 2, maxItems: 4, items: { type: 'string' }, description: 'Ordered 2-4 uploaded image handles of the same person, front view first, then side/back views.' },
+										experimentalConfirmed: { type: 'boolean', const: true, description: 'Required opt-in: custom persona generation is experimental.' },
+										heightMeters: { type: 'number', minimum: 0.1, description: 'Approximate real height used for scaling and rigging. Default 1.7.' },
+									},
+								},
+								model: { type: 'string', description: 'Opaque presenter model handle. Set by phase:"resolve" for persona.fromImages, or an approved existing model.' },
 								id: { type: 'string', minLength: 1, description: 'Stable presenter id used by motionTime.kineticSelection and slides[].presenterMotion.' },
 								pixelFrame: PRESENTER_PIXEL_FRAME_TOOL_SCHEMA,
 								rect: { type: 'object', required: ['x', 'y', 'w', 'h'], additionalProperties: false, properties: { x: { type: 'number' }, y: { type: 'number' }, w: { type: 'number', exclusiveMinimum: 0 }, h: { type: 'number', exclusiveMinimum: 0 } }, description: 'Exact AI-authored presenter frame in slide inches.' },
@@ -1523,9 +1535,9 @@ export const TOOLS = [
 		inputSchema: JSON.parse(JSON.stringify(MEDIA_AVATAR_PUBLIC_OPERATION_SCHEMAS['betterpptx.narration.voices'])),
 	},
 	{
-		name: 'betterpptx.narration.synthesize',
-		title: 'Synthesize narration audio',
-		description: 'Prepare narration before quotation or final deck generation. Provide text or ordered segments; the service measures each returned WAV, records exact segment timing and authored gaps, and returns opaque audio and preparation-manifest handles. Reuse the returned manifest in the deck spec so final generation never synthesizes a different clip after the quote. This is a mutating, potentially metered operation; supply a stable idempotencyKey. For long multi-clip preparations, a response deadline may return TOOL_TIMEOUT while synthesis continues: poll the returned operationId with betterpptx.operation.status or replay the identical request/key; never start a changed retry to recover the same preparation. Discovery never starts synthesis.',
+		name: 'betterpptx.narration.get_voice_timing',
+		title: 'Get narration voice timing',
+		description: 'Synthesize the narration speech for a deck and return its measured timing, before quotation or final deck generation. Provide text or ordered segments; the service synthesizes each clip with an approved text-to-speech voice, measures it, records exact segment timing and authored gaps, and returns the timing plus opaque audio and preparation-manifest handles. The audio is embedded in the deck as native narration. Reuse the returned manifest in the deck spec so final generation never synthesizes a different clip after the quote. This is a mutating, potentially metered operation; supply a stable idempotencyKey. For long multi-clip preparations, a response deadline may return TOOL_TIMEOUT while synthesis continues: poll the returned operationId with betterpptx.operation.status or replay the identical request/key; never start a changed retry to recover the same preparation. Discovery never starts synthesis.',
 		inputSchema: {
 			type: 'object',
 			description: 'Provide text or segments. A segment requires text or script; gap values are non-negative integer milliseconds. Use a caller-generated idempotencyKey for retries.',
@@ -4974,7 +4986,7 @@ const SPECIFIC_DATA = {
 	'betterpptx.slide.update_equation': { slideIndex: { type: 'number' }, objectName: { type: 'string' }, sourceFormat: { type: 'string' }, patchedKeys: { type: 'array', description: 'Equation fields changed.' } },
 	'betterpptx.deck.export_spec': { authoringRoute: { type: 'object', description: 'Route provenance for the exported authoring artifact.', additionalProperties: true }, mode: { type: 'string' }, spec: { type: 'object', description: 'Public-safe BetterPPTX JSON spec.' }, specArtifact: { type: 'object', description: 'Immutable authored/effective spec identity when an archive mode is requested.' }, artifact: { type: 'object', description: 'Portable JSON download artifact when download:true.' }, editabilityMap: { type: 'array' }, byTier: { type: 'object' }, unsupportedFindings: { type: 'array' }, privacy: { type: 'object' } },
 	'betterpptx.deck.editability_report': { slideCount: { type: 'number' }, objectCount: { type: 'number' }, byTier: { type: 'object', description: 'Object counts by editability tier.' }, byKind: { type: 'object', description: 'Object counts by kind.' } },
-	'betterpptx.narration.synthesize': {
+	'betterpptx.narration.get_voice_timing': {
 		state: { type: 'string', enum: ['succeeded', 'failed'], description: 'Preparation state. A succeeded result contains an immutable measured-audio manifest.' },
 		preparationId: { type: 'string', description: 'Opaque preparation identifier bound to the measured script, settings, segment timings, and audio bytes.' },
 		operationId: { type: 'string', description: 'Opaque preparation operation identifier for correlation; use the returned state and manifest for reuse.' },
@@ -5165,7 +5177,7 @@ const IDEMPOTENT_SESSION_MUTATION_TOOLS = new Set([
 	'betterpptx.deck.open_uploaded',
 	'betterpptx.deck.dispose',
 	'betterpptx.io.write_file',
-	'betterpptx.narration.synthesize',
+	'betterpptx.narration.get_voice_timing',
 	'betterpptx.avatar.render_job',
 	'betterpptx.assets.upload',
 		'betterpptx.sketchfab.import',
@@ -5242,11 +5254,18 @@ export function codexSafeToolName(name) {
 	return String(name || '').replace(/[^A-Za-z0-9_-]/g, '_')
 }
 
-export const TOOL_NAME_ALIASES = Object.fromEntries(
-	TOOLS
+// Renamed public tools. The previous name keeps resolving so existing clients
+// do not break, but only the current name is listed.
+export const LEGACY_TOOL_NAMES = Object.freeze({
+	'betterpptx.narration.synthesize': 'betterpptx.narration.get_voice_timing',
+})
+
+export const TOOL_NAME_ALIASES = Object.fromEntries([
+	...TOOLS
 		.map(t => [codexSafeToolName(t.name), t.name])
-		.filter(([alias, canonical]) => alias && alias !== canonical)
-)
+		.filter(([alias, canonical]) => alias && alias !== canonical),
+	...Object.entries(LEGACY_TOOL_NAMES).flatMap(([legacy, current]) => [[legacy, current], [codexSafeToolName(legacy), current]]),
+])
 
 export function canonicalToolName(name) {
 	const value = String(name || '')
