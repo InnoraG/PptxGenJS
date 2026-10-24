@@ -1196,8 +1196,8 @@ export interface Model3DProps extends PositionProps, ObjectNameProps {
 	 * Embedded-animation ("Scene") selection for rigged glTF/GLB models.
 	 *
 	 * PowerPoint activates the selected embedded glTF animation through the slide timing
-	 * tree's `embeddedN` channel. Static/edit posture comes from the GLB base transforms;
-	 * `am3d:raster` remains the compatibility fallback/anchor.
+	 * tree's `embeddedN` channel. Without posterFrame, static/edit posture comes from
+	 * the GLB base transforms; `am3d:raster` remains the compatibility fallback/anchor.
 	 *
 	 * - `animId`       – 0-based glTF animation index (the "scene" to activate).
 	 * - `length`       – clip length in milliseconds. PowerPoint recomputes it, but a
@@ -1208,7 +1208,15 @@ export interface Model3DProps extends PositionProps, ObjectNameProps {
 		animId: number
 		length?: number
 		loop?: boolean
+		/** Explicitly declare native embedded playback properties in addition to slide timing.
+		 * Requires length in milliseconds. Omitted/false preserves timing-only playback.
+		 */
+		playbackMetadata?: boolean
 	}
+	/** Idle appearance selected from an embedded animation, independently of playback.
+	 * animId is a zero-based animation index; progress is a normalized time from 0 to 1.
+	 */
+	posterFrame?: { animId: number; progress: number }
 	/**
 	 * Used internally by library
 	 * @private
@@ -4042,6 +4050,12 @@ export interface TransitionProps {
 }
 
 export interface AnimationProps {
+	/**
+	 * Normalized portion of the selected embedded 3D animation to play.
+	 * Supported only by emphasis/playScene. Values must satisfy 0 <= start < end <= 1.
+	 * The authored duration controls playback time for this interval; omission plays the full scene.
+	 */
+	sceneProgress?: { start: number; end: number }
 	/**
 	 * Animation type
 	 * - entrance: Object appears

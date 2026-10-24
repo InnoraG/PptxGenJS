@@ -2,6 +2,8 @@
  * PptxGenJS: Slide Object Generators
  */
 
+import { validateModel3DPosterFrame } from './gen-model3d-poster'
+
 import {
 	BARCHART_COLORS,
 	CHART_NAME,
@@ -1419,6 +1421,7 @@ export function addSummaryZoomDefinition(target: PresSlide, opt: SummaryZoomProp
  * @param {Model3DProps} opt - model options
  */
 export function addModel3DDefinition(target: PresSlide, opt: Model3DProps): void {
+	validateModel3DPosterFrame(opt)
 	// VALIDATION: Inline animation property is not supported
 	if ((opt as any)?.animation) {
 		throw new Error('Inline `animation` property is not supported. Use slide.addAnimation(model3d, animationProps) instead.')
@@ -1460,6 +1463,7 @@ export function addModel3DDefinition(target: PresSlide, opt: Model3DProps): void
 		// Rigged-model "Scene" selection (embedded glTF animation). Forwarded only when set
 		// so static models are unaffected; the emitter turns it into an am3d:extLst.
 		...(opt.scene && typeof opt.scene === 'object' ? { scene: opt.scene } : {}),
+		...(opt.posterFrame !== undefined ? { posterFrame: { ...opt.posterFrame } } : {}),
 		nativeOnly,
 		_model3dXml: opt._model3dXml,
 		_originalGlbRid: opt._originalGlbRid,

@@ -75,7 +75,8 @@ export const MODEL3D_ANIMATION_TEMPLATES: Record<string, Model3DAnimationTemplat
 		// that SELECTS the clip (0-based glTF index) — PowerPoint's real, round-trip-safe selector
 		// (buildPlaySceneBehaviors fills it from the animation's animId). The timing orchestrator adds
 		// the outer click/delay wrappers. Verified against PowerPoint 365 build 16.0.20131.
-		behaviors: "<p:anim calcmode=\"lin\" valueType=\"num\"><p:cBhvr><p:cTn id=\"{{ID0}}\" dur=\"{{DUR}}\" fill=\"hold\"/><p:tgtEl><p:spTgt spid=\"{{SPID}}\"/></p:tgtEl><p:attrNameLst><p:attrName>{{EMB}}</p:attrName></p:attrNameLst></p:cBhvr><p:tavLst><p:tav tm=\"0\"><p:val><p:fltVal val=\"0\"/></p:val></p:tav><p:tav tm=\"100000\"><p:val><p:fltVal val=\"1\"/></p:val></p:tav></p:tavLst></p:anim>",
+		// Progress endpoints select a normalized subinterval; omitted options retain the full 0..1 scene.
+		behaviors: "<p:anim calcmode=\"lin\" valueType=\"num\"><p:cBhvr><p:cTn id=\"{{ID0}}\" dur=\"{{DUR}}\" fill=\"hold\"/><p:tgtEl><p:spTgt spid=\"{{SPID}}\"/></p:tgtEl><p:attrNameLst><p:attrName>{{EMB}}</p:attrName></p:attrNameLst></p:cBhvr><p:tavLst><p:tav tm=\"0\"><p:val><p:fltVal val=\"{{PROGRESS_START}}\"/></p:val></p:tav><p:tav tm=\"100000\"><p:val><p:fltVal val=\"{{PROGRESS_END}}\"/></p:val></p:tav></p:tavLst></p:anim>",
 	},
 }
 

@@ -100,6 +100,8 @@ jobs:
           node --test betterpptx-mcp/test/public-schema-compaction.test.mjs
           node --test betterpptx-mcp/test/public-http-schema-parity.test.mjs
           node --test betterpptx-mcp/test/http-fast-start.test.mjs
+          node --test betterpptx-mcp/test/reusable-animated-model-library.test.mjs
+          node --test betterpptx-mcp/test/reusable-animated-model-native-transport.test.mjs
 
       - name: Build the production container without publishing it
         shell: bash
@@ -112,3 +114,4 @@ jobs:
             --file deploy/docker/Dockerfile.mcp \
             --tag "betterpptx-mcp-ci:$GITHUB_SHA" .
           docker run --rm -i --entrypoint node "betterpptx-mcp-ci:$GITHUB_SHA" --input-type=module < deploy/gcp/verify-container-current-export.mjs
+          docker run --rm -i --entrypoint node "betterpptx-mcp-ci:$GITHUB_SHA" --input-type=module < deploy/gcp/verify-container-reusable-emoji.mjs

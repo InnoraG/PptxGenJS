@@ -193,6 +193,7 @@ import { generateImage as generateImageUnchecked, cacheGeneratedImage, getCached
 import { resolveGenAssetTenantIdentity } from './storage/gen-asset-store.mjs'
 import { generateRigged3d as generateRigged3dUnchecked, cacheGeneratedRigged3d, registerLocalRigged3d, getCachedGeneratedRigged3d as getCachedGeneratedRigged3dUnchecked, parseGenRigged3dHandle, rigged3dHashFor, model3dGenProviderStatus, persistGeneratedRigged3d, hydrateGeneratedRigged3d as hydrateGeneratedRigged3dUnchecked } from './assets/model3d-gen-providers.mjs'
 import { isPublicDefaultPresenterHandle, PUBLIC_PRESENTER_IDENTITIES } from './assets/default-presenter-roster.mjs'
+import { reusableAnimatedModelCatalogEntries, reusableAnimatedModelLibraryFingerprint, resolveReusableAnimatedModelDefaults as resolveReusableAnimatedModelRegistryDefaults, getReusableAnimatedModelNativeTransport } from './assets/reusable-animated-model-library.mjs'
 import { generatePersonalizedMeshyAvatar, meshyAvatarHashFor, meshyAvatarProviderStatus } from './assets/meshy-avatar-provider.mjs'
 import { resolveNative3dPipeline, publicProductionNative3dLicense } from './ir/native3d-policy.mjs'
 import { publicVerificationPolicy, resolveVerificationPolicy, VERIFICATION_POLICIES, previewInfrastructureAvailable, publicGeneratedImagePolicy, generatedImageUnavailableInProductionError } from './verification-policy.mjs'
@@ -1091,6 +1092,30 @@ async function authorizedOpaqueNativeSnapshot(entry, handle) {
 function publicCatalogHandleForItem(item = {}) {
 	const identity = item.handle || item.modelAsset || item.path || `${item.kind || 'asset'}:${item.title || item.name || ''}`
 	return publicCatalogAssetHandle(identity, item.kind || 'asset')
+}
+
+function canonicalReusableAnimatedModelHandle(handle) {
+	let canonical = handle
+	if (typeof handle === 'string' && handle.startsWith('asset://catalog/')) {
+		const item = loadUnifiedAssetCatalog().find(row => publicCatalogHandleForItem(row) === handle)
+		if (item) canonical = item.handle
+	}
+	return canonical
+}
+
+function resolveReusableAnimatedModelDefaults(handle, options = {}) {
+	const aliases = ['modelAsset', 'model3DAsset', 'model', 'glbFile']
+	const canonicalHandle = canonicalReusableAnimatedModelHandle(handle)
+	const canonicalOptions = { ...options }
+	for (const alias of aliases) {
+		if (options[alias] !== undefined) canonicalOptions[alias] = options[alias] === handle ? canonicalHandle : canonicalReusableAnimatedModelHandle(options[alias])
+	}
+	const resolved = resolveReusableAnimatedModelRegistryDefaults(canonicalHandle, canonicalOptions)
+	if (!resolved) return null
+	// Validate all references against the same named selection, then preserve
+	// the caller's opaque identity for durable public readback.
+	for (const alias of aliases) if (options[alias] !== undefined) resolved[alias] = options[alias]
+	return resolved
 }
 
 function resolveCatalogAssetRef(value) {
@@ -7911,6 +7936,7 @@ function specCompileOptions(args = {}, context = {}) {
 		// Semantic 3D front-door: let the compiler resolve author-intent model3d blocks to a
 		// concrete native catalog handle at compile time (visible in dryRun, stable on save).
 		resolveModel3d: selectCatalogModel3d,
+		resolveReusableAnimatedModelDefaults,
 		validateStaticPose: (modelAsset, staticPose) => prepareStaticPoseForAsset(modelAsset, staticPose).report,
 		validatePreparedScene: (modelAsset, scene) => {
 			const parsed = parseGenRigged3dHandle(modelAsset)
@@ -18175,7 +18201,7 @@ function currentUnifiedAssetCatalogCacheKey() {
 	let sketchfabMtime = 0
 	try { sketchfabMtime = Math.round(fsNode.statSync(sketchfabManifestPath()).mtimeMs) }
 	catch (_) {}
-	return `${ASSETS_ROOT}|${sketchfabManifestPath()}|${sketchfabMtime}`
+	return `${ASSETS_ROOT}|${sketchfabManifestPath()}|${sketchfabMtime}|${reusableAnimatedModelLibraryFingerprint()}`
 }
 
 function invalidateUnifiedAssetCatalog() {
@@ -18189,6 +18215,7 @@ function loadUnifiedAssetCatalog({ refresh = false } = {}) {
 		return unifiedAssetCatalogCache
 	}
 	const catalog = [
+		...reusableAnimatedModelCatalogEntries().map(item => ({ ...item, searchText: makeCatalogSearchText(item) })),
 		...buildMicrosoftStock3DAssets(),
 		...buildIconScoutAssets(),
 		...buildToxSamAssets(),
@@ -34711,6 +34738,10 @@ function prepareMotionFramingForAsset(modelAsset, options = {}) {
 async function handleAddModel3D(args, context = {}) {
 	const slide = getSlide(args.deckId, args.slideIndex)
 	let options = args.options ? { ...args.options } : {}
+	// Resolve maintained source-bound motion before opaque asset handles become
+	// private file references. Several expressions may share one immutable bank.
+	const reusableInput = options.modelAsset || options.model3DAsset || options.model
+	if (reusableInput) options = resolveReusableAnimatedModelDefaults(reusableInput, options) ?? options
 	const model3dViewPresetId = args.model3dViewPresetId || options.model3dViewPresetId
 	const publicViewInput = Object.fromEntries(['model3dViewPresetId', 'camera', 'trans', 'ambientLight', 'ptLights', 'objViewport', 'nativeOnly', 'rotate', 'flipH', 'flipV', 'scene', 'posterAsset', 'staticPose', 'motionFraming'].filter(key => Object.prototype.hasOwnProperty.call(options, key)).map(key => [key, options[key]]))
 	if (args.model3dViewPresetId !== undefined) publicViewInput.model3dViewPresetId = args.model3dViewPresetId
@@ -34747,6 +34778,7 @@ async function handleAddModel3D(args, context = {}) {
 			selection = { handle: picked.handle, title: picked.title, source: picked.source }
 		}
 	}
+	if (options.modelAsset) options = resolveReusableAnimatedModelDefaults(options.modelAsset, options) ?? options
 	// Selector/provenance fields must never reach pptxgenjs addModel3D.
 	for (const key of ['query', 'context', 'prompt', 'intent', 'useCase', 'aiContext', 'sizePolicy', 'preferNative', 'maxModelSizeMb', 'kind3d', '_model3dSelection']) {
 		delete options[key]
@@ -34781,6 +34813,11 @@ async function handleAddModel3D(args, context = {}) {
 	const poseValidation = staticPose || options.scene?.motionId ? prepareStaticPoseForAsset(originalModelRef, staticPose) : null
 	const posed = poseValidation?.buffer ? poseValidation : null
 	const rigged3dResolved = await materializeGeneratedRigged3dOptions(resolvedOptions, args.deckId)
+	const reusableTransport = getReusableAnimatedModelNativeTransport(canonicalReusableAnimatedModelHandle(originalModelRef))
+	if (reusableTransport) {
+		const nativeAsset = lockGeneratedAssetBufferDescriptor(reusableTransport.glbBytes, 'model3d-catalog-native', { extn: 'glb' })
+		rigged3dResolved.glbFile = resolveLockedAssetHandle(nativeAsset.handle)
+	}
 	let durableModelRef = isPublicSpecAssetRef(originalModelRef) ? originalModelRef : null
 	let durablePosterRef = isPublicSpecAssetRef(originalPosterRef) ? originalPosterRef : null
 	if (posed) {

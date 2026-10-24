@@ -4522,7 +4522,7 @@ function autoScenePlayAnimation(scene) {
 	return anim
 }
 
-function planBlock({ spec, slide, slideIndex = 0, block, blockIndex, regions, regionRect = null, theme, warnings, handles, templateContract, preserveSourceGeometry = false, preserveAuthoredPrecision = false, validatePreparedScene }) {
+function planBlock({ spec, slide, slideIndex = 0, block, blockIndex, regions, regionRect = null, theme, warnings, handles, templateContract, preserveSourceGeometry = false, preserveAuthoredPrecision = false, validatePreparedScene, resolveReusableAnimatedModelDefaults }) {
 	const objects = []
 	// Default elevation is a World temperament, not a universal decoration.
 	// Flat/quiet/outline Worlds explicitly resolve depth.shadow:'none'; preserve
@@ -6052,10 +6052,15 @@ function planBlock({ spec, slide, slideIndex = 0, block, blockIndex, regions, re
 				color: theme.ink,
 				fontSize: 11,
 			}),
-			// Only authored animation or an explicitly selected embedded Scene plays.
-			// World motion vocabulary never becomes automatic model playback.
+			// Only authored animation, a registered intrinsic catalogue motion, or an
+			// explicitly selected embedded Scene plays. World motion vocabulary never
+			// becomes automatic model playback. Asset aliases may resolve only in the
+			// compiler, so keep the origin: a registered motion may replace an implicit
+			// default without discarding an explicitly authored effect.
+			_model3dImplicitAnimation: block.animation === undefined,
 			animation: block.animation !== undefined ? block.animation
-				: autoScenePlayAnimation(playbackScene),
+				: (resolveReusableAnimatedModelDefaults?.(block.modelAsset || block.model3DAsset || block.model, modelOptions || {})?.animation
+					|| autoScenePlayAnimation(playbackScene)),
 			altText: block.altText || `3D model: ${slide.message || slide.title}`,
 		})
 		return objects
@@ -6946,7 +6951,7 @@ export function planDeckLayout(spec, options = {}) {
 		const namedRegionRects = namedRegionStackRects(effectiveContent, regions)
 		for (let i = 0; i < effectiveContent.length; i += 1) {
 			const blockTheme = { ...theme, ...visual.theme, textColorRoles, art: visual.art, card: cardAxisForSpec(spec, visual.art), surface: spec.theme?.surface || spec.styleIntent?.surface, composition, typeEmphasis, depth, motion, stage3d, iconTemperament, imageTreatment, mediaMotion, headFontFace: spec.theme?.headFontFace || spec.theme?.fontFace || visual.headFontFace, bodyFontFace: spec.theme?.bodyFontFace || spec.theme?.fontFace || visual.bodyFontFace }
-			const blockObjects = planBlock({ spec, slide, slideIndex, block: effectiveContent[i], blockIndex: i, regions, regionRect: stackRectFor(namedRegionRects, effectiveContent[i]), theme: blockTheme, warnings, handles, templateContract, preserveSourceGeometry, preserveAuthoredPrecision, validatePreparedScene: options.validatePreparedScene })
+			const blockObjects = planBlock({ spec, slide, slideIndex, block: effectiveContent[i], blockIndex: i, regions, regionRect: stackRectFor(namedRegionRects, effectiveContent[i]), theme: blockTheme, warnings, handles, templateContract, preserveSourceGeometry, preserveAuthoredPrecision, validatePreparedScene: options.validatePreparedScene, resolveReusableAnimatedModelDefaults: options.resolveReusableAnimatedModelDefaults })
 			objects.push(...blockObjects)
 			for (const object of blockObjects) addOverexpandedTextShapeWarning(warnings, slide.id, effectiveContent[i], object)
 		}

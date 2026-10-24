@@ -26,6 +26,7 @@ import { DOMParser, XMLSerializer } from '@xmldom/xmldom'
 import { AnimationBuildContext } from './types'
 import { getNodeTypeFromTrigger } from './utils'
 import { MODEL3D_ANIMATION_TEMPLATES, Model3DAnimationName, normalizeModel3DAnimationEffectName } from './data3DAnimationTemplates'
+import { resolveSceneProgress } from './sceneProgress'
 import {
 	MODEL3D_JUMP_AND_TURN_OPTION_BEHAVIORS,
 	MODEL3D_SWING_OPTION_BEHAVIORS,
@@ -344,6 +345,7 @@ function repeatCountAttribute(animation: Record<string, unknown>, name: Model3DA
  */
 function buildPlaySceneBehaviors(ctx: AnimationBuildContext): string {
 	const tpl = MODEL3D_ANIMATION_TEMPLATES.playScene
+	const progress = resolveSceneProgress(ctx.animation)
 	const anim = ctx.animation as unknown as Record<string, unknown>
 	const durRaw = Number(anim.duration)
 	const dur = Number.isFinite(durRaw) && durRaw > 0 ? Math.round(durRaw) : (ctx.config?.defaultDuration || 2000)
@@ -356,6 +358,8 @@ function buildPlaySceneBehaviors(ctx: AnimationBuildContext): string {
 	return fillTemplatePlaceholders(tpl.behaviors, ctx, tpl.idCount)
 		.split('{{DUR}}').join(String(dur))
 		.split('{{EMB}}').join(`embedded${animId + 1}`)
+		.split('{{PROGRESS_START}}').join(String(progress.start))
+		.split('{{PROGRESS_END}}').join(String(progress.end))
 }
 
 /**
@@ -364,6 +368,7 @@ function buildPlaySceneBehaviors(ctx: AnimationBuildContext): string {
  * wrappers. Deliberately omits grpId — the reference deck has none for 3D.
  */
 function build3DModelAnimation(ctx: AnimationBuildContext, name: Model3DAnimationName): string {
+	resolveSceneProgress(ctx.animation)
 	const tpl = MODEL3D_ANIMATION_TEMPLATES[name]
 	if (!tpl) throw new Error(`Unknown 3D model animation template: "${name}"`)
 

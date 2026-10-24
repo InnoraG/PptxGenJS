@@ -1,0 +1,3022 @@
+{
+  "schemaVersion": "betterpptx.reusable-animated-model-library.v1",
+  "source": "betterpptx-face-motions",
+  "sourceLabel": "Reusable ceramic face expressions",
+  "entries": [
+    {
+      "id": "ceramic-angry-face",
+      "title": "Ceramic satin — Angry face",
+      "description": "Firm frown, forward emphasis, then release. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "angry",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.angry-face",
+        "label": "Angry face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.00033619095646327164,
+          "end": 0.013783829214994135
+        }
+      },
+      "posterFrame": {
+        "progress": 0.00033619095646327164
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-anguished-face",
+      "title": "Ceramic satin — Anguished face",
+      "description": "Quick brow lift, open tense mouth, retreat. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "anguished",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.anguished-face",
+        "label": "Anguished face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.01462430660615231,
+          "end": 0.02807194486468317
+        }
+      },
+      "posterFrame": {
+        "progress": 0.01462430660615231
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-astonished-face",
+      "title": "Ceramic satin — Astonished face",
+      "description": "Wide eyes, mouth drop, head recoil. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "astonished",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.astonished-face",
+        "label": "Astonished face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.02891242225584135,
+          "end": 0.042360060514372216
+        }
+      },
+      "posterFrame": {
+        "progress": 0.02891242225584135
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-cold-face",
+      "title": "Ceramic satin — Cold face",
+      "description": "Shiver with chattering teeth and frosty tint. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "cold",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.cold-face",
+        "label": "Cold face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.04320053790553039,
+          "end": 0.05664817616406126
+        }
+      },
+      "posterFrame": {
+        "progress": 0.04320053790553039
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-crying-face",
+      "title": "Ceramic satin — Crying face",
+      "description": "Small frown, one tear forms and rolls. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "crying",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.crying-face",
+        "label": "Crying face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.05748865355521945,
+          "end": 0.07093629181375032
+        }
+      },
+      "posterFrame": {
+        "progress": 0.05748865355521945
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-disguised-face",
+      "title": "Ceramic satin — Disguised face",
+      "description": "Glasses/nose/moustache reveal with playful glance. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "disguised",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.disguised-face",
+        "label": "Disguised face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.0717767692049085,
+          "end": 0.08522440746343937
+        }
+      },
+      "posterFrame": {
+        "progress": 0.0717767692049085
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-distraught-wail-face",
+      "title": "Ceramic satin — Distraught wail face",
+      "description": "Large wail, trembling head and sustained tear streams. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "distraught",
+        "wail",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.distraught-wail-face",
+        "label": "Distraught wail face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.08606488485459755,
+          "end": 0.09951252311312843
+        }
+      },
+      "posterFrame": {
+        "progress": 0.08606488485459755
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-downcast-face-with-sweat",
+      "title": "Ceramic satin — Downcast face with Sweat",
+      "description": "Lowered gaze with a descending sweat drop. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "downcast",
+        "face",
+        "with",
+        "sweat"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.downcast-face-with-sweat",
+        "label": "Downcast face with Sweat",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.10035300050428661,
+          "end": 0.11380063876281747
+        }
+      },
+      "posterFrame": {
+        "progress": 0.10035300050428661
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-drooling-face",
+      "title": "Ceramic satin — Drooling face",
+      "description": "Dreamy smile and short drool trail. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "drooling",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.drooling-face",
+        "label": "Drooling face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.11464111615397564,
+          "end": 0.1280887544125065
+        }
+      },
+      "posterFrame": {
+        "progress": 0.11464111615397564
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-face-blown-a-kiss",
+      "title": "Ceramic satin — Face blown a kiss",
+      "description": "Pucker, wink, launch a small heart. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "face",
+        "blown",
+        "a",
+        "kiss"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.face-blown-a-kiss",
+        "label": "Face blown a kiss",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.1289292318036647,
+          "end": 0.14237687006219554
+        }
+      },
+      "posterFrame": {
+        "progress": 0.1289292318036647
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-face-exhaling",
+      "title": "Ceramic satin — face Exhaling",
+      "description": "Small inhale then visible exhale and relaxed settle. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "face",
+        "exhaling"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.face-exhaling",
+        "label": "face Exhaling",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.14321734745335374,
+          "end": 0.15666498571188459
+        }
+      },
+      "posterFrame": {
+        "progress": 0.14321734745335374
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-face-with-diagonal-mouth",
+      "title": "Ceramic satin — Face with Diagonal mouth",
+      "description": "Diagonal mouth pull with doubtful head tilt. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "face",
+        "with",
+        "diagonal",
+        "mouth"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.face-with-diagonal-mouth",
+        "label": "Face with Diagonal mouth",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.15750546310304278,
+          "end": 0.17095310136157363
+        }
+      },
+      "posterFrame": {
+        "progress": 0.15750546310304278
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-face-with-open-eyes",
+      "title": "Ceramic satin — Face with Open Eyes",
+      "description": "Custom wide-open-eye alert glance; no chin hand assumed. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "face",
+        "with",
+        "open",
+        "eyes"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.face-with-open-eyes",
+        "label": "Face with Open Eyes",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.17179357875273182,
+          "end": 0.18524121701126267
+        }
+      },
+      "posterFrame": {
+        "progress": 0.17179357875273182
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-face-with-peeking-eye",
+      "title": "Ceramic satin — Face with Peeking Eye",
+      "description": "Hands cover face; fingers part for a peek. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "face",
+        "with",
+        "peeking",
+        "eye"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.face-with-peeking-eye",
+        "label": "Face with Peeking Eye",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.18608169440242087,
+          "end": 0.1995293326609517
+        }
+      },
+      "posterFrame": {
+        "progress": 0.18608169440242087
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-face-with-thermometer",
+      "title": "Ceramic satin — Face with thermometer",
+      "description": "Thermometer held in mouth with subdued blink. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "face",
+        "with",
+        "thermometer"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.face-with-thermometer",
+        "label": "Face with thermometer",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.2003698100521099,
+          "end": 0.21381744831064076
+        }
+      },
+      "posterFrame": {
+        "progress": 0.2003698100521099
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-face-with-zipper-mouth",
+      "title": "Ceramic satin — face with Zipper mouth",
+      "description": "Mouth closes as zipper pull travels across. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "face",
+        "with",
+        "zipper",
+        "mouth"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.face-with-zipper-mouth",
+        "label": "face with Zipper mouth",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.21465792570179895,
+          "end": 0.2281055639603298
+        }
+      },
+      "posterFrame": {
+        "progress": 0.21465792570179895
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-fake-a-smile",
+      "title": "Ceramic satin — Fake a Smile",
+      "description": "Forced asymmetric smile with delayed uneasy eye response. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "fake",
+        "a",
+        "smile"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.fake-a-smile",
+        "label": "Fake a Smile",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.22894604135148794,
+          "end": 0.24239367961001881
+        }
+      },
+      "posterFrame": {
+        "progress": 0.22894604135148794
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-fearful-face",
+      "title": "Ceramic satin — Fearful face",
+      "description": "Eyes widen, head withdraws, mouth quivers. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "fearful",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.fearful-face",
+        "label": "Fearful face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.24323415700117693,
+          "end": 0.2566817952597078
+        }
+      },
+      "posterFrame": {
+        "progress": 0.24323415700117693
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-goofy-face",
+      "title": "Ceramic satin — Goofy face",
+      "description": "Uneven eyes, tongue out, playful wobble. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "goofy",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.goofy-face",
+        "label": "Goofy face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.2575222726508659,
+          "end": 0.2709699109093968
+        }
+      },
+      "posterFrame": {
+        "progress": 0.2575222726508659
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-grimacing-face",
+      "title": "Ceramic satin — Grimacing face",
+      "description": "Wide tense tooth bar with a small backward lean. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "grimacing",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.grimacing-face",
+        "label": "Grimacing face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.27181038830055493,
+          "end": 0.2852580265590858
+        }
+      },
+      "posterFrame": {
+        "progress": 0.27181038830055493
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-grinning-face-with-smiling-eyes",
+      "title": "Ceramic satin — Grinning face with smiling Eyes",
+      "description": "Bright grin with crescent eyes and a gentle lift. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "grinning",
+        "face",
+        "with",
+        "smiling",
+        "eyes"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.grinning-face-with-smiling-eyes",
+        "label": "Grinning face with smiling Eyes",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.28609850395024394,
+          "end": 0.2995461422087748
+        }
+      },
+      "posterFrame": {
+        "progress": 0.28609850395024394
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-hand-over-mouth",
+      "title": "Ceramic satin — Hand over Mouth",
+      "description": "Mouth-covering hand, brief amused pause, return. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "hand",
+        "over",
+        "mouth"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.hand-over-mouth",
+        "label": "Hand over Mouth",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.3003866195999329,
+          "end": 0.3138342578584638
+        }
+      },
+      "posterFrame": {
+        "progress": 0.3003866195999329
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-hot-face",
+      "title": "Ceramic satin — Hot face",
+      "description": "Panting tongue and sweat with a warm face tint. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "hot",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.hot-face",
+        "label": "Hot face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.3146747352496219,
+          "end": 0.32812237350815276
+        }
+      },
+      "posterFrame": {
+        "progress": 0.3146747352496219
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-hugging-face",
+      "title": "Ceramic satin — Hugging face",
+      "description": "Hands open outward, soft hug gesture, settle. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "hugging",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.hugging-face",
+        "label": "Hugging face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.32896285089931093,
+          "end": 0.3424104891578418
+        }
+      },
+      "posterFrame": {
+        "progress": 0.32896285089931093
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-lying-face",
+      "title": "Ceramic satin — Lying face",
+      "description": "Nose extends during a sideways evasive glance. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "lying",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.lying-face",
+        "label": "Lying face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.3432509665489999,
+          "end": 0.35669860480753074
+        }
+      },
+      "posterFrame": {
+        "progress": 0.3432509665489999
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-mad-face",
+      "title": "Ceramic satin — Mad face",
+      "description": "Redder frown with a short emphatic head shake. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "mad",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.mad-face",
+        "label": "Mad face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.3575390821986889,
+          "end": 0.37098672045721975
+        }
+      },
+      "posterFrame": {
+        "progress": 0.3575390821986889
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-medical-mask-face",
+      "title": "Ceramic satin — Medical Mask face",
+      "description": "Masked face with weary eyes and gentle breathing. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "medical",
+        "mask",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.medical-mask-face",
+        "label": "Medical Mask face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.37182719784837787,
+          "end": 0.38527483610690877
+        }
+      },
+      "posterFrame": {
+        "progress": 0.37182719784837787
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-money-mouth-face",
+      "title": "Ceramic satin — Money mouth face",
+      "description": "Currency eyes pop open and money tongue drops. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "money",
+        "mouth",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.money-mouth-face",
+        "label": "Money mouth face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.3861153134980669,
+          "end": 0.39956295175659773
+        }
+      },
+      "posterFrame": {
+        "progress": 0.3861153134980669
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-neutral-face",
+      "title": "Ceramic satin — Neutral Face",
+      "description": "Neutral straight mouth with attentive small gaze movement. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "neutral",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.neutral-face",
+        "label": "Neutral Face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.4004034291477559,
+          "end": 0.41385106740628674
+        }
+      },
+      "posterFrame": {
+        "progress": 0.4004034291477559
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-party-face",
+      "title": "Ceramic satin — Party Face",
+      "description": "Cheerful bob, party blower extends and confetti falls. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "party",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.party-face",
+        "label": "Party Face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.41469154479744486,
+          "end": 0.42813918305597576
+        }
+      },
+      "posterFrame": {
+        "progress": 0.41469154479744486
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-pleading-face",
+      "title": "Ceramic satin — Pleading Face",
+      "description": "Large glistening eyes and a gentle upward appeal. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "pleading",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.pleading-face",
+        "label": "Pleading Face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.42897966044713387,
+          "end": 0.4424272987056647
+        }
+      },
+      "posterFrame": {
+        "progress": 0.42897966044713387
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-rolling-on-the-floor-laughing-face",
+      "title": "Ceramic satin — Rolling on the floor laughing face",
+      "description": "Tearful laugh with a rolling head/body gesture. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "rolling",
+        "on",
+        "the",
+        "floor",
+        "laughing",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.rolling-on-the-floor-laughing-face",
+        "label": "Rolling on the floor laughing face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.44326777609682294,
+          "end": 0.4567154143553538
+        }
+      },
+      "posterFrame": {
+        "progress": 0.44326777609682294
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-sad-pensive-face",
+      "title": "Ceramic satin — Sad pensive face",
+      "description": "Head lowers slowly into a quiet pensive frown. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "sad",
+        "pensive",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.sad-pensive-face",
+        "label": "Sad pensive face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.45755589174651196,
+          "end": 0.4710035300050428
+        }
+      },
+      "posterFrame": {
+        "progress": 0.45755589174651196
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-saluting-face",
+      "title": "Ceramic satin — Saluting face",
+      "description": "Hand rises to a clear salute and returns. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "saluting",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.saluting-face",
+        "label": "Saluting face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.471844007396201,
+          "end": 0.4852916456547319
+        }
+      },
+      "posterFrame": {
+        "progress": 0.471844007396201
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-screaming-in-fear",
+      "title": "Ceramic satin — Screaming in fear",
+      "description": "Hands to cheeks, wide mouth, fast recoil. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "screaming",
+        "in",
+        "fear"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.screaming-in-fear",
+        "label": "Screaming in fear",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.48613212304589004,
+          "end": 0.4995797613044209
+        }
+      },
+      "posterFrame": {
+        "progress": 0.48613212304589004
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-shushing-face",
+      "title": "Ceramic satin — Shushing face",
+      "description": "Index finger rises to puckered lips, gentle hush. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "shushing",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.shushing-face",
+        "label": "Shushing face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.5004202386955791,
+          "end": 0.51386787695411
+        }
+      },
+      "posterFrame": {
+        "progress": 0.5004202386955791
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-sleeping-face",
+      "title": "Ceramic satin — Sleeping face",
+      "description": "Eyes close; slow breathing and small Z symbols rise. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "sleeping",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.sleeping-face",
+        "label": "Sleeping face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.5147083543452682,
+          "end": 0.528155992603799
+        }
+      },
+      "posterFrame": {
+        "progress": 0.5147083543452682
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-sleepy-face",
+      "title": "Ceramic satin — Sleepy face",
+      "description": "Drooping eyes and the sleepy nasal bubble. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "sleepy",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.sleepy-face",
+        "label": "Sleepy face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.5289964699949572,
+          "end": 0.542444108253488
+        }
+      },
+      "posterFrame": {
+        "progress": 0.5289964699949572
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-smiling-face-with-glasses",
+      "title": "Ceramic satin — Smiling face with Glasses",
+      "description": "Original clear-lens nerd-like grin; seller glasses type unverified. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "smiling",
+        "face",
+        "with",
+        "glasses"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.smiling-face-with-glasses",
+        "label": "Smiling face with Glasses",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.5432845856446462,
+          "end": 0.5567322239031771
+        }
+      },
+      "posterFrame": {
+        "progress": 0.5432845856446462
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-smiling-face-with-horns",
+      "title": "Ceramic satin — Smiling face with Horns",
+      "description": "Mischievous smile with horn silhouette and tiny head tilt. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "smiling",
+        "face",
+        "with",
+        "horns"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.smiling-face-with-horns",
+        "label": "Smiling face with Horns",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.5575727012943352,
+          "end": 0.5710203395528661
+        }
+      },
+      "posterFrame": {
+        "progress": 0.5575727012943352
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-smiling-face-with-sunglasses",
+      "title": "Ceramic satin — Smiling face with Sunglasses",
+      "description": "Cool smile with confident lean and settle. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "smiling",
+        "face",
+        "with",
+        "sunglasses"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.smiling-face-with-sunglasses",
+        "label": "Smiling face with Sunglasses",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.5718608169440244,
+          "end": 0.5853084552025551
+        }
+      },
+      "posterFrame": {
+        "progress": 0.5718608169440244
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-smiling-face-with-tear",
+      "title": "Ceramic satin — Smiling face with Tear",
+      "description": "Warm smile while a single tear descends. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "smiling",
+        "face",
+        "with",
+        "tear"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.smiling-face-with-tear",
+        "label": "Smiling face with Tear",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.5861489325937134,
+          "end": 0.5995965708522442
+        }
+      },
+      "posterFrame": {
+        "progress": 0.5861489325937134
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-thinking-face",
+      "title": "Ceramic satin — Thinking face",
+      "description": "Chin hand, upward glance and thoughtful brow change. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "thinking",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.thinking-face",
+        "label": "Thinking face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.6004370482434024,
+          "end": 0.6138846865019333
+        }
+      },
+      "posterFrame": {
+        "progress": 0.6004370482434024
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-thinking-monocle",
+      "title": "Ceramic satin — Thinking Monocle",
+      "description": "Monocle inspection with one brow lift and lean-in. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "thinking",
+        "monocle"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.thinking-monocle",
+        "label": "Thinking Monocle",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.6147251638930914,
+          "end": 0.6281728021516223
+        }
+      },
+      "posterFrame": {
+        "progress": 0.6147251638930914
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-vomiting-face",
+      "title": "Ceramic satin — Vomiting face",
+      "description": "Queasy anticipation followed by a brief stylized emission. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "vomiting",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.vomiting-face",
+        "label": "Vomiting face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.6290132795427805,
+          "end": 0.6424609178013113
+        }
+      },
+      "posterFrame": {
+        "progress": 0.6290132795427805
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-weary-face",
+      "title": "Ceramic satin — Weary face",
+      "description": "Eyes squeeze, mouth opens, heavy downward release. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "weary",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.weary-face",
+        "label": "Weary face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.6433013951924695,
+          "end": 0.6567490334510003
+        }
+      },
+      "posterFrame": {
+        "progress": 0.6433013951924695
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-winking-face",
+      "title": "Ceramic satin — Winking face",
+      "description": "Playful one-eye wink and asymmetric smile. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "winking",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.winking-face",
+        "label": "Winking face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.6575895108421586,
+          "end": 0.6710371491006895
+        }
+      },
+      "posterFrame": {
+        "progress": 0.6575895108421586
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-winking-face-tongue-out",
+      "title": "Ceramic satin — Winking face Tongue Out",
+      "description": "One-eye wink with tongue flick and small bounce. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "winking",
+        "face",
+        "tongue",
+        "out"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.winking-face-tongue-out",
+        "label": "Winking face Tongue Out",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.6718776264918476,
+          "end": 0.6853252647503785
+        }
+      },
+      "posterFrame": {
+        "progress": 0.6718776264918476
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-worried",
+      "title": "Ceramic satin — Worried",
+      "description": "Uneven concerned brows with a cautious side glance. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "worried"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.worried",
+        "label": "Worried",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.6861657421415367,
+          "end": 0.6996133804000675
+        }
+      },
+      "posterFrame": {
+        "progress": 0.6861657421415367
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-yawning-face",
+      "title": "Ceramic satin — Yawning face",
+      "description": "Slow open yawn covered by one hand. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "yawning",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.yawning-face",
+        "label": "Yawning face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.7004538577912257,
+          "end": 0.7139014960497565
+        }
+      },
+      "posterFrame": {
+        "progress": 0.7004538577912257
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-angry-face-with-horns",
+      "title": "Ceramic satin — Angry face with Horns",
+      "description": "Horned angry frown with a firm forward beat. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "angry",
+        "face",
+        "with",
+        "horns"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.angry-face-with-horns",
+        "label": "Angry face with Horns",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.7147419734409147,
+          "end": 0.7281896116994456
+        }
+      },
+      "posterFrame": {
+        "progress": 0.7147419734409147
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-cowboy-face",
+      "title": "Ceramic satin — Cowboy face",
+      "description": "Broad grin and jaunty nod under a cowboy hat. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "cowboy",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.cowboy-face",
+        "label": "Cowboy face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.7290300890906037,
+          "end": 0.7424777273491346
+        }
+      },
+      "posterFrame": {
+        "progress": 0.7290300890906037
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-face-with-hand-over-mouth-and-smiling-eyes",
+      "title": "Ceramic satin — face with hand over mouth and smiling eyes",
+      "description": "Crescent-eye giggle behind a hand; distinct from slot22. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "face",
+        "with",
+        "hand",
+        "over",
+        "mouth",
+        "and",
+        "smiling",
+        "eyes"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.face-with-hand-over-mouth-and-smiling-eyes",
+        "label": "face with hand over mouth and smiling eyes",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.7433182047402929,
+          "end": 0.7567658429988237
+        }
+      },
+      "posterFrame": {
+        "progress": 0.7433182047402929
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-face-with-head-bandage",
+      "title": "Ceramic satin — Face with head bandage",
+      "description": "Bandaged face, careful head tilt and subdued blink. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "face",
+        "with",
+        "head",
+        "bandage"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.face-with-head-bandage",
+        "label": "Face with head bandage",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.7576063203899819,
+          "end": 0.7710539586485128
+        }
+      },
+      "posterFrame": {
+        "progress": 0.7576063203899819
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-face-with-open-eyes-and-hand-over-mouth",
+      "title": "Ceramic satin — Face with Open Eyes and Hand over Mouth",
+      "description": "Wide-eyed gasp, hand covers mouth, gradual recovery. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "face",
+        "with",
+        "open",
+        "eyes",
+        "and",
+        "hand",
+        "over",
+        "mouth"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.face-with-open-eyes-and-hand-over-mouth",
+        "label": "Face with Open Eyes and Hand over Mouth",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.7718944360396709,
+          "end": 0.7853420742982018
+        }
+      },
+      "posterFrame": {
+        "progress": 0.7718944360396709
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-face-with-rolling-eyes",
+      "title": "Ceramic satin — Face with Rolling Eyes",
+      "description": "Eyes roll upward before a small unimpressed settle. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "face",
+        "with",
+        "rolling",
+        "eyes"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.face-with-rolling-eyes",
+        "label": "Face with Rolling Eyes",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.7861825516893599,
+          "end": 0.7996301899478908
+        }
+      },
+      "posterFrame": {
+        "progress": 0.7861825516893599
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-face-with-stuck-out-tongue",
+      "title": "Ceramic satin — face with Stuck out Tongue",
+      "description": "Straight tongue-out reveal with friendly open eyes. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "face",
+        "with",
+        "stuck",
+        "out",
+        "tongue"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.face-with-stuck-out-tongue",
+        "label": "face with Stuck out Tongue",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.800470667339049,
+          "end": 0.8139183055975798
+        }
+      },
+      "posterFrame": {
+        "progress": 0.800470667339049
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-face-without-mouth",
+      "title": "Ceramic satin — Face without mouth",
+      "description": "Mouth retracts fully; eyes hold a silent reaction. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "face",
+        "without",
+        "mouth"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.face-without-mouth",
+        "label": "Face without mouth",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.814758782988738,
+          "end": 0.828206421247269
+        }
+      },
+      "posterFrame": {
+        "progress": 0.814758782988738
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-frowning-face",
+      "title": "Ceramic satin — Frowning face",
+      "description": "Clear deep frown with lowered gaze. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "frowning",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.frowning-face",
+        "label": "Frowning face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.8290468986384271,
+          "end": 0.842494536896958
+        }
+      },
+      "posterFrame": {
+        "progress": 0.8290468986384271
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-grinning-face",
+      "title": "Ceramic satin — Grinning face",
+      "description": "Open-eye toothy grin with upbeat anticipation. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "grinning",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.grinning-face",
+        "label": "Grinning face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.8433350142881161,
+          "end": 0.856782652546647
+        }
+      },
+      "posterFrame": {
+        "progress": 0.8433350142881161
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-grinning-face-with-smiling-eyes-alternate",
+      "title": "Ceramic satin — Grinning face with Smiling Eyes (alternate)",
+      "description": "Second original smiling-eye grin take: quicker chuckle and settle. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "grinning",
+        "face",
+        "with",
+        "smiling",
+        "eyes",
+        "alternate"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.grinning-face-with-smiling-eyes-alternate",
+        "label": "Grinning face with Smiling Eyes",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.8576231299378052,
+          "end": 0.871070768196336
+        }
+      },
+      "posterFrame": {
+        "progress": 0.8576231299378052
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-relieved-face",
+      "title": "Ceramic satin — Relieved face",
+      "description": "Gentle eyes close and shoulders-free head release. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "relieved",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.relieved-face",
+        "label": "Relieved face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.8719112455874944,
+          "end": 0.8853588838460252
+        }
+      },
+      "posterFrame": {
+        "progress": 0.8719112455874944
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-skull",
+      "title": "Ceramic satin — Skull",
+      "description": "Separate skull face mesh; playful jaw open and head nod. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "skull"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.skull",
+        "label": "Skull",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.8861993612371837,
+          "end": 0.8996469994957145
+        }
+      },
+      "posterFrame": {
+        "progress": 0.8861993612371837
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-smiling-face",
+      "title": "Ceramic satin — Smiling face",
+      "description": "Soft closed-mouth smile with relaxed eyes. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "smiling",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.smiling-face",
+        "label": "Smiling face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.9004874768868729,
+          "end": 0.9139351151454037
+        }
+      },
+      "posterFrame": {
+        "progress": 0.9004874768868729
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-smiling-face-holding-back-tears",
+      "title": "Ceramic satin — Smiling face holding back Tears",
+      "description": "Glistening eyes fill before a restrained grateful smile. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "smiling",
+        "face",
+        "holding",
+        "back",
+        "tears"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.smiling-face-holding-back-tears",
+        "label": "Smiling face holding back Tears",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.9147755925365622,
+          "end": 0.928223230795093
+        }
+      },
+      "posterFrame": {
+        "progress": 0.9147755925365622
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-smiling-face-with-halo",
+      "title": "Ceramic satin — Smiling face with Halo",
+      "description": "Innocent smile and a gentle halo bob. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "smiling",
+        "face",
+        "with",
+        "halo"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.smiling-face-with-halo",
+        "label": "Smiling face with Halo",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.9290637081862513,
+          "end": 0.9425113464447822
+        }
+      },
+      "posterFrame": {
+        "progress": 0.9290637081862513
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-smiling-face-with-heart-eyes",
+      "title": "Ceramic satin — Smiling face with Heart Eyes",
+      "description": "Heart eyes expand slightly with delighted head lift. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "smiling",
+        "face",
+        "with",
+        "heart",
+        "eyes"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.smiling-face-with-heart-eyes",
+        "label": "Smiling face with Heart Eyes",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.9433518238359405,
+          "end": 0.9567994620944714
+        }
+      },
+      "posterFrame": {
+        "progress": 0.9433518238359405
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-smiling-face-with-hearts",
+      "title": "Ceramic satin — Smiling face with Hearts",
+      "description": "Affectionate smile as small hearts orbit and settle. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "smiling",
+        "face",
+        "with",
+        "hearts"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.smiling-face-with-hearts",
+        "label": "Smiling face with Hearts",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.9576399394856298,
+          "end": 0.9710875777441607
+        }
+      },
+      "posterFrame": {
+        "progress": 0.9576399394856298
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-smiling-face-with-licking-lips",
+      "title": "Ceramic satin — Smiling Face with Licking lips",
+      "description": "Tongue sweeps toward the lip and returns. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "smiling",
+        "face",
+        "with",
+        "licking",
+        "lips"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.smiling-face-with-licking-lips",
+        "label": "Smiling Face with Licking lips",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.971928055135319,
+          "end": 0.9853756933938499
+        }
+      },
+      "posterFrame": {
+        "progress": 0.971928055135319
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    },
+    {
+      "id": "ceramic-upside-down-face",
+      "title": "Ceramic satin — Upside down face",
+      "description": "Face rolls upside down, holds its smile, then returns. Characteristic expression and accessories persist before and after playback.",
+      "tags": [
+        "face",
+        "emoji",
+        "expression",
+        "ceramic",
+        "satin",
+        "identity-preserving",
+        "upside",
+        "down",
+        "face"
+      ],
+      "glbFile": "face-expressions.glb",
+      "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+      "bytes": 15645260,
+      "clip": {
+        "id": "motion.face.upside-down-face",
+        "label": "Upside down face",
+        "index": 0,
+        "durationMs": 4000,
+        "sourceWindow": {
+          "start": 0.9862161707850082,
+          "end": 0.9996638090435391
+        }
+      },
+      "posterFrame": {
+        "progress": 0.9862161707850082
+      },
+      "approval": {
+        "status": "previously-validated",
+        "approvedOn": "2026-10-17"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated ceramic face artwork. Authorized for reusable presentation catalogue integration.",
+      "initialization": {
+        "visibilityDelayMs": 200
+      }
+    }
+  ]
+}

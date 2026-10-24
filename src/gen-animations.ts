@@ -28,6 +28,7 @@ import { generateNativeNarrationTiming, getNativeNarrationMediaSpids, hasNativeN
 import { genXmlBuildList } from './gen-animations-buildlist'
 import { isModel3DAnimationEffect } from './animations-builders/data3DAnimationTemplates'
 import { assertNativeDescendantAnimationInspectable, nativeGroupIdentityPlan } from './gen-group-animation-targets'
+import { resolveSceneProgress } from './animations-builders/sceneProgress'
 
 // Re-export for backwards compatibility
 export { genXmlBuildList } from './gen-animations-buildlist'
@@ -422,6 +423,7 @@ export function addAnimation(
 	const animations = Array.isArray(animation) ? animation : [animation]
 
 	animations.forEach(anim => {
+		resolveSceneProgress(anim)
 		// Semantic JSON clients may author explicit millisecond aliases. Collapse
 		// them at the native library boundary so every registry builder receives
 		// the same duration/delay carrier and no slider is silently dropped.
@@ -457,6 +459,7 @@ export function genXmlAnimationForObject(animData: {
 	paragraphCount?: number
 }, options?: { skipGrpId?: boolean, skipIndefiniteWrapper?: boolean }): string | string[] {
 	const { animation, shapeId, paragraphCount = 1 } = animData
+	resolveSceneProgress(animation)
 	// For motion paths, use motionPath property instead of effect
 	const effect = (animation.type === 'motion' && animation.motionPath)
 		? animation.motionPath

@@ -1,0 +1,581 @@
+{
+  "schemaVersion": "reusable-face-catalog-current-audit.v1",
+  "status": "PASS_CATALOG_SOURCE_BINDING_AND_IDENTITY_ENDPOINTS",
+  "sourceSha256": "47c2e02095b818cab89b1089fe354634db2f0cabf04394dc96ab7780c0a1781f",
+  "bytes": 15645260,
+  "entries": 70,
+  "uniqueDiscoveryTitles": 70,
+  "initializationVisibilityDelayMs": 200,
+  "uniqueEmbeddedAssets": 1,
+  "physicalAnimations": 1,
+  "weightedRigJoints": [
+    128
+  ],
+  "durationSeconds": 297.45001220703125,
+  "sourceBufferModified": false,
+  "endpointSampling": "Actual bank at 100000-step native normalized seek precision; all channels compared independently.",
+  "maximumEndpointDelta": 0.0000045637116123456185,
+  "nativePlaybackQualification": "NOT_EVALUATED_BY_SOURCE_AUDIT",
+  "windows": [
+    {
+      "id": "ceramic-angry-face",
+      "motionId": "motion.face.angry-face",
+      "startSeconds": 0.10113300415039063,
+      "endSeconds": 4.098861168212891,
+      "endpointDelta": 3.8317224856747323e-7,
+      "midpointMotionDelta": 0.026116418779932184
+    },
+    {
+      "id": "ceramic-anguished-face",
+      "motionId": "motion.face.anguished-face",
+      "startSeconds": 4.348719178466797,
+      "endSeconds": 8.349421842651367,
+      "endpointDelta": 0.000004338983917236529,
+      "midpointMotionDelta": 0.0025710683438709423
+    },
+    {
+      "id": "ceramic-astonished-face",
+      "motionId": "motion.face.astonished-face",
+      "startSeconds": 8.599279852905275,
+      "endSeconds": 12.599982517089844,
+      "endpointDelta": 8.465047135475245e-10,
+      "midpointMotionDelta": 0.002580049778192802
+    },
+    {
+      "id": "ceramic-cold-face",
+      "motionId": "motion.face.cold-face",
+      "startSeconds": 12.849840527343751,
+      "endSeconds": 16.85054319152832,
+      "endpointDelta": 1.1102230246251565e-16,
+      "midpointMotionDelta": 0.026124732214945066
+    },
+    {
+      "id": "ceramic-crying-face",
+      "motionId": "motion.face.crying-face",
+      "startSeconds": 17.100401201782226,
+      "endSeconds": 21.1011038659668,
+      "endpointDelta": 0.0000034871919844999552,
+      "midpointMotionDelta": 0.08745173862933564
+    },
+    {
+      "id": "ceramic-disguised-face",
+      "motionId": "motion.face.disguised-face",
+      "startSeconds": 21.3509618762207,
+      "endSeconds": 25.348690040283206,
+      "endpointDelta": 1.699718402112588e-7,
+      "midpointMotionDelta": 0.006874514735489723
+    },
+    {
+      "id": "ceramic-distraught-wail-face",
+      "motionId": "motion.face.distraught-wail-face",
+      "startSeconds": 25.598548050537108,
+      "endSeconds": 29.59925071472168,
+      "endpointDelta": 3.607698836408102e-7,
+      "midpointMotionDelta": 0.025343008245565193
+    },
+    {
+      "id": "ceramic-downcast-face-with-sweat",
+      "motionId": "motion.face.downcast-face-with-sweat",
+      "startSeconds": 29.849108724975583,
+      "endSeconds": 33.84981138916016,
+      "endpointDelta": 0.000001627664629010278,
+      "midpointMotionDelta": 0.025376621810157818
+    },
+    {
+      "id": "ceramic-drooling-face",
+      "motionId": "motion.face.drooling-face",
+      "startSeconds": 34.09966939941406,
+      "endSeconds": 38.100372063598634,
+      "endpointDelta": 4.1359030627651384e-25,
+      "midpointMotionDelta": 0.02541012605152959
+    },
+    {
+      "id": "ceramic-face-blown-a-kiss",
+      "motionId": "motion.face.face-blown-a-kiss",
+      "startSeconds": 38.350230073852536,
+      "endSeconds": 42.35093273803711,
+      "endpointDelta": 1.9026483139006345e-8,
+      "midpointMotionDelta": 0.002610372422063051
+    },
+    {
+      "id": "ceramic-face-exhaling",
+      "motionId": "motion.face.face-exhaling",
+      "startSeconds": 42.60079074829101,
+      "endSeconds": 46.59851891235351,
+      "endpointDelta": 2.339126000359959e-7,
+      "midpointMotionDelta": 0.014994805340702324
+    },
+    {
+      "id": "ceramic-face-with-diagonal-mouth",
+      "motionId": "motion.face.face-with-diagonal-mouth",
+      "startSeconds": 46.85135142272949,
+      "endSeconds": 50.84907958679199,
+      "endpointDelta": 1.33106196363586e-7,
+      "midpointMotionDelta": 0.002602844259124118
+    },
+    {
+      "id": "ceramic-face-with-open-eyes",
+      "motionId": "motion.face.face-with-open-eyes",
+      "startSeconds": 51.0989375970459,
+      "endSeconds": 55.09964026123046,
+      "endpointDelta": 1.497268816482572e-8,
+      "midpointMotionDelta": 0.002574036764553725
+    },
+    {
+      "id": "ceramic-face-with-peeking-eye",
+      "motionId": "motion.face.face-with-peeking-eye",
+      "startSeconds": 55.34949827148437,
+      "endSeconds": 59.35020093566895,
+      "endpointDelta": 1.1102230246251565e-16,
+      "midpointMotionDelta": 0.054999897716811574
+    },
+    {
+      "id": "ceramic-face-with-thermometer",
+      "motionId": "motion.face.face-with-thermometer",
+      "startSeconds": 59.60005894592285,
+      "endSeconds": 63.600761610107426,
+      "endpointDelta": 2.749414580727194e-8,
+      "midpointMotionDelta": 0.05405062110112829
+    },
+    {
+      "id": "ceramic-face-with-zipper-mouth",
+      "motionId": "motion.face.face-with-zipper-mouth",
+      "startSeconds": 63.85061962036133,
+      "endSeconds": 67.8513222845459,
+      "endpointDelta": 1.7519492254147728e-7,
+      "midpointMotionDelta": 0.007361134713264994
+    },
+    {
+      "id": "ceramic-fake-a-smile",
+      "motionId": "motion.face.fake-a-smile",
+      "startSeconds": 68.1011802947998,
+      "endSeconds": 72.0989084588623,
+      "endpointDelta": 5.508368232845897e-7,
+      "midpointMotionDelta": 0.0025907609499541615
+    },
+    {
+      "id": "ceramic-fearful-face",
+      "motionId": "motion.face.fearful-face",
+      "startSeconds": 72.34876646911621,
+      "endSeconds": 76.34946913330079,
+      "endpointDelta": 2.2299461138741705e-8,
+      "midpointMotionDelta": 0.002569261104915073
+    },
+    {
+      "id": "ceramic-goofy-face",
+      "motionId": "motion.face.goofy-face",
+      "startSeconds": 76.59932714355469,
+      "endSeconds": 80.60002980773926,
+      "endpointDelta": 0,
+      "midpointMotionDelta": 0.0025389927214799213
+    },
+    {
+      "id": "ceramic-grimacing-face",
+      "motionId": "motion.face.grimacing-face",
+      "startSeconds": 80.84988781799316,
+      "endSeconds": 84.85059048217774,
+      "endpointDelta": 0,
+      "midpointMotionDelta": 0.10270631699303545
+    },
+    {
+      "id": "ceramic-grinning-face-with-smiling-eyes",
+      "motionId": "motion.face.grinning-face-with-smiling-eyes",
+      "startSeconds": 85.10044849243165,
+      "endSeconds": 89.10115115661621,
+      "endpointDelta": 3.71999056419936e-8,
+      "midpointMotionDelta": 0.002623409393375062
+    },
+    {
+      "id": "ceramic-hand-over-mouth",
+      "motionId": "motion.face.hand-over-mouth",
+      "startSeconds": 89.35100916687011,
+      "endSeconds": 93.34873733093262,
+      "endpointDelta": 1.6927020013435268e-7,
+      "midpointMotionDelta": 0.0025840257715455837
+    },
+    {
+      "id": "ceramic-hot-face",
+      "motionId": "motion.face.hot-face",
+      "startSeconds": 93.59859534118652,
+      "endSeconds": 97.5992980053711,
+      "endpointDelta": 3.419543818133959e-7,
+      "midpointMotionDelta": 0.025345953013393208
+    },
+    {
+      "id": "ceramic-hugging-face",
+      "motionId": "motion.face.hugging-face",
+      "startSeconds": 97.849156015625,
+      "endSeconds": 101.84985867980957,
+      "endpointDelta": 2.3022745643253018e-7,
+      "midpointMotionDelta": 0.07999929368319514
+    },
+    {
+      "id": "ceramic-lying-face",
+      "motionId": "motion.face.lying-face",
+      "startSeconds": 102.09971669006347,
+      "endSeconds": 106.10041935424805,
+      "endpointDelta": 1.1102230246251565e-16,
+      "midpointMotionDelta": 0.15999991660653978
+    },
+    {
+      "id": "ceramic-mad-face",
+      "motionId": "motion.face.mad-face",
+      "startSeconds": 106.35027736450196,
+      "endSeconds": 110.35098002868652,
+      "endpointDelta": 1.479415329408429e-7,
+      "midpointMotionDelta": 0.026159014927549205
+    },
+    {
+      "id": "ceramic-medical-mask-face",
+      "motionId": "motion.face.medical-mask-face",
+      "startSeconds": 110.60083803894042,
+      "endSeconds": 114.59856620300293,
+      "endpointDelta": 0.0000035562882594090094,
+      "midpointMotionDelta": 0.021734718062797323
+    },
+    {
+      "id": "ceramic-money-mouth-face",
+      "motionId": "motion.face.money-mouth-face",
+      "startSeconds": 114.85139871337891,
+      "endSeconds": 118.84912687744142,
+      "endpointDelta": 1.0993927396923953e-7,
+      "midpointMotionDelta": 0.002600611104817671
+    },
+    {
+      "id": "ceramic-neutral-face",
+      "motionId": "motion.face.neutral-face",
+      "startSeconds": 119.09898488769531,
+      "endSeconds": 123.09968755187988,
+      "endpointDelta": 1.5037542545372207e-8,
+      "midpointMotionDelta": 0.002561913840875666
+    },
+    {
+      "id": "ceramic-party-face",
+      "motionId": "motion.face.party-face",
+      "startSeconds": 123.34954556213378,
+      "endSeconds": 127.35024822631837,
+      "endpointDelta": 0,
+      "midpointMotionDelta": 0.2799992672939544
+    },
+    {
+      "id": "ceramic-pleading-face",
+      "motionId": "motion.face.pleading-face",
+      "startSeconds": 127.60010623657226,
+      "endSeconds": 131.60080890075685,
+      "endpointDelta": 6.66949377253756e-8,
+      "midpointMotionDelta": 0.037041030297302366
+    },
+    {
+      "id": "ceramic-rolling-on-the-floor-laughing-face",
+      "motionId": "motion.face.rolling-on-the-floor-laughing-face",
+      "startSeconds": 131.85066691101073,
+      "endSeconds": 135.85136957519532,
+      "endpointDelta": 3.7119186042933183e-7,
+      "midpointMotionDelta": 0.025466696030742454
+    },
+    {
+      "id": "ceramic-sad-pensive-face",
+      "motionId": "motion.face.sad-pensive-face",
+      "startSeconds": 136.10122758544924,
+      "endSeconds": 140.0989557495117,
+      "endpointDelta": 9.736044719391157e-8,
+      "midpointMotionDelta": 0.02174495435774243
+    },
+    {
+      "id": "ceramic-saluting-face",
+      "motionId": "motion.face.saluting-face",
+      "startSeconds": 140.34881375976562,
+      "endSeconds": 144.3495164239502,
+      "endpointDelta": 3.676798798757375e-8,
+      "midpointMotionDelta": 0.0025525772869634464
+    },
+    {
+      "id": "ceramic-screaming-in-fear",
+      "motionId": "motion.face.screaming-in-fear",
+      "startSeconds": 144.5993744342041,
+      "endSeconds": 148.60007709838868,
+      "endpointDelta": 1.1102230246251565e-16,
+      "midpointMotionDelta": 0.14884600584368646
+    },
+    {
+      "id": "ceramic-shushing-face",
+      "motionId": "motion.face.shushing-face",
+      "startSeconds": 148.84993510864257,
+      "endSeconds": 152.85063777282716,
+      "endpointDelta": 1.3877787807814457e-17,
+      "midpointMotionDelta": 0.007034243602726087
+    },
+    {
+      "id": "ceramic-sleeping-face",
+      "motionId": "motion.face.sleeping-face",
+      "startSeconds": 153.10049578308104,
+      "endSeconds": 157.1011984472656,
+      "endpointDelta": 1.4629083303074886e-7,
+      "midpointMotionDelta": 0.015011473788666331
+    },
+    {
+      "id": "ceramic-sleepy-face",
+      "motionId": "motion.face.sleepy-face",
+      "startSeconds": 157.35105645751955,
+      "endSeconds": 161.34878462158204,
+      "endpointDelta": 2.2155068790663535e-7,
+      "midpointMotionDelta": 0.02540442692436229
+    },
+    {
+      "id": "ceramic-smiling-face-with-glasses",
+      "motionId": "motion.face.smiling-face-with-glasses",
+      "startSeconds": 161.59864263183593,
+      "endSeconds": 165.5993452960205,
+      "endpointDelta": 6.781026569702142e-7,
+      "midpointMotionDelta": 0.049998942583793615
+    },
+    {
+      "id": "ceramic-smiling-face-with-horns",
+      "motionId": "motion.face.smiling-face-with-horns",
+      "startSeconds": 165.8492033062744,
+      "endSeconds": 169.84990597045896,
+      "endpointDelta": 4.844556006355916e-9,
+      "midpointMotionDelta": 0.002569493608110998
+    },
+    {
+      "id": "ceramic-smiling-face-with-sunglasses",
+      "motionId": "motion.face.smiling-face-with-sunglasses",
+      "startSeconds": 170.0997639807129,
+      "endSeconds": 174.10046664489747,
+      "endpointDelta": 0,
+      "midpointMotionDelta": 0.09999976941105315
+    },
+    {
+      "id": "ceramic-smiling-face-with-tear",
+      "motionId": "motion.face.smiling-face-with-tear",
+      "startSeconds": 174.35032465515135,
+      "endSeconds": 178.35102731933594,
+      "endpointDelta": 3.0766705849671894e-8,
+      "midpointMotionDelta": 0.0026197248610022473
+    },
+    {
+      "id": "ceramic-thinking-face",
+      "motionId": "motion.face.thinking-face",
+      "startSeconds": 178.60088532958983,
+      "endSeconds": 182.59861349365235,
+      "endpointDelta": 0.000003846537123580263,
+      "midpointMotionDelta": 0.0025411902709424894
+    },
+    {
+      "id": "ceramic-thinking-monocle",
+      "motionId": "motion.face.thinking-monocle",
+      "startSeconds": 182.85144600402833,
+      "endSeconds": 186.84917416809083,
+      "endpointDelta": 0.0000045637116123456185,
+      "midpointMotionDelta": 0.0026118506556828324
+    },
+    {
+      "id": "ceramic-vomiting-face",
+      "motionId": "motion.face.vomiting-face",
+      "startSeconds": 187.09903217834471,
+      "endSeconds": 191.0997348425293,
+      "endpointDelta": 1.1428702859084261e-8,
+      "midpointMotionDelta": 0.002574268784592035
+    },
+    {
+      "id": "ceramic-weary-face",
+      "motionId": "motion.face.weary-face",
+      "startSeconds": 191.3495928527832,
+      "endSeconds": 195.35029551696775,
+      "endpointDelta": 2.0679515313825692e-25,
+      "midpointMotionDelta": 0.021683350151437658
+    },
+    {
+      "id": "ceramic-winking-face",
+      "motionId": "motion.face.winking-face",
+      "startSeconds": 195.6001535272217,
+      "endSeconds": 199.60085619140625,
+      "endpointDelta": 1.218293217697397e-8,
+      "midpointMotionDelta": 0.0025994842669547213
+    },
+    {
+      "id": "ceramic-winking-face-tongue-out",
+      "motionId": "motion.face.winking-face-tongue-out",
+      "startSeconds": 199.85071420166017,
+      "endSeconds": 203.85141686584473,
+      "endpointDelta": 7.935723060986785e-8,
+      "midpointMotionDelta": 0.002606011049566842
+    },
+    {
+      "id": "ceramic-worried",
+      "motionId": "motion.face.worried",
+      "startSeconds": 204.1012748760986,
+      "endSeconds": 208.0990030401611,
+      "endpointDelta": 0.000002316238034245021,
+      "midpointMotionDelta": 0.021729858295663165
+    },
+    {
+      "id": "ceramic-yawning-face",
+      "motionId": "motion.face.yawning-face",
+      "startSeconds": 208.34886105041505,
+      "endSeconds": 212.3495637145996,
+      "endpointDelta": 1.4065378965699704e-7,
+      "midpointMotionDelta": 0.0149885501318082
+    },
+    {
+      "id": "ceramic-angry-face-with-horns",
+      "motionId": "motion.face.angry-face-with-horns",
+      "startSeconds": 212.59942172485353,
+      "endSeconds": 216.6001243890381,
+      "endpointDelta": 1.6155871338926322e-27,
+      "midpointMotionDelta": 0.02611983637257579
+    },
+    {
+      "id": "ceramic-cowboy-face",
+      "motionId": "motion.face.cowboy-face",
+      "startSeconds": 216.84998239929197,
+      "endSeconds": 220.85068506347656,
+      "endpointDelta": 1.1102230246251565e-16,
+      "midpointMotionDelta": 0.06975601868482238
+    },
+    {
+      "id": "ceramic-face-with-hand-over-mouth-and-smiling-eyes",
+      "motionId": "motion.face.face-with-hand-over-mouth-and-smiling-eyes",
+      "startSeconds": 221.10054307373045,
+      "endSeconds": 225.10124573791506,
+      "endpointDelta": 8.019440556061852e-8,
+      "midpointMotionDelta": 0.002600267196740509
+    },
+    {
+      "id": "ceramic-face-with-head-bandage",
+      "motionId": "motion.face.face-with-head-bandage",
+      "startSeconds": 225.35110374816895,
+      "endSeconds": 229.34883191223145,
+      "endpointDelta": 5.702128637502567e-7,
+      "midpointMotionDelta": 0.02174677411081065
+    },
+    {
+      "id": "ceramic-face-with-open-eyes-and-hand-over-mouth",
+      "motionId": "motion.face.face-with-open-eyes-and-hand-over-mouth",
+      "startSeconds": 229.59868992248533,
+      "endSeconds": 233.59939258666992,
+      "endpointDelta": 4.6614820392587575e-8,
+      "midpointMotionDelta": 0.1503784264320327
+    },
+    {
+      "id": "ceramic-face-with-rolling-eyes",
+      "motionId": "motion.face.face-with-rolling-eyes",
+      "startSeconds": 233.84925059692384,
+      "endSeconds": 237.8499532611084,
+      "endpointDelta": 1.0647022638532455e-9,
+      "midpointMotionDelta": 0.021612928328942127
+    },
+    {
+      "id": "ceramic-face-with-stuck-out-tongue",
+      "motionId": "motion.face.face-with-stuck-out-tongue",
+      "startSeconds": 238.0998112713623,
+      "endSeconds": 242.10051393554687,
+      "endpointDelta": 1.1102230246251565e-16,
+      "midpointMotionDelta": 0.0025974718170203295
+    },
+    {
+      "id": "ceramic-face-without-mouth",
+      "motionId": "motion.face.face-without-mouth",
+      "startSeconds": 242.3503719458008,
+      "endSeconds": 246.35107460998535,
+      "endpointDelta": 3.021518124243783e-8,
+      "midpointMotionDelta": 0.002620625464894385
+    },
+    {
+      "id": "ceramic-frowning-face",
+      "motionId": "motion.face.frowning-face",
+      "startSeconds": 246.60093262023923,
+      "endSeconds": 250.59866078430176,
+      "endpointDelta": 0.000003639106222170759,
+      "midpointMotionDelta": 0.021733757053558095
+    },
+    {
+      "id": "ceramic-grinning-face",
+      "motionId": "motion.face.grinning-face",
+      "startSeconds": 250.85149329467774,
+      "endSeconds": 254.84922145874023,
+      "endpointDelta": 1.0994706133027332e-7,
+      "midpointMotionDelta": 0.12133752850899482
+    },
+    {
+      "id": "ceramic-grinning-face-with-smiling-eyes-alternate",
+      "motionId": "motion.face.grinning-face-with-smiling-eyes-alternate",
+      "startSeconds": 255.09907946899415,
+      "endSeconds": 259.09978213317873,
+      "endpointDelta": 2.0309531070794584e-8,
+      "midpointMotionDelta": 0.0025744314014125302
+    },
+    {
+      "id": "ceramic-relieved-face",
+      "motionId": "motion.face.relieved-face",
+      "startSeconds": 259.3496401434326,
+      "endSeconds": 263.3503428076172,
+      "endpointDelta": 6.938893903907228e-18,
+      "midpointMotionDelta": 0.0025851275846538804
+    },
+    {
+      "id": "ceramic-skull",
+      "motionId": "motion.face.skull",
+      "startSeconds": 263.6002008178711,
+      "endSeconds": 267.6009034820556,
+      "endpointDelta": 6.651793205136869e-8,
+      "midpointMotionDelta": 0.0025924134258967085
+    },
+    {
+      "id": "ceramic-smiling-face",
+      "motionId": "motion.face.smiling-face",
+      "startSeconds": 267.8507614923096,
+      "endSeconds": 271.85146415649416,
+      "endpointDelta": 6.263018409100041e-8,
+      "midpointMotionDelta": 0.0026385433156670334
+    },
+    {
+      "id": "ceramic-smiling-face-holding-back-tears",
+      "motionId": "motion.face.smiling-face-holding-back-tears",
+      "startSeconds": 272.10132216674805,
+      "endSeconds": 276.09905033081054,
+      "endpointDelta": 2.789897909673267e-7,
+      "midpointMotionDelta": 0.13260955533281304
+    },
+    {
+      "id": "ceramic-smiling-face-with-halo",
+      "motionId": "motion.face.smiling-face-with-halo",
+      "startSeconds": 276.34890834106443,
+      "endSeconds": 280.349611005249,
+      "endpointDelta": 0.0000017783747328730098,
+      "midpointMotionDelta": 0.015849523186065695
+    },
+    {
+      "id": "ceramic-smiling-face-with-heart-eyes",
+      "motionId": "motion.face.smiling-face-with-heart-eyes",
+      "startSeconds": 280.59946901550296,
+      "endSeconds": 284.6001716796875,
+      "endpointDelta": 1.1102230246251565e-16,
+      "midpointMotionDelta": 0.049315402921222606
+    },
+    {
+      "id": "ceramic-smiling-face-with-hearts",
+      "motionId": "motion.face.smiling-face-with-hearts",
+      "startSeconds": 284.85002968994144,
+      "endSeconds": 288.85073235412597,
+      "endpointDelta": 1.948256975886631e-9,
+      "midpointMotionDelta": 0.09999846741456467
+    },
+    {
+      "id": "ceramic-smiling-face-with-licking-lips",
+      "motionId": "motion.face.smiling-face-with-licking-lips",
+      "startSeconds": 289.10059036437985,
+      "endSeconds": 293.10129302856444,
+      "endpointDelta": 6.573477370550013e-8,
+      "midpointMotionDelta": 0.00261842367062233
+    },
+    {
+      "id": "ceramic-upside-down-face",
+      "motionId": "motion.face.upside-down-face",
+      "startSeconds": 293.35115103881833,
+      "endSeconds": 297.3488792028809,
+      "endpointDelta": 1.7172239974638174e-7,
+      "midpointMotionDelta": 0.043581215474846
+    }
+  ]
+}

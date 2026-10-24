@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "betterpptx.reusable-animated-model-library.v1",
+  "source": "betterpptx-emoji-motions",
+  "sourceLabel": "Reusable approved hand motions",
+  "entries": [
+    {
+      "id": "handshake-approved",
+      "title": "Approved handshake",
+      "description": "Two right hands approach, pass thumb against opposite palm, and close into a relaxed handshake. The source-bound approved shape, gentle finger curvature and timing are preserved.",
+      "tags": [
+        "hand",
+        "handshake",
+        "poignee-de-main",
+        "agreement",
+        "two-right-hands",
+        "yellow",
+        "satin",
+        "white-cuffs",
+        "owner-approved"
+      ],
+      "glbFile": "handshake-approved.glb",
+      "sourceSha256": "9704e1a8c11eba95a8bf76fa7c243673e525136f091282042e7653cf31f3ef11",
+      "bytes": 2441796,
+      "clip": {
+        "id": "motion.hand.handshake-approved",
+        "label": "Open → pass → grip",
+        "index": 0,
+        "durationMs": 3600
+      },
+      "posterFrame": {
+        "progress": 0
+      },
+      "approval": {
+        "status": "owner-approved",
+        "approvedOn": "2026-10-23"
+      },
+      "nativeQualification": {
+        "status": "qualified"
+      },
+      "license": "Owner-generated hand artwork, adapted with authorization for the reusable presentation catalogue. Source account asset license applies."
+    }
+  ]
+}
