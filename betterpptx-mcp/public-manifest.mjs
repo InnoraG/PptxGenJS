@@ -25,13 +25,12 @@ if (CONFIGURED_SEMANTIC_VERSION && CONFIGURED_SEMANTIC_VERSION !== PACKAGE_SEMAN
 }
 export const PUBLIC_SEMANTIC_VERSION = PACKAGE_SEMANTIC_VERSION
 export const PUBLIC_SCHEMA_CHANGE = Object.freeze({
-	previousToolSchemaVersion: '2026-09-29.1',
+	previousToolSchemaVersion: '2026-10-23.1',
 	compatibility: 'additive',
 	changes: [
-		'Built-in presenter motion discovery exposes a public catalog version, shared prepared reuse, and review source selection through the ordinary authoring tools.',
-		'Named art directions are optional; omitted/null selections use neutral technical defaults with no aesthetic certification penalty. Explicit geometry, styling and motion remain AI-authored.',
-		'Cloud browser downloads use opaque, generation-bound links compatible with ChatGPT URL decoration. Large presentations stay outside the conversation; links and retained bytes share the original 12-hour boundary.',
-		'Durable dispatch failures provide a public-safe operation recovery path. Release preflight verifies the scoped worker-identity permission before deployment.',
+		'spec presenter.identity no longer lists the owner-gated mena research persona.',
+		'betterpptx.avatar.attach_result points to the deck.generate_from_spec patch route for attaching a completed talking-head video.',
+		'betterpptx.deck.export_spec download:true publishes the exported spec in every mode, including current.',
 	],
 })
 export const PUBLIC_CAPABILITY_DIGEST_COVERAGE = 'Canonical SHA-256 over all stable public family fields and contracts, extended layers, persona terminology/contracts, motion, narration, and combined examples; live readiness and measured inventories are excluded.'

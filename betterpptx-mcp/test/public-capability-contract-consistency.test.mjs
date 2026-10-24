@@ -33,7 +33,7 @@ function walk(value, visit, path = []) {
 }
 
 function servedPerformanceSchema() {
-	const tool = publicToolList(TOOLS).find(row => row.name === 'betterpptx.deck.generate_from_spec')
+	const tool = publicToolList(TOOLS, { fullSchemas: true }).find(row => row.name === 'betterpptx.deck.generate_from_spec')
 	assert.ok(tool, 'public generate_from_spec must be served')
 	const result = walk(tool.inputSchema, value => {
 		const properties = value?.properties

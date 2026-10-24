@@ -50,7 +50,7 @@ test('closed public motion-framing schemas expose only semantic framing controls
 	assert.equal(normalizeModel3dMotionFraming(undefined), undefined)
 	assert.deepEqual(MODEL3D_OPTIONS_PUBLIC_SCHEMA.properties.motionFraming, MODEL3D_MOTION_FRAMING_PUBLIC_SCHEMA)
 	assert.ok(MODEL3D_AUTHORING_CAPABILITY_CONTRACT.overrideFields.includes('motionFraming'))
-	const publicTools = publicToolList(TOOLS)
+	const publicTools = publicToolList(TOOLS, { fullSchemas: true })
 	const generate = publicTools.find(tool => tool.name === 'betterpptx.deck.generate_from_spec')
 	const schema = generate.inputSchema.properties.spec.properties.slides.items.properties.content.items.properties.motionFraming
 	assert.equal(schema.additionalProperties, false)

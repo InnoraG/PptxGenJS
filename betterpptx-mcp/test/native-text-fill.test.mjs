@@ -159,7 +159,7 @@ test('public catalog, deck schema and text/group entry schemas share the closed 
 	assert.deepEqual(block.text.oneOf[1].items.properties.options.properties.textFill, TEXT_FILL_PUBLIC_SCHEMA)
 	assert.deepEqual(GENERIC_OPTIONS_SCHEMA.properties.textFill, TEXT_FILL_PUBLIC_SCHEMA)
 	assert.deepEqual(TEXT_RUN_OPTIONS_SCHEMA.properties.textFill, TEXT_FILL_PUBLIC_SCHEMA)
-	const served = publicToolList(TOOLS).find(tool => tool.name === 'betterpptx.deck.generate_from_spec')
+	const served = publicToolList(TOOLS, { fullSchemas: true }).find(tool => tool.name === 'betterpptx.deck.generate_from_spec')
 	const servedFill = served.inputSchema.properties.spec.properties.slides.items.properties.content.items.properties.style.properties.textFill
 	const validate = new Ajv({ allErrors: true, multipleOfPrecision: 10 }).compile(servedFill)
 	for (const value of [gradient, pathGradient, { color: 'accent1', transparency: 37.125 }, { type: 'none' }, null]) assert.equal(validate(value), true, JSON.stringify(validate.errors))

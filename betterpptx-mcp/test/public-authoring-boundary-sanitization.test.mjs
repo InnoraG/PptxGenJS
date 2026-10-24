@@ -13,7 +13,7 @@ const { publicToolList } = await import('../blackbox.mjs')
 const { createMcpToolDispatcher } = await import('../engine.mjs')
 const { TOOLS } = await import('../tools.mjs')
 
-const publicTools = publicToolList(TOOLS)
+const publicTools = publicToolList(TOOLS, { fullSchemas: true })
 const toolByName = new Map(publicTools.map(tool => [tool.name, tool]))
 const dispatcher = createMcpToolDispatcher({
 	sessionId: `public-authoring-boundary-${Date.now()}`,

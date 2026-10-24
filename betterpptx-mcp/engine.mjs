@@ -229,7 +229,8 @@ import { createMotionPreparationRuntime } from './motion-preparation-runtime.mjs
 import { createGeneratedMotionPreparationCache } from './motion-preparation-cache.mjs'
 import { createMotionPreparedFileDelivery } from './motion-preparation-delivery.mjs'
 import { hydratePreparedNativeAsset } from './motion-preparation-native-asset.mjs'
-import { publicRuntimeManifest, publicCapabilityDiscovery, PUBLIC_SEMANTIC_VERSION, TOOL_SCHEMA_VERSION } from './public-manifest.mjs'
+import { advertisedPublicTools, publicRuntimeManifest, publicCapabilityDiscovery, PUBLIC_SEMANTIC_VERSION, TOOL_SCHEMA_VERSION } from './public-manifest.mjs'
+import { publicToolSchemaDetail } from './public-schema-compaction.mjs'
 import { publicAuthoringCapabilityCatalog, publicCapabilityOverview, publicContentRepresentationContract, PUBLIC_COMBINED_CAPABILITY_EXAMPLES, PUBLIC_NARRATION_CAPABILITY_CONTRACT } from './authoring-capability-registry.mjs'
 import { publicBaselineCatalog } from './public-baseline-catalog.mjs'
 import { publicAuthoringLesson, publicControlRegistry, publicControlRegistryMetadata, interpretCapabilityIntent } from './authoring-control-registry.mjs'
@@ -6921,7 +6922,28 @@ async function handleHelpWorkflow(args = {}) {
 }
 
 async function handleHelpToolRecipe(args = {}) {
+	if (args.schemaFor) return publicToolSchemaRecipe(args)
 	return publicToolRecipe(args)
+}
+
+// tools/list advertises bounded schemas (public-schema-compaction.mjs); this is
+// the on-demand route to the complete public contract of one tool or sub-path.
+function publicToolSchemaRecipe(args = {}) {
+	const which = args.schemaKind === 'output' ? 'output' : 'input'
+	const detail = publicToolSchemaDetail(advertisedPublicTools({ fullSchemas: true }), canonicalToolName(String(args.schemaFor || '').trim()), { schemaPath: args.schemaPath, which })
+	if (!detail.ok) {
+		const choices = (detail.childFields || detail.availableTools || []).slice(0, 60)
+		throw Object.assign(new Error(`${detail.message}${choices.length ? ` Valid ${detail.childFields ? 'fields' : 'tools'}: ${choices.join(', ')}.` : ''}`), { code: detail.code })
+	}
+	const { ok: _ok, ...toolSchema } = detail
+	return {
+		schemaVersion: 'betterpptx.public-help.v2',
+		detail: 'full',
+		surface: 'schema',
+		designAuthority: 'ai',
+		toolSchema,
+		rule: 'The server validates arguments against this complete contract and returns exact corrections; request childFields paths for deeper detail.',
+	}
 }
 
 function handleOptionsCatalog(args = {}) {

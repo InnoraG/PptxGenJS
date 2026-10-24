@@ -143,7 +143,7 @@ test('nativeShapeLine exposes a closed linear stop contract without expanding co
 	const schema = structuredClone(deckSchema)
 	delete schema.$schema
 	const validateDeck = new Ajv({ allErrors: true, jsonPointers: true, unknownFormats: 'ignore', multipleOfPrecision: 8 }).compile(schema)
-	const generate = publicToolList(TOOLS).find(tool => tool.name === 'betterpptx.deck.generate_from_spec')
+	const generate = publicToolList(TOOLS, { fullSchemas: true }).find(tool => tool.name === 'betterpptx.deck.generate_from_spec')
 	const publicBlock = generate.inputSchema.properties.spec.properties.slides.items.properties.content.items
 	const validatePublic = new Ajv({ allErrors: true, multipleOfPrecision: 8 }).compile(publicBlock)
 	assert.deepEqual(CONNECTOR_STYLE_LINE_SCHEMA.oneOf[1].properties.type.enum, ['none', 'solid'])

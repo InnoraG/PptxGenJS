@@ -68,4 +68,6 @@ USER appuser
 EXPOSE 3344
 HEALTHCHECK --interval=15s --timeout=3s --start-period=20s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||process.env.BETTERPPTX_PORT||3344)+'/health').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
-CMD ["node", "betterpptx-mcp/server-http.mjs"]
+# The fast-start entry binds the port and answers health/OAuth discovery while
+# server-http.mjs loads in a child process, then hands the socket to it.
+CMD ["node", "betterpptx-mcp/http-fast-start.mjs"]

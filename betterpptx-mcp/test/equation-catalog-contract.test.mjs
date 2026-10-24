@@ -23,7 +23,7 @@ test('equation catalog is an unranked exact-id host command with a closed public
 	assert.equal(truth.capabilityMode, 'discrete')
 	assert.deepEqual(truth.componentOwnership, ['publicOperation', 'equationCatalog', 'exactIdValidation'])
 
-	const tool = publicToolList(TOOLS).find(entry => entry.name === 'betterpptx.equation.catalog')
+	const tool = publicToolList(TOOLS, { fullSchemas: true }).find(entry => entry.name === 'betterpptx.equation.catalog')
 	assert.ok(tool)
 	assert.equal(tool.inputSchema.additionalProperties, false)
 	assert.deepEqual(tool.inputSchema.properties.format.enum, ['summary', 'full'])

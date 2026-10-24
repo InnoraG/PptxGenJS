@@ -43,4 +43,4 @@ WORKDIR /app/betterpptx-mcp
 EXPOSE 3344
 
 ENTRYPOINT ["tini", "--"]
-CMD ["node", "server-http.mjs"]
+CMD ["node", "http-fast-start.mjs"]

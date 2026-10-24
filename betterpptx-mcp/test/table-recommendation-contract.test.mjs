@@ -23,7 +23,7 @@ test('table.recommend is an unranked exact-id catalog command', async () => {
 	assert.equal(truth.capabilityMode, 'discrete')
 	assert.deepEqual(truth.componentOwnership, ['publicOperation', 'tableCatalog', 'exactIdValidation'])
 
-	const tool = publicToolList(TOOLS).find(entry => entry.name === 'betterpptx.table.recommend')
+	const tool = publicToolList(TOOLS, { fullSchemas: true }).find(entry => entry.name === 'betterpptx.table.recommend')
 	assert.ok(tool)
 	assert.ok(tool.inputSchema.properties.tablePresetId)
 	assert.deepEqual(tool.inputSchema.properties.format.enum, ['summary', 'full'])
