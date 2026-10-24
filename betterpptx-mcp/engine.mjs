@@ -113,7 +113,7 @@ import {
 } from './connector-style-contract.mjs'
 import { CONNECTOR_EFFECT_FIELDS, connectorEffectsPublicReadback, patchConnectorEffects } from './connector-effects-contract.mjs'
 import { patchTextFill, textFillCompatibilityOptions } from './text-fill-contract.mjs'
-import { aspectLayoutPresetForSpec, buildSpecOperationPlan as buildSpecOperationPlanUnchecked, compactSpecPlan, operationResolutionRequirement, publicSpecCapabilityMatrix, autoSyncBuildCues, canonicalNarrationCue, NARRATION_CUE_ANCHOR_METHOD, TOOL_RESPONSE_VERSION, lowerHtmlAuthoringSurface, applyPowerpointNiceties, validateModel3DViewOptions, findPresenterPerformanceCollision, slideHasExplicitNarration, avatarArgsForObject } from './ir/spec-compiler.mjs'
+import { aspectLayoutPresetForSpec, buildSpecOperationPlan as buildSpecOperationPlanUnchecked, compactSpecPlan, operationResolutionRequirement, presenterPersonaResolutionRequirement, publicSpecCapabilityMatrix, autoSyncBuildCues, canonicalNarrationCue, NARRATION_CUE_ANCHOR_METHOD, TOOL_RESPONSE_VERSION, lowerHtmlAuthoringSurface, applyPowerpointNiceties, validateModel3DViewOptions, findPresenterPerformanceCollision, slideHasExplicitNarration } from './ir/spec-compiler.mjs'
 import { assertRuntimeEditableItemPair } from './ir/continuity-native-payload.mjs'
 import { assertSlideContinuityCommitMode } from './ir/slide-continuity-contract.mjs'
 import { finalizeContinuityReservations, reconcileFailedContinuityReservations } from './billing/spec-continuity-settlement.mjs'
@@ -738,14 +738,14 @@ const LONG_RUNNING_TOOLS = new Set([
 	'betterpptx.slide.add_avatar_narration',
 	// Narration preparation may synthesize several measured clips and assemble
 	// their authored gaps before a financial quote or final deck commit.
-	'betterpptx.narration.synthesize',
+	'betterpptx.narration.get_voice_timing',
 	// Contextual image generation can cold-start a private worker and is invoked
 	// inside deck.generate_from_spec; both front doors need the same bounded ceiling.
 	'betterpptx.assets.generate_image',
 	'betterpptx.deck.generate_from_spec',
 ])
 function toolTimeoutForName(name) {
-	if (name === 'betterpptx.narration.synthesize') return NARRATION_RESPONSE_TIMEOUT_MS
+	if (name === 'betterpptx.narration.get_voice_timing') return NARRATION_RESPONSE_TIMEOUT_MS
 	return LONG_RUNNING_TOOLS.has(name) ? LONG_TOOL_TIMEOUT_MS : TOOL_TIMEOUT_MS
 }
 const SESSION_DECKS_PER_HOUR = Math.max(1, Number(process.env.BETTERPPTX_SESSION_DECKS_PER_HOUR || 20))
@@ -3080,7 +3080,7 @@ function publicThemeSystemGuidance(args = {}) {
 				key: 'visualAssetEcosystem',
 				name: 'Visual Asset Ecosystem',
 				coverage: ['shape/icon geometry', 'imagery treatment', 'component blueprints', '3D/custom-geometry asset rules'],
-				tools: ['betterpptx.assets.catalog', 'betterpptx.assets.upload', 'betterpptx.assets.search_stock', 'betterpptx.assets.generate_model3d', 'betterpptx.custom_geometry.catalog', 'betterpptx.custom_geometry.from_svg', 'betterpptx.deck.generate_from_spec'],
+				tools: ['betterpptx.assets.catalog', 'betterpptx.assets.upload', 'betterpptx.assets.search_stock', 'betterpptx.custom_geometry.catalog', 'betterpptx.custom_geometry.from_svg', 'betterpptx.deck.generate_from_spec'],
 				checks: ['Assets are presentation-relevant, licensed or caller-provided, and have alt text or adjacent explanation.', 'Repeated components follow the same radius, border, shadow, and icon stroke rules.'],
 			},
 			{
@@ -3962,11 +3962,8 @@ function publicHelpRoutes(req = {}) {
 	if (req.features?.smartArt) optionalTools.add('betterpptx.smartart.catalog')
 	if (req.features?.equation) optionalTools.add('betterpptx.equation.catalog')
 	if (req.features?.media || req.features?.model3d) optionalTools.add('betterpptx.assets.catalog')
-	if (req.features?.model3d) optionalTools.add('betterpptx.assets.generate_model3d')
 	if (req.features?.avatar || req.features?.talkingHead) {
-		optionalTools.add('betterpptx.avatar.render_job')
-		optionalTools.add('betterpptx.avatar.job_status')
-		optionalTools.add('betterpptx.avatar.attach_result')
+		optionalTools.add('betterpptx.narration.get_voice_timing')
 		optionalTools.add('betterpptx.deck.validate_avatar_narration')
 	}
 	if (req.features?.customGeometry) {
@@ -5118,7 +5115,7 @@ function maintainerWorkflowGuidance(args = {}) {
 		...(f.charts || f.tables ? ['betterpptx.authoring.catalog', 'betterpptx.options.catalog'] : []),
 		...(f.smartArt ? ['betterpptx.smartart.catalog'] : []),
 		...(f.equation ? ['betterpptx.equation.catalog'] : []),
-		...(f.model3d ? ['betterpptx.assets.catalog', 'betterpptx.assets.generate_model3d'] : []),
+		...(f.model3d ? ['betterpptx.assets.catalog'] : []),
 		...(f.customGeometry ? ['betterpptx.custom_geometry.catalog', 'betterpptx.custom_geometry.from_svg'] : []),
 		...(f.narration ? ['betterpptx.narration.voices'] : []),
 	]
@@ -5200,7 +5197,7 @@ function maintainerWorkflowGuidance(args = {}) {
 		data: f.charts || f.tables ? ['betterpptx.authoring.catalog', 'betterpptx.options.catalog', 'betterpptx.deck.generate_from_spec'] : undefined,
 		motion: f.animation || f.timing ? ['betterpptx.deck.generate_from_spec'] : undefined,
 		narration: f.narration ? ['betterpptx.narration.voices', 'betterpptx.deck.generate_from_spec', 'betterpptx.deck.validate_narration'] : undefined,
-		model3d: f.model3d ? ['betterpptx.assets.catalog', 'betterpptx.assets.generate_model3d', 'betterpptx.deck.generate_from_spec'] : undefined,
+		model3d: f.model3d ? ['betterpptx.assets.catalog', 'betterpptx.deck.generate_from_spec'] : undefined,
 		customGeometry: f.customGeometry ? ['betterpptx.custom_geometry.catalog', 'betterpptx.deck.generate_from_spec'] : undefined,
 		annotations: f.ink || f.laser ? ['betterpptx.deck.generate_from_spec'] : undefined,
 		quality: ['betterpptx.deck.validate', 'betterpptx.deck.validate_design', 'betterpptx.deck.validate_accessibility', 'betterpptx.deck.validate_native_visuals', 'betterpptx.deck.validate_quality'],
@@ -5284,7 +5281,7 @@ function publicNarrationRecipe(detail = 'summary') {
 		},
 		sequence: [
 			{ tool: 'betterpptx.narration.voices', when: 'Check the current language/gender catalog and readiness facts before selecting a voice.' },
-			{ type: 'template', tool: 'betterpptx.narration.synthesize', missingInputs: ['text or ordered segments', 'eligible approved voice or explicit caller audio route', 'idempotencyKey for retries'], when: 'Prepare the exact script through the configured synthesis runtime before the final quote. The response measures each returned WAV segment and returns preparationId, manifestHandle, segment timing, and an assembled audio reference; discovery never starts synthesis.' },
+			{ type: 'template', tool: 'betterpptx.narration.get_voice_timing', missingInputs: ['text or ordered segments', 'eligible approved voice or explicit caller audio route', 'idempotencyKey for retries'], when: 'Prepare the exact script through the configured synthesis runtime before the final quote. The response measures each returned WAV segment and returns preparationId, manifestHandle, segment timing, and an assembled audio reference; discovery never starts synthesis.' },
 			{ type: 'executable-estimate-call', tool: 'betterpptx.billing.estimate', request: { toolName: 'betterpptx.deck.generate_from_spec', toolArgs: { plan: 'premium', spec: 'complete authored spec with preparedNarration reference' } }, when: 'Quote the final deck using the complete authored spec plus the prepared narration manifest. The result includes quoteBinding; it is a read-only final-cost calculation and must not synthesize or charge.' },
 			{ type: 'template', tool: 'betterpptx.deck.generate_from_spec', missingInputs: ['content/story/design choices', 'preparedNarration.manifestHandle and preparationId copied from the preparation response', 'quoteBinding copied unchanged from billing.estimate when required by deployment', 'cues and one timing authority', 'autoplay intent'], when: 'Compile the authored semantic spec with the exact prepared narration reference and quote binding. Final generation reuses the measured audio; it does not perform a second TTS call after the quote.' },
 			{ tool: 'betterpptx.deck.validate_narration', when: 'Verify audio packaging, measured duration, cue alignment, slide advance, autoplay, and conflicts before save.' },
@@ -5430,12 +5427,12 @@ function compactPublicToolRecipe(args = {}) {
 				{ step: 2, type: 'executable-readiness-call', tool: 'betterpptx.status', request: {}, when: 'Read caller authorization, service availability, and the current production/non-rendering save policy.' },
 				{ step: 3, type: 'authorization-step', missingInputs: ['authorized source image', 'explicit identity consent for this render', 'caller permission to use the selected identity'], when: 'Obtain the image and consent outside discovery. The presence of a photograph is not voice-cloning permission, and there is no default personal identity.' },
 				{ step: 4, type: 'executable-voice-call', tool: 'betterpptx.narration.voices', request: { language: 'en-US' }, when: 'Inspect eligible voices; catalog listing does not prove per-voice approval or synthesis success. Skip this call only when the caller explicitly supplies audio.' },
-				{ step: 5, type: 'executable-entitlement-check', tool: 'betterpptx.billing.estimate', request: { toolName: 'betterpptx.avatar.render_job' }, when: 'Confirm the bounded sponsored talking-head allowance before media generation. A covered free operation returns zero caller charge; an exhausted allowance returns the explicit next authorization boundary.' },
-				{ step: 6, type: 'authorization-step', missingInputs: ['approved zero-cost allowance or explicit paid authorization after exhaustion', 'approved voice/runtime or supplied audio'], when: 'Confirm entitlement and the selected voice/audio route before provider execution.' },
-				{ step: 7, type: 'template', tool: 'betterpptx.avatar.render_job', missingInputs: ['authorized uploaded source image', 'consentAffirmed:true', 'script plus eligible voice/language or supplied audio', 'quality and timing choices', 'idempotencyKey'], when: 'Start only after identity consent, the audio route, and the bounded allowance or explicit paid authorization are satisfied. The request must contain the actual user-approved inputs; no placeholder is executable.' },
-				{ step: 8, type: 'template', tool: 'betterpptx.avatar.job_status', missingInputs: ['jobId returned by the same render_job call'], when: 'Poll with bounded retries using the returned stable job ID until the supported terminal state is reached.' },
-				{ step: 9, type: 'result-check', source: 'betterpptx.avatar.job_status', requiredState: 'status:"succeeded"', requiredOutput: ['video.ref', 'video.posterRef', 'video.durationMs', 'video.extn'], when: 'Use the completed job response as the only source for the opaque asset, poster, and measured media metadata. Audio-track presence is verified from the completed media during attachment/package validation; a queued or failed job cannot be attached.' },
-				{ step: 10, type: 'template', tool: 'betterpptx.deck.generate_from_spec', request: { deckId: '<deckId>', commitMode: 'patch', phase: 'dryRun', spec: avatarAttachPatchSpec(0, { jobId: '<succeeded jobId>', script: '<the spoken script>', rect: { x: 9, y: 1.5, w: 3.5, h: 3.5 } }) }, missingInputs: ['deckId', 'slideIndex', 'script', 'rect in slide inches', 'exactly one of the succeeded jobId or its returned avatarAsset (video.ref)'], when: 'Attach the completed audiovisual asset with slides[].avatarNarration in a patch: dryRun, then commit. The compiler resolves the returned poster and writes the semantic video/playback/timing representation. The same avatarNarration block also works in createNew and append specs. Attaching is placement only; the render was billed by render_job.' },
+				{ step: 5, type: 'template', tool: 'betterpptx.narration.get_voice_timing', missingInputs: ['script or ordered segments', 'eligible approved voice', 'idempotencyKey'], when: 'Synthesize and measure the narration first; the talking-head video is driven by this measured audio. Skip only when the caller explicitly supplies audio.' },
+				{ step: 6, type: 'template', tool: 'betterpptx.deck.generate_from_spec', request: { phase: 'dryRun' }, missingInputs: ['slides[].avatarNarration with the authorized source image, consentAffirmed:true, and the prepared narration reference', 'presenter frame and timing choices'], when: 'Author the talking head in the spec and dry-run it. The dry run reports the media that phase:"resolve" will render.' },
+				{ step: 7, type: 'executable-entitlement-check', tool: 'betterpptx.billing.estimate', request: { toolName: 'betterpptx.deck.generate_from_spec' }, when: 'Quote the spec. A covered talking head draws on the bounded identity-media allowance with zero caller charge; an exhausted allowance returns the explicit paid alternative.' },
+				{ step: 8, type: 'template', tool: 'betterpptx.deck.generate_from_spec', request: { phase: 'resolve', billingConfirmed: true }, missingInputs: ['the same spec', 'idempotencyKey'], when: 'Render the talking-head video. A long render returns an operationId: poll betterpptx.operation.status, or repeat the identical request with the same key, until it completes with lockedSpec.' },
+				{ step: 9, type: 'result-check', source: 'betterpptx.deck.generate_from_spec', requiredState: 'resolution.locked:true', requiredOutput: ['lockedSpec'], when: 'Use the returned lockedSpec unchanged; it carries the rendered video, poster, and measured duration.' },
+				{ step: 10, type: 'template', tool: 'betterpptx.deck.generate_from_spec', request: { phase: 'commit' }, missingInputs: ['lockedSpec from step 9', 'quoteBinding when required'], when: 'Commit the locked spec. The compiler places the video, embeds its audio once, writes the playback/timing contract, and keeps the script in speaker notes.' },
 				{ step: 11, type: 'template', tool: 'betterpptx.deck.validate_avatar_narration', missingInputs: ['deckId'], when: 'Verify video/audio tracks, measured duration metadata, relationships, poster, notes, timing commands, and slide advance without claiming PowerPoint visual or perceptual lip-sync review.' },
 				{ step: 12, type: 'environment-policy-step', tool: 'betterpptx.deck.save', missingInputs: ['deckId', 'idempotencyKey'], when: verification.rendererRequiredForSave ? 'Save only after current-version validation and complete release PowerPoint preview of the frozen package.' : 'Save after current-version deterministic validation; production intentionally does not require hosted PowerPoint preview and records renderPerformed:false.' },
 			],
@@ -5446,17 +5443,12 @@ function compactPublicToolRecipe(args = {}) {
 				timing: 'Use measured completed media duration, authored integer-millisecond anchors, supported cues, and one explicit timing authority. Estimates do not establish measured or word-level alignment accuracy.',
 			},
 			attachment: {
-				status: 'public',
-				tool: 'betterpptx.deck.generate_from_spec',
-				field: 'slides[].avatarNarration',
-				requiredFields: ['deckId', 'slides[].slideIndex', 'avatarNarration.script', 'avatarNarration.rect'],
-				assetSelector: 'exactly one of avatarNarration.jobId or avatarNarration.avatarAsset',
-				directAttachTool: 'betterpptx.avatar.attach_result returns AVATAR_ATTACH_SPEC_ROUTE with this exact patch request; it does not edit decks directly.',
-				jobIdSource: 'betterpptx.avatar.render_job → betterpptx.avatar.job_status',
-				avatarAssetSource: 'video.ref from a succeeded job status response',
-				posterRule: 'The completed job supplies the poster; public clients do not provide a host filesystem path or guess a cover field.',
+				status: 'compiled',
+				route: 'deck.generate_from_spec phase:"resolve" renders, commit places',
+				specField: 'slides[].avatarNarration',
+				posterRule: 'The render supplies the poster; public clients do not provide a host filesystem path or guess a cover field.',
 			},
-			jobSemantics: { states: ['queued', 'running', 'succeeded', 'failed'], retry: 'same idempotency key and same logical request', duplicateProtection: 'identical requests are cache-aware/idempotent where the service reports it' },
+			jobSemantics: { states: ['queued', 'running', 'succeeded', 'failed'], retry: 'same idempotency key and same spec', duplicateProtection: 'a repeated resolve with the same key reuses the same render and allowance reservation' },
 			validation: ['actual video and audio tracks', 'positive measured duration', 'package relationships and poster', 'notes and supported playback settings', 'one audio representation and one timing authority', 'no duplicate standalone narration for the same embedded audio'],
 			readiness: ['source-image authorization and consent', 'voice/runtime or supplied-audio availability', 'bounded sponsored allowance or explicit paid authorization after exhaustion', 'service execution state', 'per-presentation media/timing validation', 'deployment-selected save policy'],
 			fallbacks: ['Choose explicit voice-only narration or supplied audio when talking-head rendering is unavailable.', 'Choose an existing compatible native 3D presenter only when the user wants a 3D character and the caller has an approved selectable identity.', 'Never silently substitute a poster, static image, native 3D presenter, or notes-only result for a requested talking-head video.'],
@@ -5488,8 +5480,8 @@ function compactPublicToolRecipe(args = {}) {
 			purpose: 'Generate a new personalized animation-ready 3D character only for explicitly authorized experimental use; this route is not the production path for an existing 3D presenter.',
 			sequence: [
 				{ step: 1, type: 'executable-readiness-call', tool: 'betterpptx.help.capabilities', request: { detail: 'full' }, when: 'Read the stage-level maturity and current blockers.' },
-				{ step: 2, type: 'template', tool: 'betterpptx.assets.generate_rigged3d', missingInputs: ['two to four approved multiview body image handles', 'experimentalConfirmed:true', 'idempotencyKey', 'bounded sponsored allowance or explicit paid authorization after exhaustion'], when: 'Call only after identity consent, experimental acceptance, multiview asset checks, and the current allowance/readiness gates pass. This route must not be inferred from an ordinary 3D-presenter request.' },
-				{ step: 3, type: 'blocked-until-evidence', tool: 'betterpptx.deck.generate_from_spec', missingInputs: ['verified rig, deformation, presenter-motion compatibility, package, and release evidence'], when: 'Do not treat the generated geometry as a production presenter until every required stage is verified.' },
+				{ step: 2, type: 'template', tool: 'betterpptx.deck.generate_from_spec', request: { phase: 'resolve', billingConfirmed: true }, missingInputs: ['presenter.persona.fromImages with two to four approved multiview body image handles', 'presenter.persona.experimentalConfirmed:true', 'idempotencyKey', 'bounded identity-media allowance or explicit paid authorization after exhaustion'], when: 'Call only after identity consent and experimental acknowledgement. A long build returns an operationId to poll with betterpptx.operation.status. The built model is locked into presenter.model in the returned lockedSpec.' },
+				{ step: 3, type: 'template', tool: 'betterpptx.deck.generate_from_spec', request: { phase: 'commit' }, missingInputs: ['lockedSpec from step 2'], when: 'Commit the locked spec. Commit never substitutes a built-in presenter for an unbuilt persona; verify rig, deformation, and motion compatibility before treating it as production quality.' },
 			],
 			stageReadiness: PUBLIC_PERSONA_CAPABILITY_CONTRACT.capabilities.find(capability => capability.id === 'rigged-persona-generation')?.stageReadiness || [],
 			recovery: ['Use an existing compatible 3D presenter for production.', 'If an experimental stage is unavailable or unknown, preserve the source and report that exact stage rather than silently falling back to Avatar or a static poster.'],
@@ -5566,7 +5558,7 @@ function compactPublicToolRecipe(args = {}) {
 			limitations: ['Merged cells are rejected in v1 because each cell is an independent editable target.', 'Synergy interaction requires a compatible presenter with empirical motion timing; discovery and ordinary table animation do not trigger provider work.', 'Use table-panel instead when one native table carrier and lookup semantics are more important than independent row/cell timing.'],
 			lesson: publicAuthoringLesson('animated-table-synergy'),
 		},
-		model3d: { surface: '3d', purpose: 'Choose an editable 3D asset only when it strengthens the story.', sequence: [{ tool: 'betterpptx.assets.catalog', when: 'Inspect unranked opaque 3D asset handles.' }, { tool: 'betterpptx.assets.generate_model3d', when: 'Resolve an explicitly chosen compatible 3D asset when the catalog does not supply it.' }, authorStep('Put the exact opaque handle and an exact AI-authored frame on the model3d block.', ['content[].kind', 'content[].modelAsset', 'content[].rect', 'selectionManifest'])] },
+		model3d: { surface: '3d', purpose: 'Choose an editable 3D asset only when it strengthens the story.', sequence: [{ tool: 'betterpptx.assets.catalog', when: 'Inspect unranked opaque 3D asset handles.' }, { tool: 'betterpptx.deck.generate_from_spec', when: 'Author a model3d block with the chosen handle, or with a story query the compiler resolves to licensed stock at commit.' }, authorStep('Put the exact opaque handle and an exact AI-authored frame on the model3d block.', ['content[].kind', 'content[].modelAsset', 'content[].rect', 'selectionManifest'])] },
 		customgeometry: { surface: 'customGeometry', purpose: 'Use editable custom geometry without exposing or authoring unsafe raw XML.', sequence: [{ tool: 'betterpptx.custom_geometry.catalog', when: 'Inspect unranked typed custom-geometry choices.' }, authorStep('Author the customGeometry block and its exact AI-authored frame.', ['content[].kind', 'content[].handle', 'content[].rect', 'selectionManifest'])] },
 		structural: {
 			surface: 'structural',
@@ -5702,7 +5694,7 @@ function publicToolRecipe(args = {}) {
 				recipe('betterpptx.slide.add_text', 'Create named visual/text targets before narration cues.', ['objectName on cue targets']),
 				recipe('betterpptx.slide.add_shape', 'Create panels, markers, or emphasis targets before narration cues.', ['objectName on cue targets']),
 				recipe('betterpptx.narration.voices', 'Select a voice when synthesis is needed.'),
-				recipe('betterpptx.narration.synthesize', 'Prepare and measure the exact narration clips before quotation; reuse the returned opaque preparation manifest during final generation.', ['text|segments[]', 'voice', 'lang', 'segments[].gapBeforeMs/gapAfterMs', 'idempotencyKey']),
+				recipe('betterpptx.narration.get_voice_timing', 'Prepare and measure the exact narration clips before quotation; reuse the returned opaque preparation manifest during final generation.', ['text|segments[]', 'voice', 'lang', 'segments[].gapBeforeMs/gapAfterMs', 'idempotencyKey']),
 				recipe('betterpptx.billing.estimate', 'Quote the final deck with the returned preparation manifest. Reuse carries no duplicate synthesis charge.', ['toolName:"betterpptx.deck.generate_from_spec"', 'toolArgs.spec', 'preparedNarration.manifestHandle']),
 				recipe('betterpptx.slide.add_narration', 'Attach per-slide narration and cue timing.', ['deckId', 'slideIndex', 'audio or script', 'timing:{expectedDurationMs,startDelayMs,paddingMs,cues}']),
 				recipe('betterpptx.deck.autoplay', 'Set show timing after narration durations are known.', ['paddingMs', 'loop']),
@@ -5780,7 +5772,6 @@ function publicToolRecipe(args = {}) {
 			sequence: [
 				recipe('betterpptx.deck.generate_from_spec', 'FRONT-DOOR: author a model3d block with just a story query (+ optional intent/useCase/sizePolicy) and the compiler resolves the best native Microsoft Stock model for you — no separate catalog round-trip. It inherits the world 3D dynamic automatically.', ['content[].kind=model3d', 'query', 'intent', 'sizePolicy']),
 					recipe('betterpptx.assets.catalog', 'ALTERNATIVE: search the catalog yourself when you want to pick the exact model handle.', ['query', 'kind']),
-				recipe('betterpptx.assets.generate_model3d', 'Select a catalog asset or compatible external import.', ['context', 'kind', 'assetSource', 'licensePolicy']),
 				recipe('betterpptx.slide.add_model3d', 'Place the model with camera, transform, lighting, poster, and objectName. Accepts modelAsset (a resolved handle) OR a semantic query the engine resolves itself.', ['modelAsset', 'query', 'x', 'y', 'w', 'h', 'model3d']),
 				recipe('betterpptx.slide.animate_shapes', 'Add model-aware motion when useful.', ['target objectName', 'effect']),
 			],
@@ -6369,7 +6360,7 @@ function publicCapabilityPlan(args = {}) {
 		pushOptionalTools('betterpptx.assets.catalog', 'betterpptx.custom_geometry.catalog', 'betterpptx.custom_geometry.inspect', 'betterpptx.custom_geometry.from_svg')
 	}
 	if (threeD) {
-		pushOptionalTools('betterpptx.assets.catalog', 'betterpptx.assets.generate_model3d', 'betterpptx.smartart.catalog', 'betterpptx.equation.catalog')
+		pushOptionalTools('betterpptx.assets.catalog', 'betterpptx.smartart.catalog', 'betterpptx.equation.catalog')
 	}
 	const exposedOptionalTools = optionalTools.filter(isPublicToolAllowed)
 	return {
@@ -7001,7 +6992,7 @@ async function handleAuthStatus(_args = {}, context = {}) {
 				: 'session-only'
 	const [deckPublications, narrationPreparations, talkingHeads, rigged3dPersonas] = await Promise.all([
 		getFreeValueStatus('betterpptx.deck.save', {}, context),
-		getFreeValueStatus('betterpptx.narration.synthesize', {}, context),
+		getFreeValueStatus('betterpptx.narration.get_voice_timing', {}, context),
 		getFreeValueStatus('betterpptx.avatar.render_job', {}, context),
 		getFreeValueStatus('betterpptx.assets.generate_rigged3d', { imageHandles: ['eligible://front', 'eligible://side'] }, context),
 	])
@@ -8718,6 +8709,64 @@ async function resolveSpecAvatarAsset(op = {}, rootArgs = {}, context = {}) {
 	return { rendered, lockedVideo, lockedPoster, lockedAudio }
 }
 
+// Identity media resolved inside a spec draws on the same rolling free
+// allowance as the standalone media routes it replaced, keyed per item so a
+// resolve retry with the same idempotency key reuses the reservation.
+function specIdentityMediaIdempotencyKey(rootArgs = {}, item = '') {
+	const base = String(rootArgs.idempotencyKey || rootArgs.idempotency_key || '').trim()
+	return base ? `${base}:${item}` : ''
+}
+
+async function withSpecIdentityMediaAllowance(accountingTool, args, context, run) {
+	const reservation = await reserveFreeValue(accountingTool, args, context)
+	try {
+		const result = await run()
+		if (reservation) {
+			const committed = await commitFreeValue(reservation, { tool: accountingTool, route: 'deck.generate_from_spec:resolve' })
+			if (!committed?.ok) throw Object.assign(new Error('The free-value reservation could not be committed.'), {
+				code: committed?.code || 'FREE_VALUE_COMMIT_FAILED',
+				details: committed || {},
+			})
+		}
+		return result
+	} catch (err) {
+		if (reservation) await releaseFreeValue(reservation).catch(() => {})
+		throw err
+	}
+}
+
+function presenterPersonaGenerationArgs(spec = {}, rootArgs = {}) {
+	const persona = spec.presenter?.persona || {}
+	const imageHandles = persona.fromImages.filter(value => typeof value === 'string' && value.trim())
+	return {
+		imageHandles,
+		experimentalConfirmed: persona.experimentalConfirmed === true,
+		...(persona.heightMeters !== undefined ? { heightMeters: persona.heightMeters } : {}),
+		...(persona.production === true ? { production: true } : {}),
+		...(rootArgs.billingConfirmed === true ? { billingConfirmed: true } : {}),
+		idempotencyKey: specIdentityMediaIdempotencyKey(rootArgs, 'presenter-persona'),
+	}
+}
+
+async function resolveSpecPresenterPersona(lockedSpec = {}, rootArgs = {}, context = {}) {
+	const name = 'betterpptx.assets.generate_rigged3d'
+	const args = presenterPersonaGenerationArgs(lockedSpec, rootArgs)
+	const entitlementGate = requireEntitlement(name, args, context, {})
+	if (entitlementGate) throwSpecEntitlementFailure({ ok: false, error: entitlementGate.error })
+	return withSpecIdentityMediaAllowance(name, args, context, async () => {
+		const gate = await preflightBillingReservation({ name, args, context, entry: null, billingEntitlement: getBillingEntitlement(context) })
+		try {
+			const generated = await handleGenerateRigged3d(args, context)
+			if (!generated?.handle) throw Object.assign(new Error('Custom presenter persona generation returned no model.'), { code: 'PRESENTER_PERSONA_FAILED' })
+			await finalizeBillingReservation({ gate, name, args, result: generated })
+			return generated
+		} catch (err) {
+			await releaseBillingReservation({ gate, reason: err?.code || 'presenter-persona-failed-before-value' })
+			throw err
+		}
+	})
+}
+
 async function resolveCompiledSpecAssets(compiled = {}, rootArgs = {}, context = {}) {
 	const lockedSpec = cloneSpecJson(rootArgs.spec)
 	const resolvedAssets = []
@@ -8738,6 +8787,12 @@ async function resolveCompiledSpecAssets(compiled = {}, rootArgs = {}, context =
 			},
 			auditSummary: templateResolution.auditSummary,
 		})
+	}
+	if (presenterPersonaResolutionRequirement(lockedSpec)) {
+		const persona = await resolveSpecPresenterPersona(lockedSpec, rootArgs, context)
+		lockedSpec.presenter.model = persona.handle
+		lockedSpecPatch.push({ op: 'merge', path: '/presenter', value: { model: persona.handle } })
+		resolvedAssets.push({ kind: 'presenterPersona', handle: persona.handle, rigged: persona.rigged === true })
 	}
 	for (let operationIndex = 0; operationIndex < (compiled.operations || []).length; operationIndex += 1) {
 		const op = compiled.operations[operationIndex]
@@ -8878,11 +8933,11 @@ async function resolveCompiledSpecAssets(compiled = {}, rootArgs = {}, context =
 					}
 					resolved = { audio: prepared.audio, textHash: prepared.manifest.scriptDigest, provider: null, preparedNarration: prepared.preparedNarration }
 				} else if (inlineScriptRequested && !suppliedAudioRequested && isPublicBlackBoxMode() && !isLocalMaintainerMode() && rootArgs.allowInlineSynthesis !== true) {
-					const error = new Error('Narrated final generation requires a measured preparation from betterpptx.narration.synthesize; inline synthesis after the quote is not permitted.')
+					const error = new Error('Narrated final generation requires a measured preparation from betterpptx.narration.get_voice_timing; inline synthesis after the quote is not permitted.')
 					error.code = 'NARRATION_PREPARATION_REQUIRED'
 					error.details = {
 						status: 'preparation_required_before_quote',
-						tool: 'betterpptx.narration.synthesize',
+						tool: 'betterpptx.narration.get_voice_timing',
 						recovery: 'Prepare the exact script/segments first, carry manifestHandle and preparationId into the narration block, then request the final quote and commit.',
 					}
 					throw error
@@ -8932,7 +8987,13 @@ async function resolveCompiledSpecAssets(compiled = {}, rootArgs = {}, context =
 					resolvedAssets.push({ kind: 'audio', slideIndex: op.slideIndex, slideId: op.slideId, objectName: op.objectName, lockedAudio, textHash: resolved.textHash || null, warnings: publicNarrationWarnings(resolved.warnings) })
 				}
 			} else {
-				const avatar = await resolveSpecAvatarAsset(op, rootArgs, context)
+				const avatarAllowanceArgs = {
+					avatar: op.args?.avatar,
+					script: op.args?.script,
+					slideIndex: op.slideIndex,
+					idempotencyKey: specIdentityMediaIdempotencyKey(rootArgs, `talking-head:${op.slideIndex}:${op.objectName || ''}`),
+				}
+				const avatar = await withSpecIdentityMediaAllowance('betterpptx.avatar.render_job', avatarAllowanceArgs, context, () => resolveSpecAvatarAsset(op, rootArgs, context))
 				const patch = mergeAvatarLockIntoSpec(lockedSpec, op, {
 					lockedVideo: avatar.lockedVideo,
 					lockedPoster: avatar.lockedPoster,
@@ -12187,6 +12248,17 @@ async function handleGenerateFromSpec(args = {}, context = {}) {
 			const suppliedAudio = Boolean(narrationAudioInputHasSource(operation.args?.audio)) || (segments.length > 0 && segments.every(segment => narrationAudioInputHasSource(segment?.audio ?? segment?.lockedAudio)))
 			return !suppliedAudio
 		})
+	if (phase === 'commit' && presenterPersonaResolutionRequirement(args.spec)) {
+		throwSpecCompileFailed('The custom presenter persona has not been built yet.', {
+			errors: [{
+				code: 'PRESENTER_PERSONA_RESOLVE_REQUIRED',
+				severity: 'error',
+				fallbackApplied: false,
+				message: 'presenter.persona.fromImages is built during phase:"resolve"; commit never substitutes a built-in presenter.',
+				fix: 'Run phase:"resolve" with billingConfirmed:true and an idempotencyKey, poll betterpptx.operation.status if it returns an operationId, then commit the returned lockedSpec.',
+			}],
+		})
+	}
 	if (phase === 'commit' && requiresNarrationSynthesis) {
 		const runtime = await probeSynthesisRuntime()
 		if (!runtime.ok) {
@@ -34131,7 +34203,7 @@ async function materializeGeneratedRigged3dOptions(options, deckId) {
 	if (!parsed) return options
 	const cached = getCachedGeneratedRigged3d(parsed.hash)
 	if (!cached) {
-		throw new Error(`${String(source)} was not generated in this session — call betterpptx.assets.generate_rigged3d first, then use the returned handle as glbFile.`)
+		throw new Error(`${String(source)} was not generated in this session — build the persona with presenter.persona.fromImages in phase:"resolve", then commit the returned lockedSpec.`)
 	}
 	recordResourceLabels({ model3dGenProvider: cached.provider, model3dGenModel: cached.model, model3dGenMeshResolution: cached.meshResolution })
 	// Reuse the generic deck asset-license registry (generated content has no author/sourceUrl).
@@ -35921,11 +35993,11 @@ async function resolvePreparedNarration(value = {}) {
 	await authorizeAssetReferences(value)
 	const reference = preparedNarrationReference(value)
 	if (!reference.manifestHandle) {
-		const error = new Error('A measured narration preparation requires manifestHandle from betterpptx.narration.synthesize.')
+		const error = new Error('A measured narration preparation requires manifestHandle from betterpptx.narration.get_voice_timing.')
 		error.code = 'NARRATION_PREPARATION_REQUIRED'
 		error.details = {
 			status: 'preparation_handle_missing',
-			nextAction: { tool: 'betterpptx.narration.synthesize', reason: 'Prepare and measure the narration before requesting a quote or final generation.' },
+			nextAction: { tool: 'betterpptx.narration.get_voice_timing', reason: 'Prepare and measure the narration before requesting a quote or final generation.' },
 		}
 		throw error
 	}
@@ -42123,7 +42195,7 @@ const HANDLERS = {
 	'betterpptx.deck.add_narration': handleDeckAddNarration,
 	'betterpptx.deck.add_avatar_narration': handleDeckAddAvatarNarration,
 	'betterpptx.narration.voices': handleNarrationVoices,
-	'betterpptx.narration.synthesize': handleNarrationSynthesize,
+	'betterpptx.narration.get_voice_timing': handleNarrationSynthesize,
 	'betterpptx.avatar.render_job': handleAvatarRenderJob,
 	'betterpptx.avatar.job_status': handleAvatarJobStatus,
 	'betterpptx.avatar.attach_result': handleAvatarAttachResult,
@@ -42229,7 +42301,7 @@ const HEAVY_TOOLS = new Set([
 	'betterpptx.slide.preview',
 	'betterpptx.deck.add_narration',
 	'betterpptx.slide.add_narration',
-	'betterpptx.narration.synthesize',
+	'betterpptx.narration.get_voice_timing',
 	// Model-backed avatar jobs are value-producing GPU work. Keeping the job
 	// entrypoint in the durable-operation class lets queued deployments accept
 	// an idempotency key before any worker execution begins.
@@ -42240,6 +42312,25 @@ const HEAVY_TOOLS = new Set([
 	'betterpptx.assets.generate_model3d',
 	'betterpptx.assets.generate_rigged3d',
 ])
+// A spec resolve that renders identity media (talking-head video or a custom
+// persona) runs as long as the media tools it replaces, so it shares their
+// heavy queue class and durable-operation lease.
+function specResolveRendersIdentityMedia(spec = {}) {
+	if (!spec || typeof spec !== 'object') return false
+	if (presenterPersonaResolutionRequirement(spec)) return true
+	return (Array.isArray(spec.slides) ? spec.slides : []).some(slide => {
+		const blocks = [slide?.avatarNarration, ...(Array.isArray(slide?.content) ? slide.content.filter(item => item?.kind === 'avatarNarration') : [])]
+		return blocks.some(block => block && typeof block === 'object' && !block.avatarAsset && !block.jobId && !block.lockedVideo)
+	})
+}
+
+function isHeavyInvocation(name, args = {}) {
+	if (HEAVY_TOOLS.has(name)) return true
+	if (name !== 'betterpptx.deck.generate_from_spec') return false
+	const phase = String(args.phase || '').trim().toLowerCase().replace(/[-_\s]/g, '')
+	return ['resolve', 'lock', 'lockmedia'].includes(phase) && specResolveRendersIdentityMedia(args.spec)
+}
+
 let _heavyActive = 0
 const _heavyQueue = []
 function acquireHeavy() {
@@ -42395,7 +42486,7 @@ const IDEMPOTENT_SESSION_MUTATION_TOOLS = new Set([
 	'betterpptx.deck.open_uploaded',
 	'betterpptx.deck.dispose',
 	'betterpptx.io.write_file',
-	'betterpptx.narration.synthesize',
+	'betterpptx.narration.get_voice_timing',
 	'betterpptx.avatar.render_job',
 	'betterpptx.assets.upload',
 	'betterpptx.sketchfab.import',
@@ -42751,7 +42842,7 @@ function supportsSessionIdempotency(name, args = {}) {
 	// Long-running identity media and narration use the durable operation ledger
 	// when configured. A process-local session record must not mask the durable
 	// result after the MCP transport or worker reconnects.
-	if (['betterpptx.avatar.render_job', 'betterpptx.narration.synthesize'].includes(name) && hasIdempotencyKey(args) && durableOperationStoreEnabled()) return false
+	if (['betterpptx.avatar.render_job', 'betterpptx.narration.get_voice_timing'].includes(name) && hasIdempotencyKey(args) && durableOperationStoreEnabled()) return false
 	return IDEMPOTENT_SESSION_MUTATION_TOOLS.has(name)
 }
 
@@ -42796,7 +42887,7 @@ function supportsDurableOperationLedger(name, args = {}) {
 		DECK_CREATION_TOOLS.has(name)
 		|| supportsDeckIdempotency(name, args)
 		|| supportsDeckIdempotencyReplay(name, args)
-		|| HEAVY_TOOLS.has(name),
+		|| isHeavyInvocation(name, args),
 	)
 }
 
@@ -42814,9 +42905,9 @@ function durableOperationQueuedTakeoverMs() {
 	return Math.max(1000, Number(process.env.BETTERPPTX_DURABLE_OPERATION_QUEUED_TAKEOVER_MS || 15000))
 }
 
-function durableOperationLeaseMs(name) {
+function durableOperationLeaseMs(name, args = {}) {
 	const base = Number(process.env.BETTERPPTX_DURABLE_OPERATION_LEASE_MS || 10 * 60 * 1000)
-	const heavy = HEAVY_TOOLS.has(name) ? Number(process.env.BETTERPPTX_DURABLE_HEAVY_OPERATION_LEASE_MS || 30 * 60 * 1000) : base
+	const heavy = isHeavyInvocation(name, args) ? Number(process.env.BETTERPPTX_DURABLE_HEAVY_OPERATION_LEASE_MS || 30 * 60 * 1000) : base
 	return Math.max(1000, Number.isFinite(heavy) ? heavy : base)
 }
 
@@ -42839,7 +42930,7 @@ function durableOperationInput(name, args = {}, context = {}) {
 		expectedDeckVersion: Number.isNaN(expectedDeckVersion) ? null : expectedDeckVersion,
 		inputDigest,
 		pricingInputDigest: '',
-		queueClass: HEAVY_TOOLS.has(name) ? 'heavy' : 'default',
+		queueClass: isHeavyInvocation(name, args) ? 'heavy' : 'default',
 		idempotencyKey: getIdempotencyKey(args),
 		metadata: {
 			phase: String(args.phase || (args.dryRun === true ? 'dryRun' : 'commit')),
@@ -43005,7 +43096,7 @@ async function beginDurableOperation(name, args = {}, context = {}) {
 	try {
 		const claim = await _operationStore.claimOperation(operation.operationId, {
 			leaseOwner: `${process.pid}:${context.sessionId || 'stdio-default'}`,
-			leaseMs: durableOperationLeaseMs(name),
+			leaseMs: durableOperationLeaseMs(name, args),
 		})
 		if (!claim.claimed && claim.terminal && claim.operation?.state === 'succeeded') {
 			return { replayResult: await durableOperationSuccessResult(claim.operation, name, args) }
@@ -43137,7 +43228,7 @@ export async function runDurableOperationById(operationId, { leaseOwner = '' } =
 	try {
 		claim = await _operationStore.claimOperation(id, {
 			leaseOwner: leaseOwner || `worker:${process.pid}`,
-			leaseMs: durableOperationLeaseMs(existing.toolName),
+			leaseMs: durableOperationLeaseMs(existing.toolName, request.args),
 		})
 	} catch (err) {
 		if (err?.code === 'OPERATION_ALREADY_LEASED') return publicDurableOperationStatus(existing)
@@ -43426,40 +43517,39 @@ function publicNextActionsForError(code, details = {}) {
 			]
 		case 'AVATAR_JOB_NOT_READY':
 			return [
-				{ type: 'poll_status', tool: 'betterpptx.avatar.job_status', description: 'Poll the avatar render job until it succeeds before attaching it.' },
+				{ type: 'poll_status', tool: 'betterpptx.operation.status', description: 'Poll the resolve operation until the talking-head render completes, then commit the returned lockedSpec.' },
 			]
 		case 'AVATAR_JOB_REQUIRED':
 			return [
-				{ type: 'start_job', tool: 'betterpptx.avatar.render_job', description: 'Start an avatar render job, poll it, then attach the completed result.' },
-				{ type: 'attach_result', tool: 'betterpptx.deck.generate_from_spec', description: 'After the job succeeds, attach it with commitMode:"patch" and slides[].avatarNarration { jobId, script, rect }.' },
+				{ type: 'resolve_media', tool: 'betterpptx.deck.generate_from_spec', description: 'Render the talking head with phase:"resolve", billingConfirmed:true and an idempotencyKey, then commit the returned lockedSpec.' },
 			]
 		case 'NARRATION_SYNTHESIS_RUNTIME_UNAVAILABLE':
 		case 'NARRATION_SYNTHESIS_RUNTIME_TIMEOUT':
 			return [
 				{ type: 'check_readiness', tool: 'betterpptx.narration.voices', description: 'Check synthesisRuntimeAvailable, mode, and productionReady; retry synthesis only when the configured runtime is available.' },
-				{ type: 'retry_preparation', tool: 'betterpptx.narration.synthesize', description: 'Retry the same bounded preparation request with its idempotencyKey after the approved synthesis runtime recovers.' },
+				{ type: 'retry_preparation', tool: 'betterpptx.narration.get_voice_timing', description: 'Retry the same bounded preparation request with its idempotencyKey after the approved synthesis runtime recovers.' },
 			]
 		case 'NARRATION_SYNTHESIS_FAILED':
 			return [
-				{ type: 'inspect_preparation', tool: 'betterpptx.narration.synthesize', description: 'Correct the rejected preparation input or voice selection, then retry with the same idempotencyKey only when the request is unchanged.' },
+				{ type: 'inspect_preparation', tool: 'betterpptx.narration.get_voice_timing', description: 'Correct the rejected preparation input or voice selection, then retry with the same idempotencyKey only when the request is unchanged.' },
 			]
 		case 'NARRATION_PREPARATION_REQUIRED':
 		case 'NARRATION_PREPARATION_EXPIRED':
 		case 'NARRATION_PREPARATION_INVALID':
 		case 'NARRATION_PREPARATION_TIMING_MISMATCH':
 			return [
-				{ type: 'prepare_measured_audio', tool: 'betterpptx.narration.synthesize', description: 'Prepare the exact script/segments again, then copy the returned preparationId, manifestHandle, and manifestDigest into the narrated spec before requesting the final quote.' },
+				{ type: 'prepare_measured_audio', tool: 'betterpptx.narration.get_voice_timing', description: 'Prepare the exact script/segments again, then copy the returned preparationId, manifestHandle, and manifestDigest into the narrated spec before requesting the final quote.' },
 				{ type: 'inspect_voice_readiness', tool: 'betterpptx.narration.voices', description: 'Confirm the selected voice remains catalogued, runtime-ready, caller-authorized, and production-approved before retrying preparation.' },
 			]
 		case 'QUOTE_BINDING_REQUIRED':
 			return [
 				{ type: 'request_final_quote', tool: 'betterpptx.billing.estimate', description: 'Request the final read-only quote with the exact authored spec and prepared narration manifest, then copy its complete quoteBinding into generate_from_spec.' },
-				{ type: 'inspect_preparation', tool: 'betterpptx.narration.synthesize', description: 'If narration is present, prepare and measure the exact script first; the final quote cannot be created from notes or an estimated duration.' },
+				{ type: 'inspect_preparation', tool: 'betterpptx.narration.get_voice_timing', description: 'If narration is present, prepare and measure the exact script first; the final quote cannot be created from notes or an estimated duration.' },
 			]
 		case 'QUOTE_BINDING_MISMATCH':
 			return [
 				{ type: 'request_fresh_quote', tool: 'betterpptx.billing.estimate', description: 'Request a new quote for the unchanged final spec and exact prepared narration manifest, then pass its quoteBinding unchanged.' },
-				{ type: 'preserve_prepared_audio', tool: 'betterpptx.narration.synthesize', description: 'Do not synthesize again unless the script, voice, or segment inputs changed; reuse the valid preparation manifest.' },
+				{ type: 'preserve_prepared_audio', tool: 'betterpptx.narration.get_voice_timing', description: 'Do not synthesize again unless the script, voice, or segment inputs changed; reuse the valid preparation manifest.' },
 			]
 		case 'IMAGE_GENERATION_UNAVAILABLE_IN_PRODUCTION':
 			return [
@@ -44213,7 +44303,7 @@ async function callBetterPptxToolInScope(name, args = {}, context = {}) {
 		const result = buildToolErrorResult(err, internalName, args)
 		return finishToolCall(trace, internalName, result)
 	}
-	const heavy = HEAVY_TOOLS.has(internalName)
+	const heavy = isHeavyInvocation(internalName, args)
 	const asyncValueBilling = isAsyncValueBillingTool(internalName, args)
 	if (heavy) {
 		try { await acquireHeavy() }
@@ -44234,7 +44324,7 @@ async function callBetterPptxToolInScope(name, args = {}, context = {}) {
 	const runToCompletion = async () => {
 	try {
 		const assetProductionSource = ['betterpptx.assets.upload', 'betterpptx.bundle.import'].includes(internalName) ? 'upload'
-			: (/^betterpptx\.assets\.generate_/.test(internalName) || ['betterpptx.narration.synthesize', 'betterpptx.avatar.render_job'].includes(internalName)) ? 'generation' : 'owned-derivation'
+			: (/^betterpptx\.assets\.generate_/.test(internalName) || ['betterpptx.narration.get_voice_timing', 'betterpptx.avatar.render_job'].includes(internalName)) ? 'generation' : 'owned-derivation'
 		const data = await withEngineAssetProduction(assetProductionSource, async () => {
 		const handlerContext = asyncValueBilling ? { ...context, __billingGate: billingGate } : context
 		const invokeHandler = () => {

@@ -121,7 +121,7 @@ export function estimateHeavyCost(name, args = {}, result = {}, rateCard = curre
 	if (tool === 'betterpptx.deck.open_uploaded' || tool === 'betterpptx.deck.open_existing' || tool === 'betterpptx.deck.load_template') {
 		return applyMinimumCharge(h.openUploadedBase + bytesToMb(argByteEstimate(args, result)) * h.openUploadedPerMb, rateCard)
 	}
-	if (tool === 'betterpptx.narration.synthesize' || tool === 'betterpptx.deck.add_narration' || tool === 'betterpptx.slide.add_narration') {
+	if (tool === 'betterpptx.narration.get_voice_timing' || tool === 'betterpptx.deck.add_narration' || tool === 'betterpptx.slide.add_narration') {
 		// A final spec carrying a validated preparation manifest reuses the exact
 		// measured audio. It must not be quoted or reserved as a second synthesis.
 		if (tool === 'betterpptx.slide.add_narration' && args.preparedNarration) return 0

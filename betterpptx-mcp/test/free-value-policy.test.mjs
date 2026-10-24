@@ -62,7 +62,7 @@ test('free authoring is complete while scarce identity media uses a bounded rout
 test('free publication, narration, and identity-media categories do not consume one another', async () => {
 	const context = { installHash: 'install-policy-test', sessionId: 'policy-test' }
 	const save = await entitlements.reserveFreeValue('betterpptx.deck.save', { idempotencyKey: 'deck-a' }, context)
-	const narration = await entitlements.reserveFreeValue('betterpptx.narration.synthesize', { idempotencyKey: 'narration-a', segments: [{ script: 'Measured narration.' }] }, context)
+	const narration = await entitlements.reserveFreeValue('betterpptx.narration.get_voice_timing', { idempotencyKey: 'narration-a', segments: [{ script: 'Measured narration.' }] }, context)
 	const avatar = await entitlements.reserveFreeValue('betterpptx.avatar.render_job', { idempotencyKey: 'avatar-a' }, context)
 	const persona = await entitlements.reserveFreeValue('betterpptx.assets.generate_rigged3d', { idempotencyKey: 'persona-a', imageHandles: ['asset://front', 'asset://side'] }, context)
 	assert.equal(save.request.category, 'deck-publication')
@@ -82,7 +82,7 @@ test('secured free narration estimate is zero-charge and does not reserve an all
 	const mcp = createMcpToolDispatcher({ installHash, resourceIdentityHash: installHash, authenticated: true, authenticationBasis: 'oauth-access-token', sessionId: 'sponsored-narration-estimate', blackBox: true })
 	const before = await mcp.call('betterpptx.auth.status', {})
 	const estimate = await mcp.call('betterpptx.billing.estimate', {
-		toolName: 'betterpptx.narration.synthesize',
+		toolName: 'betterpptx.narration.get_voice_timing',
 		toolArgs: {
 			voice: 'en_US-ljspeech-high',
 			segments: [{ script: 'A bounded sponsored narration preparation.' }],

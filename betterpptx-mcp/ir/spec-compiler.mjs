@@ -4599,6 +4599,17 @@ function resolutionRequirementsForOperations(operations = []) {
 	return operations.map(operationResolutionRequirement).filter(Boolean)
 }
 
+// A custom presenter persona is built from the caller's authorized images during
+// phase:"resolve"; the resulting rigged model handle is locked into presenter.model.
+export function presenterPersonaResolutionRequirement(spec = {}) {
+	const presenter = spec.presenter && typeof spec.presenter === 'object' ? spec.presenter : null
+	const persona = presenter?.persona && typeof presenter.persona === 'object' && !Array.isArray(presenter.persona) ? presenter.persona : null
+	if (!persona || presenter.model) return null
+	const images = Array.isArray(persona.fromImages) ? persona.fromImages.filter(value => typeof value === 'string' && value.trim()) : []
+	if (!images.length) return null
+	return { kind: 'presenterPersona', field: 'presenter.persona', imageCount: images.length }
+}
+
 function templateResolutionRequirement(spec = {}) {
 	const template = spec.template && typeof spec.template === 'object' ? spec.template : null
 	if (!template) return null
@@ -6149,7 +6160,7 @@ export function buildSpecOperationPlan(spec, options = {}) {
 	const estimatedPlanDigest = deterministicPlanDigest({ kind: 'estimated-plan', compilerVersion: SPEC_COMPILER_VERSION, plan, operations })
 	const resolutionRequirements = [
 		...resolutionRequirementsForOperations(operations),
-		...[templateResolutionRequirement(spec)].filter(Boolean),
+		...[templateResolutionRequirement(spec), presenterPersonaResolutionRequirement(spec)].filter(Boolean),
 	]
 	const visualDirection = publicVisualDirection(operations
 		.filter(op => op.tool === 'betterpptx.slide.add_image' && op.args?.options?.visualGeneration)

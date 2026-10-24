@@ -785,7 +785,7 @@ function collectPremiumFeatureFlags(value, flags) {
 }
 
 function standalonePremiumFeature(name) {
-	if (name === 'betterpptx.narration.synthesize') return 'narration'
+	if (name === 'betterpptx.narration.get_voice_timing') return 'narration'
 	if (name === 'betterpptx.avatar.render_job' || name === 'betterpptx.slide.add_avatar_narration' || name === 'betterpptx.deck.add_avatar_narration') return 'avatar'
 	if (name === 'betterpptx.assets.generate_rigged3d') return 'model3d'
 	return null
@@ -907,7 +907,7 @@ function freeValuePolicyForTool(name, args = {}, { purpose = 'execution' } = {})
 		reservationTiming: 'on-successful-save',
 		classificationBasis: 'compiled-spec-plus-final-save-quote',
 	}
-	if (name === 'betterpptx.narration.synthesize') return {
+	if (name === 'betterpptx.narration.get_voice_timing') return {
 		category: 'narration-preparation',
 		limit: FREE_TIER_POLICY.narrationPreparationLimit,
 		workflowStage: 'media-resolution',

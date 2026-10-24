@@ -103,7 +103,7 @@ test('final generation reuses prepared audio without a second provider call', as
 			{ id: 'third', slideId: 'slide-2', text: 'Third sentence.', gapAfterMs: 50 },
 			{ id: 'fourth', slideId: 'slide-2', text: 'Fourth sentence.', gapBeforeMs: 50 },
 		]
-		const preparedResult = await mcp.call('betterpptx.narration.synthesize', {
+		const preparedResult = await mcp.call('betterpptx.narration.get_voice_timing', {
 			segments: preparedSegments,
 			voice: 'en_US-ljspeech-high',
 			idempotencyKey: 'prep-reuse-test',
@@ -111,7 +111,7 @@ test('final generation reuses prepared audio without a second provider call', as
 		assert.equal(preparedResult.ok, true, JSON.stringify(preparedResult))
 		const prepared = preparedResult.data
 		assert.equal(providerCalls, 4)
-		const replayResult = await mcp.call('betterpptx.narration.synthesize', {
+		const replayResult = await mcp.call('betterpptx.narration.get_voice_timing', {
 			segments: preparedSegments,
 			voice: 'en_US-ljspeech-high',
 			idempotencyKey: 'prep-reuse-test',

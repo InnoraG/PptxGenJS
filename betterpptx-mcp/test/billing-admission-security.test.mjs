@@ -23,7 +23,7 @@ process.env.BETTERPPTX_BILLING_LEDGER_FILE = path.join(root, 'ledger.json')
 const store = createBillingLedgerStore()
 const customerHash = `install_${'a'.repeat(64)}`
 const billingEntitlement = { provider: 'crypto_credits', billingCustomerHash: customerHash, billingStatus: 'active' }
-const request = id => ({ name: 'betterpptx.narration.synthesize', args: { script: 'A short test.', idempotencyKey: id }, billingEntitlement, context: { installHash: customerHash, sessionId: 'first-session' }, store })
+const request = id => ({ name: 'betterpptx.narration.get_voice_timing', args: { script: 'A short test.', idempotencyKey: id }, billingEntitlement, context: { installHash: customerHash, sessionId: 'first-session' }, store })
 
 test.after(async () => { await fs.rm(root, { recursive: true, force: true }) })
 
@@ -62,12 +62,12 @@ test('enforced heavy work without a billing identity fails before a reservation'
 })
 
 test('fake reuse flags do not make synthesis free; segments are priced', () => {
-	const base = estimateHeavyCost('betterpptx.narration.synthesize', { script: 'Test' })
+	const base = estimateHeavyCost('betterpptx.narration.get_voice_timing', { script: 'Test' })
 	assert.ok(base > 0)
 	for (const key of ['preparedNarration', 'narrationPreparation', 'preparedAudio', 'narrationPreparationReuse']) {
-		assert.equal(estimateHeavyCost('betterpptx.narration.synthesize', { script: 'Test', [key]: true }), base)
+		assert.equal(estimateHeavyCost('betterpptx.narration.get_voice_timing', { script: 'Test', [key]: true }), base)
 	}
-	assert.ok(estimateHeavyCost('betterpptx.narration.synthesize', { segments: [{ script: 'word '.repeat(1000) }] }) > base)
+	assert.ok(estimateHeavyCost('betterpptx.narration.get_voice_timing', { segments: [{ script: 'word '.repeat(1000) }] }) > base)
 })
 
 test('zero-cost attachment requires execution-layer proof, not just a handle-shaped argument', async () => {

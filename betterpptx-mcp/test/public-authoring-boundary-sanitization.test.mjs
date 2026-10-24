@@ -59,7 +59,10 @@ test('public tool projection scopes exact coordinates to typed authoring routes 
 	// legitimately expose fewer tools. Assert the important lifecycle tool
 	// directly instead of freezing a stale total-count expectation.
 	assert.ok(publicTools.length >= 51)
-	assert.ok(toolByName.has('betterpptx.avatar.attach_result'))
+	assert.ok(toolByName.has('betterpptx.narration.get_voice_timing'))
+	// Talking-head video, custom personas and stock 3D are compiled by the spec.
+	assert.equal(toolByName.has('betterpptx.avatar.attach_result'), false)
+	assert.equal(toolByName.has('betterpptx.assets.generate_model3d'), false)
 	assert.equal(toolByName.has('betterpptx.custom_geometry.inspect'), false)
 	assert.equal(toolByName.has('betterpptx.custom_geometry.from_svg'), false)
 	assertVocabularyClean('public tool schemas', publicTools)
@@ -95,8 +98,6 @@ test('public tool projection scopes exact coordinates to typed authoring routes 
 		assert.equal(geometryCatalog.inputSchema.properties[key], undefined, key)
 	}
 	assert.deepEqual(toolByName.get('betterpptx.assets.catalog')?.inputSchema?.properties?.kind?.enum, ['model3d', 'shapeScene', 'customGeometry'])
-	const model3d = toolByName.get('betterpptx.assets.generate_model3d')
-	for (const key of ['x', 'y', 'w', 'h', 'assetSource']) assert.equal(model3d?.inputSchema?.properties?.[key], undefined, key)
 })
 
 test('public recipes and catalogs expose only opaque semantic authoring choices', async () => {

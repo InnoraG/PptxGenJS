@@ -27,7 +27,7 @@ const HEAVY_TOOLS = new Set([
 	'betterpptx.deck.transform_shapes',
 	'betterpptx.deck.add_narration',
 	'betterpptx.slide.add_narration',
-	'betterpptx.narration.synthesize',
+	'betterpptx.narration.get_voice_timing',
 	'betterpptx.avatar.render_job',
 	'betterpptx.deck.add_avatar_narration',
 	'betterpptx.slide.add_avatar_narration',

@@ -46,41 +46,13 @@ async function createDeck(mcp) {
 	return created.data.deckId
 }
 
-test('avatar.render_job accepts its advertised deckId and slideIndex', { timeout: 120000 }, async () => {
-	const mcp = dispatcher('render-job')
-	const deckId = await createDeck(mcp)
-	const before = getDeck(deckId).deckVersion
-	const job = await mcp.call('betterpptx.avatar.render_job', {
-		deckId,
-		slideIndex: 0,
-		script: 'Thanks for watching.',
-		avatar: { source: 'uploaded', image: { data: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' }, consentAffirmed: true },
-		idempotencyKey: `render-${Date.now()}`,
-	})
-	assert.notEqual(job.error?.code, 'JSON_SPEC_AUTHORING_REQUIRED', JSON.stringify(job.error))
-	assert.equal(job.ok, true, JSON.stringify(job.error))
-	assert.match(job.data.jobId, /^avatar_job_/)
-	assert.equal(getDeck(deckId).deckVersion, before, 'starting a render does not edit the deck')
-})
-
-test('avatar.attach_result names the exact spec-first replacement', { timeout: 120000 }, async () => {
-	const mcp = dispatcher('attach')
-	const deckId = await createDeck(mcp)
-	const attached = await mcp.call('betterpptx.avatar.attach_result', { deckId, slideIndex: 0, jobId: 'avatar_job_example', script: 'Thanks for watching.' })
-	assert.equal(attached.ok, false)
-	assert.equal(attached.error.code, 'AVATAR_ATTACH_SPEC_ROUTE')
-	assert.match(attached.error.message, /generate_from_spec/)
-	const request = attached.error.details.nextAction.request
-	assert.equal(request.commitMode, 'patch')
-	assert.deepEqual(request.spec.slides[0].avatarNarration.jobId, 'avatar_job_example')
-
-	// The suggested request is a valid patch whose plan attaches the completed render.
-	const dry = await mcp.call('betterpptx.deck.generate_from_spec', { ...request, includePatchPlan: true })
-	assert.equal(dry.ok, true, JSON.stringify(dry.error))
-	const attach = dry.data.patchOperations.find(operation => operation.tool === 'betterpptx.avatar.attach_result')
-	assert.ok(attach, JSON.stringify(dry.data.patchOperations))
-	assert.equal(attach.slideIndex, 0)
-	assert.equal(dry.data.patchUnsupportedFindings?.some?.(finding => finding.kind === 'avatarNarration') ?? false, false)
+test('the standalone avatar tools are not part of the MCP surface; the spec renders talking heads', { timeout: 120000 }, async () => {
+	const mcp = dispatcher('folded-avatar')
+	for (const name of ['betterpptx.avatar.render_job', 'betterpptx.avatar.job_status', 'betterpptx.avatar.attach_result']) {
+		const result = await mcp.call(name, {})
+		assert.equal(result.ok, false, name)
+		assert.match(JSON.stringify(result.error), /generate_from_spec/, name)
+	}
 })
 
 async function inPublicMode(run) {
@@ -93,17 +65,17 @@ async function inPublicMode(run) {
 	}
 }
 
-test('the avatar recipe and attach tool point at the spec route', async () => {
+test('the avatar recipe renders in phase resolve and commits the locked spec', async () => {
 	const recipe = await inPublicMode(() => dispatcher('recipe', true).call('betterpptx.help.tool_recipe', { surface: 'avatar', detail: 'full' }))
 	assert.equal(recipe.ok, true, JSON.stringify(recipe.error))
 	const avatar = recipe.data.recipes.find(item => item.surface === 'avatar')
-	const attachStep = avatar.sequence.find(step => step.step === 10)
-	assert.equal(attachStep.tool, 'betterpptx.deck.generate_from_spec')
-	assert.equal(attachStep.request.commitMode, 'patch')
-	assert.ok(attachStep.request.spec.slides[0].avatarNarration.jobId)
-	assert.equal(avatar.attachment.tool, 'betterpptx.deck.generate_from_spec')
-	const tool = TOOLS.find(item => item.name === 'betterpptx.avatar.attach_result')
-	assert.match(tool.description, /AVATAR_ATTACH_SPEC_ROUTE/)
+	const resolveStep = avatar.sequence.find(step => step.step === 8)
+	assert.equal(resolveStep.tool, 'betterpptx.deck.generate_from_spec')
+	assert.equal(resolveStep.request.phase, 'resolve')
+	const commitStep = avatar.sequence.find(step => step.step === 10)
+	assert.equal(commitStep.request.phase, 'commit')
+	assert.equal(avatar.attachment.specField, 'slides[].avatarNarration')
+	assert.doesNotMatch(JSON.stringify(avatar.sequence), /avatar\.(render_job|job_status|attach_result)/)
 })
 
 test('failed avatar jobs say why and what to do next', () => {

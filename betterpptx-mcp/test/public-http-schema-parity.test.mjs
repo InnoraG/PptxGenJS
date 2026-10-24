@@ -106,7 +106,9 @@ test('served public HTTP schema agrees with production manifest and executable g
 		assert.ok(byName.get('betterpptx.narration.voices')?.inputSchema?.properties?.language)
 		assert.ok(byName.get('betterpptx.deck.generate_from_spec')?.inputSchema?.anyOf?.some(branch => branch.required?.includes('specHandle')))
 		assert.equal(byName.get('betterpptx.deck.export_spec')?.inputSchema?.properties?.download?.type, 'boolean')
-		assert.ok(byName.has('betterpptx.avatar.attach_result'))
+		assert.ok(byName.has('betterpptx.narration.get_voice_timing'))
+		assert.equal(byName.has('betterpptx.avatar.attach_result'), false)
+		assert.match(byName.get('betterpptx.deck.generate_from_spec')?.description || '', /avatarNarration/)
 
 		const serializedTools = JSON.stringify(tools)
 		assert.doesNotMatch(serializedTools, /preview every slide before public save|configure hosted PowerPoint to continue|defer public save when preview is unavailable/i)
