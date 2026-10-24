@@ -14,7 +14,7 @@ import { publicVerificationPolicy } from './verification-policy.mjs'
 // Increment whenever the server-advertised public tool records change,
 // including descriptions or metadata covered by PUBLIC_TOOL_SCHEMA_DIGEST_COVERAGE.
 // The capability registry has its own independent revision and digest.
-export const TOOL_SCHEMA_VERSION = '2026-10-13.1'
+export const TOOL_SCHEMA_VERSION = '2026-10-23.1'
 const PACKAGE_SEMANTIC_VERSION = String(JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version || '').trim()
 const CONFIGURED_SEMANTIC_VERSION = String(process.env.BETTERPPTX_PUBLIC_VERSION || '').trim()
 if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(PACKAGE_SEMANTIC_VERSION)) {
@@ -25,13 +25,12 @@ if (CONFIGURED_SEMANTIC_VERSION && CONFIGURED_SEMANTIC_VERSION !== PACKAGE_SEMAN
 }
 export const PUBLIC_SEMANTIC_VERSION = PACKAGE_SEMANTIC_VERSION
 export const PUBLIC_SCHEMA_CHANGE = Object.freeze({
-	previousToolSchemaVersion: '2026-09-29.1',
+	previousToolSchemaVersion: '2026-10-13.1',
 	compatibility: 'additive',
 	changes: [
-		'Built-in presenter motion discovery exposes a public catalog version, shared prepared reuse, and review source selection through the ordinary authoring tools.',
-		'Named art directions are optional; omitted/null selections use neutral technical defaults with no aesthetic certification penalty. Explicit geometry, styling and motion remain AI-authored.',
-		'Cloud browser downloads use opaque, generation-bound links compatible with ChatGPT URL decoration. Large presentations stay outside the conversation; links and retained bytes share the original 12-hour boundary.',
-		'Durable dispatch failures provide a public-safe operation recovery path. Release preflight verifies the scoped worker-identity permission before deployment.',
+		'tools/list advertises bounded schemas that lead with BetterPPTX extended capabilities: deck.generate_from_spec indexes animated-table, narration autoplay, talking-head video, the native 3-D presenter, layered motion, continuities, and interactions, and expands their schemas; common slide fields stay summarized and output schemas are reduced to the result envelope. Accepted arguments and server-side validation are unchanged.',
+		'betterpptx.help.tool_recipe accepts schemaFor, schemaPath, and schemaKind and returns the exact public schema of any tool or sub-path on demand.',
+		'betterpptx.deck.dispose advertises destructiveHint:true because it discards unsaved deck state.',
 	],
 })
 export const PUBLIC_CAPABILITY_DIGEST_COVERAGE = 'Canonical SHA-256 over all stable public family fields and contracts, extended layers, persona terminology/contracts, motion, narration, and combined examples; live readiness and measured inventories are excluded.'

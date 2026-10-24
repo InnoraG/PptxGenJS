@@ -48,7 +48,8 @@ try {
 	const tools = await client.listTools()
 	const generate = tools.tools.find(tool => tool.name === 'betterpptx.deck.generate_from_spec')
 	assert.ok(generate.inputSchema.properties.alternativeAuthorization)
-	const publicAuthoringContractSchema = generate.outputSchema?.properties?.data?.properties?.authoringContract?.properties
+	// tools/list advertises bounded schemas; nested contracts are fetched on demand.
+	const publicAuthoringContractSchema = (await call('betterpptx.help.tool_recipe', { schemaFor: 'betterpptx.deck.generate_from_spec', schemaKind: 'output', schemaPath: 'data.authoringContract' })).toolSchema?.schema?.properties
 	assert.deepEqual(publicAuthoringContractSchema?.geometryAuthority?.enum, ['ai'])
 	assert.ok(!publicAuthoringContractSchema?.placementPolicy?.enum?.includes('semantic-layout-only'))
 	pass('typed-alternative-authorization-contract')

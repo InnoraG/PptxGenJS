@@ -116,7 +116,7 @@ test('public black-box schema keeps typed pixel authoring without exposing the i
 	const previous = process.env.BETTERPPTX_PUBLIC_BLACK_BOX
 	process.env.BETTERPPTX_PUBLIC_BLACK_BOX = '1'
 	try {
-		const publicTool = publicToolList(TOOLS, { toolNameProfile: 'canonical' }).find(tool => tool.name === 'betterpptx.deck.generate_from_spec')
+		const publicTool = publicToolList(TOOLS, { toolNameProfile: 'canonical', fullSchemas: true }).find(tool => tool.name === 'betterpptx.deck.generate_from_spec')
 		assert.ok(publicTool)
 		const publicSpec = publicTool.inputSchema.properties.spec
 		assert.ok(publicSpec.properties.presenter.properties.pixelFrame)

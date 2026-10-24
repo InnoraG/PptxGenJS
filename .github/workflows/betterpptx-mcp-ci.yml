@@ -95,6 +95,9 @@ jobs:
           node --test betterpptx-mcp/test/cloudflare-deploy-secret.test.mjs
           node --test betterpptx-mcp/test/mission-control-private-iam.test.mjs
           node --test betterpptx-mcp/test/mission-control-deployment-contract.test.mjs
+          node --test betterpptx-mcp/test/public-schema-compaction.test.mjs
+          node --test betterpptx-mcp/test/public-http-schema-parity.test.mjs
+          node --test betterpptx-mcp/test/http-fast-start.test.mjs
 
       - name: Build the production container without publishing it
         shell: bash

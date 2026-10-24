@@ -23,7 +23,7 @@ test('SmartArt catalog is a bounded unranked exact-id host command', async () =>
 	assert.equal(truth.capabilityMode, 'discrete')
 	assert.deepEqual(truth.componentOwnership, ['publicOperation', 'smartartCatalog', 'exactIdValidation'])
 
-	const tool = publicToolList(TOOLS).find(entry => entry.name === 'betterpptx.smartart.catalog')
+	const tool = publicToolList(TOOLS, { fullSchemas: true }).find(entry => entry.name === 'betterpptx.smartart.catalog')
 	assert.ok(tool)
 	assert.equal(tool.inputSchema.additionalProperties, false)
 	assert.equal(tool.inputSchema.properties.limit.maximum, 8)

@@ -69,8 +69,10 @@ try {
 	const estimateTool = byName.get('betterpptx.billing.estimate')
 	const generateTool = byName.get('betterpptx.deck.generate_from_spec')
 	assert.ok(estimateTool && generateTool)
-	const issuedSchema = estimateTool.outputSchema.properties.data.properties.quoteBinding
-	const consumedSchema = generateTool.inputSchema.properties.quoteBinding
+	// tools/list advertises bounded schemas; compare the exact contracts on demand.
+	const schemaNode = async (schemaFor, schemaKind, schemaPath) => (await call('betterpptx.help.tool_recipe', { schemaFor, schemaKind, schemaPath })).toolSchema.schema
+	const issuedSchema = await schemaNode('betterpptx.billing.estimate', 'output', 'data.quoteBinding')
+	const consumedSchema = await schemaNode('betterpptx.deck.generate_from_spec', 'input', 'quoteBinding')
 	assert.deepEqual(issuedSchema, consumedSchema)
 	assert.equal(consumedSchema.properties.quoteSchemaVersion.const, 'betterpptx.premium-quote.v1')
 	pass('one-issuer-consumer-schema')

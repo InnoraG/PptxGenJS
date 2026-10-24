@@ -46,6 +46,7 @@ import { credentialAccounts } from './config/credential-store.mjs'
 import { handleMcpV2Post, mcpV2HandshakePayload } from './mcp-v2/handler.mjs'
 import { isMcpV2Request, publicMcpProtocolManifest } from './mcp-v2/protocol.mjs'
 import { oauthAuthorizationServerCompatibilityPaths, oauthAuthorizationServerMetadata, oauthProtectedResourceMetadata, wwwAuthenticateHeader } from './mcp-v2/oauth.mjs'
+import { applyCorsHeaders } from './http-cors.mjs'
 import {
 	acquireAvatarWorkerIdempotency,
 	cancelAvatarWorkerIdempotency,
@@ -312,14 +313,6 @@ function publicErrorPayload(code, message, extra = {}) {
 			...(extra.details ? { details: extra.details } : {}),
 		},
 	}
-}
-
-function applyCorsHeaders(req, res) {
-	res.setHeader('Access-Control-Allow-Origin', '*')
-	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
-	res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, DPoP, mcp-session-id, mcp-protocol-version, MCP-Protocol-Version, x-betterpptx-device, x-betterpptx-mission-control-token, x-betterpptx-mission-control-admin-token, PAYMENT-SIGNATURE, X-PAYMENT')
-	res.setHeader('Access-Control-Expose-Headers', 'mcp-session-id, MCP-Protocol-Version, WWW-Authenticate, DPoP-Nonce, PAYMENT-REQUIRED, PAYMENT-RESPONSE')
-	res.setHeader('Access-Control-Max-Age', '86400')
 }
 
 function sendMissionControlSecretError(res, { action = 'unknown', id = '' } = {}, err) {
@@ -1901,7 +1894,10 @@ export async function startBetterPptxHttp(options = {}) {
 	httpServer.headersTimeout = headersTimeoutMs
 	httpServer.timeout = Math.max(0, Number(process.env.BETTERPPTX_HTTP_SOCKET_TIMEOUT_MS || 0) || 0)
 	logEvent('http.server.timeouts', { requestTimeoutMs, headersTimeoutMs, keepAliveTimeoutMs, socketTimeoutMs: httpServer.timeout })
-	await new Promise(resolve => httpServer.listen(port, host, resolve))
+	// http-fast-start.mjs supplies `listen` to adopt the socket its edge process
+	// has been answering health/OAuth discovery on during the cold start.
+	if (options.listen) await options.listen(httpServer, app)
+	else await new Promise(resolve => httpServer.listen(port, host, resolve))
 	const boundAddress = httpServer.address()
 	const actualPort = boundAddress && typeof boundAddress === 'object' ? boundAddress.port : port
 

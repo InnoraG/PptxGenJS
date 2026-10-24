@@ -3,6 +3,7 @@
 
 import { createHash } from 'node:crypto'
 import { toolSecuritySchemes } from './auth/tool-security.mjs'
+import { compactPublicTool } from './public-schema-compaction.mjs'
 import { publicRuntimeValidationError, publicRuntimeValidationMessage } from './public-runtime-validation-error.mjs'
 
 import { canonicalToolName, toolListForNameProfile } from './tools.mjs'
@@ -279,7 +280,25 @@ export function assertPublicToolAllowed(name) {
 	}
 }
 
+// Sanitizing the full tool inventory costs ~1.5 s, and every tools/list,
+// /health and discovery response needs it. The result depends only on the
+// tool array, the options, and BETTERPPTX_* configuration, so memoize on those.
+const publicToolListCache = new WeakMap()
+
+function publicToolListCacheKey(options) {
+	const env = Object.keys(process.env).filter(name => name.startsWith('BETTERPPTX_')).sort().map(name => `${name}=${process.env[name]}`)
+	return JSON.stringify([Boolean(options.fullSchemas), options.toolNameProfile || '', env])
+}
+
 export function publicToolList(tools, options = {}) {
+	let byKey = publicToolListCache.get(tools)
+	if (!byKey) publicToolListCache.set(tools, byKey = new Map())
+	const key = publicToolListCacheKey(options)
+	if (!byKey.has(key)) byKey.set(key, buildPublicToolList(tools, options))
+	return byKey.get(key)
+}
+
+function buildPublicToolList(tools, options) {
 	const filtered = tools.filter(t => isPublicToolAllowed(t.name))
 	const visibleTools = isPublicBlackBoxMode() ? filtered.map(sanitizePublicTool) : filtered
 	const authenticatedTools = isPublicBlackBoxMode() || process.env.BETTERPPTX_AUTH === 'oauth'
@@ -287,7 +306,10 @@ export function publicToolList(tools, options = {}) {
 			const securitySchemes = toolSecuritySchemes(canonicalToolName(tool.name))
 			return { ...tool, securitySchemes, _meta: { ...tool._meta, securitySchemes } }
 		}) : visibleTools
-	return toolListForNameProfile(authenticatedTools, options.toolNameProfile)
+	// tools/list advertises bounded schemas; options.fullSchemas returns the
+	// complete public contract for on-demand lookup (help.tool_recipe schemaFor).
+	const advertised = options.fullSchemas ? authenticatedTools : authenticatedTools.map(compactPublicTool)
+	return toolListForNameProfile(advertised, options.toolNameProfile)
 }
 
 export function toPublicToolName(name) {

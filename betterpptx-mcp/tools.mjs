@@ -348,6 +348,9 @@ export const TOOLS = [
 				intent: { type: 'string', maxLength: 512, description: 'Optional user-facing task used to rank relevant recipes.' },
 				profile: { type: 'string', enum: ['modern', 'narrated', 'static'], default: 'modern' },
 				detail: { type: 'string', enum: ['summary', 'full'], default: 'summary' },
+				schemaFor: { type: 'string', maxLength: 128, description: 'Exact public tool name whose complete schema to return instead of a recipe, e.g. betterpptx.deck.generate_from_spec. tools/list advertises nested fields in summarized form.' },
+				schemaPath: { type: 'string', maxLength: 256, description: 'Optional dotted field path inside schemaFor, e.g. spec.slides.content or spec.theme. Array items are traversed implicitly; the response lists childFields for the next request.' },
+				schemaKind: { type: 'string', enum: ['input', 'output'], default: 'input', description: 'Which schema of schemaFor to return.' },
 			},
 		},
 	},
@@ -747,7 +750,7 @@ export const TOOLS = [
 		name: 'betterpptx.deck.generate_from_spec',
 		title: 'Author and compile a governed PowerPoint JSON spec',
 		description: PUBLIC_BLACK_BOX_SCHEMA
-			? 'Validate, create, or revise a native-editable PowerPoint from a BetterPPTX JSON specification. phase:"dryRun" checks the proposed deck without creating it; phase:"commit" creates or revises a deck under the applicable authorization. The specification carries authored geometry, styling, media, and timing. The result reports validation findings, effective native representations, and deck identity when committed.'
+			? 'Validate, create, or revise a native-editable PowerPoint from a BetterPPTX JSON specification. phase:"dryRun" checks the proposed deck without creating it; phase:"commit" creates or revises a deck under the applicable authorization. The specification carries authored geometry, styling, media, and timing. The result reports validation findings, effective native representations, and deck identity when committed. Beyond standard slides it compiles: animated-table (independently editable rows, columns, or cells revealed through native timing, usable as presenter targets); narration with native audio and measured cues on one autoplay clock (narration.voices, narration.synthesize, deck.validate_narration); talking-head video from an authorized image and narration (avatar.render_job, avatar.attach_result); an editable native 3-D presenter with gestures, continuous performances, and stage movement (spec.presenter, slides[].presenterPerformance, slides[].scene); layered entrance, emphasis, motion-path, and exit motion; cross-slide continuities and triggered interactions. Exact contracts: help.tool_recipe surface animated-table, narration, avatar, 3d-presenter, or layered-motion.'
 			: 'The sole presentation construction and editing front door. Use ai-sovereign-v1 when the AI must retain sole creative authority with creativeAuthority=ai, directorMode=off, and verificationMode=complete. In this workflow Content/Story, Visual/Design, and Motion/Time Director domains are optional, no Director stage blocks authoring, and the engine may report but may not creatively rewrite explicit choices. Use authoring-excellence-director-v1 only when structured assistance is desired. Both workflows share the typed native object model, deterministic dryRun/resolve/commit phases, package safety, accessibility, selection, media, timing, and current-version validation. Exact AI geometry uses geometryAuthority=ai with placementPolicy=ai-authored-geometry-v1. Raw PowerPoint XML, opaque native-preservation payloads, private runtime mappings, direct primitives, and maintainer bypasses remain unavailable.',
 		inputSchema: {
 			type: 'object',
@@ -4749,6 +4752,7 @@ const SPECIFIC_DATA = {
 		objectNaming: { type: 'array', description: 'Stable object naming rules for editing, animation, and transitions.' },
 		unknownSurfaces: { type: 'array', items: { type: 'string' } },
 		rule: { type: 'string' },
+		toolSchema: { type: 'object', description: 'Present when schemaFor was requested: the exact public schema node (tool, which, schemaPath, schema, childFields).', additionalProperties: true },
 	},
 	'betterpptx.authoring.capabilities': {
 		schemaVersion: { type: 'string' },
@@ -5168,6 +5172,14 @@ const IDEMPOTENT_SESSION_MUTATION_TOOLS = new Set([
 		'betterpptx.assets.generate_model3d',
 		'betterpptx.assets.generate_rigged3d',
 	])
+// Tools that discard or delete user work. Claude always confirms a destructive
+// tool before running it, so the hint stays true even when the call is
+// replay-safe (idempotent).
+const DESTRUCTIVE_TOOLS = new Set([
+	'betterpptx.deck.dispose',
+	'betterpptx.slide.delete_shapes',
+	'betterpptx.io.write_file',
+])
 
 for (const t of TOOLS) {
 	if (MODEL3D_PUBLIC_OPERATION_SCHEMAS[t.name]) t.inputSchema = JSON.parse(JSON.stringify(MODEL3D_PUBLIC_OPERATION_SCHEMAS[t.name]))
@@ -5221,6 +5233,9 @@ for (const t of TOOLS) {
 		t.annotations.destructiveHint = false
 		t.annotations.openWorldHint ??= false
 	}
+	if (DESTRUCTIVE_TOOLS.has(t.name)) t.annotations.destructiveHint = true
+	// Connector directory review requires a human-readable title on every tool.
+	t.annotations.title ??= t.title || t.name
 }
 
 export function codexSafeToolName(name) {

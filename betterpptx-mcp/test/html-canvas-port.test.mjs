@@ -361,7 +361,7 @@ const { publicToolList } = await import('../blackbox.mjs')
 const { TOOLS } = await import('../tools.mjs')
 
 test('assets.upload advertises a connector file parameter', () => {
-	const listed = publicToolList(TOOLS)
+	const listed = publicToolList(TOOLS, { fullSchemas: true })
 	const upload = listed.find(tool => tool.name === 'betterpptx.assets.upload')
 	assert.ok(upload)
 	assert.deepEqual(upload._meta?.['openai/fileParams'], ['file'])
@@ -579,7 +579,7 @@ test('status and capabilities expose public capability discovery without runtime
 })
 
 test('generate_from_spec advertises planId for compile-once commit', () => {
-	const listed = publicToolList(TOOLS)
+	const listed = publicToolList(TOOLS, { fullSchemas: true })
 	const generate = listed.find(tool => tool.name === 'betterpptx.deck.generate_from_spec')
 	assert.ok(generate.inputSchema.properties.planId)
 	assert.ok(generate.inputSchema.properties.lockedPlanId)
