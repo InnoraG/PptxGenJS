@@ -9,6 +9,7 @@ import { avatarError } from '../errors.mjs'
 import { createAvatarWorkerStateStore } from '../../storage/avatar-worker-state-store.mjs'
 import { avatarProviderMetrologyReadiness, recordAvatarProviderMetrology } from '../../storage/avatar-provider-metrology-store.mjs'
 import { avatarWorkerQuotaProductionConfig, avatarWorkerQuotaReadiness, createAvatarWorkerQuotaStore } from '../../storage/avatar-worker-quota-state.mjs'
+import { avatarWorkerBudgetProductionConfig, avatarWorkerRenderCostUsd, createAvatarWorkerBudgetStore } from '../../storage/avatar-worker-budget-store.mjs'
 import { assertProductionTalkingHeadAttestation, resolveProductionTalkingHeadOptions } from '../production-profile.mjs'
 
 // Avatar workers (liveportrait+musetalk) support MULTIPLE endpoints for round-robin load spread +
@@ -17,11 +18,20 @@ import { assertProductionTalkingHeadAttestation, resolveProductionTalkingHeadOpt
 const AVATAR_STORE_PROVIDER_ID = 'avatar-worker'
 const COMMERCIAL_AVATAR_STORE_PROVIDER_ID = 'avatar-worker-commercial'
 
-function avatarWorkerEnvironmentPool(prefix) {
+// The pool is either a bare [{ id, url, route, token, weight }] array or a whole
+// credential-store document (the Secret Manager bundle) bound as one secret env value.
+function avatarWorkerEnvironmentPool(prefix, storeProviderId) {
 	const raw = String(process.env[`${prefix}POOL`] || '').trim()
 	if (!raw) return []
 	let parsed
-	try { parsed = JSON.parse(raw) } catch { return [] }
+	try { parsed = JSON.parse(raw.replace(/^\uFEFF/, '')) } catch { return [] }
+	if (parsed && !Array.isArray(parsed) && typeof parsed === 'object') {
+		const accounts = parsed.providers?.[storeProviderId]?.accounts
+		if (!Array.isArray(accounts)) return []
+		parsed = accounts
+			.filter(account => account && account.enabled !== false && account.env && typeof account.env === 'object')
+			.map(account => ({ id: account.id, url: account.env[`${prefix}URL`], route: account.env[`${prefix}ROUTE`], token: account.env[`${prefix}TOKEN`], weight: account.env[`${prefix}WEIGHT`] }))
+	}
 	if (!Array.isArray(parsed)) return []
 	return parsed
 		.map((account, index) => ({
@@ -54,7 +64,7 @@ export function avatarWorkerAccounts(provider = 'liveportrait-musetalk') {
 	// value. This keeps rotation/failover available without writing a transient
 	// credential file or falling back across provider namespaces. The commercial
 	// pool is still read only from the commercial prefix.
-	const fromEnvironmentPool = avatarWorkerEnvironmentPool(prefix)
+	const fromEnvironmentPool = avatarWorkerEnvironmentPool(prefix, storeProviderId)
 	if (fromEnvironmentPool.length) return fromEnvironmentPool
 	const url = String(process.env[`${prefix}URL`] || '').trim().replace(/\/+$/, '')
 	if (!url) return []
@@ -281,6 +291,14 @@ export async function renderMuseTalkHttp({ avatarImagePath, audioPath, durationM
 		throw avatarError('AVATAR_QUOTA_UNAVAILABLE', 'Avatar worker quota state is not configured for distributed production use.', { retryable: false, reasons: quotaConfig.errors })
 	}
 	const quotaStore = quotaReadiness.configured && quotaReadiness.limitGpuSeconds > 0 ? createAvatarWorkerQuotaStore() : null
+	// Monthly per-account USD cap (owner hard rule: $29.50 per Modal account). An account
+	// that cannot fit the next render drops out of rotation; a required gate fails closed.
+	const budgetConfig = avatarWorkerBudgetProductionConfig()
+	if (!budgetConfig.ok) {
+		throw avatarError('AVATAR_BUDGET_UNAVAILABLE', 'Avatar worker budget state is not configured for production use.', { retryable: false, reasons: budgetConfig.errors })
+	}
+	const budgetStore = createAvatarWorkerBudgetStore()
+	if (budgetConfig.required && !budgetStore) throw avatarError('AVATAR_BUDGET_UNAVAILABLE', 'Avatar worker budget state is unavailable.', { retryable: false })
 	const quotaEstimate = avatarQuotaEstimateGpuSeconds()
 	const stateStore = createAvatarWorkerStateStore()
 	let states = []
@@ -313,6 +331,8 @@ export async function renderMuseTalkHttp({ avatarImagePath, audioPath, durationM
 		let quotaReserved = false
 		let quotaSettled = false
 		let quotaKeepReservation = false
+		let budgetReserved = false
+		let budgetSettled = false
 		const controller = new AbortController()
 		const timer = setTimeout(() => controller.abort(), timeoutMs())
 		try {
@@ -329,6 +349,21 @@ export async function renderMuseTalkHttp({ avatarImagePath, audioPath, durationM
 					continue
 				}
 				quotaReserved = true
+			}
+			if (budgetStore) {
+				let budget
+				try { budget = await budgetStore.reserve(account.id, quotaReservationId, budgetConfig.estimatedRenderUsd) }
+				catch (error) {
+					if (budgetConfig.required) throw avatarError('AVATAR_BUDGET_UNAVAILABLE', 'Avatar worker budget state is unavailable.', { retryable: false, cause: String(error?.message || '').slice(0, 120) })
+					throw error
+				}
+				if (!budget?.ok) {
+					attemptTrace.push({ accountHash, phase: 'budget', code: String(budget?.code || 'AVATAR_WORKER_BUDGET_EXHAUSTED') })
+					if (quotaStore && quotaReserved) { try { await quotaStore.release(account.id, quotaReservationId) } catch {} quotaSettled = true }
+					lastErr = avatarError('AVATAR_BUDGET_EXHAUSTED', 'Every avatar worker account is at its monthly spend limit.', { retryable: false, accountHash })
+					continue
+				}
+				budgetReserved = true
 			}
 			const body = new FormData()
 			body.append('image', new Blob([imageBuffer], { type: imageMime }), 'avatar.png')
@@ -369,6 +404,14 @@ export async function renderMuseTalkHttp({ avatarImagePath, audioPath, durationM
 					await quotaStore.release(account.id, quotaReservationId)
 					quotaSettled = true
 				}
+			}
+			if (budgetStore && budgetReserved) {
+				// A failed settlement keeps the full estimate reserved: spend is never under-counted.
+				try {
+					if (providerUsage.isProviderCompute) await budgetStore.settle(account.id, quotaReservationId, avatarWorkerRenderCostUsd(providerUsage.gpuSeconds, budgetConfig))
+					else await budgetStore.release(account.id, quotaReservationId)
+				} catch {}
+				budgetSettled = true
 			}
 			// Only the first provider execution reports X-Gpu-Seconds.  A broker replay
 			// is terminal media retrieval and must not create a second billable usage row.
@@ -422,6 +465,11 @@ export async function renderMuseTalkHttp({ avatarImagePath, audioPath, durationM
 		} catch (err) {
 			if (quotaStore && quotaReserved && !quotaSettled && !quotaKeepReservation) {
 				try { await quotaStore.release(account.id, quotaReservationId) } catch {}
+			}
+			// The worker may have used GPU time before failing, so a failed attempt that reached
+			// the provider settles at the cold-start allowance instead of being released.
+			if (budgetStore && budgetReserved && !budgetSettled) {
+				try { await budgetStore.settle(account.id, quotaReservationId, avatarWorkerRenderCostUsd(0, budgetConfig)) } catch {}
 			}
 			attemptTrace.push({ accountHash, status: Number(err?.details?.status || 0) || null, idempotencyState: String(err?.details?.idempotencyState || ''), phase: err?.name === 'AbortError' ? 'timeout' : 'error', errorName: String(err?.name || 'Error'), errorCode: String(err?.code || '').slice(0, 80), errorMessage: String(err?.message || '').slice(0, 160) })
 			if (err?.name === 'AbortError') {
