@@ -53,7 +53,12 @@ function existingModelInsertion(args = {}) {
  const handle = options.modelAsset ?? args.modelAsset
  const raw = ['glbFile', 'glbData', 'glbBase64', 'glbBuffer', 'modelUrl', 'url', 'path', 'data', 'filePath']
  if (raw.some(key => args[key] != null || options[key] != null)) return false
- return typeof handle === 'string' && (/^gen:\/\/(?:trellis\/)?rigged3d\/[a-f0-9]{8,64}$/.test(handle) || /^model3d:\/\/microsoft-stock\/[a-f0-9]{16}\/[a-zA-Z0-9_-]+$/.test(handle))
+ return typeof handle === 'string' && (/^gen:\/\/(?:trellis\/)?rigged3d\/[a-f0-9]{8,64}$/.test(handle)
+	|| /^model3d:\/\/microsoft-stock\/[a-f0-9]{16}\/[a-zA-Z0-9_-]+$/.test(handle)
+	// Public opaque catalogue handles and the bundled animated emoji sources are
+	// existing catalogue models, like Microsoft stock.
+	|| /^asset:\/\/catalog\/model3d\/[a-f0-9]{32}$/.test(handle)
+	|| /^model3d:\/\/betterpptx-(?:emoji|face)-motions\/[a-z0-9-]+$/.test(handle))
 }
 
 export function classifyBillingTool(name, args = {}) {

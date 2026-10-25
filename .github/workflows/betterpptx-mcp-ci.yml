@@ -78,6 +78,7 @@ jobs:
           node --test betterpptx-mcp/test/durable-operation-phase-idempotency.test.mjs
           node --test betterpptx-mcp/test/durable-mcp-authoring-worker.test.mjs
           node --test betterpptx-mcp/test/free-publication-existing-model-billing.test.mjs
+          node --test betterpptx-mcp/test/free-catalog-model-and-stateless-plan.test.mjs
           node --test betterpptx-mcp/test/inline-image-dimensions-security.test.mjs
           node --test betterpptx-mcp/test/public-artifact-download-sanitization.test.mjs
           node --test betterpptx-mcp/test/public-file-result.test.mjs

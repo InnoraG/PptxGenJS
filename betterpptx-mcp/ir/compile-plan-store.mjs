@@ -34,6 +34,12 @@ export function consumeLockedCompilePlan(planId, compiled) {
 		}
 	}
 	const row = LOCKED_COMPILE_PLANS.get(id)
+	// A queued commit can run on a different instance than its dry run. The plan
+	// id is a deterministic digest, so a fresh compile of the same spec that
+	// reproduces it is the same plan.
+	if (!row && compiled && [compiled.lockedPlanDigest, compiled.planDigest, compiled.estimatedPlanDigest].includes(id)) {
+		return { compiled, usedLockedPlan: true, warning: null }
+	}
 	if (!row) {
 		const error = new Error('planId is unknown or expired. Dry-run again and commit with the returned planId.')
 		error.code = 'PLAN_ID_UNKNOWN'
