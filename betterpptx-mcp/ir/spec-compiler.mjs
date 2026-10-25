@@ -2104,6 +2104,12 @@ function model3DOptionsForObject(object, assets, ctx = {}) {
 				: object.animation === false ? { animation: false } : animationOptions(object)),
 			...(object.scene !== undefined ? { scene: object.scene } : {}),
 		}) : null
+	// Registered views supersede implicit world staging only. Explicit manual
+	// components, presets and motion framing keep their normal ownership.
+	const reusableView = reusableDefaults && !model3dViewPresetId && !model3dMotionFraming(object)
+		? ctx.resolveReusableAnimatedModelDefaults(modelOptions.modelAsset || modelAsset, {
+			...object.rect, ...Object.fromEntries(Object.entries(authoredViewOptions).filter(([key]) => !object._model3dImplicitView?.includes(key))),
+		}) : null
 	const scene = normalizeStaticPoseScene(modelOptions.scene ?? object.scene ?? reusableDefaults?.scene, staticPose)
 	if (scene?.preparedVariantId != null) {
 		if (typeof ctx.validatePreparedScene !== 'function') throw new Error('Prepared scene validation is required for this model asset.')
@@ -2157,6 +2163,7 @@ function model3DOptionsForObject(object, assets, ctx = {}) {
 		...(object._model3dImplicitAnimation && reusableDefaults
 			? { animation: reusableDefaults.animation }
 			: animationOptions(object)),
+		...(reusableView ? Object.fromEntries(['camera','trans','objViewport'].filter(key => reusableView[key] !== undefined).map(key => [key,reusableView[key]])) : {}),
 	}
 	// The semantic catalogue handle owns the source window and idle selection.
 	// Clients author ordinary layout and cues; private clip indexes stay derived.

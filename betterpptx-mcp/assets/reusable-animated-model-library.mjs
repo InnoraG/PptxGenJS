@@ -17,6 +17,30 @@ const parsedSources=new Map()
 const nativeTransports=new Map()
 let defaultRegistryCache
 const stamp=file=>{const s=statSync(file,{bigint:true});return[s.dev,s.ino,s.size,s.mtimeNs,s.ctimeNs].map(String).join(':')}
+function validatePreferredView(v){
+ if(!closed(v,['camera','trans','viewportPerInch'])||!Object.keys(v).length)fail()
+ const scalar=(n,min,max,integer=false)=>{if(typeof n!=='number'||!Number.isFinite(n)||n<min||n>max||integer&&!Number.isInteger(n))fail()}
+ const vector=(o,keys,min,max,integer=false)=>{if(!closed(o,keys)||!Object.keys(o).length)fail();for(const n of Object.values(o))scalar(n,min,max,integer)}
+ if(v.camera!==undefined){if(!closed(v.camera,['pos','fov']))fail();if(v.camera.pos!==undefined)vector(v.camera.pos,['x','y','z'],-2147483648,2147483647,true);if(v.camera.fov!==undefined)scalar(v.camera.fov,.01,21600000)}
+ if(v.trans!==undefined){const t=v.trans;if(!closed(t,['meterPerModelUnit','preTrans','scale','rot','postTrans']))fail();if(t.meterPerModelUnit!==undefined)vector(t.meterPerModelUnit,['n','d'],1,2147483647,true);for(const k of ['preTrans','postTrans'])if(t[k]!==undefined)vector(t[k],['dx','dy','dz'],-2147483648,2147483647,true);if(t.scale!==undefined)vector(t.scale,['x','y','z','sx','sy','sz'],0,100000000);if(t.rot!==undefined)vector(t.rot,['x','y','z','ax','ay','az'],-21600000,21600000)}
+ if(v.viewportPerInch!==undefined)scalar(v.viewportPerInch,1,2147483647)
+}
+const mergeViewComponent=(base,override)=>{
+ if(override==null)return structuredClone(base)
+ if(!base||typeof override!=='object'||Array.isArray(override))return structuredClone(override)
+ const merged=structuredClone(base)
+ for(const[k,v]of Object.entries(override))merged[k]=v===null?structuredClone(base[k]):v&&typeof v==='object'&&!Array.isArray(v)?mergeViewComponent(base[k],v):structuredClone(v)
+ return merged
+}
+/** Trusted source-relative view, independent of slide geometry or motion identity. */
+export function applyReusableAnimatedModelPreferredView(preferredView,options={}){
+ if(!preferredView||options.model3dViewPresetId||options.motionFraming)return options
+ validatePreferredView(preferredView)
+ const view={}
+ for(const k of ['camera','trans'])if(preferredView[k]!==undefined)view[k]=mergeViewComponent(preferredView[k],options[k])
+ if(preferredView.viewportPerInch!==undefined&&Number.isFinite(options.h)&&options.h>0){const viewport=Math.round(preferredView.viewportPerInch*options.h);if(viewport<1||viewport>2147483647)fail();view.objViewport=options.objViewport??viewport}
+ return{...options,...view}
+}
 function clipDuration(parsed,index){
  const a=parsed.json.animations?.[index];if(!a?.channels?.length||!a.samplers?.length)fail()
  let maximum=0
@@ -38,7 +62,7 @@ export function loadReusableAnimatedModelRegistry(catalogFiles=catalogs){
    const file=fileURLToPath(catalogFile),bytes=readFileSync(file);if(bytes.length>1024*1024)fail();fingerprint.update(bytes)
    const catalog=JSON.parse(bytes);if(!closed(catalog,['schemaVersion','source','sourceLabel','entries'])||catalog.schemaVersion!=='betterpptx.reusable-animated-model-library.v1'||!id(catalog.source)||!text(catalog.sourceLabel,160)||!Array.isArray(catalog.entries)||catalog.entries.length>160)fail()
    for(const row of catalog.entries){
-    if(!closed(row,['id','title','description','tags','glbFile','sourceSha256','bytes','clip','posterFrame','initialization','approval','nativeQualification','license'])||!id(row.id)||!text(row.title,160)||!text(row.description,1000)||!text(row.glbFile,4096)||!text(row.license,512)||!Array.isArray(row.tags)||row.tags.length>32||row.tags.some(t=>!text(t,64))||!(/^[a-f0-9]{64}$/).test(row.sourceSha256)||!Number.isSafeInteger(row.bytes)||row.bytes<20||row.bytes>32*1024*1024)fail()
+    if(!closed(row,['id','title','description','tags','glbFile','sourceSha256','bytes','clip','posterFrame','initialization','preferredView','approval','nativeQualification','license'])||!id(row.id)||!text(row.title,160)||!text(row.description,1000)||!text(row.glbFile,4096)||!text(row.license,512)||!Array.isArray(row.tags)||row.tags.length>32||row.tags.some(t=>!text(t,64))||!(/^[a-f0-9]{64}$/).test(row.sourceSha256)||!Number.isSafeInteger(row.bytes)||row.bytes<20||row.bytes>32*1024*1024)fail()
     const sourcePath=path.resolve(path.dirname(file),row.glbFile),relative=path.relative(root,sourcePath);if(relative.startsWith('..')||path.isAbsolute(relative))fail()
     let source=sources.get(sourcePath);if(!source){const b=readFileSync(sourcePath),digest=sha(b);let parsed=parsedSources.get(digest);if(!parsed){parsed=parseGlb(b);parsedSources.set(digest,parsed);while(parsedSources.size>4)parsedSources.delete(parsedSources.keys().next().value)}source={bytes:b.length,sha256:digest,parsed,durations:new Map()};sources.set(sourcePath,source);fingerprint.update(source.sha256)}
     if(source.bytes!==row.bytes||source.sha256!==row.sourceSha256)fail()
@@ -49,6 +73,7 @@ export function loadReusableAnimatedModelRegistry(catalogFiles=catalogs){
     if(!closed(row.approval,['status','approvedOn'])||!['owner-approved','previously-validated'].includes(row.approval.status)||!/^\d{4}-\d{2}-\d{2}$/.test(row.approval.approvedOn)||!closed(row.nativeQualification,['status'])||!['pending-native','qualified'].includes(row.nativeQualification.status))fail()
     if(row.posterFrame!==undefined&&(!closed(row.posterFrame,['progress'])||!Number.isFinite(row.posterFrame.progress)||row.posterFrame.progress<0||row.posterFrame.progress>1))fail()
     if(row.initialization!==undefined&&(!closed(row.initialization,['visibilityDelayMs'])||!Number.isInteger(row.initialization.visibilityDelayMs)||row.initialization.visibilityDelayMs<1||row.initialization.visibilityDelayMs>2000))fail()
+    if(row.preferredView!==undefined)validatePreferredView(row.preferredView)
     const handle=`model3d://${catalog.source}/${row.id}`;if(handles.has(handle))fail();handles.add(handle)
     rows.push({row:structuredClone(row),handle,sourcePath,sourceDurationMs:source.durations.get(c.index),source:catalog.source,sourceLabel:catalog.sourceLabel})
    }
@@ -66,7 +91,7 @@ export function resolveReusableAnimatedModelSelection(handle){
  if(!found){const paths=rows.filter(r=>r.sourcePath===handle);if(paths.length>1)throw Object.assign(new Error('Select a named reusable motion rather than a shared source model.'),{code:'REUSABLE_ANIMATED_MODEL_SELECTION_AMBIGUOUS'});found=paths[0]}if(!found)return null
  const {row:r}=found,c=r.clip
  const scene={animId:c.index,length:Math.round(found.sourceDurationMs),loop:false},sceneProgress=structuredClone(c.sourceWindow??{start:0,end:1}),posterFrame={animId:c.index,progress:r.posterFrame?.progress??c.idleProgress??c.sourceWindow?.start??0}
- return{modelAsset:found.sourcePath,handle:found.handle,sourceSha256:r.sourceSha256,motionId:c.id,durationMs:c.durationMs,scene,sceneProgress,posterFrame,...(r.initialization?{initialization:structuredClone(r.initialization)}:{}),defaultScene:scene,defaultPosterFrame:posterFrame,defaultPlayScene:{effect:'playScene',animId:c.index,duration:c.durationMs,loop:false,sceneProgress},sourceBound:true}
+ return{...(r.preferredView?{preferredView:structuredClone(r.preferredView)}:{}),modelAsset:found.sourcePath,handle:found.handle,sourceSha256:r.sourceSha256,motionId:c.id,durationMs:c.durationMs,scene,sceneProgress,posterFrame,...(r.initialization?{initialization:structuredClone(r.initialization)}:{}),defaultScene:scene,defaultPosterFrame:posterFrame,defaultPlayScene:{effect:'playScene',animId:c.index,duration:c.durationMs,loop:false,sceneProgress},sourceBound:true}
 }
 /** Merge source-bound defaults without changing the authored layout or cue.
  * A caller may not silently substitute a different source clip or expression. */
@@ -109,7 +134,7 @@ export function resolveReusableAnimatedModelDefaults(handle,options={}){
   const play={...plays[0],trigger:'withPrevious',delay:0,...(plays[0].order===undefined?{order:1}:{})}
   animation=[...gate,play,...sequence.filter(a=>a.effect!=='playScene'&&a.type!=='entrance')]
  }
- const merged={...options,scene:structuredClone(selected.scene),posterFrame:structuredClone(selected.posterFrame),animation};delete merged.animations
+ const merged={...applyReusableAnimatedModelPreferredView(selected.preferredView,options),scene:structuredClone(selected.scene),posterFrame:structuredClone(selected.posterFrame),animation};delete merged.animations
  return merged
 }
 /** Lossless delivery preparation for the registered source only. Proven small

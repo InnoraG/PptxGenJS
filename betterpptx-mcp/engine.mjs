@@ -1,3 +1,4 @@
+import {paginateAssetCatalog} from './asset-catalog-pagination.mjs'
 import {motionCatalogRecovery} from './motion-catalog-recovery.mjs'
 import {validateMotionWindowRequirements,motionComparisonWindows} from './motion-source-movement-timeline.mjs'
 import {validateMotionComparisonTarget,motionComparisonTargetReadiness,motionComparisonCatalogReadiness} from './motion-comparison-readiness.mjs'
@@ -18228,7 +18229,7 @@ function loadUnifiedAssetCatalog({ refresh = false } = {}) {
 	return catalog
 }
 
-function listAssetFiles({ kind, query, q: queryAlias, intent, useCase, aiContext, source, maxResults = 60, includeDuplicates = false, preferNative = true, sizePolicy = 'standard', maxModelSizeMb, maxGlbSizeMb, maxSizeMb } = {}) {
+function listAssetFiles({ kind, query, q: queryAlias, intent, useCase, aiContext, source, maxResults = 60, includeDuplicates = false, preferNative = true, sizePolicy = 'standard', maxModelSizeMb, maxGlbSizeMb, maxSizeMb, completeInventory = false } = {}) {
 	const normalizedKind = normalizeAssetKind(kind)
 	const rawQuery = String(query ?? queryAlias ?? '').trim()
 	const q = rawQuery.toLowerCase()
@@ -18236,7 +18237,7 @@ function listAssetFiles({ kind, query, q: queryAlias, intent, useCase, aiContext
 	const intentContext = buildAssetIntentQueryContext(contextText)
 	const terms = intentContext.terms
 	const sourceFilter = normalizeCatalogSource(source)
-	const limit = Math.max(1, Math.min(500, Number(maxResults) || 60))
+	const limit = completeInventory ? Infinity : Math.max(1, Math.min(500, Number(maxResults) || 60))
 	const normalizedSizePolicy = normalizeModelSizePolicy(sizePolicy)
 	const explicitMax = Number(maxModelSizeMb ?? maxGlbSizeMb ?? maxSizeMb)
 	const maxModelSize = Number.isFinite(explicitMax) && explicitMax > 0
@@ -18439,20 +18440,25 @@ function publicCatalogEntry(item) {
 	return entry
 }
 
-function publicAssetCatalogResult(result, maxResults = 60) {
+function publicAssetCatalogResult(result, maxResults = 60, continuation = {}) {
 	const allowedKinds = new Set(['model3d', 'shapeScene', 'customShape'])
 	const publicItems = [...(result.results || result.assets || [])]
 		.filter(item => allowedKinds.has(item?.kind))
-		.sort((left, right) => String(left?.title || left?.name || '').localeCompare(String(right?.title || right?.name || '')) || String(left?.handle || '').localeCompare(String(right?.handle || '')))
 	const limit = Math.max(1, Math.min(60, Number(maxResults) || 60))
-	const publicEntries = publicItems.slice(0, limit).map(publicCatalogEntry)
+	const page = paginateAssetCatalog({items:publicItems,scope:continuation.scope,cursor:continuation.cursor,limit,key:publicAssetCatalogPageKey,version:assetCatalogPageVersion})
+	// Retain the existing factual-match page membership, then present each page
+	// neutrally by label. Sorting the entire inventory before slicing would push
+	// exact semantic matches behind weaker matches in larger inventories.
+	const publicEntries = page.items.sort((left,right)=>String(left?.title||left?.name||'').localeCompare(String(right?.title||right?.name||''))||String(left?.handle||'').localeCompare(String(right?.handle||''))).map(publicCatalogEntry)
 	return {
 		query: result.query,
 		intent: result.intent,
 		useCase: result.useCase,
 		kind: result.kind,
 		count: publicEntries.length,
-		truncated: Boolean(result.truncated || publicItems.length > publicEntries.length),
+		truncated: page.pagination.hasMore,
+		nextCursor: page.nextCursor,
+		pagination: page.pagination,
 		fallbackUsed: result.fallbackUsed,
 		...((result.kind === 'model3d' || result.kind == null) ? { sizePolicy: result.sizePolicy } : {}),
 		queryExpansion: result.queryExpansion,
@@ -19250,10 +19256,22 @@ async function handleGenerateRigged3d(args = {}, context = {}) {
 
 async function handleAssetCatalog(args = {}) {
 	const publicMode = isPublicBlackBoxMode()
-	const requestedLimit = Math.max(1, Math.min(60, Number(args.maxResults) || 60))
-	const result = listAssetFiles(publicMode && !args.kind ? { ...args, maxResults: 500 } : args)
-	return publicMode ? publicAssetCatalogResult(result, requestedLimit) : result
+	const requestedLimit = Math.max(1, Math.min(publicMode ? 60 : 500, Math.floor(Number(args.maxResults) || 60)))
+	const result = listAssetFiles({...args,completeInventory:true})
+	const normalizedSizePolicy = normalizeModelSizePolicy(args.sizePolicy)
+	const explicitMax = Number(args.maxModelSizeMb ?? args.maxGlbSizeMb ?? args.maxSizeMb)
+	const scope = {publicMode,kind:normalizeAssetKind(args.kind)||null,query:String(args.query??args.q??'').trim().toLowerCase(),intent:String(args.intent??'').trim().toLowerCase(),useCase:String(args.useCase??'').trim().toLowerCase(),aiContext:String(args.aiContext??'').trim().toLowerCase(),source:normalizeCatalogSource(args.source)||null,includeDuplicates:args.includeDuplicates===true,preferNative:args.preferNative!==false,sizePolicy:normalizedSizePolicy,maxModelSizeMb:Number.isFinite(explicitMax)&&explicitMax>0?explicitMax:(MODEL_SIZE_POLICY_LIMITS_MB[normalizedSizePolicy]??null)}
+	if(publicMode)return publicAssetCatalogResult(result,requestedLimit,{scope,cursor:args.cursor})
+	const page=paginateAssetCatalog({items:result.results,scope,cursor:args.cursor,limit:requestedLimit,key:publicAssetCatalogPageKey,version:assetCatalogPageVersion})
+	return{...result,count:page.items.length,truncated:page.pagination.hasMore,results:page.items,assets:page.items,nextCursor:page.nextCursor,pagination:page.pagination}
 }
+
+function publicAssetCatalogPageKey(item){
+	if(item.kind==='shapeScene')return publicShapeSceneHandle(item.handle)
+	if(item.kind==='customShape')return publicCustomShapeHandle(item.handle)
+	return publicCatalogHandleForItem(item)
+}
+function assetCatalogPageVersion(item){return[item.sha256??null,item.bytes??null,item.title??item.name??null]}
 
 function publicCustomShapeEntry(asset, format = 'summary') {
 	if (!isPublicBlackBoxMode()) {

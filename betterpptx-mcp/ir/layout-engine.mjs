@@ -6027,11 +6027,14 @@ function planBlock({ spec, slide, slideIndex = 0, block, blockIndex, regions, re
 			...(Object.prototype.hasOwnProperty.call(block, 'staticPose') ? { staticPose: block.staticPose }
 				: Object.prototype.hasOwnProperty.call(block.model3dOptions || {}, 'staticPose') ? { staticPose: block.model3dOptions.staticPose } : {}),
 			model3dViewPresetId: block.model3dViewPresetId || block.modelOptions?.model3dViewPresetId,
+			// Keep world staging distinguishable from authored view components when
+			// a semantic catalogue selection resolves later in the compiler.
+			_model3dImplicitView: ['camera','trans','objViewport'].filter(key => !Object.prototype.hasOwnProperty.call(block,key) && !Object.prototype.hasOwnProperty.call(modelOptions || {},key)),
 			// Per-world STAGING: the world frames AND lights the model (camera lens + pose +
 			// key-light tint) unless the author set their own. luxe = cinematic telephoto + warm
 			// gold light, blueprint = flat technical + cool cyan, brutalist = wide + hard white.
-			camera: block.camera || (!motionFraming && !block.model3dViewPresetId && !block.modelOptions?.model3dViewPresetId && theme.stage3d ? theme.stage3d.camera : undefined),
-			trans: block.trans || (!motionFraming && !block.model3dViewPresetId && !block.modelOptions?.model3dViewPresetId && theme.stage3d ? { scale: { x: 1, y: 1, z: 1 }, rot: block.rotation || theme.stage3d.rot } : undefined),
+			camera: block.camera !== undefined ? block.camera : (!motionFraming && !block.model3dViewPresetId && !block.modelOptions?.model3dViewPresetId && theme.stage3d ? theme.stage3d.camera : undefined),
+			trans: block.trans !== undefined ? block.trans : (!motionFraming && !block.model3dViewPresetId && !block.modelOptions?.model3dViewPresetId && theme.stage3d ? { scale: { x: 1, y: 1, z: 1 }, rot: block.rotation || theme.stage3d.rot } : undefined),
 			ambientLight: block.ambientLight || (!block.model3dViewPresetId && !block.modelOptions?.model3dViewPresetId && theme.stage3d?.ambient ? { color: theme.stage3d.ambient.color, illuminance: theme.stage3d.ambient.illuminance } : undefined),
 			ptLights: block.ptLights || (!block.model3dViewPresetId && !block.modelOptions?.model3dViewPresetId && theme.stage3d?.key ? [{ color: theme.stage3d.key.color, intensity: theme.stage3d.key.intensity, pos: { x: 24000000, y: 56000000, z: 30000000 } }] : undefined),
 			nativeOnly: block.nativeOnly,
