@@ -25,7 +25,7 @@ if (CONFIGURED_SEMANTIC_VERSION && CONFIGURED_SEMANTIC_VERSION !== PACKAGE_SEMAN
 }
 export const PUBLIC_SEMANTIC_VERSION = PACKAGE_SEMANTIC_VERSION
 export const PUBLIC_SCHEMA_CHANGE = Object.freeze({
-	previousToolSchemaVersion: '2026-10-23.2',
+	previousToolSchemaVersion: '2026-10-24.1',
 	compatibility: 'breaking',
 	changes: [
 		'betterpptx.narration.synthesize is renamed betterpptx.narration.get_voice_timing; the previous name still resolves but is no longer listed.',

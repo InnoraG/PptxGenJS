@@ -36,6 +36,7 @@ import {configureBuiltInPreparedMotionLibrary,builtInPreparedMotionLibrary,isPub
 import {builtInMotionSourceReview} from './motion-source-authoring-reviews.mjs'
 import { createAssetGrantManager, AssetGrantError, requiresAssetGrant, assetGrantBundleBytes } from './auth/asset-grants.mjs'
 import { loadGeneratedAsset } from './storage/gen-asset-store.mjs'
+import { createAssetFs } from './assets/asset-inventory.mjs'
 import { publicVoiceCatalog, probeSynthesisRuntime } from './narration/runtime-status.mjs'
 import { narratedProfileRequested } from './narration/tts-text.mjs'
 import { findNonNativeCaptionOverlayField, materializeClosedCaptionTracks, nonNativeCaptionOverlayIssue, normalizeAuthoredCue } from './ir/narration-contract.mjs'
@@ -712,6 +713,9 @@ const native3dPosterReceipts = createNative3dPosterReceiptStore(path.resolve(pro
 // explicit BETTERPPTX_ASSETS_ROOT mount; local MCP clients should not lose the
 // maintained catalog merely because the worker cwd differs from the repo root.
 const ASSETS_ROOT = path.resolve(process.env.BETTERPPTX_ASSETS_ROOT || path.resolve(__dirname, '..'))
+// Catalogue metadata lookups (exists/stat/readdir) under ASSETS_ROOT go through the bundle's
+// precomputed inventory when one is published with it (see assets/asset-inventory.mjs).
+const assetFs = createAssetFs({ root: ASSETS_ROOT, fs: fsNode, inventoryPath: process.env.BETTERPPTX_ASSETS_INVENTORY ? path.resolve(process.env.BETTERPPTX_ASSETS_INVENTORY) : undefined })
 let unifiedAssetCatalogCache = null
 let unifiedAssetCatalogCacheKey = ''
 const OPAQUE_NATIVE_SNAPSHOT_VERSION = 'betterpptx.opaque-native.v1'
@@ -2600,7 +2604,7 @@ function modelSizeSummary(bytes) {
 
 function statSummary(file) {
 	try {
-		const st = fsNode.statSync(file)
+		const st = assetFs.statSync(file)
 		const summary = {
 			path: file,
 			exists: true,
@@ -17246,7 +17250,7 @@ function buildSketchfabImportedAssets() {
 		let filePath
 		try { filePath = resolveSketchfabCachePath(cacheRoot, asset.file) }
 		catch { return null }
-		if (!asset?.handle || !fsNode.existsSync(filePath)) return null
+		if (!asset?.handle || !assetFs.existsSync(filePath)) return null
 		let previewPath
 		try { previewPath = asset.preview ? resolveSketchfabCachePath(cacheRoot, asset.preview) : undefined }
 		catch { previewPath = undefined }
@@ -17274,8 +17278,8 @@ function buildSketchfabImportedAssets() {
 			path: filePath,
 			modelAsset: filePath,
 			rel: relFromCwd(filePath),
-			preview: previewPath && fsNode.existsSync(previewPath) ? previewPath : undefined,
-			posterAsset: previewPath && fsNode.existsSync(previewPath) ? previewPath : undefined,
+			preview: previewPath && assetFs.existsSync(previewPath) ? previewPath : undefined,
+			posterAsset: previewPath && assetFs.existsSync(previewPath) ? previewPath : undefined,
 			addModel3DOptions: { modelAsset: filePath, nativeOnly: true },
 			sourceUrl: asset.sourceUrl,
 			rights: asset.rights,
@@ -17767,7 +17771,7 @@ function buildMicrosoftStock3DAssets() {
 	const localGlbDir = path.join(libraryDir, 'glb')
 	let recordFiles = []
 	try {
-		recordFiles = fsNode.readdirSync(recordsDir)
+		recordFiles = assetFs.readdirSync(recordsDir)
 	} catch {
 		return []
 	}
@@ -17785,8 +17789,8 @@ function buildMicrosoftStock3DAssets() {
 			// the picker falls back to low-poly sources.
 			const rawGlb = String(record?.glb || '')
 			const localGlb = rawGlb ? path.join(localGlbDir, crossPlatformBasename(rawGlb)) : ''
-			const glbPath = localGlb && fsNode.existsSync(localGlb) ? localGlb : path.resolve(rawGlb)
-			if (!record?.title || !fsNode.existsSync(glbPath)) continue
+			const glbPath = localGlb && assetFs.existsSync(localGlb) ? localGlb : path.resolve(rawGlb)
+			if (!record?.title || !assetFs.existsSync(glbPath)) continue
 			const sha = String(record.sha256 || '').trim()
 			const key = sha || glbPath.toLowerCase()
 			const aiCollections = classifyMicrosoftStock3DRecord(record)
@@ -17876,7 +17880,7 @@ function buildIconScoutAssets() {
 	const vendor = manifest.vendor || 'iconscout'
 	return manifest.assets.map(asset => {
 		const filePath = path.resolve(root, String(asset.file || ''))
-		if (!asset?.handle || !fsNode.existsSync(filePath)) return null
+		if (!asset?.handle || !assetFs.existsSync(filePath)) return null
 		const isModel = asset.category === 'models3d' || String(asset.format || '').toLowerCase() === 'glb'
 		const title = String(asset.title || asset.name || titleFromAssetPath(asset.file || asset.handle, 'IconScout asset'))
 		const previewPath = asset.preview ? path.resolve(root, String(asset.preview)) : undefined
@@ -17908,7 +17912,7 @@ function buildIconScoutAssets() {
 			privateAsset: true,
 			path: filePath,
 			rel: relFromCwd(filePath),
-			preview: previewPath && fsNode.existsSync(previewPath) ? previewPath : undefined,
+			preview: previewPath && assetFs.existsSync(previewPath) ? previewPath : undefined,
 			...(isModel ? {
 				modelAsset: filePath,
 				addModel3DOptions: { modelAsset: filePath, nativeOnly: true },
@@ -17932,7 +17936,7 @@ function buildToxSamAssets() {
 		if (![OPEN_SOURCE_3D_SOURCE_KEY, OPEN_SOURCE_3D_QUALITY_SOURCE_KEY].includes(sourceKey)) return null
 		if (asset.category !== 'models3d' || !asset.file) return null
 		const filePath = path.resolve(root, String(asset.file))
-		if (!fsNode.existsSync(filePath)) return null
+		if (!assetFs.existsSync(filePath)) return null
 		const previewPath = asset.preview ? path.resolve(root, String(asset.preview)) : undefined
 		const isQuality = sourceKey === OPEN_SOURCE_3D_QUALITY_SOURCE_KEY
 		const title = String(asset.upstreamAssetName || asset.title || asset.altText || titleFromAssetPath(asset.file, 'ToxSam open-source model'))
@@ -17967,11 +17971,11 @@ function buildToxSamAssets() {
 			path: filePath,
 			modelAsset: filePath,
 			rel: relFromCwd(filePath),
-			preview: previewPath && fsNode.existsSync(previewPath) ? previewPath : undefined,
-			posterAsset: previewPath && fsNode.existsSync(previewPath) ? previewPath : undefined,
+			preview: previewPath && assetFs.existsSync(previewPath) ? previewPath : undefined,
+			posterAsset: previewPath && assetFs.existsSync(previewPath) ? previewPath : undefined,
 			addModel3DOptions: {
 				modelAsset: filePath,
-				...(previewPath && fsNode.existsSync(previewPath) ? { posterAsset: previewPath } : { nativeOnly: true }),
+				...(previewPath && assetFs.existsSync(previewPath) ? { posterAsset: previewPath } : { nativeOnly: true }),
 			},
 			project: {
 				id: asset.projectId || undefined,
@@ -18054,7 +18058,7 @@ function buildCustomShapeAssets() {
 	const root = agencyShapeSceneRoot()
 	let files = []
 	try {
-		files = fsNode.readdirSync(root)
+		files = assetFs.readdirSync(root)
 			.filter(name => /\.json$/i.test(name))
 			.sort()
 	} catch {
@@ -18156,7 +18160,7 @@ function buildDirectoryAssetItems(source) {
 	const items = []
 	function walk(dir) {
 		let entries
-		try { entries = fsNode.readdirSync(dir, { withFileTypes: true }) } catch { return }
+		try { entries = assetFs.readdirSync(dir, { withFileTypes: true }) } catch { return }
 		for (const entry of entries) {
 			const full = path.join(dir, entry.name)
 			if (entry.isDirectory()) {
@@ -18200,7 +18204,7 @@ function buildDirectoryAssetItems(source) {
 
 function currentUnifiedAssetCatalogCacheKey() {
 	let sketchfabMtime = 0
-	try { sketchfabMtime = Math.round(fsNode.statSync(sketchfabManifestPath()).mtimeMs) }
+	try { sketchfabMtime = Math.round(assetFs.statSync(sketchfabManifestPath()).mtimeMs) }
 	catch (_) {}
 	return `${ASSETS_ROOT}|${sketchfabManifestPath()}|${sketchfabMtime}|${reusableAnimatedModelLibraryFingerprint()}`
 }
@@ -19650,12 +19654,12 @@ function loadLocalOpenSource3DAssets() {
 			if (isQualityDerivative && !isVerifiedQualityDerivative) return null
 			const modelPath = path.resolve(root, String(asset.file))
 			const posterPath = path.resolve(root, String(asset.preview))
-			if (!fsNode.existsSync(modelPath) || !fsNode.existsSync(posterPath)) return null
+			if (!assetFs.existsSync(modelPath) || !assetFs.existsSync(posterPath)) return null
 			const posterPaths = {}
 			if (asset.previews && typeof asset.previews === 'object') {
 				for (const [pose, rel] of Object.entries(asset.previews)) {
 					const candidate = path.resolve(root, String(rel))
-					if (fsNode.existsSync(candidate)) posterPaths[pose] = candidate
+					if (assetFs.existsSync(candidate)) posterPaths[pose] = candidate
 				}
 			}
 			return {
@@ -19671,7 +19675,7 @@ function loadLocalOpenSource3DAssets() {
 				qualityVerified: isVerifiedQualityDerivative,
 				qualityBoost: isVerifiedQualityDerivative ? 28 : 0,
 				metadata: {
-					file_size: Number(asset.bytes || fsNode.statSync(modelPath).size || 0),
+					file_size: Number(asset.bytes || assetFs.statSync(modelPath).size || 0),
 					attributes: Array.isArray(asset.tags) ? asset.tags.map(tag => ({ trait_type: 'Tag', value: tag })) : [],
 				},
 			}
@@ -19773,14 +19777,14 @@ function resolvePremiumModel3DAsset(kind, args = {}) {
 	if (premium) {
 		const modelPath = path.resolve(ASSETS_ROOT, 'demos', 'betterpptx-premium-assets', 'models', `${premium.stem}.glb`)
 		const posterPath = path.resolve(ASSETS_ROOT, 'demos', 'betterpptx-premium-assets', 'posters', `${premium.stem}.png`)
-		if (fsNode.existsSync(modelPath) && fsNode.existsSync(posterPath)) return { ...premium, modelPath, posterPath, tier: 'high-fidelity-paired' }
+		if (assetFs.existsSync(modelPath) && assetFs.existsSync(posterPath)) return { ...premium, modelPath, posterPath, tier: 'high-fidelity-paired' }
 	}
 	const online = ONLINE_MODEL3D_PAIRS[kind]
 	if (online) {
 		const posterExt = online.posterExt || '.png'
 		const modelPath = path.resolve(ASSETS_ROOT, 'demos', 'betterpptx-online-assets', 'models', 'khronos', `${online.stem}.glb`)
 		const posterPath = path.resolve(ASSETS_ROOT, 'demos', 'betterpptx-online-assets', 'models', 'khronos', 'previews', `${online.stem}${posterExt}`)
-		if (fsNode.existsSync(modelPath) && fsNode.existsSync(posterPath)) return { ...online, modelPath, posterPath, tier: 'high-fidelity-library' }
+		if (assetFs.existsSync(modelPath) && assetFs.existsSync(posterPath)) return { ...online, modelPath, posterPath, tier: 'high-fidelity-library' }
 	}
 	return null
 }
@@ -33932,7 +33936,7 @@ async function materializeIconPng(iconSource = {}) {
 	const iconSetDirs = ASSET_CATALOG.filter(s => s.kind === 'icon').map(s => ({ source: s.source, dir: path.resolve(ASSETS_ROOT, s.root) }))
 	const iconSetByName = new Map(iconSetDirs.map(s => [s.source, s.dir]))
 	const normBase = value => String(value).trim().toLowerCase().replace(/\s+/g, '-').replace(/\.svg$/i, '')
-	const fileInDir = (dir, base) => { const cand = path.join(dir, `${base}.svg`); return dir && fsNode.existsSync(cand) ? cand : null }
+	const fileInDir = (dir, base) => { const cand = path.join(dir, `${base}.svg`); return dir && assetFs.existsSync(cand) ? cand : null }
 	const asSvgFile = value => {
 		if (!value) return null
 		const raw = String(value).trim()
@@ -33946,7 +33950,7 @@ async function materializeIconPng(iconSource = {}) {
 		for (const { dir } of iconSetDirs) { const hit = fileInDir(dir, base); if (hit) return hit }
 		return null
 	}
-	const asIconSvg = value => (typeof value === 'string' && /\.svg$/i.test(value) && fsNode.existsSync(value) &&
+	const asIconSvg = value => (typeof value === 'string' && /\.svg$/i.test(value) && assetFs.existsSync(value) &&
 		iconSetDirs.some(s => value.replace(/\\/g, '/').toLowerCase().startsWith(s.dir.replace(/\\/g, '/').toLowerCase()))) ? value : null
 	// Resolution order — prefer an EXACT glyph name over a fuzzy semantic match (an author
 	// who writes "shield" means the shield glyph, not the catalog's ranked guess):

@@ -2,6 +2,7 @@ param(
 	[string]$Project = 'betterpptx-mcp-20260926',
 	[string]$Region = 'us-central1',
 	[string]$Bucket = 'betterpptx-mcp-20260926-artifacts',
+	[string]$CatalogBucket = 'betterpptx-mcp-20260926-catalog',
 	[string]$DeployerServiceAccount = 'github-free-beta-deployer'
 )
 
@@ -79,6 +80,13 @@ $firestoreCondition = "expression=resource.name == 'projects/$Project/databases/
 Invoke-Gcloud @('projects', 'add-iam-policy-binding', $Project, "--member=serviceAccount:$runtimeEmail", '--role=roles/datastore.user', "--condition=$firestoreCondition", '--quiet') | Out-Null
 
 Invoke-Gcloud @('storage', 'buckets', 'add-iam-policy-binding', "gs://$Bucket", "--member=serviceAccount:$runtimeEmail", '--role=roles/storage.objectAdmin', '--quiet') | Out-Null
+# The read-only asset catalogue (Microsoft Stock 3D and the open library) is a private
+# bucket mounted read-only into the gateway and worker. The runtime may only read it;
+# publish-asset-catalog-bundle.sh fills it and writes its precomputed inventory.
+if (-not (Test-GcloudResource @('storage', 'buckets', 'describe', "gs://$CatalogBucket", '--format=value(name)'))) {
+	Invoke-Gcloud @('storage', 'buckets', 'create', "gs://$CatalogBucket", "--project=$Project", "--location=$Region", '--default-storage-class=STANDARD', '--uniform-bucket-level-access', '--public-access-prevention', '--soft-delete-duration=0', '--quiet') | Out-Null
+}
+Invoke-Gcloud @('storage', 'buckets', 'add-iam-policy-binding', "gs://$CatalogBucket", "--member=serviceAccount:$runtimeEmail", '--role=roles/storage.objectViewer', '--quiet') | Out-Null
 foreach ($secret in @($hmacSecret, $workerSecret)) {
 	Invoke-Gcloud @('secrets', 'add-iam-policy-binding', $secret, "--project=$Project", "--member=serviceAccount:$runtimeEmail", '--role=roles/secretmanager.secretAccessor', '--quiet') | Out-Null
 }
