@@ -33,6 +33,6 @@ sync "$ol/models/open-source-3d"
 
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
-gcloud storage objects list "$bucket" --format=json > "$work/listing.json"
+gcloud storage objects list "$bucket/**" --format=json > "$work/listing.json"
 node "$here/build-asset-inventory.mjs" --listing "$work/listing.json" --out "$work/.betterpptx-asset-inventory.json"
 gcloud storage cp "$work/.betterpptx-asset-inventory.json" "$bucket/.betterpptx-asset-inventory.json"

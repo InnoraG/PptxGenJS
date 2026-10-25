@@ -3,7 +3,7 @@
 // published asset bundle, so the catalogue loader never walks the mounted bucket.
 //
 // From the bucket itself (the inventory then matches exactly what is published):
-//   gcloud storage objects list gs://BUCKET --format=json > listing.json
+//   gcloud storage objects list "gs://BUCKET/**" --format=json > listing.json
 //   node deploy/gcp/build-asset-inventory.mjs --listing listing.json --out .betterpptx-asset-inventory.json
 //   gcloud storage cp .betterpptx-asset-inventory.json gs://BUCKET/.betterpptx-asset-inventory.json
 //

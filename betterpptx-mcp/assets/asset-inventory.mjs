@@ -91,13 +91,13 @@ export function createAssetFs({ root, fs, inventoryPath = path.join(root, ASSET_
 		return index
 	}
 	// Relative key for a path inside the bundle, or null when the facade should pass through.
+	const rootPrefix = absRoot.endsWith(path.sep) ? absRoot : absRoot + path.sep
 	function keyFor(file) {
 		if (typeof file !== 'string' || !file) return null
 		const abs = path.resolve(file)
-		const rel = path.relative(absRoot, abs)
-		if (rel.startsWith('..') || path.isAbsolute(rel)) return null
+		if (abs !== absRoot && !abs.startsWith(rootPrefix)) return null
 		if (!load()) return null
-		return toPosix(rel)
+		return abs === absRoot ? '' : toPosix(abs.slice(rootPrefix.length))
 	}
 	return {
 		get active() { return !!load() },
