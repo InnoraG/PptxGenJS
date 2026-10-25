@@ -2575,6 +2575,7 @@ export const TOOLS = [
 				aiContext: { type: 'string', description: 'Optional broader deck context for AI ranking when the exact object is not obvious.' },
 				source: { type: 'string', description: 'Optional category filter.' },
 				maxResults: { type: 'number', default: 60 },
+				cursor: { type: 'string', minLength: 1, maxLength: 2052, description: 'Optional opaque nextCursor returned by the previous asset page. Keep query, category, source and size filters unchanged. Start a new request if the inventory changed.' },
 				preferNative: { type: 'boolean', default: true, description: 'When true, rank relevant Microsoft PowerPoint Stock 3D models above other sources.' },
 				includeDuplicates: { type: 'boolean', default: false, description: 'Normally duplicate asset entries are consolidated while preserving useful categories and titles.' },
 				sizePolicy: { type: 'string', enum: ['compact', 'standard', 'balanced', 'large-ok', 'unrestricted'], default: 'standard', description: 'GLB size policy for model3d results. standard keeps results at about 10 MiB or less; use large-ok/unrestricted only when detail matters more than PPTX file size.' },

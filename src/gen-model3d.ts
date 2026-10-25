@@ -6,6 +6,7 @@ import { ISlideObject, Model3DProps } from './core-interfaces'
 import { CRLF } from './core-enums'
 import { encodeXmlEntities, createShadowElement, convertRotationDegrees } from './gen-utils'
 import { genXmlCNvPr } from './gen-accessibility'
+import { validateModel3DPosterFrame } from './gen-model3d-poster'
 
 const MODEL3D_RATIONAL_DENOMINATOR = 1000000
 const MODEL3D_DEGREE_UNIT = 60000
@@ -171,6 +172,7 @@ function normalizePointLights(value: unknown): Array<{ color: { r: number; g: nu
  */
 export function genXmlModel3D(slideItemObj: ISlideObject, idx: number, slideNum: number): string {
 	const options = slideItemObj.options as Model3DProps
+	validateModel3DPosterFrame(options)
 	const creationId = `{${generateGUID()}}`
 	const shapeId = options.spid || idx + 2
 	const objectName = options.objectName || `3D Model ${idx + 1}`
@@ -281,15 +283,26 @@ export function genXmlModel3D(slideItemObj: ISlideObject, idx: number, slideNum:
 }
 
 /**
- * The Office-2018 model3d "Scene" selection extension (am3d:extLst → a3danim:embedAnim + posterFrame) is
- * intentionally NOT emitted. PowerPoint REJECTS a deck carrying it as 0x80070570 corruption — even with a
+ * Automatic Office-2018 embedded playback metadata is intentionally NOT emitted.
+ * PowerPoint rejected combined embedAnim/posterFrame metadata as 0x80070570 corruption — even with a
  * preceding am3d:raster — verified by COM round-trip (fox animId 0 AND 1). The embedded clip is instead
  * SELECTED + played by the playScene timing animation's `embedded{animId+1}` channel
  * (build3DModelAnimation.ts / autoScenePlayAnimation), which PowerPoint honors and round-trips cleanly.
- * Kept as a documented no-op so the call site and the reasoning stay in place.
+ * Explicit idle-frame selection emits only the narrow, independently specified posterFrame payload.
  */
-function genModel3DSceneExtLst(_options: Model3DProps): string {
-	return ''
+function genModel3DSceneExtLst(options: Model3DProps): string {
+	if (options.posterFrame === undefined && options.scene?.playbackMetadata !== true) return ''
+	const namespace = 'http://schemas.microsoft.com/office/drawing/2018/animation/model3d'
+	let xml = '<am3d:extLst>'
+	if (options.scene?.playbackMetadata === true) {
+		const scene = options.scene
+		xml += `<a:ext uri="{9A65AA19-BECB-4387-8358-8AD5134E1D82}"><a3danim:embedAnim xmlns:a3danim="${namespace}" animId="${scene.animId}"><a3danim:animPr length="${scene.length}" count="${scene.loop === false ? '1' : 'indefinite'}"/></a3danim:embedAnim></a:ext>`
+	}
+	if (options.posterFrame !== undefined) {
+		const { animId, progress } = options.posterFrame
+		xml += `<a:ext uri="{E9DE012E-A134-456F-84FE-255F9AAD75C6}"><a3danim:posterFrame xmlns:a3danim="${namespace}" animId="${animId}" frame="${Math.round(progress * 100000)}"/></a:ext>`
+	}
+	return xml + `</am3d:extLst>${CRLF}`
 }
 
 /**
@@ -369,8 +382,7 @@ function genModel3DElement(glbRid: string, rasterRid: string | undefined, cx: nu
 		xml += `            </am3d:raster>${CRLF}`
 	}
 
-	// Keep the repair-unsafe Office scene extension absent. Embedded clip selection is
-	// carried by the slide timing tree's `embeddedN` channel instead.
+	// Playback selection stays in timing; only an explicit idle poster adds an extension.
 	xml += genModel3DSceneExtLst(options)
 
 	// Viewport

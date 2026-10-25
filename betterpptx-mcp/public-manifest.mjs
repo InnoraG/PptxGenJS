@@ -14,7 +14,7 @@ import { publicVerificationPolicy } from './verification-policy.mjs'
 // Increment whenever the server-advertised public tool records change,
 // including descriptions or metadata covered by PUBLIC_TOOL_SCHEMA_DIGEST_COVERAGE.
 // The capability registry has its own independent revision and digest.
-export const TOOL_SCHEMA_VERSION = '2026-10-24.1'
+export const TOOL_SCHEMA_VERSION = '2026-10-25.1'
 const PACKAGE_SEMANTIC_VERSION = String(JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version || '').trim()
 const CONFIGURED_SEMANTIC_VERSION = String(process.env.BETTERPPTX_PUBLIC_VERSION || '').trim()
 if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(PACKAGE_SEMANTIC_VERSION)) {
@@ -25,7 +25,7 @@ if (CONFIGURED_SEMANTIC_VERSION && CONFIGURED_SEMANTIC_VERSION !== PACKAGE_SEMAN
 }
 export const PUBLIC_SEMANTIC_VERSION = PACKAGE_SEMANTIC_VERSION
 export const PUBLIC_SCHEMA_CHANGE = Object.freeze({
-	previousToolSchemaVersion: '2026-10-23.2',
+	previousToolSchemaVersion: '2026-10-24.1',
 	compatibility: 'breaking',
 	changes: [
 		'betterpptx.narration.synthesize is renamed betterpptx.narration.get_voice_timing; the previous name still resolves but is no longer listed.',

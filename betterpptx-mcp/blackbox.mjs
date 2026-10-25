@@ -1189,7 +1189,7 @@ function sanitizePublicTool(tool) {
 		master.properties.headerFooter = JSON.parse(JSON.stringify(HEADER_FOOTER_POLICY_SCHEMA))
 	}
 	if (clone.name === 'betterpptx.assets.catalog') {
-		clone.description = 'Return an unranked inventory of presentation assets as opaque handles. The AI chooses an exact handle and places it only through betterpptx.deck.generate_from_spec; BetterPPTX does not choose the visual treatment.'
+		clone.description = 'Return an unranked inventory of presentation assets as opaque handles. Use nextCursor with unchanged filters to continue through larger inventories, with up to 60 results per page. The AI chooses an exact handle and places it only through betterpptx.deck.generate_from_spec; BetterPPTX does not choose the visual treatment.'
 		if (properties.kind) {
 			properties.kind.enum = ['model3d', 'shapeScene', 'customGeometry']
 			properties.kind.description = 'Optional semantic asset category. Omit it to inspect all public 3D and editable custom-geometry choices.'

@@ -2096,7 +2096,21 @@ function model3DOptionsForObject(object, assets, ctx = {}) {
 	}
 	validateModel3DViewOptions(authoredViewOptions, `slides[${object.slideIndex ?? '?' }].${object.objectName || 'model3d'}.view`)
 	const staticPose = model3dStaticPose(object)
-	const scene = normalizeStaticPoseScene(modelOptions.scene ?? object.scene, staticPose)
+	const reusableDefaults = typeof ctx.resolveReusableAnimatedModelDefaults === 'function'
+		? ctx.resolveReusableAnimatedModelDefaults(modelOptions.modelAsset || modelAsset, {
+			...modelOptions, ...(object._model3dImplicitAnimation ? {}
+				// A source-bound animated selection cannot silently turn a stopped
+				// request into autoplay. Select a separate static asset to stop it.
+				: object.animation === false ? { animation: false } : animationOptions(object)),
+			...(object.scene !== undefined ? { scene: object.scene } : {}),
+		}) : null
+	// Registered views supersede implicit world staging only. Explicit manual
+	// components, presets and motion framing keep their normal ownership.
+	const reusableView = reusableDefaults && !model3dViewPresetId && !model3dMotionFraming(object)
+		? ctx.resolveReusableAnimatedModelDefaults(modelOptions.modelAsset || modelAsset, {
+			...object.rect, ...Object.fromEntries(Object.entries(authoredViewOptions).filter(([key]) => !object._model3dImplicitView?.includes(key))),
+		}) : null
+	const scene = normalizeStaticPoseScene(modelOptions.scene ?? object.scene ?? reusableDefaults?.scene, staticPose)
 	if (scene?.preparedVariantId != null) {
 		if (typeof ctx.validatePreparedScene !== 'function') throw new Error('Prepared scene validation is required for this model asset.')
 		ctx.validatePreparedScene(modelOptions.modelAsset || modelAsset, scene)
@@ -2109,7 +2123,7 @@ function model3DOptionsForObject(object, assets, ctx = {}) {
 		if (typeof ctx.validateStaticPose !== 'function') throw staticPoseError('STATIC_POSE_VALIDATION_REQUIRED', 'staticPose requires validation against the original approved presenter asset before compilation.')
 		ctx.validateStaticPose(modelOptions.modelAsset || modelAsset, staticPose)
 	}
-	return {
+	const result = {
 		...object.rect,
 		objectName: object.objectName,
 		editHandle: object.editHandle,
@@ -2146,8 +2160,16 @@ function model3DOptionsForObject(object, assets, ctx = {}) {
 		...(staticPose !== undefined ? { staticPose } : {}),
 		...(motionFraming !== undefined ? { motionFraming } : {}),
 		...(scene !== undefined ? { scene } : {}),
-		...animationOptions(object),
+		...(object._model3dImplicitAnimation && reusableDefaults
+			? { animation: reusableDefaults.animation }
+			: animationOptions(object)),
+		...(reusableView ? Object.fromEntries(['camera','trans','objViewport'].filter(key => reusableView[key] !== undefined).map(key => [key,reusableView[key]])) : {}),
 	}
+	// The semantic catalogue handle owns the source window and idle selection.
+	// Clients author ordinary layout and cues; private clip indexes stay derived.
+	return typeof ctx.resolveReusableAnimatedModelDefaults === 'function'
+		? ctx.resolveReusableAnimatedModelDefaults(modelOptions.modelAsset || modelAsset, result) ?? result
+		: result
 }
 
 function mediaOptionsForObject(object, assets, spec = {}) {

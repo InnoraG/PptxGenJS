@@ -4522,7 +4522,7 @@ function autoScenePlayAnimation(scene) {
 	return anim
 }
 
-function planBlock({ spec, slide, slideIndex = 0, block, blockIndex, regions, regionRect = null, theme, warnings, handles, templateContract, preserveSourceGeometry = false, preserveAuthoredPrecision = false, validatePreparedScene }) {
+function planBlock({ spec, slide, slideIndex = 0, block, blockIndex, regions, regionRect = null, theme, warnings, handles, templateContract, preserveSourceGeometry = false, preserveAuthoredPrecision = false, validatePreparedScene, resolveReusableAnimatedModelDefaults }) {
 	const objects = []
 	// Default elevation is a World temperament, not a universal decoration.
 	// Flat/quiet/outline Worlds explicitly resolve depth.shadow:'none'; preserve
@@ -6027,11 +6027,14 @@ function planBlock({ spec, slide, slideIndex = 0, block, blockIndex, regions, re
 			...(Object.prototype.hasOwnProperty.call(block, 'staticPose') ? { staticPose: block.staticPose }
 				: Object.prototype.hasOwnProperty.call(block.model3dOptions || {}, 'staticPose') ? { staticPose: block.model3dOptions.staticPose } : {}),
 			model3dViewPresetId: block.model3dViewPresetId || block.modelOptions?.model3dViewPresetId,
+			// Keep world staging distinguishable from authored view components when
+			// a semantic catalogue selection resolves later in the compiler.
+			_model3dImplicitView: ['camera','trans','objViewport'].filter(key => !Object.prototype.hasOwnProperty.call(block,key) && !Object.prototype.hasOwnProperty.call(modelOptions || {},key)),
 			// Per-world STAGING: the world frames AND lights the model (camera lens + pose +
 			// key-light tint) unless the author set their own. luxe = cinematic telephoto + warm
 			// gold light, blueprint = flat technical + cool cyan, brutalist = wide + hard white.
-			camera: block.camera || (!motionFraming && !block.model3dViewPresetId && !block.modelOptions?.model3dViewPresetId && theme.stage3d ? theme.stage3d.camera : undefined),
-			trans: block.trans || (!motionFraming && !block.model3dViewPresetId && !block.modelOptions?.model3dViewPresetId && theme.stage3d ? { scale: { x: 1, y: 1, z: 1 }, rot: block.rotation || theme.stage3d.rot } : undefined),
+			camera: block.camera !== undefined ? block.camera : (!motionFraming && !block.model3dViewPresetId && !block.modelOptions?.model3dViewPresetId && theme.stage3d ? theme.stage3d.camera : undefined),
+			trans: block.trans !== undefined ? block.trans : (!motionFraming && !block.model3dViewPresetId && !block.modelOptions?.model3dViewPresetId && theme.stage3d ? { scale: { x: 1, y: 1, z: 1 }, rot: block.rotation || theme.stage3d.rot } : undefined),
 			ambientLight: block.ambientLight || (!block.model3dViewPresetId && !block.modelOptions?.model3dViewPresetId && theme.stage3d?.ambient ? { color: theme.stage3d.ambient.color, illuminance: theme.stage3d.ambient.illuminance } : undefined),
 			ptLights: block.ptLights || (!block.model3dViewPresetId && !block.modelOptions?.model3dViewPresetId && theme.stage3d?.key ? [{ color: theme.stage3d.key.color, intensity: theme.stage3d.key.intensity, pos: { x: 24000000, y: 56000000, z: 30000000 } }] : undefined),
 			nativeOnly: block.nativeOnly,
@@ -6052,10 +6055,15 @@ function planBlock({ spec, slide, slideIndex = 0, block, blockIndex, regions, re
 				color: theme.ink,
 				fontSize: 11,
 			}),
-			// Only authored animation or an explicitly selected embedded Scene plays.
-			// World motion vocabulary never becomes automatic model playback.
+			// Only authored animation, a registered intrinsic catalogue motion, or an
+			// explicitly selected embedded Scene plays. World motion vocabulary never
+			// becomes automatic model playback. Asset aliases may resolve only in the
+			// compiler, so keep the origin: a registered motion may replace an implicit
+			// default without discarding an explicitly authored effect.
+			_model3dImplicitAnimation: block.animation === undefined,
 			animation: block.animation !== undefined ? block.animation
-				: autoScenePlayAnimation(playbackScene),
+				: (resolveReusableAnimatedModelDefaults?.(block.modelAsset || block.model3DAsset || block.model, modelOptions || {})?.animation
+					|| autoScenePlayAnimation(playbackScene)),
 			altText: block.altText || `3D model: ${slide.message || slide.title}`,
 		})
 		return objects
@@ -6946,7 +6954,7 @@ export function planDeckLayout(spec, options = {}) {
 		const namedRegionRects = namedRegionStackRects(effectiveContent, regions)
 		for (let i = 0; i < effectiveContent.length; i += 1) {
 			const blockTheme = { ...theme, ...visual.theme, textColorRoles, art: visual.art, card: cardAxisForSpec(spec, visual.art), surface: spec.theme?.surface || spec.styleIntent?.surface, composition, typeEmphasis, depth, motion, stage3d, iconTemperament, imageTreatment, mediaMotion, headFontFace: spec.theme?.headFontFace || spec.theme?.fontFace || visual.headFontFace, bodyFontFace: spec.theme?.bodyFontFace || spec.theme?.fontFace || visual.bodyFontFace }
-			const blockObjects = planBlock({ spec, slide, slideIndex, block: effectiveContent[i], blockIndex: i, regions, regionRect: stackRectFor(namedRegionRects, effectiveContent[i]), theme: blockTheme, warnings, handles, templateContract, preserveSourceGeometry, preserveAuthoredPrecision, validatePreparedScene: options.validatePreparedScene })
+			const blockObjects = planBlock({ spec, slide, slideIndex, block: effectiveContent[i], blockIndex: i, regions, regionRect: stackRectFor(namedRegionRects, effectiveContent[i]), theme: blockTheme, warnings, handles, templateContract, preserveSourceGeometry, preserveAuthoredPrecision, validatePreparedScene: options.validatePreparedScene, resolveReusableAnimatedModelDefaults: options.resolveReusableAnimatedModelDefaults })
 			objects.push(...blockObjects)
 			for (const object of blockObjects) addOverexpandedTextShapeWarning(warnings, slide.id, effectiveContent[i], object)
 		}

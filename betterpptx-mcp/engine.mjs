@@ -1,3 +1,4 @@
+import {paginateAssetCatalog} from './asset-catalog-pagination.mjs'
 import {motionCatalogRecovery} from './motion-catalog-recovery.mjs'
 import {validateMotionWindowRequirements,motionComparisonWindows} from './motion-source-movement-timeline.mjs'
 import {validateMotionComparisonTarget,motionComparisonTargetReadiness,motionComparisonCatalogReadiness} from './motion-comparison-readiness.mjs'
@@ -194,6 +195,7 @@ import { generateImage as generateImageUnchecked, cacheGeneratedImage, getCached
 import { resolveGenAssetTenantIdentity } from './storage/gen-asset-store.mjs'
 import { generateRigged3d as generateRigged3dUnchecked, cacheGeneratedRigged3d, registerLocalRigged3d, getCachedGeneratedRigged3d as getCachedGeneratedRigged3dUnchecked, parseGenRigged3dHandle, rigged3dHashFor, model3dGenProviderStatus, persistGeneratedRigged3d, hydrateGeneratedRigged3d as hydrateGeneratedRigged3dUnchecked } from './assets/model3d-gen-providers.mjs'
 import { isPublicDefaultPresenterHandle, PUBLIC_PRESENTER_IDENTITIES } from './assets/default-presenter-roster.mjs'
+import { reusableAnimatedModelCatalogEntries, reusableAnimatedModelLibraryFingerprint, resolveReusableAnimatedModelDefaults as resolveReusableAnimatedModelRegistryDefaults, getReusableAnimatedModelNativeTransport } from './assets/reusable-animated-model-library.mjs'
 import { generatePersonalizedMeshyAvatar, meshyAvatarHashFor, meshyAvatarProviderStatus } from './assets/meshy-avatar-provider.mjs'
 import { resolveNative3dPipeline, publicProductionNative3dLicense } from './ir/native3d-policy.mjs'
 import { publicVerificationPolicy, resolveVerificationPolicy, VERIFICATION_POLICIES, previewInfrastructureAvailable, publicGeneratedImagePolicy, generatedImageUnavailableInProductionError } from './verification-policy.mjs'
@@ -1095,6 +1097,30 @@ async function authorizedOpaqueNativeSnapshot(entry, handle) {
 function publicCatalogHandleForItem(item = {}) {
 	const identity = item.handle || item.modelAsset || item.path || `${item.kind || 'asset'}:${item.title || item.name || ''}`
 	return publicCatalogAssetHandle(identity, item.kind || 'asset')
+}
+
+function canonicalReusableAnimatedModelHandle(handle) {
+	let canonical = handle
+	if (typeof handle === 'string' && handle.startsWith('asset://catalog/')) {
+		const item = loadUnifiedAssetCatalog().find(row => publicCatalogHandleForItem(row) === handle)
+		if (item) canonical = item.handle
+	}
+	return canonical
+}
+
+function resolveReusableAnimatedModelDefaults(handle, options = {}) {
+	const aliases = ['modelAsset', 'model3DAsset', 'model', 'glbFile']
+	const canonicalHandle = canonicalReusableAnimatedModelHandle(handle)
+	const canonicalOptions = { ...options }
+	for (const alias of aliases) {
+		if (options[alias] !== undefined) canonicalOptions[alias] = options[alias] === handle ? canonicalHandle : canonicalReusableAnimatedModelHandle(options[alias])
+	}
+	const resolved = resolveReusableAnimatedModelRegistryDefaults(canonicalHandle, canonicalOptions)
+	if (!resolved) return null
+	// Validate all references against the same named selection, then preserve
+	// the caller's opaque identity for durable public readback.
+	for (const alias of aliases) if (options[alias] !== undefined) resolved[alias] = options[alias]
+	return resolved
 }
 
 function resolveCatalogAssetRef(value) {
@@ -7915,6 +7941,7 @@ function specCompileOptions(args = {}, context = {}) {
 		// Semantic 3D front-door: let the compiler resolve author-intent model3d blocks to a
 		// concrete native catalog handle at compile time (visible in dryRun, stable on save).
 		resolveModel3d: selectCatalogModel3d,
+		resolveReusableAnimatedModelDefaults,
 		validateStaticPose: (modelAsset, staticPose) => prepareStaticPoseForAsset(modelAsset, staticPose).report,
 		validatePreparedScene: (modelAsset, scene) => {
 			const parsed = parseGenRigged3dHandle(modelAsset)
@@ -18179,7 +18206,7 @@ function currentUnifiedAssetCatalogCacheKey() {
 	let sketchfabMtime = 0
 	try { sketchfabMtime = Math.round(assetFs.statSync(sketchfabManifestPath()).mtimeMs) }
 	catch (_) {}
-	return `${ASSETS_ROOT}|${sketchfabManifestPath()}|${sketchfabMtime}`
+	return `${ASSETS_ROOT}|${sketchfabManifestPath()}|${sketchfabMtime}|${reusableAnimatedModelLibraryFingerprint()}`
 }
 
 function invalidateUnifiedAssetCatalog() {
@@ -18193,6 +18220,7 @@ function loadUnifiedAssetCatalog({ refresh = false } = {}) {
 		return unifiedAssetCatalogCache
 	}
 	const catalog = [
+		...reusableAnimatedModelCatalogEntries().map(item => ({ ...item, searchText: makeCatalogSearchText(item) })),
 		...buildMicrosoftStock3DAssets(),
 		...buildIconScoutAssets(),
 		...buildToxSamAssets(),
@@ -18205,7 +18233,7 @@ function loadUnifiedAssetCatalog({ refresh = false } = {}) {
 	return catalog
 }
 
-function listAssetFiles({ kind, query, q: queryAlias, intent, useCase, aiContext, source, maxResults = 60, includeDuplicates = false, preferNative = true, sizePolicy = 'standard', maxModelSizeMb, maxGlbSizeMb, maxSizeMb } = {}) {
+function listAssetFiles({ kind, query, q: queryAlias, intent, useCase, aiContext, source, maxResults = 60, includeDuplicates = false, preferNative = true, sizePolicy = 'standard', maxModelSizeMb, maxGlbSizeMb, maxSizeMb, completeInventory = false } = {}) {
 	const normalizedKind = normalizeAssetKind(kind)
 	const rawQuery = String(query ?? queryAlias ?? '').trim()
 	const q = rawQuery.toLowerCase()
@@ -18213,7 +18241,7 @@ function listAssetFiles({ kind, query, q: queryAlias, intent, useCase, aiContext
 	const intentContext = buildAssetIntentQueryContext(contextText)
 	const terms = intentContext.terms
 	const sourceFilter = normalizeCatalogSource(source)
-	const limit = Math.max(1, Math.min(500, Number(maxResults) || 60))
+	const limit = completeInventory ? Infinity : Math.max(1, Math.min(500, Number(maxResults) || 60))
 	const normalizedSizePolicy = normalizeModelSizePolicy(sizePolicy)
 	const explicitMax = Number(maxModelSizeMb ?? maxGlbSizeMb ?? maxSizeMb)
 	const maxModelSize = Number.isFinite(explicitMax) && explicitMax > 0
@@ -18416,20 +18444,25 @@ function publicCatalogEntry(item) {
 	return entry
 }
 
-function publicAssetCatalogResult(result, maxResults = 60) {
+function publicAssetCatalogResult(result, maxResults = 60, continuation = {}) {
 	const allowedKinds = new Set(['model3d', 'shapeScene', 'customShape'])
 	const publicItems = [...(result.results || result.assets || [])]
 		.filter(item => allowedKinds.has(item?.kind))
-		.sort((left, right) => String(left?.title || left?.name || '').localeCompare(String(right?.title || right?.name || '')) || String(left?.handle || '').localeCompare(String(right?.handle || '')))
 	const limit = Math.max(1, Math.min(60, Number(maxResults) || 60))
-	const publicEntries = publicItems.slice(0, limit).map(publicCatalogEntry)
+	const page = paginateAssetCatalog({items:publicItems,scope:continuation.scope,cursor:continuation.cursor,limit,key:publicAssetCatalogPageKey,version:assetCatalogPageVersion})
+	// Retain the existing factual-match page membership, then present each page
+	// neutrally by label. Sorting the entire inventory before slicing would push
+	// exact semantic matches behind weaker matches in larger inventories.
+	const publicEntries = page.items.sort((left,right)=>String(left?.title||left?.name||'').localeCompare(String(right?.title||right?.name||''))||String(left?.handle||'').localeCompare(String(right?.handle||''))).map(publicCatalogEntry)
 	return {
 		query: result.query,
 		intent: result.intent,
 		useCase: result.useCase,
 		kind: result.kind,
 		count: publicEntries.length,
-		truncated: Boolean(result.truncated || publicItems.length > publicEntries.length),
+		truncated: page.pagination.hasMore,
+		nextCursor: page.nextCursor,
+		pagination: page.pagination,
 		fallbackUsed: result.fallbackUsed,
 		...((result.kind === 'model3d' || result.kind == null) ? { sizePolicy: result.sizePolicy } : {}),
 		queryExpansion: result.queryExpansion,
@@ -19227,10 +19260,22 @@ async function handleGenerateRigged3d(args = {}, context = {}) {
 
 async function handleAssetCatalog(args = {}) {
 	const publicMode = isPublicBlackBoxMode()
-	const requestedLimit = Math.max(1, Math.min(60, Number(args.maxResults) || 60))
-	const result = listAssetFiles(publicMode && !args.kind ? { ...args, maxResults: 500 } : args)
-	return publicMode ? publicAssetCatalogResult(result, requestedLimit) : result
+	const requestedLimit = Math.max(1, Math.min(publicMode ? 60 : 500, Math.floor(Number(args.maxResults) || 60)))
+	const result = listAssetFiles({...args,completeInventory:true})
+	const normalizedSizePolicy = normalizeModelSizePolicy(args.sizePolicy)
+	const explicitMax = Number(args.maxModelSizeMb ?? args.maxGlbSizeMb ?? args.maxSizeMb)
+	const scope = {publicMode,kind:normalizeAssetKind(args.kind)||null,query:String(args.query??args.q??'').trim().toLowerCase(),intent:String(args.intent??'').trim().toLowerCase(),useCase:String(args.useCase??'').trim().toLowerCase(),aiContext:String(args.aiContext??'').trim().toLowerCase(),source:normalizeCatalogSource(args.source)||null,includeDuplicates:args.includeDuplicates===true,preferNative:args.preferNative!==false,sizePolicy:normalizedSizePolicy,maxModelSizeMb:Number.isFinite(explicitMax)&&explicitMax>0?explicitMax:(MODEL_SIZE_POLICY_LIMITS_MB[normalizedSizePolicy]??null)}
+	if(publicMode)return publicAssetCatalogResult(result,requestedLimit,{scope,cursor:args.cursor})
+	const page=paginateAssetCatalog({items:result.results,scope,cursor:args.cursor,limit:requestedLimit,key:publicAssetCatalogPageKey,version:assetCatalogPageVersion})
+	return{...result,count:page.items.length,truncated:page.pagination.hasMore,results:page.items,assets:page.items,nextCursor:page.nextCursor,pagination:page.pagination}
 }
+
+function publicAssetCatalogPageKey(item){
+	if(item.kind==='shapeScene')return publicShapeSceneHandle(item.handle)
+	if(item.kind==='customShape')return publicCustomShapeHandle(item.handle)
+	return publicCatalogHandleForItem(item)
+}
+function assetCatalogPageVersion(item){return[item.sha256??null,item.bytes??null,item.title??item.name??null]}
 
 function publicCustomShapeEntry(asset, format = 'summary') {
 	if (!isPublicBlackBoxMode()) {
@@ -34715,6 +34760,10 @@ function prepareMotionFramingForAsset(modelAsset, options = {}) {
 async function handleAddModel3D(args, context = {}) {
 	const slide = getSlide(args.deckId, args.slideIndex)
 	let options = args.options ? { ...args.options } : {}
+	// Resolve maintained source-bound motion before opaque asset handles become
+	// private file references. Several expressions may share one immutable bank.
+	const reusableInput = options.modelAsset || options.model3DAsset || options.model
+	if (reusableInput) options = resolveReusableAnimatedModelDefaults(reusableInput, options) ?? options
 	const model3dViewPresetId = args.model3dViewPresetId || options.model3dViewPresetId
 	const publicViewInput = Object.fromEntries(['model3dViewPresetId', 'camera', 'trans', 'ambientLight', 'ptLights', 'objViewport', 'nativeOnly', 'rotate', 'flipH', 'flipV', 'scene', 'posterAsset', 'staticPose', 'motionFraming'].filter(key => Object.prototype.hasOwnProperty.call(options, key)).map(key => [key, options[key]]))
 	if (args.model3dViewPresetId !== undefined) publicViewInput.model3dViewPresetId = args.model3dViewPresetId
@@ -34751,6 +34800,7 @@ async function handleAddModel3D(args, context = {}) {
 			selection = { handle: picked.handle, title: picked.title, source: picked.source }
 		}
 	}
+	if (options.modelAsset) options = resolveReusableAnimatedModelDefaults(options.modelAsset, options) ?? options
 	// Selector/provenance fields must never reach pptxgenjs addModel3D.
 	for (const key of ['query', 'context', 'prompt', 'intent', 'useCase', 'aiContext', 'sizePolicy', 'preferNative', 'maxModelSizeMb', 'kind3d', '_model3dSelection']) {
 		delete options[key]
@@ -34785,6 +34835,11 @@ async function handleAddModel3D(args, context = {}) {
 	const poseValidation = staticPose || options.scene?.motionId ? prepareStaticPoseForAsset(originalModelRef, staticPose) : null
 	const posed = poseValidation?.buffer ? poseValidation : null
 	const rigged3dResolved = await materializeGeneratedRigged3dOptions(resolvedOptions, args.deckId)
+	const reusableTransport = getReusableAnimatedModelNativeTransport(canonicalReusableAnimatedModelHandle(originalModelRef))
+	if (reusableTransport) {
+		const nativeAsset = lockGeneratedAssetBufferDescriptor(reusableTransport.glbBytes, 'model3d-catalog-native', { extn: 'glb' })
+		rigged3dResolved.glbFile = resolveLockedAssetHandle(nativeAsset.handle)
+	}
 	let durableModelRef = isPublicSpecAssetRef(originalModelRef) ? originalModelRef : null
 	let durablePosterRef = isPublicSpecAssetRef(originalPosterRef) ? originalPosterRef : null
 	if (posed) {
