@@ -14,7 +14,7 @@ import { publicVerificationPolicy } from './verification-policy.mjs'
 // Increment whenever the server-advertised public tool records change,
 // including descriptions or metadata covered by PUBLIC_TOOL_SCHEMA_DIGEST_COVERAGE.
 // The capability registry has its own independent revision and digest.
-export const TOOL_SCHEMA_VERSION = '2026-10-25.1'
+export const TOOL_SCHEMA_VERSION = '2026-10-25.2'
 const PACKAGE_SEMANTIC_VERSION = String(JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8')).version || '').trim()
 const CONFIGURED_SEMANTIC_VERSION = String(process.env.BETTERPPTX_PUBLIC_VERSION || '').trim()
 if (!/^\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?$/.test(PACKAGE_SEMANTIC_VERSION)) {
@@ -25,12 +25,12 @@ if (CONFIGURED_SEMANTIC_VERSION && CONFIGURED_SEMANTIC_VERSION !== PACKAGE_SEMAN
 }
 export const PUBLIC_SEMANTIC_VERSION = PACKAGE_SEMANTIC_VERSION
 export const PUBLIC_SCHEMA_CHANGE = Object.freeze({
-	previousToolSchemaVersion: '2026-10-24.1',
+	previousToolSchemaVersion: '2026-10-25.1',
 	compatibility: 'breaking',
 	changes: [
-		'betterpptx.narration.synthesize is renamed betterpptx.narration.get_voice_timing; the previous name still resolves but is no longer listed.',
-		'Talking-head video, custom presenter personas and stock 3-D models are built by betterpptx.deck.generate_from_spec: slides[].avatarNarration and the new presenter.persona.fromImages render during phase:"resolve", and model3d blocks resolve a stock query at commit. betterpptx.avatar.render_job, avatar.job_status, avatar.attach_result, assets.generate_model3d and assets.generate_rigged3d are no longer public tools.',
-		'Identity media rendered through phase:"resolve" draws on the same rolling identity-media allowance as the former standalone routes.',
+		'The free plan counts complete new deck publications per rolling 30-day window, at an owner-set number that betterpptx.auth.status reports (initially 5). Custom talking-head and custom-persona renders keep their own owner-set rolling allowances (initially 1 each), counted when phase:"resolve" renders them whether or not the deck is saved. Narration preparation no longer has its own allowance.',
+		'Editing an uploaded or already-published deck (deck.open_uploaded, or generate_from_spec with deckId and commitMode patch, append or replaceDeck) is a paid service when the owner enables it; free accounts receive REQUIRES_PAID_ENTITLEMENT and can publish the revised deck as a new presentation instead. Iterating on a never-saved draft stays free.',
+		'auth.status freeAllowances adds otherPerFeatureLimits and existingDeckEditing; discovery policy replaces identityMediaLimitPerFamily with talkingHeadsPerWindow, customPersonasPerWindow, otherPerFeatureLimits and existingDeckEditing.',
 	],
 })
 export const PUBLIC_CAPABILITY_DIGEST_COVERAGE = 'Canonical SHA-256 over all stable public family fields and contracts, extended layers, persona terminology/contracts, motion, narration, and combined examples; live readiness and measured inventories are excluded.'

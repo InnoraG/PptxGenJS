@@ -1,4 +1,5 @@
 import { isFreePublicationBillingProfile } from './security-policy.mjs'
+import { editRequiresPayment } from './free-tier-config.mjs'
 
 const FREE_TOOL_RE = /\.(capabilities|version|status|voices|job_status|list|summary|inspect|inspect_layouts|editability_report|analyze_reference|compare_reference|validate|validate_design|validate_accessibility|validate_narration|validate_avatar_narration|list_shapes|inspect_shapes|read_file|read_json|list_dir|find|catalog|recommend|sample_palette|list_xml_groups|polygon_to_custgeom|simplify_path|from_svg|fetch|explain_plan|portal)$/
 
@@ -69,6 +70,9 @@ export function classifyBillingTool(name, args = {}) {
 	}
 	if (CHECKPOINT_TOOLS.has(tool)) return { category: 'checkpoint', billable: true, mode: 'deck.save', reason: 'value-delivery-checkpoint' }
 	if (tool === 'betterpptx.slide.add_model3d' && isFreePublicationBillingProfile() && existingModelInsertion(args)) return { category: 'draft-accrual', billable: false, mode: 'draft-accrual', reason: 'existing-model-free-authoring' }
+	// With paid editing switched off, opening an uploaded deck is ordinary free
+	// authoring; its save still consumes the single publication counter.
+	if ((tool === 'betterpptx.deck.open_uploaded' || tool === 'betterpptx.deck.open_existing') && isFreePublicationBillingProfile() && !editRequiresPayment()) return { category: 'draft-accrual', billable: false, mode: 'draft-accrual', reason: 'existing-deck-editing-included' }
 	if (HEAVY_TOOLS.has(tool)) return { category: 'heavy', billable: true, mode: 'immediate-heavy', reason: 'resource-heavy-operation' }
 	if (/^betterpptx\.(deck|slide|shape|table|chart|smartart|media|image|io|library|custom_geometry)\./.test(tool)) {
 		return { category: 'draft-accrual', billable: false, mode: 'draft-accrual', reason: 'ordinary-edit-loop' }

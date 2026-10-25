@@ -75,7 +75,7 @@ async function fixture(t, provider) {
 		BETTERPPTX_DURABLE_OPERATION_STORE: 'local', BETTERPPTX_OPERATION_STORE_FILE: path.join(root, 'operations.json'),
 		BETTERPPTX_REQUIRE_DURABLE_OPERATIONS: '0', BETTERPPTX_PUBLIC_BLACK_BOX: '1',
 		BETTERPPTX_FORCE_PLAN: 'free', BETTERPPTX_PREMIUM: '0', BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW: '3',
-		BETTERPPTX_FREE_IDENTITY_MEDIA_PER_WINDOW: '3', BETTERPPTX_FREE_NARRATION_PREPARATIONS_PER_WINDOW: '3',
+		BETTERPPTX_FREE_TALKING_HEADS_PER_WINDOW: '3', BETTERPPTX_FREE_CUSTOM_PERSONAS_PER_WINDOW: '3',
 	}
 	const previous = Object.fromEntries(Object.keys(env).map(key => [key, process.env[key]]))
 	Object.assign(process.env, env)
@@ -227,9 +227,15 @@ for (const provider of ['local', 'firestore']) {
 		// for each backend; identity/digest and policy code itself are not mocked.
 		const { reserveFreeValue, commitFreeValue, releaseFreeValue, getFreeValueStatus } = await import(`../auth/entitlements.mjs?allowance-json-${provider}`)
 		const context = { installHash: alice, authenticated: true, sessionId: 'allowance-json-owner' }
+		// Narration preparation has no allowance of its own and leaves no record.
+		const narrationArgs = { segments: [{ script: 'Measured narration.' }] }
+		const narration = await reserveFreeValue('betterpptx.narration.get_voice_timing', { ...narrationArgs, idempotencyKey: 'shared-key' }, context)
+		assert.equal(narration.status, 'included')
+		assert.equal(narration.request.reservationId, `free-value.v2:${digestOperationPayload({ tool: 'betterpptx.narration.get_voice_timing', idempotencyKey: 'shared-key', args: narrationArgs })}`)
+		assert.equal((await commitFreeValue(narration, {})).status, 'included')
+		assert.equal((await stored(alice, 'narration-preparation').catch(() => undefined)) ?? null, null)
 		const routes = [
 			['betterpptx.deck.save', { deckId: 'deck-one', deckVersion: 1 }, 'deck-publication'],
-			['betterpptx.narration.get_voice_timing', { segments: [{ script: 'Measured narration.' }] }, 'narration-preparation'],
 			['betterpptx.avatar.render_job', { audioHandle: 'asset://audio' }, 'talking-head-generation'],
 			['betterpptx.assets.generate_rigged3d', { imageHandles: ['asset://front', 'asset://side'] }, 'rigged3d-persona-generation'],
 		]

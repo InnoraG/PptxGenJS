@@ -94,6 +94,7 @@ import {
 } from './billing/base-wallet-funding.mjs'
 import { registerPayRamRoutes } from './billing/payram-routes.mjs'
 import { buildMissionControlSnapshot, missionControlAccess, missionControlAdminAccess, missionControlOnlyPathAllowed, renderMissionControlPage, sendMissionControlDenied } from './mission-control.mjs'
+import { FREE_TIER_LIMITS, describeOwnerConfigStore, editRequiresPayment, resolveFreeTierConfig, setFreeTierLimits } from './billing/free-tier-config.mjs'
 import {
 	getMissionControlSecretsSnapshot,
 	MissionControlSecretError,
@@ -330,6 +331,24 @@ function sendMissionControlSecretError(res, { action = 'unknown', id = '' } = {}
 			retry_safe: action === 'list' || action === 'test',
 		},
 	})
+}
+
+async function missionControlFreeTierView(options = {}) {
+	const config = await resolveFreeTierConfig(options)
+	return {
+		publicationsPerWindow: config.publicationsPerWindow,
+		talkingHeadsPerWindow: config.talkingHeadsPerWindow,
+		customPersonasPerWindow: config.customPersonasPerWindow,
+		windowDays: Number(process.env.BETTERPPTX_FREE_PUBLICATION_WINDOW_DAYS || 30),
+		source: config.source,
+		sources: config.sources,
+		environmentFallback: config.environmentFallback,
+		environmentFallbacks: config.environmentFallbacks,
+		updatedAt: config.updatedAt,
+		store: describeOwnerConfigStore().provider,
+		existingDeckEditing: editRequiresPayment() ? 'paid' : 'included',
+		...(config.readError ? { readError: config.readError } : {}),
+	}
 }
 
 function sendOwnerGoodwillError(res, err) {
@@ -1363,6 +1382,33 @@ export async function startBetterPptxHttp(options = {}) {
 			res.json(await testMissionControlSecret(id))
 		} catch (err) {
 			return sendMissionControlSecretError(res, { action: 'test', id }, err)
+		}
+	})
+	// Owner-set free publication limit. It changes only the number compared with
+	// the rolling usage ledger, never the usage records themselves.
+	app.get('/ops/mission-control/free-tier', async (req, res) => {
+		const access = missionControlAccess(req)
+		if (!access.allowed) return sendMissionControlDenied(res, access)
+		res.setHeader('Cache-Control', 'no-store')
+		res.json(await missionControlFreeTierView({ force: true }))
+	})
+	app.post('/ops/mission-control/free-tier', async (req, res) => {
+		const access = missionControlAdminAccess(req)
+		if (!access.allowed) return sendMissionControlDenied(res, access)
+		res.setHeader('Cache-Control', 'no-store')
+		if (req.body?.confirm !== 'SET FREE PUBLICATION LIMIT') {
+			return res.status(400).json({ error: { code: 'CONFIRMATION_REQUIRED', message: 'Confirm with SET FREE PUBLICATION LIMIT.' } })
+		}
+		try {
+			const limits = Object.fromEntries(Object.keys(FREE_TIER_LIMITS).filter(field => req.body?.[field] !== undefined).map(field => [field, req.body[field]]))
+			const updated = await setFreeTierLimits(limits, { actor: `mission-control:${access.adminMode || access.mode}`, note: req.body?.note })
+			logEvent('mission_control.free_tier_limits_set', { changes: updated.lastChange })
+			res.json(await missionControlFreeTierView())
+		} catch (err) {
+			const invalid = err?.code === 'INVALID_FREE_PUBLICATION_LIMIT' || err?.code === 'INVALID_FREE_TIER_LIMIT'
+			const status = invalid ? 400 : 503
+			const code = invalid || err?.code === 'OWNER_CONFIG_STORE_UNAVAILABLE' ? err.code : 'OWNER_CONFIG_WRITE_FAILED'
+			res.status(status).json({ error: { code, message: status === 400 ? err.message : 'The owner configuration could not be written. Check that this service can write the owner configuration store.' } })
 		}
 	})
 	app.post('/ops/mission-control/billing/goodwill-credit', async (req, res) => {

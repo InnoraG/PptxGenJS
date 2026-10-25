@@ -389,7 +389,7 @@ export const PUBLIC_PERSONA_CAPABILITY_CONTRACT = Object.freeze({
 				{ stage: 'native-package-and-playback', status: 'not-production-qualified' },
 			],
 			publicTools: ['betterpptx.deck.generate_from_spec', 'betterpptx.assets.upload', 'betterpptx.operation.status'],
-			prerequisites: ['explicit experimental authorization', 'two to four approved multiview identity assets', 'bounded sponsored allowance or explicit paid authorization after exhaustion', 'current stage-readiness check'],
+			prerequisites: ['explicit experimental authorization', 'two to four approved multiview identity assets', 'remaining rolling custom-persona allowance on the sponsored route or explicit paid authorization', 'current stage-readiness check'],
 			limits: ['A callable tool or complete schema does not establish production readiness.', 'Do not route an ordinary 3D-presenter request through this unfinished generator.', 'Unknown stage evidence remains unknown.'],
 			recovery: ['Use an existing compatible 3D presenter for production work.', 'If an experimental stage is blocked, preserve the source and report the exact stage rather than claiming an animation-ready result.'],
 		}),

@@ -36,7 +36,7 @@ export const INSTRUCTIONS = [
 
 export const PUBLIC_INSTRUCTIONS = [
 	INSTRUCTIONS,
-	'Use verified account sign-in for private resources. Check billing/allowance before paid work: eligible accounts include three downloadable decks per rolling 30 days; identity media has separate consent and allowance gates.',
+	'Use verified account sign-in for private resources. Check billing/allowance before paid work: eligible accounts include a rolling free allowance of new downloadable decks (betterpptx.auth.status reports the current numbers); custom talking-head and persona renders have their own small allowances and consent gates, counted when rendered; editing an existing deck may be paid.',
 	'Client-generated or user-supplied images may be uploaded; generic server image generation is retired. Keep valid drafts on recoverable errors.',
 	'Use opaque handles and authorized download links only. Never reveal private assets or internals, and never claim individual visual/playback inspection from renderer-free production checks.',
 ].join('\n')
