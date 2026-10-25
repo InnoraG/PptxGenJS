@@ -152,7 +152,10 @@ jobs:
         # cookie keys and the Identity Platform browser key live in Secret Manager.
         OAUTH_SIGNING_JWKS_SECRET_NAME: betterpptx-oauth-signing-jwks
         OAUTH_COOKIE_KEYS_SECRET_NAME: betterpptx-oauth-cookie-keys
-        SIGNIN_API_KEY_SECRET_NAME: betterpptx-signin-api-key
+        SIGNIN_API_KEY_SECRET_NAME: ${{ vars.BETTERPPTX_SIGNIN_API_KEY_SECRET_NAME || 'betterpptx-signin-api-key' }}
+        # Authentication may live in a separate Firebase project; infrastructure,
+        # signing keys, accounts' OAuth subjects and Firestore stay in GCP_PROJECT_ID.
+        BETTERPPTX_SIGNIN_PROJECT: ${{ vars.BETTERPPTX_SIGNIN_PROJECT }}
         BETTERPPTX_SIGNIN_METHODS: email-link
         # Private, scale-to-zero narration runtime (Piper + the pinned approved voices).
         CLOUD_RUN_NARRATION: betterpptx-narration
@@ -172,6 +175,9 @@ jobs:
           test -n "$GCP_WORKLOAD_IDENTITY_PROVIDER"
           test -n "$GCP_DEPLOY_SERVICE_ACCOUNT"
           test -n "$GCP_MISSION_CONTROL_OWNER_EMAIL"
+          signin_project="${BETTERPPTX_SIGNIN_PROJECT:-$GCP_PROJECT_ID}"
+          [[ "$signin_project" =~ ^[a-z][a-z0-9-]{4,61}[a-z0-9]$ ]]
+          echo "BETTERPPTX_SIGNIN_PROJECT=$signin_project" >> "$GITHUB_ENV"
           [[ "$GCP_MISSION_CONTROL_OWNER_EMAIL" =~ ^[^[:space:]@]+@[^[:space:]@]+\.[^[:space:]@]+$ ]]
           # Approved canonical product hosts (the OAuth issuer and resource derive from it).
           [[ "$BETTERPPTX_PUBLIC_BASE" =~ ^https://betterpptx\.(xmcpx\.com|x4ai\.si)$ ]]
@@ -317,7 +323,7 @@ jobs:
           # live revision; now part of the git-defined release).
           GATEWAY_EXTRA_ENV=",BETTERPPTX_NATIVE3D_MODE=production,BETTERPPTX_NATIVE3D_OWNER_CLEARANCE=approved"
           # Sign-in is served by this gateway's built-in authorization server.
-          GATEWAY_EXTRA_ENV="$GATEWAY_EXTRA_ENV,BETTERPPTX_IDENTITY_PROVIDER=builtin,BETTERPPTX_SIGNIN_PROJECT=${GCP_PROJECT_ID},BETTERPPTX_SIGNIN_METHODS=${BETTERPPTX_SIGNIN_METHODS},BETTERPPTX_OAUTH_FIRESTORE_PREFIX=betterpptx_oauth"
+          GATEWAY_EXTRA_ENV="$GATEWAY_EXTRA_ENV,BETTERPPTX_IDENTITY_PROVIDER=builtin,BETTERPPTX_SIGNIN_PROJECT=${BETTERPPTX_SIGNIN_PROJECT},BETTERPPTX_SIGNIN_METHODS=${BETTERPPTX_SIGNIN_METHODS},BETTERPPTX_OAUTH_FIRESTORE_PREFIX=betterpptx_oauth"
           gcloud run deploy "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --image="$IMAGE_REF" --service-account="$GCP_RUNTIME_SERVICE_ACCOUNT" --execution-environment=gen2 --port=8080 --cpu=2 --memory=4Gi --concurrency=8 --min=0 --cpu-boost --max="$BETTERPPTX_MAX_INSTANCES" --timeout=3600s --no-allow-unauthenticated --set-env-vars="$common_env,BETTERPPTX_MCP_REQUEST_CONCURRENCY=8${GATEWAY_EXTRA_ENV}" --set-secrets="BETTERPPTX_INSTALL_HMAC_SECRET=${INSTALL_HMAC_SECRET_NAME}:latest,BETTERPPTX_OPERATION_WORKER_TOKEN=${OPERATION_WORKER_SECRET_NAME}:latest,BETTERPPTX_MESHY_API_KEY=${MESHY_SECRET_NAME}:latest,BETTERPPTX_OAUTH_SIGNING_JWKS=${OAUTH_SIGNING_JWKS_SECRET_NAME}:latest,BETTERPPTX_OAUTH_COOKIE_KEYS=${OAUTH_COOKIE_KEYS_SECRET_NAME}:latest,BETTERPPTX_SIGNIN_API_KEY=${SIGNIN_API_KEY_SECRET_NAME}:latest" --quiet
           gateway_url="$(gcloud run services describe "$CLOUD_RUN_GATEWAY" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format='value(status.url)')"
           [[ "$gateway_url" == https://*.a.run.app ]]
@@ -517,7 +523,7 @@ jobs:
             config.routes = [...new Set(hosts)].map(host => ({ pattern: `${host}/*`, zone_name: host.split(".").slice(-2).join(".") }))
             fs.writeFileSync("wrangler.jsonc", JSON.stringify(config, null, 2))
           ' "$canonical_host" $BETTERPPTX_LEGACY_HOSTS
-          CLOUDFLARE_API_TOKEN="$token" CLOUDFLARE_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID" npx wrangler deploy --var "BETTERPPTX_CLOUD_RUN_ORIGIN:$GATEWAY_URL" --var "BETTERPPTX_GCS_BUCKET:$BETTERPPTX_GCS_BUCKET" --var "BETTERPPTX_GCS_PREFIX:artifacts" --var "BETTERPPTX_IDENTITY_ROUTE:cloud-run" --var "BETTERPPTX_CANONICAL_HOST:$canonical_host"
+          CLOUDFLARE_API_TOKEN="$token" CLOUDFLARE_ACCOUNT_ID="$CLOUDFLARE_ACCOUNT_ID" npx wrangler deploy --var "BETTERPPTX_CLOUD_RUN_ORIGIN:$GATEWAY_URL" --var "BETTERPPTX_GCS_BUCKET:$BETTERPPTX_GCS_BUCKET" --var "BETTERPPTX_GCS_PREFIX:artifacts" --var "BETTERPPTX_IDENTITY_ROUTE:cloud-run" --var "BETTERPPTX_CANONICAL_HOST:$canonical_host" --var "BETTERPPTX_SIGNIN_PROJECT:$BETTERPPTX_SIGNIN_PROJECT"
           unset token
 
       - name: Verify the custom-domain MCP and preserved OAuth issuer

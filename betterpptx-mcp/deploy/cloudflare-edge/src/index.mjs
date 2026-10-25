@@ -1,4 +1,5 @@
 import { relayAuthorizedPresentationDownload } from './download-proxy.mjs'
+import { relayEmailAuthAction } from './email-auth-proxy.mjs'
 
 const IDENTITY_ROOT = '/identity'
 const NO_STORE = 'no-store'
@@ -57,6 +58,8 @@ export default {
 				headers: { Location: `https://${canonical}${incoming.pathname}${incoming.search}`, 'Cache-Control': NO_STORE },
 			})
 		}
+		const emailAction = await relayEmailAuthAction(request, env)
+		if (emailAction) return emailAction
 		if (isIdentityRequest(incoming.pathname) && env?.BETTERPPTX_IDENTITY_ROUTE !== 'cloud-run') {
 			// Legacy/rollback: the narrowly allowlisted identity origin behind the
 			// proxied DNS record. Route fetch(request) goes to the configured origin.
