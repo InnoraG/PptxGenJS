@@ -76,7 +76,8 @@ jobs:
           npm run test:unit
           npm run test:authoring-augmentation --prefix betterpptx-mcp
           node --test betterpptx-mcp/test/durable-operation-phase-idempotency.test.mjs
-          node --test betterpptx-mcp/test/avatar-worker-budget.test.mjs betterpptx-mcp/test/identity-media-deployment-contract.test.mjs
+          node --test betterpptx-mcp/test/avatar-worker-budget.test.mjs betterpptx-mcp/test/avatar-worker-rotation.test.mjs betterpptx-mcp/test/identity-media-deployment-contract.test.mjs
+          node --test betterpptx-mcp/test/oauth-server.test.mjs betterpptx-mcp/test/gcs-browser-download-route.test.mjs
           node --test betterpptx-mcp/test/durable-mcp-authoring-worker.test.mjs
           node --test betterpptx-mcp/test/free-publication-existing-model-billing.test.mjs
           node --test betterpptx-mcp/test/free-catalog-model-and-stateless-plan.test.mjs

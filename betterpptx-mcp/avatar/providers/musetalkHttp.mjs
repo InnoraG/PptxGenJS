@@ -323,6 +323,10 @@ export async function renderMuseTalkHttp({ avatarImagePath, audioPath, durationM
 	// (e.g. liveportrait-musetalk), so the pipeline choice is unchanged.
 	const start = avatarWorkerStartIndex(eligibleAccounts, idempotencyKey)
 	let lastErr = null
+	// Accounts skipped before any provider call (daily quota, monthly budget, stale billing).
+	// They never replace a real worker error; if every account was skipped, the caller gets
+	// one actionable capacity error instead of whichever skip happened to come last.
+	const capacitySkips = []
 	const attemptTrace = []
 	for (let i = 0; i < eligibleAccounts.length; i++) {
 		const account = eligibleAccounts[(start + i) % eligibleAccounts.length]
@@ -345,7 +349,7 @@ export async function renderMuseTalkHttp({ avatarImagePath, audioPath, durationM
 				}
 				if (!reservation?.ok) {
 					attemptTrace.push({ accountHash, phase: 'quota', code: String(reservation?.code || 'AVATAR_WORKER_QUOTA_EXCEEDED') })
-					lastErr = avatarError('AVATAR_QUOTA_EXCEEDED', 'Avatar worker account quota is exhausted.', { retryable: true, accountHash })
+					capacitySkips.push('daily-quota')
 					continue
 				}
 				quotaReserved = true
@@ -360,7 +364,7 @@ export async function renderMuseTalkHttp({ avatarImagePath, audioPath, durationM
 				if (!budget?.ok) {
 					attemptTrace.push({ accountHash, phase: 'budget', code: String(budget?.code || 'AVATAR_WORKER_BUDGET_EXHAUSTED') })
 					if (quotaStore && quotaReserved) { try { await quotaStore.release(account.id, quotaReservationId) } catch {} quotaSettled = true }
-					lastErr = avatarError('AVATAR_BUDGET_EXHAUSTED', 'Every avatar worker account is at its monthly spend limit.', { retryable: false, accountHash })
+					capacitySkips.push(budget?.code === 'AVATAR_WORKER_BILLING_STALE' ? 'billing-stale' : 'monthly-budget')
 					continue
 				}
 				budgetReserved = true
@@ -490,6 +494,10 @@ export async function renderMuseTalkHttp({ avatarImagePath, audioPath, durationM
 		} finally {
 			clearTimeout(timer)
 		}
+	}
+	if (!lastErr && capacitySkips.length) {
+		const reasons = [...new Set(capacitySkips)].sort()
+		lastErr = avatarError('AVATAR_CAPACITY_EXHAUSTED', 'Talking-head rendering capacity is temporarily exhausted. No video was rendered and no talking-head allowance was used. Retry later, or continue with voice-only narration.', { retryable: true, reasons, skippedAccounts: capacitySkips.length })
 	}
 	if (lastErr?.details) lastErr.details = { ...lastErr.details, attempts: attemptTrace }
 	throw lastErr || avatarError('AVATAR_UNAVAILABLE', 'All avatar workers failed.')
