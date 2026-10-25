@@ -3,19 +3,37 @@ import { createEntitlementStore } from './entitlement-store.mjs'
 import { createBillingLedgerStore, hashCustomerId } from '../billing/ledger-store.mjs'
 import { createInstallUsageStore } from './install-identity.mjs'
 import { isProductionBillingEnvironment } from '../billing/security-policy.mjs'
+import { currentFreeTierLimit, editRequiresPayment, resolveFreeTierLimit } from '../billing/free-tier-config.mjs'
 import { digestOperationPayload } from '../storage/operation-store.mjs'
 
 const DEFAULT_PRICING_URL = 'https://betterpptx.com/pricing'
 
+// Complete deck publications per rolling window, plus one allowance each for
+// talking-head and custom-persona renders (counted when rendered, published or
+// not). All three limits are owner-changeable at runtime without resetting
+// usage (billing/free-tier-config.mjs); no other feature has its own limit.
+// Editing an existing deck is a paid service unless the owner switches
+// BETTERPPTX_EDIT_REQUIRES_PAYMENT off.
 export const FREE_TIER_POLICY = {
 	plan: 'free',
-	publicationLimit: Number(process.env.BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW || 3),
+	get publicationLimit() { return currentFreeTierLimit('publicationsPerWindow') },
+	get talkingHeadLimit() { return currentFreeTierLimit('talkingHeadsPerWindow') },
+	get customPersonaLimit() { return currentFreeTierLimit('customPersonasPerWindow') },
 	windowDays: Number(process.env.BETTERPPTX_FREE_PUBLICATION_WINDOW_DAYS || 30),
-	narrationPreparationLimit: Number(process.env.BETTERPPTX_FREE_NARRATION_PREPARATIONS_PER_WINDOW || 3),
-	identityMediaLimit: Number(process.env.BETTERPPTX_FREE_IDENTITY_MEDIA_PER_WINDOW || 3),
+	otherPerFeatureLimits: 'none',
+	get existingDeckEditing() { return editRequiresPayment() ? 'paid' : 'included' },
 	creativeFeatureGate: 'none',
 	genericServerImageGeneration: 'retired',
 }
+
+const FREE_LIMIT_FIELD_BY_CATEGORY = {
+	'deck-publication': 'publicationsPerWindow',
+	'talking-head-generation': 'talkingHeadsPerWindow',
+	'rigged3d-persona-generation': 'customPersonasPerWindow',
+}
+// Narration preparation stays behind its identity and idempotency checks but has
+// no counter of its own: it is part of the decks it narrates.
+const UNMETERED_FREE_CATEGORIES = new Set(['narration-preparation'])
 
 const FREE_WINDOW_MS = () => Math.max(1, FREE_TIER_POLICY.windowDays) * 24 * 60 * 60 * 1000
 const FREE_RESERVATION_LEASE_MS = () => Math.max(60_000, Number(process.env.BETTERPPTX_FREE_RESERVATION_LEASE_MS) || 30 * 60 * 1000)
@@ -375,19 +393,20 @@ export function explainPlan() {
 		free: {
 			plan: 'free',
 			included: [
-				'three complete downloadable native-editable presentations per rolling 30-day window',
+				`${FREE_TIER_POLICY.publicationLimit} complete downloadable native-editable presentations per rolling ${FREE_TIER_POLICY.windowDays}-day window`,
 				'full authoring vocabulary with AI-owned geometry, style, timing, and composition',
-				'up to three measured narration preparations per rolling window',
-				'up to three consented custom talking-head generations per rolling window',
-				'up to three experimental custom rigged-3D persona generations per rolling window',
+				`${FREE_TIER_POLICY.talkingHeadLimit} custom talking-head render(s) and ${FREE_TIER_POLICY.customPersonaLimit} custom presenter persona render(s) per rolling ${FREE_TIER_POLICY.windowDays}-day window, counted when rendered`,
+				'no other per-feature limits: narration and every other capability are included in each free publication',
 				'option discovery',
 				'package validation',
 			],
 			limits: {
 				publicationsPerWindow: FREE_TIER_POLICY.publicationLimit,
 				windowDays: FREE_TIER_POLICY.windowDays,
-				narrationPreparationsPerWindow: FREE_TIER_POLICY.narrationPreparationLimit,
-				identityMediaGenerationsPerFamily: FREE_TIER_POLICY.identityMediaLimit,
+				talkingHeadsPerWindow: FREE_TIER_POLICY.talkingHeadLimit,
+				customPersonasPerWindow: FREE_TIER_POLICY.customPersonaLimit,
+				otherPerFeatureLimits: FREE_TIER_POLICY.otherPerFeatureLimits,
+				existingDeckEditing: FREE_TIER_POLICY.existingDeckEditing,
 				creativeFeatureGate: FREE_TIER_POLICY.creativeFeatureGate,
 				genericServerImageGeneration: 'retired; upload or provide AI-client-generated imagery instead',
 			},
@@ -443,14 +462,14 @@ export function workflowStageEntitlements(context = {}) {
 			scope: settledJob ? 'one-settled-job' : designatedReleaseTest ? 'owner-authorized-release-test' : activatedCustomerEntitlement ? 'active-customer-entitlement' : 'free-drafting',
 			plan: auth.plan || 'free',
 		},
-		freePreviewMeaning: `Full authoring and up to ${FREE_TIER_POLICY.publicationLimit} genuinely downloadable PPTX publications per rolling ${FREE_TIER_POLICY.windowDays}-day identity window. Re-download and exact idempotent replay do not consume another publication.`,
+		freePreviewMeaning: `Full authoring and up to ${FREE_TIER_POLICY.publicationLimit} genuinely downloadable new PPTX publications per rolling ${FREE_TIER_POLICY.windowDays}-day identity window. Custom talking-head and persona renders each have their own rolling allowance (${FREE_TIER_POLICY.talkingHeadLimit} and ${FREE_TIER_POLICY.customPersonaLimit}), counted when rendered; nothing else has a per-feature limit. Re-download and exact idempotent replay do not consume another publication.${editRequiresPayment() ? ' Editing an uploaded or already-published deck is a paid service.' : ''}`,
 		stages: [
 			{ id: 'learning', mutates: false, chargeable: false, authorization: 'none', output: 'capability guidance and executable lessons' },
 			{ id: 'planning', mutates: false, chargeable: false, authorization: 'none', output: 'dry-run plan, quote, blockers, and expected deltas' },
 			{ id: 'draft-commit', mutates: true, chargeable: false, authorization: 'free-boundary-or-active-entitlement', output: 'durable editable draft handle; not a delivery promise' },
 			{ id: 'source-export', mutates: false, chargeable: false, authorization: 'artifact-owner', output: 'authored/effective/current semantic source where supported' },
 			{ id: 'package-audit', mutates: false, chargeable: false, authorization: 'artifact-owner', output: 'deterministic package/native/timing evidence; no perceptual approval' },
-			{ id: 'media-resolution', mutates: true, chargeable: 'conditional', authorization: 'secured-bounded-free-preparation-or-explicit-paid-entitlement', output: 'content-addressed prepared media; narration preparation, custom talking-head, and custom rigged-3D persona routes have separate bounded sponsored allowances' },
+			{ id: 'media-resolution', mutates: true, chargeable: 'conditional', authorization: 'secured-bounded-free-preparation-or-explicit-paid-entitlement', output: 'content-addressed prepared media; custom talking-head and custom rigged-3D persona renders each draw on their own rolling free allowance when rendered; narration preparation has no separate allowance' },
 			{ id: 'final-save', mutates: true, chargeable: 'conditional', authorization: coveredDelivery ? 'covered-by-current-authorization' : 'rolling-free-publication-or-fresh-paid-entitlement', output: 'downloadable PPTX when save verification passes' },
 			{ id: 'recovery', mutates: false, chargeable: false, authorization: 'original-artifact-or-operation-owner', output: 'existing operation result or reissued download within retention; no duplicate charge' },
 		],
@@ -605,7 +624,10 @@ function quotaForPlan(plan, usage, credits = 0) {
 		windowDays: FREE_TIER_POLICY.windowDays,
 		usageStatus: 'resolved atomically when a value-producing operation is reserved',
 		credits,
-		aiGuidance: 'Author freely. Before final save, BetterPPTX atomically reserves one of three rolling free publication slots; exact replay and re-download do not consume another slot.',
+		talkingHeadLimit: FREE_TIER_POLICY.talkingHeadLimit,
+		customPersonaLimit: FREE_TIER_POLICY.customPersonaLimit,
+		existingDeckEditing: FREE_TIER_POLICY.existingDeckEditing,
+		aiGuidance: `Author freely. Before final save, BetterPPTX atomically reserves one of ${FREE_TIER_POLICY.publicationLimit} rolling free publication slots; exact replay and re-download do not consume another slot.${editRequiresPayment() ? ' Editing an uploaded or already-published deck is a paid service; a complete new deck (commitMode:"createNew") uses the free allowance.' : ''}`,
 	}
 }
 
@@ -868,6 +890,13 @@ export function requireEntitlement(name, args = {}, context = {}, helpers = {}) 
 	const state = getAuthState(context)
 	const hasCredits = state.plan === 'credits' && Number(state.credits || 0) > 0
 	if (state.plan === 'premium' || hasCredits) return null
+	if (editRequiresPayment() && existingDeckEditRequest(name, args, helpers)) {
+		return entitlementFailure('REQUIRES_PAID_ENTITLEMENT', 'open_existing', `Editing an existing presentation is a paid service. The free plan includes ${FREE_TIER_POLICY.publicationLimit} complete new presentations per rolling ${FREE_TIER_POLICY.windowDays}-day window: author the full revised deck as a new presentation (betterpptx.deck.generate_from_spec without deckId, commitMode:"createNew") to use that allowance, or activate a paid entitlement to edit this deck in place.`, {
+			currentPlan: state.plan,
+			paidService: 'existing-deck-editing',
+			freeAlternative: { tool: 'betterpptx.deck.generate_from_spec', commitMode: 'createNew', countsAgainst: 'deck-publication' },
+		})
+	}
 	if (name === 'betterpptx.assets.generate_rigged3d' && (!Array.isArray(args.imageHandles) || args.imageHandles.length < 2)) {
 		return entitlementFailure('REQUIRES_PAID_ENTITLEMENT', 'model3d', 'The sponsored custom 3D persona route requires two to four authorized multiview body-image handles. Prompt-only or single-view generation is outside the free identity-media allowance.', {
 			currentPlan: state.plan,
@@ -880,6 +909,21 @@ export function requireEntitlement(name, args = {}, context = {}, helpers = {}) 
 	return null
 }
 
+const OPEN_EXISTING_DECK_TOOLS = new Set(['betterpptx.deck.open_uploaded', 'betterpptx.deck.open_existing'])
+const SPEC_PLANNING_PHASES = new Set(['dryRun', 'lockedDryRun'])
+
+// An existing deck is one opened from user bytes or one already published.
+// Iterating on a fresh, never-saved draft is part of creating it and stays free.
+export function existingDeckEditRequest(name, args = {}, helpers = {}) {
+	if (OPEN_EXISTING_DECK_TOOLS.has(name)) return true
+	if (!args?.deckId || typeof helpers.deckIsExisting !== 'function' || helpers.deckIsExisting(args.deckId) !== true) return false
+	if (name === 'betterpptx.deck.generate_from_spec') {
+		if (SPEC_PLANNING_PHASES.has(args.phase) || args.dryRun === true) return false
+		return ['patch', 'append', 'replaceDeck'].includes(String(args.commitMode || 'append').trim())
+	}
+	return typeof helpers.isDeckMutation === 'function' && helpers.isDeckMutation(name) === true
+}
+
 function rollingIdentity(context = {}) {
 	return String(context.installHash || context.quotaIdentityHash || '').trim()
 }
@@ -887,7 +931,6 @@ function rollingIdentity(context = {}) {
 function freeValuePolicyForTool(name, args = {}, { purpose = 'execution' } = {}) {
 	if (name === 'betterpptx.deck.save') return {
 		category: 'deck-publication',
-		limit: FREE_TIER_POLICY.publicationLimit,
 		workflowStage: 'final-save',
 		accountingTool: 'betterpptx.deck.save',
 		reservationTiming: 'on-successful-save',
@@ -901,7 +944,6 @@ function freeValuePolicyForTool(name, args = {}, { purpose = 'execution' } = {})
 		&& name === 'betterpptx.deck.generate_from_spec'
 		&& args?.spec && typeof args.spec === 'object' && !Array.isArray(args.spec)) return {
 		category: 'deck-publication',
-		limit: FREE_TIER_POLICY.publicationLimit,
 		workflowStage: 'final-save',
 		accountingTool: 'betterpptx.deck.save',
 		reservationTiming: 'on-successful-save',
@@ -909,21 +951,18 @@ function freeValuePolicyForTool(name, args = {}, { purpose = 'execution' } = {})
 	}
 	if (name === 'betterpptx.narration.get_voice_timing') return {
 		category: 'narration-preparation',
-		limit: FREE_TIER_POLICY.narrationPreparationLimit,
 		workflowStage: 'media-resolution',
 		accountingTool: name,
 		reservationTiming: 'on-successful-preparation',
 	}
 	if (name === 'betterpptx.avatar.render_job') return {
 		category: 'talking-head-generation',
-		limit: FREE_TIER_POLICY.identityMediaLimit,
 		workflowStage: 'media-resolution',
 		accountingTool: name,
 		reservationTiming: 'on-provider-execution',
 	}
 	if (name === 'betterpptx.assets.generate_rigged3d' && Array.isArray(args.imageHandles) && args.imageHandles.length >= 2) return {
 		category: 'rigged3d-persona-generation',
-		limit: FREE_TIER_POLICY.identityMediaLimit,
 		workflowStage: 'media-resolution',
 		accountingTool: name,
 		reservationTiming: 'on-provider-execution',
@@ -948,7 +987,7 @@ export async function reserveFreeValue(name, args = {}, context = {}) {
 	if (hasPaidEntitlement || auth.source === 'settled-bounded-job') return null
 	const identityHash = rollingIdentity(context)
 	if (!identityHash) {
-		throw freeValueError('FREE_VALUE_IDENTITY_REQUIRED', 'A secured installation or supported connector identity is required for the free publication and identity-media allowance.', {
+		throw freeValueError('FREE_VALUE_IDENTITY_REQUIRED', 'A secured installation or supported connector identity is required for free publications and identity media.', {
 			category: policy.category,
 			resolution: 'Use the official BetterPPTX connector/installation identity, or activate a paid entitlement.',
 		})
@@ -962,10 +1001,13 @@ export async function reserveFreeValue(name, args = {}, context = {}) {
 	// inside a spec remain part of the request. Do not adopt legacy unbound IDs.
 	const requestArgs = Object.fromEntries(Object.entries(args).filter(([key]) => key !== 'idempotencyKey' && key !== 'idempotency_key'))
 	const requestDigest = digestOperationPayload({ tool: name, idempotencyKey: reservationId, args: requestArgs })
+	if (UNMETERED_FREE_CATEGORIES.has(policy.category)) {
+		return { identityHash, unmetered: true, request: { category: policy.category, reservationId: `free-value.v2:${requestDigest}` }, status: 'included' }
+	}
 	const request = {
 		category: policy.category,
 		reservationId: `free-value.v2:${requestDigest}`,
-		limit: policy.limit,
+		limit: await resolveFreeTierLimit(FREE_LIMIT_FIELD_BY_CATEGORY[policy.category]),
 		windowMs: FREE_WINDOW_MS(),
 		leaseMs: FREE_RESERVATION_LEASE_MS(),
 	}
@@ -982,6 +1024,7 @@ export async function reserveFreeValue(name, args = {}, context = {}) {
 
 export async function commitFreeValue(reservation, metadata = {}) {
 	if (!reservation) return null
+	if (reservation.unmetered) return { ok: true, status: 'included', category: reservation.request.category }
 	return currentInstallUsageStore().commitRollingUsage(reservation.identityHash, {
 		...reservation.request,
 		metadata,
@@ -990,6 +1033,7 @@ export async function commitFreeValue(reservation, metadata = {}) {
 
 export async function releaseFreeValue(reservation) {
 	if (!reservation) return null
+	if (reservation.unmetered) return { ok: true, status: 'released', category: reservation.request.category }
 	return currentInstallUsageStore().releaseRollingUsage(reservation.identityHash, reservation.request)
 }
 
@@ -1006,10 +1050,20 @@ export async function getFreeValueStatus(name, args = {}, context = {}, options 
 	const hasPaidEntitlement = (auth.plan === 'premium' || auth.plan === 'credits') && auth.source !== 'environment'
 	if (hasPaidEntitlement || auth.source === 'settled-bounded-job') return { eligible: false, reason: 'covered-by-paid-entitlement', category: policy.category, route }
 	const identityHash = rollingIdentity(context)
-	if (!identityHash) return { eligible: false, reason: 'secured-identity-required', category: policy.category, limit: policy.limit, windowDays: FREE_TIER_POLICY.windowDays, route }
+	const unmetered = UNMETERED_FREE_CATEGORIES.has(policy.category)
+	const limit = unmetered ? null : await resolveFreeTierLimit(FREE_LIMIT_FIELD_BY_CATEGORY[policy.category])
+	if (!identityHash) return { eligible: false, reason: 'secured-identity-required', category: policy.category, limit, windowDays: FREE_TIER_POLICY.windowDays, route }
+	if (unmetered) return {
+		eligible: true,
+		reason: 'included-without-per-feature-limit',
+		category: policy.category,
+		limit: null,
+		perFeatureLimit: 'none',
+		route,
+	}
 	const snapshot = await currentInstallUsageStore().getRollingUsage(identityHash, {
 		category: policy.category,
-		limit: policy.limit,
+		limit,
 		windowMs: FREE_WINDOW_MS(),
 	})
 	return {

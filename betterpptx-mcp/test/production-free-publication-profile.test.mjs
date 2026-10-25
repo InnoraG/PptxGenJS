@@ -14,13 +14,12 @@ const validFreeProfile = {
 	BETTERPPTX_BILLING_MODEL: 'free_publication',
 	BETTERPPTX_BILLING_ENFORCE: '1',
 	BETTERPPTX_MONETIZED_MCP_ENABLED: '0',
-	BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW: '3',
+	BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW: '5',
 	BETTERPPTX_FREE_PUBLICATION_WINDOW_DAYS: '30',
-	BETTERPPTX_FREE_NARRATION_PREPARATIONS_PER_WINDOW: '3',
-	BETTERPPTX_FREE_IDENTITY_MEDIA_PER_WINDOW: '3',
+	BETTERPPTX_EDIT_REQUIRES_PAYMENT: '1',
 }
 
-test('production accepts only the bounded three-publications-per-30-day no-payment profile', () => {
+test('production accepts the bounded publications-per-30-day no-payment profile', () => {
 	assert.equal(isFreePublicationBillingProfile(validFreeProfile), true)
 	assert.deepEqual(productionBillingConfigurationProblems(validFreeProfile), [])
 })
@@ -38,12 +37,12 @@ test('free publication refuses payment providers, monetized routes, and disabled
 	}
 })
 
-test('free publication refuses a larger allowance, a shorter/longer window, or unbounded media allowances', () => {
+test('free publication refuses an out-of-range fallback allowance or a shorter/longer window', () => {
 	for (const [key, value, expected] of [
-		['BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW', '4', 'free-publication-limit-must-be-three'],
+		['BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW', '0', 'free-publication-limit-out-of-range'],
+		['BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW', '1001', 'free-publication-limit-out-of-range'],
 		['BETTERPPTX_FREE_PUBLICATION_WINDOW_DAYS', '31', 'free-publication-window-must-be-30-days'],
-		['BETTERPPTX_FREE_NARRATION_PREPARATIONS_PER_WINDOW', '4', 'free-narration-limit-out-of-range'],
-		['BETTERPPTX_FREE_IDENTITY_MEDIA_PER_WINDOW', '99', 'free-identity-media-limit-out-of-range'],
+		['BETTERPPTX_EDIT_REQUIRES_PAYMENT', 'sometimes', 'edit-requires-payment-flag-invalid'],
 	]) {
 		const problems = productionBillingConfigurationProblems({ ...validFreeProfile, [key]: value })
 		assert.ok(problems.includes(expected), `${key}=${value} must fail with ${expected}`)

@@ -93,6 +93,10 @@ jobs:
           node --test betterpptx-mcp/test/production-non-rendering-save.test.mjs
           node --test betterpptx-mcp/test/production-free-publication-profile.test.mjs
           node --test betterpptx-mcp/test/production-free-publication-http.test.mjs
+          node --test betterpptx-mcp/test/free-tier-launch-plan.test.mjs
+          node --test betterpptx-mcp/test/mission-control-free-tier.test.mjs
+          node --test betterpptx-mcp/test/free-value-replay-binding.test.mjs
+          node --test betterpptx-mcp/test/free-value-store-json-persistence.test.mjs
           node --test betterpptx-mcp/test/cloudflare-edge-worker.test.mjs
           node --test betterpptx-mcp/test/cloudflare-download-proxy.test.mjs
           node --test betterpptx-mcp/test/cloudflare-deploy-secret.test.mjs

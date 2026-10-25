@@ -201,6 +201,7 @@ import { resolveNative3dPipeline, publicProductionNative3dLicense } from './ir/n
 import { publicVerificationPolicy, resolveVerificationPolicy, VERIFICATION_POLICIES, previewInfrastructureAvailable, publicGeneratedImagePolicy, generatedImageUnavailableInProductionError } from './verification-policy.mjs'
 import { PUBLIC_PERSONA_CAPABILITY_CONTRACT, publicPersonaCapabilities } from './authoring-capability-registry.mjs'
 import { runBillingUsageReconciler } from './billing/reconciler.mjs'
+import { resolveFreeTierConfig } from './billing/free-tier-config.mjs'
 import {
 	FREE_TIER_POLICY,
 	activateKey,
@@ -2728,7 +2729,10 @@ async function handleStatus(args = {}) {
 			policy: {
 				publicationLimit: FREE_TIER_POLICY.publicationLimit,
 				windowDays: FREE_TIER_POLICY.windowDays,
-				identityMediaLimitPerFamily: FREE_TIER_POLICY.identityMediaLimit,
+				talkingHeadsPerWindow: FREE_TIER_POLICY.talkingHeadLimit,
+				customPersonasPerWindow: FREE_TIER_POLICY.customPersonaLimit,
+				otherPerFeatureLimits: FREE_TIER_POLICY.otherPerFeatureLimits,
+				existingDeckEditing: FREE_TIER_POLICY.existingDeckEditing,
 				creativeFeatureGate: 'none',
 			},
 			tools: {
@@ -6359,7 +6363,7 @@ function publicCapabilityPlan(args = {}) {
 		'NARRATED AUTOPLAY REQUIREMENT — when the user asks for a self-playing spoken premium deck, declare deliveryExperience:{mode:"narrated-autoplay",requireMotion:true}, spec.autoplay:{enabled:true,loop:false,secondsPerSlide:<authored dwell>}, and native narration on every slide. Dry-run rejects missing narration, autoplay, or object motion as independent findings. Prepare and measure audio before quote; verify each final slide advance covers audio and cues, then validate narration media, WebVTT when requested, and timing in the saved package. This declaration never authorizes paid synthesis. A static preview or animation count cannot prove watched playback. Honor explicit silence/reduced-motion exclusions instead of applying this profile.',
 		readabilityGuidance,
 		'Optional design heuristics, not mandates: consider restrained accent ratios, readable display sizing, alternatives to bullet walls, direct chart labels, and simplified table rules when they fit the brief. Rich dimensional type, flat type, multiple accents, dense evidence, or other deliberate choices remain available; the AI owns the final visual language.',
-		`FREE PUBLICATION POLICY — author the complete presentation with the full native design vocabulary. The scarce boundary is publication, not creativity: ${FREE_TIER_POLICY.publicationLimit} successful downloadable decks per secured identity per rolling ${FREE_TIER_POLICY.windowDays} days. Failed saves release their reservation; exact replay and re-download do not consume another slot. Never degrade later slides, force Morph, or add conversion-oriented decoration.`,
+		`FREE PUBLICATION POLICY — author the complete presentation with the full native design vocabulary. The scarce boundary is publication, not creativity: ${FREE_TIER_POLICY.publicationLimit} successful downloadable new decks per secured identity per rolling ${FREE_TIER_POLICY.windowDays} days. Custom talking-head and custom presenter-persona renders have their own allowances (${FREE_TIER_POLICY.talkingHeadLimit} and ${FREE_TIER_POLICY.customPersonaLimit} per window), counted when phase:"resolve" renders them whether or not the deck is later saved; check betterpptx.auth.status before resolving one. Nothing else has a per-feature limit. Failed saves release their reservation; exact replay and re-download do not consume another slot.${FREE_TIER_POLICY.existingDeckEditing === 'paid' ? ' Editing an uploaded or already-published deck is a paid service; on the free plan, author the full revised deck as a new presentation instead.' : ''} Never degrade later slides, force Morph, or add conversion-oriented decoration.`,
 		'Fonts: for faithful render prefer host-safe fonts (Segoe UI / Calibri); appliedDefaults.fonts.fallbackRisk flags fonts that may substitute. Object model: shape is geometry-only; textBox = standalone text; textShape = text inside a shape. Use stable slide ids + object names + notes; mark data blocks verified:true + evidenceSource + altText. The public evidenceSource field records the semantic basis for authored data; runtime/provider provenance remains private.',
 		'Use dryRun:true before commit to catch authoring errors mutation-free; when media/cost resolution is involved, use phase:"resolve" as a second mutation-free checkpoint and review the factual, unranked selected-layout feasibility readback before accepting the estimate. If a premium feature returns REQUIRES_UPGRADE, preserve valid work, offer betterpptx.auth.activate_key, or ship the best free fallback. Validate before save.',
 	]
@@ -7020,6 +7024,7 @@ async function handleAuthStatus(_args = {}, context = {}) {
 			: context.resourceIdentityHash
 				? 'connector-continuity-only'
 				: 'session-only'
+	await resolveFreeTierConfig()
 	const [deckPublications, narrationPreparations, talkingHeads, rigged3dPersonas] = await Promise.all([
 		getFreeValueStatus('betterpptx.deck.save', {}, context),
 		getFreeValueStatus('betterpptx.narration.get_voice_timing', {}, context),
@@ -7038,7 +7043,17 @@ async function handleAuthStatus(_args = {}, context = {}) {
 				? 'A verified account access token binds resource ownership and rolling allowances. No raw account identifier is exposed.'
 				: 'No authenticated account is established. An opaque fingerprint alone does not authenticate its sender. Public protected operations require sign-in.',
 		},
-		freeAllowances: { deckPublications, narrationPreparations, talkingHeads, rigged3dPersonas },
+		// Metered: deckPublications, talkingHeads and rigged3dPersonas (renders are
+		// counted when they run in phase:"resolve"). narrationPreparations is
+		// informational: it has no limit of its own.
+		freeAllowances: {
+			deckPublications,
+			talkingHeads,
+			rigged3dPersonas,
+			narrationPreparations,
+			otherPerFeatureLimits: FREE_TIER_POLICY.otherPerFeatureLimits,
+			existingDeckEditing: FREE_TIER_POLICY.existingDeckEditing,
+		},
 		workflowStages: workflowStageEntitlements(context),
 		billingDryRun: publicBillingDryRunSummary(getBillingTelemetrySummary()),
 		billing: await publicBillingStatus(context),
@@ -8748,17 +8763,31 @@ function specIdentityMediaIdempotencyKey(rootArgs = {}, item = '') {
 	return base ? `${base}:${item}` : ''
 }
 
-async function withSpecIdentityMediaAllowance(accountingTool, args, context, run) {
+// The render is counted when it runs in phase:"resolve", whether or not the deck
+// is later published. A free reservation replaces the paid ledger reservation for
+// that render, exactly as on the former standalone routes.
+async function reserveSpecIdentityMediaAllowance(accountingTool, args, context) {
 	const reservation = await reserveFreeValue(accountingTool, args, context)
+	const runContext = reservation
+		? { ...context, __freeValueAuthorization: { category: reservation.request.category, status: reservation.status } }
+		: context
+	return { reservation, runContext }
+}
+
+async function commitSpecIdentityMediaAllowance(reservation, accountingTool) {
+	if (!reservation) return
+	const committed = await commitFreeValue(reservation, { tool: accountingTool, route: 'deck.generate_from_spec:resolve' })
+	if (!committed?.ok) throw Object.assign(new Error('The free-value reservation could not be committed.'), {
+		code: committed?.code || 'FREE_VALUE_COMMIT_FAILED',
+		details: committed || {},
+	})
+}
+
+async function withSpecIdentityMediaAllowance(accountingTool, args, context, run) {
+	const { reservation, runContext } = await reserveSpecIdentityMediaAllowance(accountingTool, args, context)
 	try {
-		const result = await run()
-		if (reservation) {
-			const committed = await commitFreeValue(reservation, { tool: accountingTool, route: 'deck.generate_from_spec:resolve' })
-			if (!committed?.ok) throw Object.assign(new Error('The free-value reservation could not be committed.'), {
-				code: committed?.code || 'FREE_VALUE_COMMIT_FAILED',
-				details: committed || {},
-			})
-		}
+		const result = await run(runContext)
+		await commitSpecIdentityMediaAllowance(reservation, accountingTool)
 		return result
 	} catch (err) {
 		if (reservation) await releaseFreeValue(reservation).catch(() => {})
@@ -8784,8 +8813,8 @@ async function resolveSpecPresenterPersona(lockedSpec = {}, rootArgs = {}, conte
 	const args = presenterPersonaGenerationArgs(lockedSpec, rootArgs)
 	const entitlementGate = requireEntitlement(name, args, context, {})
 	if (entitlementGate) throwSpecEntitlementFailure({ ok: false, error: entitlementGate.error })
-	return withSpecIdentityMediaAllowance(name, args, context, async () => {
-		const gate = await preflightBillingReservation({ name, args, context, entry: null, billingEntitlement: getBillingEntitlement(context) })
+	return withSpecIdentityMediaAllowance(name, args, context, async runContext => {
+		const gate = await preflightBillingReservation({ name, args, context: runContext, entry: null, billingEntitlement: getBillingEntitlement(context) })
 		try {
 			const generated = await handleGenerateRigged3d(args, context)
 			if (!generated?.handle) throw Object.assign(new Error('Custom presenter persona generation returned no model.'), { code: 'PRESENTER_PERSONA_FAILED' })
@@ -8885,13 +8914,28 @@ async function resolveCompiledSpecAssets(compiled = {}, rootArgs = {}, context =
 			continue
 		}
 		const billingArgs = specOperationBillingArgs(rootArgs.deckId || `__spec_resolve_${String(compiled.estimatedPlanDigest || compiled.planDigest || 'plan').slice(0, 16)}`, op, rootArgs, operationIndex)
-		const gate = await preflightBillingReservation({
-			name: op.tool,
-			args: billingArgs,
-			context,
-			entry: null,
-			billingEntitlement: getBillingEntitlement(context),
-		})
+		const avatarAllowanceArgs = requirement.kind === 'avatarVideo' ? {
+			avatar: op.args?.avatar,
+			script: op.args?.script,
+			slideIndex: op.slideIndex,
+			idempotencyKey: specIdentityMediaIdempotencyKey(rootArgs, `talking-head:${op.slideIndex}:${op.objectName || ''}`),
+		} : null
+		const avatarAllowance = avatarAllowanceArgs
+			? await reserveSpecIdentityMediaAllowance('betterpptx.avatar.render_job', avatarAllowanceArgs, context)
+			: { reservation: null, runContext: context }
+		let gate = null
+		try {
+			gate = await preflightBillingReservation({
+				name: op.tool,
+				args: billingArgs,
+				context: avatarAllowance.runContext,
+				entry: null,
+				billingEntitlement: getBillingEntitlement(context),
+			})
+		} catch (err) {
+			if (avatarAllowance.reservation) await releaseFreeValue(avatarAllowance.reservation).catch(() => {})
+			throw err
+		}
 		let resolved = null
 		try {
 			if (requirement.kind === 'ttsAudio') {
@@ -9018,13 +9062,8 @@ async function resolveCompiledSpecAssets(compiled = {}, rootArgs = {}, context =
 					resolvedAssets.push({ kind: 'audio', slideIndex: op.slideIndex, slideId: op.slideId, objectName: op.objectName, lockedAudio, textHash: resolved.textHash || null, warnings: publicNarrationWarnings(resolved.warnings) })
 				}
 			} else {
-				const avatarAllowanceArgs = {
-					avatar: op.args?.avatar,
-					script: op.args?.script,
-					slideIndex: op.slideIndex,
-					idempotencyKey: specIdentityMediaIdempotencyKey(rootArgs, `talking-head:${op.slideIndex}:${op.objectName || ''}`),
-				}
-				const avatar = await withSpecIdentityMediaAllowance('betterpptx.avatar.render_job', avatarAllowanceArgs, context, () => resolveSpecAvatarAsset(op, rootArgs, context))
+				const avatar = await resolveSpecAvatarAsset(op, rootArgs, context)
+				await commitSpecIdentityMediaAllowance(avatarAllowance.reservation, 'betterpptx.avatar.render_job')
 				const patch = mergeAvatarLockIntoSpec(lockedSpec, op, {
 					lockedVideo: avatar.lockedVideo,
 					lockedPoster: avatar.lockedPoster,
@@ -9053,6 +9092,7 @@ async function resolveCompiledSpecAssets(compiled = {}, rootArgs = {}, context =
 			})
 		} catch (err) {
 			await releaseBillingReservation({ gate, reason: err?.code || 'spec-resolve-failed-before-value' })
+			if (avatarAllowance.reservation) await releaseFreeValue(avatarAllowance.reservation).catch(() => {})
 			throw err
 		}
 	}
@@ -44077,6 +44117,7 @@ function requestsRetiredGenericImageGeneration(value) {
 export { getDeck, getSlide, finalizeSlideShapeIds, applySmartTimingRemap, buildNativeTimingManifest, currentSlideTimingObjects, executeMonetizedMcpPaidItem, inferSlideLayoutIntent, _segmentsSignature, _applyRoleOverrides, _notesBodyTextFromXml, _retimeRawTransitionXml, _publicAssetLicenseRecord, toolTimeoutForName, LONG_RUNNING_TOOLS, collectCompositionIssues, PUBLIC_PREVIEW_BATCH_LIMIT, normalizedPreviewBatch, ensurePublicPreviewFreeze, currentPublicPreviewFreeze, publicPreviewVerification, invalidatePublicPreviewFreeze, currentVersionValidationVerification, authoritativePreviewInfrastructureStatus, setPowerPointPreviewExporterForTest, closedCaptionTracksForArgs as closedCaptionTracksForArgsForTest, _applyMediaOptionsPatch as applyMediaOptionsPatchForTest, _applyAtomicMediaPackagePatch as applyAtomicMediaPackagePatchForTest, _removeOwnedMediaCommands as removeOwnedMediaCommandsForTest, _markOwnedMediaCommands as markOwnedMediaCommandsForTest, _removeRawInteractiveMediaTiming as removeRawInteractiveMediaTimingForTest, _mediaRelationshipIds as mediaRelationshipIdsForTest, _removeSlideNarration as removeSlideNarrationForTest, exportedImageBlockFields as exportedImageBlockFieldsForTest, exportedMediaBlockFields as exportedMediaBlockFieldsForTest, publicSourceDescriptorForOptions as publicSourceDescriptorForOptionsForTest, publicNarrationSynthesisResult as publicNarrationSynthesisResultForTest, resolveNarrationAudioReference as resolveNarrationAudioReferenceForTest, normalizeNarrationProviderContractArgs as normalizeNarrationProviderContractArgsForTest, addNarrationToSlide as addNarrationToSlideForTest, removeAuthoredNarrationFromSlide as removeAuthoredNarrationFromSlideForTest, handleUpdateShape as handleUpdateShapeForTest, handleDeleteShapes as handleDeleteShapesForTest, handleAddImage as handleAddImageForTest, handleAddMedia as handleAddMediaForTest, handleUpdateMedia as handleUpdateMediaForTest }
 
 export { segmentCaptionTracksForArgs as segmentCaptionTracksForArgsForTest }
+export { withSpecIdentityMediaAllowance as withSpecIdentityMediaAllowanceForTest, reserveSpecIdentityMediaAllowance as reserveSpecIdentityMediaAllowanceForTest, commitSpecIdentityMediaAllowance as commitSpecIdentityMediaAllowanceForTest }
 
 export async function callBetterPptxTool(name, args = {}, context = {}) {
 	const localMaintainer = (!isPublicBlackBoxMode() || isLocalMaintainerMode()) && !isProductionBillingEnvironment()
@@ -44111,6 +44152,13 @@ export async function callBetterPptxTool(name, args = {}, context = {}) {
 	}
 }
 
+// Opened from user bytes, or already published at least once. Both markers
+// survive durable rehydration (sourceType and lastSaved in the deck head).
+function deckIsExistingForEditing(entry) {
+	if (!entry) return false
+	return entry.sourceType === 'existing' || Boolean(entry.lastArtifact || entry.lastSavedPath)
+}
+
 async function callBetterPptxToolInScope(name, args = {}, context = {}) {
 	const requestedName = String(name || '')
 	const internalName = canonicalToolName(requestedName)
@@ -44128,6 +44176,7 @@ async function callBetterPptxToolInScope(name, args = {}, context = {}) {
 			...(args?.deckId ? { deckHash: hashDeckId(args.deckId).slice(-16) } : {}),
 		})
 	} catch { /* advisory */ }
+	await resolveFreeTierConfig()
 	if (process.env.BETTERPPTX_DISABLED === '1') {
 		const result = sanitizePublicResult(maintenanceResult('SERVICE_DISABLED', 'The presentation service is temporarily unavailable for maintenance.'))
 		return finishToolCall(trace, internalName, result)
@@ -44290,6 +44339,8 @@ async function callBetterPptxToolInScope(name, args = {}, context = {}) {
 		return finishToolCall(trace, internalName, result)
 	}
 	const gate = requireEntitlement(internalName, args, context, {
+		deckIsExisting: deckId => deckIsExistingForEditing(decks.get(deckId)),
+		isDeckMutation: toolName => !isReadOnlyTool(toolName) && !['betterpptx.deck.save', 'betterpptx.deck.dispose'].includes(toolName),
 		deckSlideCount: deckId => {
 			const entry = decks.get(deckId)
 			return entry ? entry.pptx.slides.length : null

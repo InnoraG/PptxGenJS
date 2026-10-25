@@ -58,7 +58,8 @@ export function isMissionControlEnabled() {
 export function missionControlOnlyPathAllowed(pathname, method = 'GET') {
 	const path = String(pathname || '')
 	const verb = String(method || 'GET').toUpperCase()
-	if (verb === 'GET' && ['/ops/mission-control', '/ops/mission-control/data', '/ops/mission-control/secrets'].includes(path)) return true
+	if (verb === 'GET' && ['/ops/mission-control', '/ops/mission-control/data', '/ops/mission-control/secrets', '/ops/mission-control/free-tier'].includes(path)) return true
+	if (verb === 'POST' && path === '/ops/mission-control/free-tier') return true
 	if (verb === 'POST' && /^\/ops\/mission-control\/secrets\/[a-z0-9_-]+\/(?:reveal|update|rotate|test)$/.test(path)) return true
 	return false
 }
@@ -373,6 +374,7 @@ table{width:100%;border-collapse:collapse}th,td{text-align:left;padding:8px 6px;
     <section class="wide"><h2>Top Tools</h2><div id="topTools"></div></section>
     <section class="wide"><h2>Security</h2><div id="security"></div></section>
     <section class="full"><h2>Owner Secrets</h2>${accessControls}<div id="ownerSecrets"></div></section>
+    <section class="full"><h2>Free Tier</h2><div class="secretbar"><input id="freeLimit" type="number" min="1" max="1000" step="1" placeholder="Deck publications per 30 days"><input id="freeTalkingHeads" type="number" min="0" max="1000" step="1" placeholder="Talking-head renders per 30 days"><input id="freePersonas" type="number" min="0" max="1000" step="1" placeholder="Custom persona renders per 30 days"><input id="freeLimitConfirm" type="text" autocomplete="off" spellcheck="false" placeholder="Type SET FREE PUBLICATION LIMIT"><button id="saveFreeLimit" type="button">Set limit</button></div><div id="freeTier"></div></section>
     <section class="full"><h2>Billing Operations</h2><div id="billingOps"></div></section>
     ${ownerControlOnly ? '' : '<section class="full"><h2>Payment Health</h2><div id="paymentHealth"></div></section>'}
     <section class="wide"><h2>Error Codes</h2><div id="errors"></div></section>
@@ -545,7 +547,31 @@ async function loadPaymentHealth(){
  if(!r.ok)throw new Error('Payment health failed: '+r.status);
  renderPaymentHealth(await r.json());
 }
-async function refresh(){const r=await fetch('/ops/mission-control/data',{headers:missionControlHeaders(),cache:'no-store'});if(!r.ok)throw new Error('Mission Control data failed: '+r.status);render(await r.json());await loadSecrets().catch(e=>{document.getElementById('ownerSecrets').innerHTML='<div class="bad">'+esc(e.message)+'</div>'});if(paymentHealthAvailable)await loadPaymentHealth().catch(e=>{document.getElementById('paymentHealth').innerHTML='<div class="bad">'+esc(e.message)+'</div>'})}
+const FREE_LIMIT_CONFIRM='SET FREE PUBLICATION LIMIT';
+async function loadFreeTier(){
+ const r=await fetch('/ops/mission-control/free-tier',{headers:missionControlHeaders(),cache:'no-store'});
+ const data=await r.json().catch(()=>({}));
+ if(!r.ok)throw new Error((data.error&&data.error.code)||('Free tier failed: '+r.status));
+ document.getElementById('freeTier').innerHTML='<div class="secrow"><div class="status">'+esc(data.publicationsPerWindow)+' decks / '+esc(data.talkingHeadsPerWindow)+' talking heads / '+esc(data.customPersonasPerWindow)+' personas per '+esc(data.windowDays)+' days</div><div><small>sources '+esc(JSON.stringify(data.sources))+'; environment fallbacks '+esc(JSON.stringify(data.environmentFallbacks))+'; store '+esc(data.store)+(data.updatedAt?'; updated '+esc(data.updatedAt):'')+'; existing-deck editing '+esc(data.existingDeckEditing)+'. Changing a limit never resets usage; lowering it below current usage blocks that free use until older uses leave the window. Leave a field empty to keep its value.</small></div></div>';
+}
+document.getElementById('saveFreeLimit').addEventListener('click',async()=>{
+ const out=document.getElementById('freeTier');
+ const body={confirm:FREE_LIMIT_CONFIRM};
+ for(const [id,field,min] of [['freeLimit','publicationsPerWindow',1],['freeTalkingHeads','talkingHeadsPerWindow',0],['freePersonas','customPersonasPerWindow',0]]){
+  const raw=document.getElementById(id).value.trim();if(raw==='')continue;
+  const value=Number(raw);
+  if(!Number.isInteger(value)||value<min||value>1000){out.innerHTML='<div class="bad">'+field+' must be an integer from '+min+' to 1000.</div>';return;}
+  body[field]=value;
+ }
+ if(Object.keys(body).length===1){out.innerHTML='<div class="bad">Enter at least one limit.</div>';return;}
+ if(document.getElementById('freeLimitConfirm').value.trim()!==FREE_LIMIT_CONFIRM){out.innerHTML='<div class="bad">Type '+FREE_LIMIT_CONFIRM+' to confirm.</div>';return;}
+ document.getElementById('freeLimitConfirm').value='';
+ const r=await fetch('/ops/mission-control/free-tier',{method:'POST',headers:missionControlHeaders(true),body:JSON.stringify(body),cache:'no-store'});
+ const data=await r.json().catch(()=>({}));
+ if(!r.ok){out.innerHTML='<div class="bad">'+esc((data.error&&(data.error.code+': '+data.error.message))||('HTTP '+r.status))+'</div>';return;}
+ await loadFreeTier().catch(e=>{out.innerHTML='<div class="bad">'+esc(e.message)+'</div>'});
+});
+async function refresh(){const r=await fetch('/ops/mission-control/data',{headers:missionControlHeaders(),cache:'no-store'});if(!r.ok)throw new Error('Mission Control data failed: '+r.status);render(await r.json());await loadFreeTier().catch(e=>{document.getElementById('freeTier').innerHTML='<div class="bad">'+esc(e.message)+'</div>'});await loadSecrets().catch(e=>{document.getElementById('ownerSecrets').innerHTML='<div class="bad">'+esc(e.message)+'</div>'});if(paymentHealthAvailable)await loadPaymentHealth().catch(e=>{document.getElementById('paymentHealth').innerHTML='<div class="bad">'+esc(e.message)+'</div>'})}
 document.getElementById('refresh').addEventListener('click',refresh);
 document.getElementById('reloadSecrets').addEventListener('click',()=>loadSecrets().catch(e=>{document.getElementById('ownerSecrets').innerHTML='<div class="bad">'+esc(e.message)+'</div>'}));
 document.getElementById('ownerSecrets').addEventListener('click',async e=>{

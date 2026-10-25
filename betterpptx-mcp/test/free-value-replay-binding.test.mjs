@@ -24,7 +24,8 @@ Object.assign(process.env, {
 	BETTERPPTX_ENV: 'test', BETTERPPTX_DEPLOYMENT_STAGE: 'test', NODE_ENV: 'test',
 	BETTERPPTX_FORCE_PLAN: 'free', BETTERPPTX_PREMIUM: '0',
 	BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW: '2',
-	BETTERPPTX_FREE_IDENTITY_MEDIA_PER_WINDOW: '2',
+	BETTERPPTX_FREE_TALKING_HEADS_PER_WINDOW: '2',
+	BETTERPPTX_FREE_CUSTOM_PERSONAS_PER_WINDOW: '2',
 })
 const { reserveFreeValue, commitFreeValue, releaseFreeValue, getFreeValueStatus } = await import('../auth/entitlements.mjs')
 const { createInstallUsageStore } = await import('../auth/install-identity.mjs')

@@ -414,7 +414,7 @@ export const TOOLS = [
 	{
 		name: 'betterpptx.auth.status',
 		title: 'Report SaaS plan and activation status',
-		description: 'Return current authorization plus the canonical workflow-stage matrix and secured rolling publication allowance. Eligible identities can publish up to the currently reported number of complete downloadable PPTX files without a customer charge; provider-backed media allowances and paid overage remain separate. Call this before media preparation or final publication.',
+		description: 'Return current authorization plus the canonical workflow-stage matrix and secured rolling publication allowance. Eligible identities can publish up to the currently reported number of complete new downloadable PPTX files per rolling window without a customer charge. Custom talking-head and custom-persona renders have their own rolling allowances, counted when rendered; nothing else has a per-feature limit. Editing an uploaded or already-published deck may be a paid service (see existingDeckEditing). Call this before media preparation or final publication.',
 		inputSchema: { type: 'object', properties: {} },
 	},
 	{
@@ -922,7 +922,7 @@ export const TOOLS = [
 									type: 'object',
 									additionalProperties: false,
 									required: ['fromImages', 'experimentalConfirmed'],
-									description: 'Custom presenter persona built from authorized full-body photos supplied by the caller during phase:"resolve" (identity media: requires consent for the pictured person, counts toward the identity-media allowance). The built rigged model is locked into presenter.model; commit never substitutes a built-in presenter.',
+									description: 'Custom presenter persona built from authorized full-body photos supplied by the caller during phase:"resolve" (identity media: requires consent for the pictured person; each render counts toward the rolling custom-persona allowance reported by betterpptx.auth.status, whether or not the deck is saved). The built rigged model is locked into presenter.model; commit never substitutes a built-in presenter.',
 									properties: {
 										fromImages: { type: 'array', minItems: 2, maxItems: 4, items: { type: 'string' }, description: 'Ordered 2-4 uploaded image handles of the same person, front view first, then side/back views.' },
 										experimentalConfirmed: { type: 'boolean', const: true, description: 'Required opt-in: custom persona generation is experimental.' },
@@ -1607,7 +1607,7 @@ export const TOOLS = [
 	{
 		name: 'betterpptx.avatar.render_job',
 		title: 'Start Avatar talking-head video job',
-		description: 'Start the asynchronous custom talking-head video stage from an uploaded face image. Explicit source-image consent and an idempotency key are mandatory. This high-value identity-media route is sponsored within the bounded free allowance (three completed generations per secured identity per rolling 30 days), independent of the three free deck-publication slots. The completed audiovisual asset is attached through betterpptx.avatar.attach_result; no hosted PowerPoint renderer is required.',
+		description: 'Start the asynchronous custom talking-head video stage from an uploaded face image. Explicit source-image consent and an idempotency key are mandatory. This identity-media route keeps its consent and identity checks and draws on the rolling talking-head allowance reported by betterpptx.auth.status, counted per render and independent of deck publications. The completed audiovisual asset is attached through betterpptx.avatar.attach_result; no hosted PowerPoint renderer is required.',
 		inputSchema: JSON.parse(JSON.stringify(MEDIA_AVATAR_PUBLIC_OPERATION_SCHEMAS['betterpptx.avatar.render_job'])),
 	},
 	{
@@ -2740,7 +2740,7 @@ export const TOOLS = [
 	{
 		name: 'betterpptx.assets.generate_rigged3d',
 		title: 'Generate experimental rigged persona',
-		description: 'Generate an experimental personalized rigged 3D persona from authorized multiview full-body images. Explicit experimental opt-in and an idempotency key are mandatory. Two to four uploaded image handles qualify for the bounded sponsored allowance (three completed generations per secured identity per rolling 30 days); prompt-only and single-view generation remain outside that free route. A returned handle is not production-ready until deformation, motion, packaging, identity/asset approval, and release evidence succeed.',
+		description: 'Generate an experimental personalized rigged 3D persona from authorized multiview full-body images. Explicit experimental opt-in and an idempotency key are mandatory. Two to four uploaded image handles qualify for the sponsored route, which draws on the rolling custom-persona allowance reported by betterpptx.auth.status; prompt-only and single-view generation remain outside that free route. A returned handle is not production-ready until deformation, motion, packaging, identity/asset approval, and release evidence succeed.',
 		inputSchema: {
 			type: 'object',
 			required: ['experimentalConfirmed', 'idempotencyKey'],
@@ -2996,7 +2996,7 @@ export const TOOLS = [
 	{
 		name: 'betterpptx.deck.open_uploaded',
 		title: 'Open an uploaded .pptx for editing',
-		description: 'Open a user-uploaded PowerPoint file from base64/data-URL bytes into a fresh deckId. This is the public/chat-safe import path: no server filesystem path is required or exposed. Import and editing use the complete authoring vocabulary; only publication/provider value is subject to the rolling allowance or an explicit paid entitlement.',
+		description: 'Open a user-uploaded PowerPoint file from base64/data-URL bytes into a fresh deckId. This is the public/chat-safe import path: no server filesystem path is required or exposed. Import and editing use the complete authoring vocabulary. Editing an existing deck may be a paid service (betterpptx.auth.status reports existingDeckEditing); a free account without a paid entitlement receives REQUIRES_PAID_ENTITLEMENT and can instead publish a complete new deck within its rolling allowance.',
 		inputSchema: {
 			type: 'object',
 			required: ['data'],
