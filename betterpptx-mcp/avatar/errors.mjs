@@ -54,6 +54,7 @@ export function publicAvatarWarnings(warnings) {
 export function publicAvatarError(err) {
 	const code = err?.code || 'AVATAR_FAILED'
 	if (code === 'AVATAR_UNAVAILABLE') return 'Avatar video generation is not available in this environment.'
+	if (code === 'AVATAR_CAPACITY_EXHAUSTED') return 'Talking-head rendering capacity is temporarily exhausted. No video was rendered and no talking-head allowance was used. Retry later, or continue with voice-only narration.'
 	if (code === 'MEDIA_PROBE_FAILED') return 'Avatar media could not be verified.'
 	if (code === 'MEDIA_NORMALIZE_FAILED') return 'Avatar media could not be normalized for PowerPoint.'
 	if (code === 'MEDIA_UNSUPPORTED_INPUT') return 'Avatar media input is not supported.'

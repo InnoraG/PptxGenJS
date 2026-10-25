@@ -18,10 +18,12 @@ Private maintainer notes. Both features run wherever `generate_from_spec phase:"
   - Effective spend = the account's real billed month-to-date spend, plus this runtime's renders that are not yet billed (and any open reservation).
   - An account that cannot fit the next render's estimate under $29.50 − $1.50 reserve drops out of rotation.
   - An account whose billing figure is missing or older than 6 h also drops out.
-  - When no account remains, the call fails with `AVATAR_BUDGET_EXHAUSTED` before any GPU work.
+  - When no account remains, the call fails with `AVATAR_CAPACITY_EXHAUSTED` before any GPU work. The public message says nothing was rendered, no allowance was used, and to retry later or use voice-only narration. A real worker failure on any account is reported instead.
+  - In public black-box mode the failover trace (hashed account ids, worker statuses) is stripped from avatar error details, including stored durable-operation failures.
 - The real billed figure comes from the Cloud Run job `betterpptx-avatar-budget-sync` (`deploy/avatar-budget-sync/`).
   - Cloud Scheduler `betterpptx-avatar-budget-sync-hourly` runs it at minute 5 of every hour.
   - It runs `modal billing report --for "this month"` per account, using the tokens in secret `betterpptx-modal-billing-tokens` (`{"accounts":[{"id","tokenId","tokenSecret"}]}`).
   - Right after a fresh deploy, run it once by hand: `gcloud run jobs execute betterpptx-avatar-budget-sync --region=us-central1 --wait`.
 - Adding an account takes three steps: deploy the worker on the new Modal account, add it to both secrets, then run the sync job.
-- Belt and braces (owner action, dashboard only): in each Modal workspace, set **Settings → Usage & Billing → monthly spend limit** to $29.50. That limit also covers spend this runtime cannot see.
+- The owner decided on 2026-10-25 not to set Modal dashboard spend limits, so this gate is the cap.
+- Endpoint check without a GPU: every endpoint route is the GPU function, so even an unauthenticated request cold-starts an A10G. Verify deployments instead with a CPU-only Modal probe. It compares `modal.Function.from_name("betterpptx-avatar-commercial-production", "lipsync").get_web_url()` with the bundle URL, and the sha256 fingerprint of the account's `betterpptx-avatar-commercial-auth` token with the bundle token.

@@ -98,7 +98,7 @@ test('rotation skips an exhausted account and settles the render on the next one
 		await store.recordBilled('open', 28.5, new Date().toISOString())
 		await assert.rejects(
 			renderMuseTalkHttp({ avatarImagePath: path.join(jobDir, 'a.png'), audioPath: path.join(jobDir, 'a.wav'), jobDir, provider: 'musetalk' }),
-			error => error.code === 'AVATAR_BUDGET_EXHAUSTED',
+			error => error.code === 'AVATAR_CAPACITY_EXHAUSTED',
 		)
 		assert.equal(hits.length, 2)
 	} finally {

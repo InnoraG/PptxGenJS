@@ -85,10 +85,19 @@ async function authorize(f, { clientId, redirectUri, resource }) {
 	assert.match(location, /\/identity\/realms\/betterpptx\/interaction\//)
 	const page = await f.request(location)
 	assert.equal(page.status, 200)
-	assert.match(page.headers.get('content-security-policy'), /script-src 'nonce-/)
+	const csp = page.headers.get('content-security-policy')
+	assert.match(csp, /script-src 'nonce-/)
 	const html = await page.text()
 	assert.match(html, /Sign in to BetterPPTX/)
-	assert.doesNotMatch(html, /oidc|koa|firestore/i)
+	// Leak check: no implementation names on the page. The per-request interaction id and
+	// CSP nonce are random base64, so they are removed first; otherwise a random value such
+	// as "...kOa..." would trip the check. Every other byte of the page is still scanned.
+	const interactionId = new URL(location, PUBLIC).pathname.split('/').pop()
+	const nonce = /'nonce-([^']+)'/.exec(csp)[1]
+	assert.ok(interactionId.length >= 16 && html.includes(interactionId) && html.includes(nonce))
+	const staticHtml = html.split(interactionId).join('<interaction>').split(nonce).join('<nonce>')
+	assert.doesNotMatch(staticHtml, /oidc|koa|firestore/i)
+	for (const [name, value] of page.headers) assert.doesNotMatch(`${name}: ${name === 'content-security-policy' ? value.split(nonce).join('<nonce>') : name === 'set-cookie' ? '' : value}`, /oidc|koa|firestore/i)
 	const interaction = new URL(location, PUBLIC).pathname
 	const denied = await f.request(`${interaction}/login`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ idToken: 'forged' }) })
 	assert.equal(denied.status, 400)

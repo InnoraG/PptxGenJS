@@ -64,7 +64,7 @@ jobs:
           node --test betterpptx-mcp/test/cloud-run-release-promotion.test.mjs
           node --test betterpptx-mcp/test/builtin-motion-source-review.test.mjs betterpptx-mcp/test/builtin-prepared-motion-library.test.mjs betterpptx-mcp/test/builtin-prepared-publication-codec.test.mjs betterpptx-mcp/test/builtin-prepared-asset-store.test.mjs betterpptx-mcp/test/model3d-control-alias-replay.test.mjs betterpptx-mcp/test/motion-comparison-readiness.test.mjs
           node --test betterpptx-mcp/test/durable-operation-phase-idempotency.test.mjs
-          node --test betterpptx-mcp/test/avatar-worker-budget.test.mjs betterpptx-mcp/test/identity-media-deployment-contract.test.mjs
+          node --test betterpptx-mcp/test/avatar-worker-budget.test.mjs betterpptx-mcp/test/avatar-worker-rotation.test.mjs betterpptx-mcp/test/identity-media-deployment-contract.test.mjs
           node --test betterpptx-mcp/test/production-free-publication-profile.test.mjs
           node --test betterpptx-mcp/test/production-free-publication-http.test.mjs
           node --test betterpptx-mcp/test/production-non-rendering-save.test.mjs

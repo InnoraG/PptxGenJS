@@ -43218,7 +43218,8 @@ async function failDurableOperation(run = null, error = {}, { retryable = false 
 			error: {
 				code: error?.code || 'OPERATION_FAILED',
 				message: String(error?.message || error || 'Operation failed.'),
-				details: error?.details || {},
+				// Stored failures are replayed to callers, so persist only public-safe details.
+				details: publicErrorDetails(error) || {},
 			},
 			retryable,
 		})
@@ -43605,6 +43606,11 @@ function publicNextActionsForError(code, details = {}) {
 			return [
 				{ type: 'retry_later', description: 'Retry after avatar media generation is configured, or use a completed avatar asset.' },
 			]
+		case 'AVATAR_CAPACITY_EXHAUSTED':
+			return [
+				{ type: 'retry_later', tool: 'betterpptx.deck.generate_from_spec', description: 'Retry the phase:"resolve" request later with a new idempotencyKey; no video was rendered and no talking-head allowance was used.' },
+				{ type: 'voice_only', description: 'Or continue now with ordinary voice narration (kind:"narration") and no talking-head video.' },
+			]
 		case 'AVATAR_SELFIE_REQUIRED':
 			return [
 				{ type: 'upload_selfie', description: 'Upload the user selfie with consentAffirmed:true in this generation request, then retry.' },
@@ -43789,6 +43795,7 @@ function publicRecoverableForError(code) {
 		'SAFE_FETCH_TIMEOUT',
 		'SAFE_FETCH_FAILED',
 		'AVATAR_UNAVAILABLE',
+		'AVATAR_CAPACITY_EXHAUSTED',
 		'MEDIA_PROBE_FAILED',
 		'MEDIA_NORMALIZE_FAILED',
 		'MEDIA_UNSUPPORTED_INPUT',
@@ -43866,6 +43873,7 @@ function publicRetrySafeForError(code) {
 		'INVALID_PREMIUM_PREVIEW_TRANSITION',
 		'BUSY',
 		'OPERATION_DISPATCH_UNAVAILABLE',
+		'AVATAR_CAPACITY_EXHAUSTED',
 		'SAFE_FETCH_TIMEOUT',
 		'SAFE_FETCH_FAILED',
 		'NARRATION_SYNTHESIS_RUNTIME_UNAVAILABLE',
@@ -44056,13 +44064,25 @@ function normalizePublicErrorResult(result) {
 	}
 }
 
+// Talking-head provider failures carry a private failover trace (hashed account ids,
+// worker statuses, worker error text, capacity reasons). Public callers get only the
+// code, the message and whether a later retry is sensible.
+export function publicErrorDetails(err) {
+	if (!err?.details) return null
+	if (isPublicBlackBoxMode() && /^AVATAR_/.test(String(err.code || ''))) {
+		return err.details.retryable === undefined ? null : { retryable: err.details.retryable === true }
+	}
+	return err.details
+}
+
 function buildToolErrorResult(err, internalName, args = {}) {
+	const details = publicErrorDetails(err)
 	const error = {
 		message: String(err && err.message || err),
 		code: err?.code || 'TOOL_ERROR',
 		retryable: err?.retryable === true || err?.details?.retryable === true,
 		...(Array.isArray(err?.acceptedInputFields) ? { acceptedInputFields: err.acceptedInputFields } : {}),
-		...(err?.details ? { details: err.details } : {}),
+		...(details ? { details } : {}),
 		...(!isPublicBlackBoxMode() && err?.stack ? { stack: err.stack } : {}),
 	}
 	if (error.code === 'TOOL_TIMEOUT' && isMutatingTool(internalName) && !hasIdempotencyKey(args)) {

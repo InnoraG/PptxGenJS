@@ -216,7 +216,10 @@ test('large artifacts publish an opaque exact href, no GCS details or artifact b
   assert.equal(isPublishedArtifactDownloadPair(pair.downloadUrl, pair.downloadName), true)
   const payload = JSON.stringify(sanitizePublicResult({ ...pair, expiresAt: f.published.expiresAt }))
   assert.ok(payload.length < 1024)
-  assert.doesNotMatch(payload, /X-Goog|synthetic-bucket|artifacts\/|localPath|Buffer|YWFh/)
+  // The 43-character capability token is random base64url and could contain "YWFh" or
+  // "Buffer" by chance; remove that one known value, then scan everything else.
+  assert.ok(payload.includes(f.token()))
+  assert.doesNotMatch(payload.split(f.token()).join('<token>'), /X-Goog|synthetic-bucket|artifacts\/|localPath|Buffer|YWFh/)
   const target = await f.resolve()
   assert.equal(target.downloadUrl, wrapped.signedDownloadUrl)
   assert.ok(reads.every(name => name.includes('/.delivery-authority/')), 'resolving a large link never reads artifact bytes')
