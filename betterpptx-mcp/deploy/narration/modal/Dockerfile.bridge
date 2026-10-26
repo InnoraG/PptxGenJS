@@ -1,9 +1,10 @@
 FROM python:3.11-slim-bookworm
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1 PORT=8080
 WORKDIR /app
-RUN pip install --no-cache-dir modal==1.5.2 fastapi==0.135.1 uvicorn==0.41.0 httpx==0.28.1 numpy==1.26.4 scipy==1.13.1 pyloudnorm==0.1.1 future==1.0.0 \
+RUN pip install --no-cache-dir modal==1.5.2 fastapi==0.135.1 uvicorn==0.41.0 httpx==0.28.1 numpy==1.26.4 scipy==1.13.1 pyloudnorm==0.1.1 future==1.0.0 google-cloud-firestore==2.21.0 \
  && useradd --create-home --uid 10001 speech
 COPY betterpptx-mcp/deploy/narration/modal/bridge.py /app/bridge.py
+COPY betterpptx-mcp/deploy/narration/modal/budget.py /app/budget.py
 COPY betterpptx-mcp/deploy/narration/modal/fallback.py /app/fallback.py
 COPY betterpptx-mcp/deploy/narration/modal/fallback-map.json /app/fallback-map.json
 COPY betterpptx-mcp/deploy/narration/chatterbox/runtime-manifest.json /app/runtime-manifest.json

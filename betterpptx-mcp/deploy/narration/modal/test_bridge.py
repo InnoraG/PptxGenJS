@@ -60,10 +60,14 @@ class BridgeTests(unittest.IsolatedAsyncioTestCase):
             'BETTERPPTX_NARRATION_LEGACY_CATALOG': str(REPO / 'betterpptx-mcp/narration/voices/runtime-manifest.production.json'),
         })
         self.environment.start()
+        self.budget_reserve = patch.object(bridge.budget, 'reserve', return_value='test-reservation')
+        self.budget_settle = patch.object(bridge.budget, 'settle')
+        self.budget_reserve.start(); self.budget_settle.start()
         fallback.configuration.cache_clear(); fallback.legacy_voices.cache_clear(); fallback._identity.clear()
 
     async def asyncTearDown(self):
         self.environment.stop()
+        self.budget_reserve.stop(); self.budget_settle.stop()
         fallback.configuration.cache_clear(); fallback.legacy_voices.cache_clear(); fallback._identity.clear()
         await self.client.aclose()
 

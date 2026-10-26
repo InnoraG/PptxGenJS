@@ -60,7 +60,7 @@ jobs:
       - name: Install pinned speech audio test dependencies
         run: |
           python3 -m venv "$RUNNER_TEMP/speech-audio-tests"
-          "$RUNNER_TEMP/speech-audio-tests/bin/python" -m pip install --disable-pip-version-check numpy==1.26.4 scipy==1.13.1 pyloudnorm==0.1.1 future==1.0.0 fastapi==0.135.1 httpx==0.28.1
+          "$RUNNER_TEMP/speech-audio-tests/bin/python" -m pip install --disable-pip-version-check numpy==1.26.4 scipy==1.13.1 pyloudnorm==0.1.1 future==1.0.0 fastapi==0.135.1 httpx==0.28.1 google-cloud-firestore==2.21.0
           echo "$RUNNER_TEMP/speech-audio-tests/bin" >> "$GITHUB_PATH"
 
       - name: Validate the Cloudflare edge bundle without publishing
@@ -93,6 +93,8 @@ jobs:
           python3 -m unittest discover -s deploy/docker -p test_chatterbox_http_runtime.py
           python3 -m unittest discover -s deploy/docker -p test_speech_loudness.py
           python3 -m unittest discover -s betterpptx-mcp/deploy/narration/modal -p test_bridge.py
+          python3 -m unittest discover -s betterpptx-mcp/deploy/narration/modal -p test_budget.py
+          python3 -m unittest discover -s betterpptx-mcp/deploy/avatar-budget-sync -p test_sync_modal_budget.py
           node --test betterpptx-mcp/test/narration-fallback-identity.test.mjs betterpptx-mcp/test/speech-worker-secret.test.mjs
           node --test betterpptx-mcp/test/production-free-publication-profile.test.mjs
           node --test betterpptx-mcp/test/production-free-publication-http.test.mjs
@@ -496,7 +498,7 @@ jobs:
           gcloud scheduler jobs describe "$CLOUD_SCHEDULER_JOB" --project="$GCP_PROJECT_ID" --location="$GCP_REGION" --format=json > "$RUNNER_TEMP/scheduler-job.json"
           jq -e --arg uri "$scheduler_uri" --arg invoker "$SWEEPER_INVOKER_SERVICE_ACCOUNT" '.schedule == "0 * * * *" and .timeZone == "Etc/UTC" and .httpTarget.uri == $uri and .httpTarget.httpMethod == "POST" and .httpTarget.oauthToken.serviceAccountEmail == $invoker' "$RUNNER_TEMP/scheduler-job.json" >/dev/null
 
-      - name: Deploy the hourly Modal billing sync for the avatar-worker budget gate
+      - name: Deploy the hourly Modal billing sync for separate avatar and speech budget gates
         shell: bash
         run: |
           set -euo pipefail
@@ -509,13 +511,15 @@ jobs:
           fi
           image_ref="$(gcloud artifacts docker images describe "$image" --format='value(image_summary.fully_qualified_digest)')"
           [[ "$image_ref" == *@sha256:* ]]
+          budget_sync_sa="betterpptx-modal-budget-sync@${GCP_PROJECT_ID}.iam.gserviceaccount.com"
+          [[ "$budget_sync_sa" != "$GCP_RUNTIME_SERVICE_ACCOUNT" ]]
           gcloud run jobs deploy "$CLOUD_RUN_AVATAR_BUDGET_SYNC" \
             --project="$GCP_PROJECT_ID" --region="$GCP_REGION" \
-            --image="$image_ref" --service-account="$GCP_RUNTIME_SERVICE_ACCOUNT" \
+            --image="$image_ref" --service-account="$budget_sync_sa" \
             --tasks=1 --parallelism=1 --max-retries=1 --task-timeout=900s \
             --memory=1Gi --cpu=1 \
-            --set-env-vars="BETTERPPTX_GCP_PROJECT=$GCP_PROJECT_ID,BETTERPPTX_FIRESTORE_AVATAR_WORKER_BUDGET_COLLECTION=betterpptx_avatar_worker_budget" \
-            --set-secrets="BETTERPPTX_MODAL_BILLING_TOKENS=${MODAL_BILLING_TOKENS_SECRET_NAME}:latest" \
+            --set-env-vars="BETTERPPTX_GCP_PROJECT=$GCP_PROJECT_ID,BETTERPPTX_FIRESTORE_AVATAR_WORKER_BUDGET_COLLECTION=betterpptx_avatar_worker_budget,BETTERPPTX_SPEECH_WORKER_ACCOUNT_ID=fluxworkerai1" \
+            --set-secrets="BETTERPPTX_MODAL_BILLING_TOKENS=${MODAL_BILLING_TOKENS_SECRET_NAME}:latest,BETTERPPTX_SPEECH_WORKER_CREDENTIALS=betterpptx-speech-worker-credentials:1" \
             --quiet
           gcloud run jobs add-iam-policy-binding "$CLOUD_RUN_AVATAR_BUDGET_SYNC" \
             --project="$GCP_PROJECT_ID" --region="$GCP_REGION" \
@@ -536,7 +540,7 @@ jobs:
           fi
           gcloud scheduler jobs describe "$CLOUD_SCHEDULER_AVATAR_BUDGET_JOB" --project="$GCP_PROJECT_ID" --location="$GCP_REGION" --format=json \
             | jq -e --arg uri "$scheduler_uri" '.schedule == "5 * * * *" and .httpTarget.uri == $uri and .httpTarget.httpMethod == "POST"' >/dev/null
-          echo "- Avatar budget sync: \`$image_ref\` hourly; accounts without a billing figure under 6 h old are out of rotation" >> "$GITHUB_STEP_SUMMARY"
+          echo "- Compute budget sync: \`$image_ref\` hourly; avatar rotation unchanged; separate speech account included; stale billing blocks new compute" >> "$GITHUB_STEP_SUMMARY"
 
       - name: Promote the exact ready worker and gateway release revisions
         env:

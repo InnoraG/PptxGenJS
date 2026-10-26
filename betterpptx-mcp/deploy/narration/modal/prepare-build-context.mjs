@@ -10,7 +10,7 @@ export async function prepareBuildContext(output) {
   if (root === repository || root.startsWith(repository + path.sep)) throw new Error('Use a new task-owned context outside the checkout')
   try { await fs.access(root); throw new Error('Context already exists') } catch (error) { if (error.code !== 'ENOENT') throw error }
   const files = [
-    ...['Dockerfile.bridge', 'bridge.py', 'fallback.py', 'fallback-map.json'].map(name => `betterpptx-mcp/deploy/narration/modal/${name}`),
+    ...['Dockerfile.bridge', 'bridge.py', 'budget.py', 'fallback.py', 'fallback-map.json'].map(name => `betterpptx-mcp/deploy/narration/modal/${name}`),
     'betterpptx-mcp/deploy/narration/chatterbox/runtime-manifest.json',
     'betterpptx-mcp/narration/voices/runtime-manifest.production.json',
     'deploy/docker/speech_loudness.py',

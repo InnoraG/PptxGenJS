@@ -63,7 +63,7 @@ jobs:
       - name: Install pinned speech audio test dependencies
         run: |
           python3 -m venv "$RUNNER_TEMP/speech-audio-tests"
-          "$RUNNER_TEMP/speech-audio-tests/bin/python" -m pip install --disable-pip-version-check numpy==1.26.4 scipy==1.13.1 pyloudnorm==0.1.1 future==1.0.0 fastapi==0.135.1 httpx==0.28.1
+          "$RUNNER_TEMP/speech-audio-tests/bin/python" -m pip install --disable-pip-version-check numpy==1.26.4 scipy==1.13.1 pyloudnorm==0.1.1 future==1.0.0 fastapi==0.135.1 httpx==0.28.1 google-cloud-firestore==2.21.0
           echo "$RUNNER_TEMP/speech-audio-tests/bin" >> "$GITHUB_PATH"
 
       - name: Reject high or critical production dependency advisories
@@ -88,6 +88,8 @@ jobs:
           python3 -m unittest discover -s deploy/docker -p test_chatterbox_http_runtime.py
           python3 -m unittest discover -s deploy/docker -p test_speech_loudness.py
           python3 -m unittest discover -s betterpptx-mcp/deploy/narration/modal -p test_bridge.py
+          python3 -m unittest discover -s betterpptx-mcp/deploy/narration/modal -p test_budget.py
+          python3 -m unittest discover -s betterpptx-mcp/deploy/avatar-budget-sync -p test_sync_modal_budget.py
           node --test betterpptx-mcp/test/narration-fallback-identity.test.mjs betterpptx-mcp/test/speech-worker-secret.test.mjs
           node --test betterpptx-mcp/test/oauth-server.test.mjs betterpptx-mcp/test/gcs-browser-download-route.test.mjs
           node --test betterpptx-mcp/test/durable-mcp-authoring-worker.test.mjs

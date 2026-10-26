@@ -5,6 +5,7 @@ import json
 import os
 import re
 import threading
+import budget
 
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse, Response
@@ -62,9 +63,14 @@ async def invoke(method, payload=None):
         return failure()
     call = None
     try:
+        reservation = await asyncio.to_thread(budget.reserve)
         function = getattr(worker(), method)
         call = await (function.spawn.aio() if payload is None else function.spawn.aio(payload))
         result = await asyncio.wait_for(call.get.aio(timeout=RPC_TIMEOUT_SECONDS), RPC_TIMEOUT_SECONDS + 1)
+        try:
+            await asyncio.to_thread(budget.settle, reservation)
+        except Exception:
+            pass  # Keep the full reservation if accounting cannot confirm settlement.
         if method == 'voices':
             return JSONResponse(result)
         if not isinstance(result, dict) or result.get('ok') is not True:

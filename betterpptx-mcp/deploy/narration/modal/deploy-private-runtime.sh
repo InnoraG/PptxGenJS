@@ -21,7 +21,7 @@ if [[ -n "${PRIVATE_VOICE_BUCKET:-}" ]]; then
   jq -e --arg member "serviceAccount:$GCP_RUNTIME_SERVICE_ACCOUNT" \
     '[.bindings[]? | select(.condition == null) | select(.role == "roles/storage.objectUser" or .role == "roles/storage.objectAdmin") | .members[]? | select(. == $member)] | length > 0' <<< "$private_policy" >/dev/null
 fi
-inputs_digest="$(cat "$here/Dockerfile.bridge" "$here/bridge.py" "$here/fallback.py" "$here/fallback-map.json" "$here/../chatterbox/runtime-manifest.json" betterpptx-mcp/narration/voices/runtime-manifest.production.json deploy/docker/speech_loudness.py | sha256sum | cut -c1-20)"
+inputs_digest="$(cat "$here/Dockerfile.bridge" "$here/bridge.py" "$here/budget.py" "$here/fallback.py" "$here/fallback-map.json" "$here/../chatterbox/runtime-manifest.json" betterpptx-mcp/narration/voices/runtime-manifest.production.json deploy/docker/speech_loudness.py | sha256sum | cut -c1-20)"
 image="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GCP_ARTIFACT_REPOSITORY}/betterpptx-narration-modal-bridge:inputs-${inputs_digest}"
 if ! gcloud artifacts docker images describe "$image" --format='value(image_summary.digest)' >/dev/null 2>&1; then
   context="$RUNNER_TEMP/modal-bridge-context-${GITHUB_RUN_ID:-local}-$$"
@@ -35,7 +35,7 @@ gcloud run deploy "$service" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" 
   --execution-environment=gen2 --port=8080 --cpu=2 --memory=4Gi --concurrency=4 \
   --min=0 --max=1 --timeout=900s --cpu-boost --no-allow-unauthenticated --invoker-iam-check \
   --startup-probe='tcpSocket.port=8080,periodSeconds=10,timeoutSeconds=3,failureThreshold=12' \
-  --update-env-vars="BETTERPPTX_NARRATION_MODAL_APP=${modal_app},BETTERPPTX_NARRATION_PIPER_URL=${piper_url}" \
+  --update-env-vars="BETTERPPTX_NARRATION_MODAL_APP=${modal_app},BETTERPPTX_NARRATION_PIPER_URL=${piper_url},BETTERPPTX_GCP_PROJECT=${GCP_PROJECT_ID},BETTERPPTX_FIRESTORE_DATABASE=${BETTERPPTX_FIRESTORE_DATABASE:-(default)},BETTERPPTX_SPEECH_MONTHLY_CAP_USD=29.50,BETTERPPTX_SPEECH_BUDGET_RESERVE_USD=1.50,BETTERPPTX_SPEECH_ADMISSION_CEILING_USD=27.00" \
   --update-secrets="BETTERPPTX_SPEECH_WORKER_CREDENTIALS=${credential_secret}:latest" --quiet
 for member in allUsers allAuthenticatedUsers; do
   if gcloud run services get-iam-policy "$service" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json \
