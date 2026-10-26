@@ -327,7 +327,11 @@ class SpeechWorker:
                     kwargs['language_id'] = language
                 generated = self.model.generate(text, **kwargs)
             samples = generated.detach().cpu().numpy().reshape(-1)
-            return pcm_wav(samples, self.model.sr)
+            from speech_loudness import normalize_samples_to_wav
+            try:
+                return normalize_samples_to_wav(samples, self.model.sr)
+            except ValueError as cause:
+                raise RequestError('Invalid generated audio.') from cause
         finally:
             self.model.conds = copy.deepcopy(self.default_conditionals)
             self.lock.release()

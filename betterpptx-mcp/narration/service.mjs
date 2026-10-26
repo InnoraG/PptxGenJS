@@ -67,6 +67,14 @@ export async function synthesizeNarration(args = {}) {
 		noiseScale: args.noiseScale,
 		noiseWScale: args.noiseWScale,
 	}))
+	const actualProvider = result?.provider || provider.name
+	const runtimeVersion = (result?.fallbackUsed || result?.explicitLegacySelection) ? 'fallback-loudness-v1' : process.env.BETTERPPTX_TTS_RUNTIME_VERSION || null
+	if (result?.fallbackUsed || result?.explicitLegacySelection) {
+		voice = result.voice
+		license = result.license
+		voiceDecision = { ...voiceDecision, gender: voice.gender, speaker: voice.speaker }
+		warnings = [...new Set(warnings.concat(result.warnings || []))]
+	}
 	if (!result?.wav || result.wav.length <= 0) throw new Error('TTS provider returned empty audio.')
 	if (result.wav.length > MAX_AUDIO_BYTES) throw new Error(`Generated audio is too large (${result.wav.length} bytes > ${MAX_AUDIO_BYTES}).`)
 	const providerAudioQuality = analyzePcmWavQuality(result.wav)
@@ -87,9 +95,9 @@ export async function synthesizeNarration(args = {}) {
 	})
 	// Cost-learning label: per-voice chars->seconds ratios are fitted from observations
 	// so future quotes predict duration without synthesizing.
-	recordResourceLabels({ ttsVoice: voice?.id || 'unknown', ttsProvider: provider.name })
+	recordResourceLabels({ ttsVoice: voice?.id || 'unknown', ttsProvider: actualProvider })
 	logEvent('narration.tts.result', {
-		provider: provider.name,
+		provider: actualProvider,
 		voiceId: voice?.id,
 		gender: voiceDecision.gender,
 		speaker: voiceDecision.speaker,
@@ -103,11 +111,13 @@ export async function synthesizeNarration(args = {}) {
 		audioPostProcessing: repaired.evidence,
 	})
 	const settingsDigest = hashText(JSON.stringify({
-		provider: provider.name,
+		provider: actualProvider,
 		language: effectiveLanguage,
 		modelDigest: voice?.modelDigest || null,
 		referenceDigest: voice?.referenceDigest || null,
-		runtimeVersion: process.env.BETTERPPTX_TTS_RUNTIME_VERSION || null,
+		runtimeVersion,
+		fallbackUsed: result?.fallbackUsed === true,
+		requestedVoiceId: result?.requestedVoiceId || null,
 		voiceId: voice?.id || null,
 		gender: voiceDecision.gender || null,
 		speaker: voiceDecision.speaker ?? null,
@@ -120,7 +130,7 @@ export async function synthesizeNarration(args = {}) {
 		ok: true,
 		wavPath: filePath,
 		durationMs: duration.durationMs,
-		provider: provider.name,
+		provider: actualProvider,
 		voice: {
 			id: voice?.id,
 			language: voice?.language,
@@ -141,8 +151,9 @@ export async function synthesizeNarration(args = {}) {
 		ttsExecution: {
 			engine: 'internal',
 			voiceId: voice?.id || null,
+			...(result?.fallbackUsed ? { fallbackUsed: true, requestedVoiceId: result.requestedVoiceId } : {}),
 			sampleRateHz: duration.sampleRate || parsed.sampleRate || 22050,
-			runtimeVersion: process.env.BETTERPPTX_TTS_RUNTIME_VERSION || null,
+			runtimeVersion,
 			modelDigest: voice?.modelDigest || null,
 			referenceDigest: voice?.referenceDigest || null,
 			deterministicSettingsDigest: `sha256:${settingsDigest}`,

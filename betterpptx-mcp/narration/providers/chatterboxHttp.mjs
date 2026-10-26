@@ -2,6 +2,7 @@ import { recordResourceUsage } from '../../billing/resource-meter.mjs'
 import { parseWavDuration } from '../wavDuration.mjs'
 import { validateVoiceSample } from '../customVoices.mjs'
 import { createMetadataIdentityTokenSource } from '../../auth/cloud-run-id-token.mjs'
+import { resolveFallbackIdentity, resolveExplicitLegacyIdentity, approvedLegacyVoices } from './fallbackIdentity.mjs'
 
 function runtimeError(code, retryable = false) {
 	const error = new Error(code === 'NARRATION_SYNTHESIS_TEXT_LIMIT'
@@ -17,6 +18,7 @@ function runtimeError(code, retryable = false) {
 export function createChatterboxHttpProvider() {
 	const base = String(process.env.BETTERPPTX_CHATTERBOX_URL || process.env.BETTERPPTX_TTS_URL || 'http://127.0.0.1:5001').replace(/\/+$/, '')
 	const timeoutMs = Number(process.env.BETTERPPTX_TTS_TIMEOUT_MS || 300000)
+	const catalogTimeoutMs = Number(process.env.BETTERPPTX_TTS_CATALOG_TIMEOUT_MS || 300000)
 	const maxBytes = Number(process.env.BETTERPPTX_TTS_MAX_AUDIO_MB || 64) * 1048576
 	let identityToken = null
 	if (process.env.BETTERPPTX_TTS_AUTH === 'cloud-run') {
@@ -50,11 +52,13 @@ export function createChatterboxHttpProvider() {
 			} catch { return false }
 		},
 		async listVoices() {
-			return request('/voices', { headers: { Accept: 'application/json' } }, identityToken ? 60000 : 8000, response => response.json())
+			return request('/voices', { headers: { Accept: 'application/json' } }, identityToken ? catalogTimeoutMs : 8000, response => response.json())
 		},
 		async synthesize(req) {
-			if (typeof req.text !== 'string' || !req.text.trim() || req.text.length > 1000) throw runtimeError('NARRATION_SYNTHESIS_TEXT_LIMIT')
-			if ((req.lengthScale != null && req.lengthScale !== 1) || req.noiseScale != null || req.noiseWScale != null || req.speaker != null) {
+			const legacy = req.voice?.privateFallbackRoute === true
+			if (legacy && (process.env.BETTERPPTX_TTS_LEGACY_FALLBACK !== '1' || req.voice.scope === 'private' || req.voice.customReferenceBuffer || !approvedLegacyVoices().some(v => v.id === req.voice.id && v.modelDigest === req.voice.modelDigest))) throw runtimeError('NARRATION_SYNTHESIS_INVALID_VOICE')
+			if (typeof req.text !== 'string' || !req.text.trim() || req.text.length > (legacy ? 4000 : 1000)) throw runtimeError('NARRATION_SYNTHESIS_TEXT_LIMIT')
+			if (!legacy && ((req.lengthScale != null && req.lengthScale !== 1) || req.noiseScale != null || req.noiseWScale != null || req.speaker != null)) {
 				throw runtimeError('NARRATION_SYNTHESIS_UNSUPPORTED_SETTINGS')
 			}
 			const voice = req.voice?.id || req.voice || req.voiceId
@@ -67,21 +71,26 @@ export function createChatterboxHttpProvider() {
 				const registered = await request('/voices/register', {
 					method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
 					body: JSON.stringify({ voice, referenceWavBase64: sample.toString('base64'), referenceDigest: evidence.referenceDigest, languages: req.voice.languages, rightsConfirmed: true }),
-				}, identityToken ? 60000 : 15000, response => response.json())
+				}, identityToken ? catalogTimeoutMs : 15000, response => response.json())
 				if (registered?.id !== voice || registered?.referenceDigest !== evidence.referenceDigest) throw runtimeError('NARRATION_SYNTHESIS_INVALID_VOICE')
 			}
-			const body = { text: req.text, voice, ...(language ? { language } : {}) }
-			const wav = await request('/synthesize', {
+			if (legacy) {
+				for (const [key, minimum] of [['lengthScale', Number.MIN_VALUE], ['noiseScale', 0], ['noiseWScale', 0]]) if (req[key] != null && (!Number.isFinite(req[key]) || req[key] < minimum || req[key] > 10)) throw runtimeError('NARRATION_SYNTHESIS_UNSUPPORTED_SETTINGS')
+				if (req.speaker != null && (!Number.isSafeInteger(req.speaker) || req.speaker < 0 || req.speaker >= req.voice.numSpeakers)) throw runtimeError('NARRATION_SYNTHESIS_UNSUPPORTED_SETTINGS')
+			}
+			const body = legacy ? { text: req.text, voice, speaker: req.speaker, length_scale: req.lengthScale, noise_scale: req.noiseScale, noise_w_scale: req.noiseWScale } : { text: req.text, voice, ...(language ? { language } : {}) }
+			const output = await request(legacy ? '/fallback/synthesize' : '/synthesize', {
 				method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'audio/wav' }, body: JSON.stringify(body),
 			}, timeoutMs, async response => {
 				if (Number(response.headers.get('content-length')) > maxBytes) throw runtimeError('NARRATION_SYNTHESIS_AUDIO_INVALID')
 				const buffer = Buffer.from(await response.arrayBuffer())
 				if (buffer.length > maxBytes) throw runtimeError('NARRATION_SYNTHESIS_AUDIO_INVALID')
-				return buffer
+				return { wav: buffer, fallback: legacy ? resolveExplicitLegacyIdentity(response.headers, req.voice, language, req.speaker) : resolveFallbackIdentity(response.headers, req.voice, language) }
 			})
+			const { wav, fallback } = output
 			const metadata = parseWavDuration(wav)
 			if (!metadata || metadata.bitsPerSample !== 16 || metadata.durationMs <= 0 || metadata.dataBytes % (metadata.channels * 2)) throw runtimeError('NARRATION_SYNTHESIS_AUDIO_INVALID')
-			return { wav, sampleRate: metadata.sampleRate, channels: metadata.channels, bitsPerSample: metadata.bitsPerSample, voice: req.voice }
+			return { wav, sampleRate: metadata.sampleRate, channels: metadata.channels, bitsPerSample: metadata.bitsPerSample, voice: req.voice, ...(fallback || {}) }
 		},
 	}
 }

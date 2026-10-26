@@ -11,11 +11,12 @@ on:
           - NO
           - DEPLOY
       narration_provider:
-        description: Narration engine (Piper remains the default and rollback)
+        description: Narration engine (V3 on T4 is primary; Piper is fallback and rollback)
         required: true
         type: choice
-        default: piper-http
+        default: chatterbox-modal
         options:
+          - chatterbox-modal
           - piper-http
           - chatterbox-http
       speech_model_bucket:
@@ -56,6 +57,12 @@ jobs:
           npm ci
           npm ci --prefix betterpptx-mcp
 
+      - name: Install pinned speech audio test dependencies
+        run: |
+          python3 -m venv "$RUNNER_TEMP/speech-audio-tests"
+          "$RUNNER_TEMP/speech-audio-tests/bin/python" -m pip install --disable-pip-version-check numpy==1.26.4 scipy==1.13.1 pyloudnorm==0.1.1 future==1.0.0 fastapi==0.135.1 httpx==0.28.1
+          echo "$RUNNER_TEMP/speech-audio-tests/bin" >> "$GITHUB_PATH"
+
       - name: Validate the Cloudflare edge bundle without publishing
         run: |
           npm ci --prefix betterpptx-mcp/deploy/cloudflare-edge
@@ -84,6 +91,9 @@ jobs:
           node --test betterpptx-mcp/deploy/narration/chatterbox/deployment.test.mjs
           node --test betterpptx-mcp/test/custom-voices.test.mjs betterpptx-mcp/test/custom-voice-public-contract.test.mjs betterpptx-mcp/test/custom-voice-public-dispatch.test.mjs betterpptx-mcp/test/chatterbox-provider.test.mjs betterpptx-mcp/test/chatterbox-custom-reference.test.mjs betterpptx-mcp/test/chatterbox-cloud-run-auth.test.mjs betterpptx-mcp/test/chatterbox-manifest.test.mjs
           python3 -m unittest discover -s deploy/docker -p test_chatterbox_http_runtime.py
+          python3 -m unittest discover -s deploy/docker -p test_speech_loudness.py
+          python3 -m unittest discover -s betterpptx-mcp/deploy/narration/modal -p test_bridge.py
+          node --test betterpptx-mcp/test/narration-fallback-identity.test.mjs betterpptx-mcp/test/speech-worker-secret.test.mjs
           node --test betterpptx-mcp/test/production-free-publication-profile.test.mjs
           node --test betterpptx-mcp/test/production-free-publication-http.test.mjs
           node --test betterpptx-mcp/test/production-non-rendering-save.test.mjs
@@ -198,7 +208,7 @@ jobs:
         # Private, scale-to-zero narration runtime (Piper + the pinned approved voices).
         CLOUD_RUN_NARRATION: betterpptx-narration
         GCP_NARRATION_SERVICE_ACCOUNT: betterpptx-narration-runtime@betterpptx-mcp-20260926.iam.gserviceaccount.com
-        NARRATION_PROVIDER: ${{ inputs.narration_provider || 'piper-http' }}
+        NARRATION_PROVIDER: ${{ inputs.narration_provider || 'chatterbox-modal' }}
         SPEECH_MODEL_BUCKET: ${{ inputs.speech_model_bucket }}
         PRIVATE_VOICE_BUCKET: ${{ inputs.private_voice_bucket }}
         BETTERPPTX_GCS_BUCKET: betterpptx-mcp-20260926-artifacts
@@ -219,6 +229,7 @@ jobs:
         run: |
           set -euo pipefail
           case "$NARRATION_PROVIDER" in
+            chatterbox-modal) test -z "$SPEECH_MODEL_BUCKET" ;;
             piper-http) test -z "$SPEECH_MODEL_BUCKET"; test -z "$PRIVATE_VOICE_BUCKET" ;;
             chatterbox-http)
               [[ "$SPEECH_MODEL_BUCKET" =~ ^[a-z0-9][a-z0-9._-]{1,61}[a-z0-9]$ ]]
@@ -334,7 +345,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if [[ "$NARRATION_PROVIDER" == chatterbox-http ]]; then
+          if [[ "$NARRATION_PROVIDER" == chatterbox-modal ]]; then
+            bash betterpptx-mcp/deploy/narration/modal/deploy-private-runtime.sh
+          elif [[ "$NARRATION_PROVIDER" == chatterbox-http ]]; then
             bash betterpptx-mcp/deploy/narration/chatterbox/deploy-private-runtime.sh
           else
           registry="${GCP_REGION}-docker.pkg.dev"
@@ -436,7 +449,7 @@ jobs:
           # Mission Control is a separate, owner-only secret console. It does
           # not expose MCP, artifacts, identity, or payment routes, and it gets
           # no public-runtime secrets or shared-store privileges.
-          mission_control_env="BETTERPPTX_ENV=production,BETTERPPTX_DEPLOYMENT_STAGE=production,BETTERPPTX_PUBLIC_BLACK_BOX=0,BETTERPPTX_AUTH=none,BETTERPPTX_BILLING_PROVIDER=none,BETTERPPTX_BILLING_MODEL=free_publication,BETTERPPTX_BILLING_ENFORCE=1,BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW=${BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW},BETTERPPTX_FREE_PUBLICATION_WINDOW_DAYS=30,BETTERPPTX_EDIT_REQUIRES_PAYMENT=${BETTERPPTX_EDIT_REQUIRES_PAYMENT},BETTERPPTX_FREE_TALKING_HEADS_PER_WINDOW=${BETTERPPTX_FREE_TALKING_HEADS_PER_WINDOW},BETTERPPTX_FREE_CUSTOM_PERSONAS_PER_WINDOW=${BETTERPPTX_FREE_CUSTOM_PERSONAS_PER_WINDOW},BETTERPPTX_OWNER_CONFIG_STORE=firestore,BETTERPPTX_MISSION_CONTROL=1,BETTERPPTX_MISSION_CONTROL_ONLY=1,BETTERPPTX_MISSION_CONTROL_TRUST_CLOUD_RUN_IAM=1,BETTERPPTX_MISSION_CONTROL_SECRET_IDS=cloudflare_worker_deploy_token,BETTERPPTX_MC_SECRET_BACKEND=gcp-secret-manager,BETTERPPTX_GCP_PROJECT=${GCP_PROJECT_ID},BETTERPPTX_LOG_PATHS=0,BETTERPPTX_LOG_PAYLOADS=0,BETTERPPTX_LOG=off,BETTERPPTX_TRACE=0,BETTERPPTX_AVATAR_PROVIDER=disabled"
+          mission_control_env="BETTERPPTX_ENV=production,BETTERPPTX_DEPLOYMENT_STAGE=production,BETTERPPTX_PUBLIC_BLACK_BOX=0,BETTERPPTX_AUTH=none,BETTERPPTX_BILLING_PROVIDER=none,BETTERPPTX_BILLING_MODEL=free_publication,BETTERPPTX_BILLING_ENFORCE=1,BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW=${BETTERPPTX_FREE_PUBLICATIONS_PER_WINDOW},BETTERPPTX_FREE_PUBLICATION_WINDOW_DAYS=30,BETTERPPTX_EDIT_REQUIRES_PAYMENT=${BETTERPPTX_EDIT_REQUIRES_PAYMENT},BETTERPPTX_FREE_TALKING_HEADS_PER_WINDOW=${BETTERPPTX_FREE_TALKING_HEADS_PER_WINDOW},BETTERPPTX_FREE_CUSTOM_PERSONAS_PER_WINDOW=${BETTERPPTX_FREE_CUSTOM_PERSONAS_PER_WINDOW},BETTERPPTX_OWNER_CONFIG_STORE=firestore,BETTERPPTX_MISSION_CONTROL=1,BETTERPPTX_MISSION_CONTROL_ONLY=1,BETTERPPTX_MISSION_CONTROL_TRUST_CLOUD_RUN_IAM=1,BETTERPPTX_MISSION_CONTROL_SECRET_IDS=cloudflare_worker_deploy_token speech_worker_credentials,BETTERPPTX_MC_SECRET_BACKEND=gcp-secret-manager,BETTERPPTX_GCP_PROJECT=${GCP_PROJECT_ID},BETTERPPTX_LOG_PATHS=0,BETTERPPTX_LOG_PAYLOADS=0,BETTERPPTX_LOG=off,BETTERPPTX_TRACE=0,BETTERPPTX_AVATAR_PROVIDER=disabled"
           gcloud run deploy "$CLOUD_RUN_MISSION_CONTROL" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --image="$IMAGE_REF" --service-account="$GCP_MISSION_CONTROL_SERVICE_ACCOUNT" --execution-environment=gen2 --port=8080 --cpu=1 --memory=512Mi --concurrency=1 --min=0 --max=1 --timeout=300s --no-allow-unauthenticated --set-env-vars="$mission_control_env" --quiet
           for member in allUsers allAuthenticatedUsers; do
             if gcloud run services get-iam-policy "$CLOUD_RUN_MISSION_CONTROL" --project="$GCP_PROJECT_ID" --region="$GCP_REGION" --format=json | jq -e --arg member "$member" '[.bindings[]? | select(.role == "roles/run.invoker") | .members[]? | select(. == $member)] | length > 0' >/dev/null; then

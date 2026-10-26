@@ -1,0 +1,7 @@
+steps:
+  - name: gcr.io/cloud-builders/docker
+    args: ['build', '-f', 'betterpptx-mcp/deploy/narration/modal/Dockerfile.bridge', '-t', '${_IMAGE}', '.']
+images: ['${_IMAGE}']
+timeout: 900s
+options:
+  logging: CLOUD_LOGGING_ONLY

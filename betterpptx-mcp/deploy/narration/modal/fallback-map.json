@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "mappings": {
+    "narrator-en-female": { "voice": "en_US-ljspeech-high" },
+    "narrator-en-male": { "voice": "en_US-norman-medium" },
+    "narrator-fr-female": { "voice": "fr_FR-mls-medium", "speaker": 88 },
+    "narrator-fr-male": { "voice": "fr_FR-mls-medium", "speaker": 8 }
+  }
+}

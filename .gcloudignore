@@ -5,6 +5,7 @@
 !rollup.config.mjs
 !tsconfig.json
 !gulpfile.js
+!.dockerignore
 !PPTX_ULTIMATE_DECYPHER_TOOL.mjs
 !ULTIMATE_PPTX_XPATH_COMPARATOR_v2h_DECYPHER.ps1
 
@@ -73,6 +74,7 @@ deploy/*
 !deploy/docker/
 deploy/docker/*
 !deploy/docker/Dockerfile.mcp
+!deploy/docker/Dockerfile.mcp.dockerignore
 !deploy/docker/Dockerfile.dodo-webhook
 
 # The generic deploy/* rule above also matches nested betterpptx-mcp/deploy

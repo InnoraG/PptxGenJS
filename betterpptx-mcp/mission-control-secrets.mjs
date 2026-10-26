@@ -18,6 +18,17 @@ let metadataToken = { accessToken: '', expiresAtMs: 0 }
 
 export const MISSION_CONTROL_SECRET_DEFINITIONS = Object.freeze([
 	Object.freeze({
+		id: 'speech_worker_credentials',
+		displayName: 'Speech GPU Account Credentials',
+		kind: 'modal-credentials',
+		description: 'Dedicated speech account credential pair. Rotate the pair at Modal, update it here, then redeploy the private speech bridge to activate the new Secret Manager version. This account is separate from avatar worker rotation.',
+		secretName: 'betterpptx-speech-worker-credentials',
+		envName: 'BETTERPPTX_SPEECH_WORKER_CREDENTIALS',
+		alternateEnvNames: [],
+		dependentServices: ['betterpptx-narration-modal'],
+		actions: { reveal: true, update: true, rotate: false, test: true },
+	}),
+	Object.freeze({
 		id: 'mission_control_access_token',
 		displayName: 'Mission Control Access Token',
 		kind: 'random-token',
@@ -383,7 +394,7 @@ function definitionFor(id) {
 function selectedSecretDefinitions() {
 	const raw = String(process.env.BETTERPPTX_MISSION_CONTROL_SECRET_IDS || '').trim()
 	if (!raw) return MISSION_CONTROL_SECRET_DEFINITIONS
-	const ids = [...new Set(raw.split(',').map(id => id.trim()).filter(Boolean))]
+	const ids = [...new Set(raw.split(/[,\s]+/).filter(Boolean))]
 	const unknown = ids.filter(id => !MISSION_CONTROL_SECRET_DEFINITIONS.some(def => def.id === id))
 	if (unknown.length) {
 		throw new MissionControlSecretError('MC_SECRET_SELECTION_INVALID', 'Mission Control secret selection contains an unsupported secret identifier.', 500)
@@ -493,6 +504,9 @@ function ensureSecretValue(value) {
 }
 
 function validateSecretValueForDefinition(def, value) {
+	if (def.kind === 'modal-credentials' && !testModalCredentials(value).ok) {
+		throw new MissionControlSecretError('MC_SECRET_VALUE_INVALID', 'Speech credentials require a JSON object containing token_id and token_secret.', 400)
+	}
 	if (def.kind === 'cloudflare-api-token') {
 		const text = String(value || '')
 		if (Buffer.byteLength(text.trim(), 'utf8') < 20 || text !== text.trim() || /[\s\u0000]/.test(text)) {
@@ -500,6 +514,16 @@ function validateSecretValueForDefinition(def, value) {
 		}
 	}
 	return value
+}
+
+function testModalCredentials(value) {
+	let pair
+	try { pair = JSON.parse(value) } catch { return { ok: false, check: 'credential-pair-format', runtimeVerified: false } }
+	const valid = pair && typeof pair === 'object' && !Array.isArray(pair)
+		&& typeof pair.token_id === 'string' && /^ak-[A-Za-z0-9_-]{8,}$/.test(pair.token_id)
+		&& typeof pair.token_secret === 'string' && /^as-[A-Za-z0-9_-]{8,}$/.test(pair.token_secret)
+		&& Object.keys(pair).every(key => ['token_id', 'token_secret'].includes(key))
+	return { ok: Boolean(valid), check: 'credential-pair-format', runtimeVerified: false, configurationOnly: true }
 }
 
 async function fetchWithTimeout(url, options = {}, timeoutMs = 8000) {
@@ -1167,6 +1191,7 @@ export async function testMissionControlSecret(id, options = {}) {
 	if (!record.value) throw new MissionControlSecretError('MC_SECRET_MISSING', 'Secret value is missing.', 404)
 	let result
 	if (def.kind === 'payram-api-key') result = await testPayRamApiKey(record.value, options)
+	else if (def.kind === 'modal-credentials') result = testModalCredentials(record.value)
 	else if (def.kind === 'cloudflare-api-token') result = await testCloudflareApiToken(record.value, options)
 	else if (def.kind === 'meshy-api-key') result = testMeshyApiKey(record.value)
 	else if (def.kind === 'random-token') result = testRandomToken(record.value)

@@ -27,10 +27,11 @@ export async function prepareBuildContext(output, { modelCache } = {}) {
   const files = ['Dockerfile', 'verify-bundle.py', 'model-source.json', 'runtime-manifest.json', 'source-identity.json', 'install-source.py', 'provision-tokenizers.py']
   for (const name of files) await fs.copyFile(path.join(here, name), path.join(root, name))
   await fs.copyFile(path.join(repository, 'deploy/docker/chatterbox_http_runtime.py'), path.join(root, 'runtime.py'))
+  await fs.copyFile(path.join(repository, 'deploy/docker/speech_loudness.py'), path.join(root, 'speech_loudness.py'))
   let bytes = 0
   for (const name of await fs.readdir(root)) bytes += (await fs.stat(path.join(root, name))).size
   if (bytes > 256 * 1024) throw new Error('Unexpected speech build context growth')
-  return { files: files.length + 1, bytes, weightsCopied: false, referencesCopied: false, modelRevision: identity.revision }
+  return { files: files.length + 2, bytes, weightsCopied: false, referencesCopied: false, modelRevision: identity.revision }
 }
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   if (!process.argv[2]) throw new Error('Pass a new task-owned build-context directory')

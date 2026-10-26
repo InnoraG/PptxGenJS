@@ -15,12 +15,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends libsndfile1 \
     && python -m pip install --no-cache-dir torch==2.6.0 torchaudio==2.6.0 --index-url https://download.pytorch.org/whl/cpu \
     && python -m pip install --no-cache-dir chatterbox-tts==0.1.7 resemble-perth==1.0.1 \
     && python -m pip install --no-cache-dir transformers==5.2.0 gradio==6.8.0 \
+    && python -m pip install --no-cache-dir numpy==1.26.4 scipy==1.13.1 pyloudnorm==0.1.1 future==1.0.0 \
     && python /tmp/pinned-speech-source/install-source.py --identity /tmp/pinned-speech-source/source-identity.json \
     && python -m pip check \
     && useradd --uid 10001 --create-home speech
 WORKDIR /app
 ENV CHATTERBOX_MODEL_DIR=/app/model-links PKUSEG_HOME=/opt/tokenizer-assets/pkuseg
-COPY --chown=speech runtime.py verify-bundle.py model-source.json runtime-manifest.json source-identity.json provision-tokenizers.py /app/
+COPY --chown=speech runtime.py speech_loudness.py verify-bundle.py model-source.json runtime-manifest.json source-identity.json provision-tokenizers.py /app/
 RUN python /app/provision-tokenizers.py
 RUN --network=none python -c "from chatterbox.models.tokenizers.tokenizer import ChineseCangjieConverter; c=ChineseCangjieConverter('/app/model-links'); assert c.word2cj and c.segmenter is not None"
 USER speech

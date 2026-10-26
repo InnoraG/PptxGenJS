@@ -21,9 +21,9 @@ test('pinned file checks reject altered bytes and traversal without copying weig
     await assert.rejects(prepareBuildContext(root), /already exists/)
   } finally { await fs.rm(root, { recursive: true, force: true }) }
 })
-test('release defaults preserve Piper and both application roles mount optional private storage', async () => {
+test('release defaults select the T4 bridge, retain Piper rollback, and mount optional private storage', async () => {
   const workflow = await fs.readFile(path.resolve(here, '../../../../.github/workflows/betterpptx-mcp-cloudrun-free-beta.yml'), 'utf8')
-  assert.match(workflow, /narration_provider:[\s\S]*default: piper-http/)
+  assert.match(workflow, /narration_provider:[\s\S]*default: chatterbox-modal/)
   assert.equal(workflow.split('source betterpptx-mcp/deploy/narration/chatterbox/private-voice-volume.sh').length - 1, 2)
   const script = await fs.readFile(path.join(here, 'deploy-private-runtime.sh'), 'utf8')
   assert.match(script, /--memory=8Gi --concurrency=1/)
@@ -74,6 +74,7 @@ test('bounded context includes the pinned source installer without copying the a
     assert.ok(result.bytes < 256 * 1024)
     assert.ok((await fs.readdir(context)).includes('install-source.py'))
     assert.ok((await fs.readdir(context)).includes('source-identity.json'))
+    assert.ok((await fs.readdir(context)).includes('speech_loudness.py'))
     assert.ok(!(await fs.readdir(context)).some(name => /\.zip$|\.wav$|\.safetensors$/.test(name)))
   } finally { await fs.rm(parent, { recursive: true, force: true }) }
 })

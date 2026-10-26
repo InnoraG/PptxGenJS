@@ -11,7 +11,9 @@ import { parseWavDuration } from './narration/wavDuration.mjs'
 import { inspectNativeCaptionTracks } from './narration/native-caption-package-evidence.mjs'
 
 const arg = (key, fallback) => process.argv.includes(key) ? process.argv[process.argv.indexOf(key) + 1] : fallback
-const root = path.resolve('outputs/chatterbox-v3-current/pptx')
+const root = path.resolve(arg('--output-dir', 'outputs/chatterbox-v3-current/pptx'))
+const outputName = arg('--file-name', 'a-world-of-voices-v3.pptx')
+assert.ok(outputName === path.basename(outputName) && outputName.endsWith('.pptx'), 'Output name must be a PPTX basename.')
 const sourcePath = path.resolve(arg('--manifest', 'outputs/chatterbox-v3-current/modal/l4/smoke-manifest.json'))
 const sha = bytes => crypto.createHash('sha256').update(bytes).digest('hex')
 const stamp = milliseconds => {
@@ -171,9 +173,9 @@ try {
     if (validator === 'validate_narration') report.timeline = result.perSlide.map(slide => ({ slideIndex: slide.slideIndex, audioEndMs: slide.audioEndMs, captionTimelineEndMs: slide.captionTimelineEndMs, requiredAdvanceMs: slide.requiredAdvanceMs, clips: (slide.captionTracks || []).map(track => ({ clipStartMs: track.clipStartMs, clipLocalCueEndMs: track.clipLocalCueEndMs })) }))
   }
   assert.equal(report.validation.validate_quality.ok, true, JSON.stringify(report.validation.validate_quality))
-  const saved = await call('betterpptx.deck.save', { deckId, outputDir: root, fileName: 'a-world-of-voices-v3.pptx', idempotencyKey: `v3-delivery-save-${run}` })
-  const bytes = await fs.readFile(saved.filePath || path.join(root, 'a-world-of-voices-v3.pptx'))
-  report.output = { file: 'a-world-of-voices-v3.pptx', bytes: bytes.length, sha256: sha(bytes) }
+  const saved = await call('betterpptx.deck.save', { deckId, outputDir: root, fileName: outputName, idempotencyKey: `v3-delivery-save-${run}` })
+  const bytes = await fs.readFile(saved.filePath || path.join(root, outputName))
+  report.output = { file: outputName, bytes: bytes.length, sha256: sha(bytes) }
   const zip = await JSZip.loadAsync(bytes)
   for (const part of Object.values(zip.files).filter(part => !part.dir && /\.(xml|rels)$/.test(part.name))) xml(await part.async('string'))
   for (const part of Object.values(zip.files).filter(part => !part.dir && part.name.endsWith('.rels'))) {

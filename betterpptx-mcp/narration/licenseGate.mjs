@@ -2,6 +2,7 @@ import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createHash } from 'node:crypto'
+import { approvedLegacyVoices } from './providers/fallbackIdentity.mjs'
 import { isCustomVoiceId, resolveCustomVoice, listCustomVoices } from './customVoices.mjs'
 import {
 	enrichVoiceWithProfile,
@@ -56,7 +57,12 @@ export function loadVoiceManifest({ provider: requestedProvider } = {}) {
 		const source = dedicatedPath || runtimePath
 		const data = readJsonIfExists(source)
 		if (!data) throw new Error('The selected narration runtime requires its own configured voice catalog.')
-		return manifestForProvider(data, source, true, provider)
+		const primary = manifestForProvider(data, source, true, provider)
+		if (process.env.BETTERPPTX_TTS_LEGACY_FALLBACK !== '1') return primary
+		const languages = new Set(primary.voices.map(v => normalizeLanguage(v.language).split('_')[0]))
+		const ids = new Set(primary.voices.map(v => v.id))
+		const legacy = approvedLegacyVoices().filter(v => !ids.has(v.id)).map(v => languages.has(normalizeLanguage(v.language).split('_')[0]) ? { ...v, isDefaultForLocale: false, isDefaultForLanguage: false } : v)
+		return { ...primary, identity: `sha256:${createHash('sha256').update(JSON.stringify([primary.identity, legacy])).digest('hex')}`, voices: [...primary.voices, ...legacy] }
 	}
 	const runtime = readJsonIfExists(runtimePath)
 	if (runtime) return manifestForProvider(runtime, runtimePath, true, provider)
@@ -163,7 +169,8 @@ export function resolveVoice({ voice, lang, gender, speaker, allowUnreviewedVoic
 	if (voice) {
 		found = manifest.voices.find(v => v.id === voice)
 	} else if (lang) {
-		found = genderVoices.find(v => v.isDefaultForLocale && normalizeLanguage(v.locale) === requested)
+		found = (manifest.provider === 'chatterbox-http' && process.env.BETTERPPTX_TTS_LEGACY_FALLBACK === '1' ? (genderVoices.find(v => !v.privateFallbackRoute && (v.isDefaultForLocale || v.isDefaultForLanguage) && voiceMatchesLanguage(v, requested)) || genderVoices.find(v => !v.privateFallbackRoute && voiceMatchesLanguage(v, requested))) : null)
+			|| genderVoices.find(v => v.isDefaultForLocale && normalizeLanguage(v.locale) === requested)
 			|| genderVoices.find(v => v.isDefaultForLanguage && normalizeLanguage(v.language) === requested)
 			|| genderVoices.find(v => v.isDefaultForLocale && normalizeLanguage(v.language) === requested)
 			|| genderVoices.find(v => normalizeLanguage(v.locale) === requested)
