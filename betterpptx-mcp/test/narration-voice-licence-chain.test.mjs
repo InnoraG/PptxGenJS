@@ -135,7 +135,7 @@ test('a CC-BY narration voice is credited in the saved deck licence manifest, no
 		assert.equal(preparedResult.ok, true, JSON.stringify(preparedResult))
 		assert.equal(requests.length, 1)
 		assert.equal(requests[0].voice, 'fr_FR-mls-medium')
-		assert.equal(requests[0].speaker, 1, 'gender:female selects the dataset-verified female MLS speaker')
+		assert.equal(requests[0].speaker, 88, 'gender:female selects the dataset-verified female MLS speaker')
 		const prepared = preparedResult.data
 		const spec = {
 			schemaVersion: 'betterpptx.deck-spec.v1',

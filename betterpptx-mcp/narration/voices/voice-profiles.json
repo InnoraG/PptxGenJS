@@ -99,8 +99,8 @@
       "genderSource": "dataset-speaker-metadata",
       "genderConfidence": "verified",
       "speakerProfiles": {
-        "0": { "name": "mls-2422", "gender": "male", "genderSource": "dataset-speaker-metadata", "genderConfidence": "verified" },
-        "2": { "name": "mls-2037", "gender": "female", "genderSource": "dataset-speaker-metadata", "genderConfidence": "verified" }
+        "6": { "name": "mls-5055", "gender": "male", "genderSource": "dataset-speaker-metadata", "genderConfidence": "verified" },
+        "5": { "name": "mls-6507", "gender": "female", "genderSource": "dataset-speaker-metadata", "genderConfidence": "verified" }
       }
     },
     "es_ES-sharvard-medium": {
@@ -117,8 +117,8 @@
       "genderSource": "dataset-speaker-metadata",
       "genderConfidence": "verified",
       "speakerProfiles": {
-        "0": { "name": "mls-1840", "gender": "male", "genderSource": "dataset-speaker-metadata", "genderConfidence": "verified" },
-        "1": { "name": "mls-3698", "gender": "female", "genderSource": "dataset-speaker-metadata", "genderConfidence": "verified" }
+        "8": { "name": "mls-3060", "gender": "male", "genderSource": "dataset-speaker-metadata", "genderConfidence": "verified" },
+        "88": { "name": "mls-12899", "gender": "female", "genderSource": "dataset-speaker-metadata", "genderConfidence": "verified" }
       }
     },
     "fr_FR-upmc-medium": {

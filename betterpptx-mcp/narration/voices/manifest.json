@@ -920,7 +920,8 @@
           "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
         },
         "verdict": "resale-safe-with-manifest-attribution",
-        "verifiedAt": "2026-10-25"
+        "verifiedAt": "2026-10-25",
+        "speakerSelection": "Speakers selected 2026-10-26 by measured intelligibility (faster-whisper WER over 4 clips) and natural pace among dataset-gender-verified MLS speakers with >=600 training minutes; the most-trained speakers were slower and less intelligible."
       },
       "reviewedAt": "2026-10-25"
     },
@@ -3039,7 +3040,8 @@
           "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
         },
         "verdict": "resale-safe-with-manifest-attribution",
-        "verifiedAt": "2026-10-25"
+        "verifiedAt": "2026-10-25",
+        "speakerSelection": "Speakers selected 2026-10-26 by measured intelligibility (faster-whisper WER over 4 clips) and natural pace among dataset-gender-verified MLS speakers with >=600 training minutes; the most-trained speakers were slower and less intelligible."
       },
       "reviewedAt": "2026-10-25"
     },
