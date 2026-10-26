@@ -306,11 +306,18 @@ jobs:
           inputs_digest="$(cat betterpptx-mcp/narration/voices/runtime-manifest.production.json betterpptx-mcp/narration/piper-http-runtime.py betterpptx-mcp/deploy/narration/Dockerfile betterpptx-mcp/deploy/narration/prepare-build-context.mjs | sha256sum | cut -c1-20)"
           image="${registry}/${GCP_PROJECT_ID}/${GCP_ARTIFACT_REPOSITORY}/betterpptx-narration:voices-${inputs_digest}"
           if ! gcloud artifacts docker images describe "$image" --format='value(image_summary.digest)' >/dev/null 2>&1; then
+            # The voice bundle is several GB (context + build copy + image layers); reclaim
+            # runner disk first. The MCP image is already pushed, and later steps use its digest.
+            docker image rm "$TAGGED_IMAGE" >/dev/null 2>&1 || true
+            docker builder prune -af >/dev/null
+            sudo rm -rf /usr/share/dotnet /usr/local/lib/android /opt/ghc /opt/hostedtoolcache/CodeQL
+            df -h / "$RUNNER_TEMP" | tail -n +2
             context="$RUNNER_TEMP/narration-context"
             node betterpptx-mcp/deploy/narration/prepare-build-context.mjs "$context"
             docker build --label "org.opencontainers.image.revision=$GITHUB_SHA" --tag "$image" "$context"
-            docker push "$image"
             rm -rf "$context"
+            docker push "$image"
+            docker image rm "$image" >/dev/null 2>&1 || true
           fi
           image_ref="$(gcloud artifacts docker images describe "$image" --format='value(image_summary.fully_qualified_digest)')"
           [[ "$image_ref" == *@sha256:* ]]
