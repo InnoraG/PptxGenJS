@@ -47,6 +47,7 @@ test('official speech bundle selects V3 and pins both weights and selector-capab
   assert.match(docker, /CHATTERBOX_MULTILINGUAL_VERSION=v3/)
   assert.match(docker, /torch==2\.6\.0 torchaudio==2\.6\.0/)
   assert.match(docker, /chatterbox-tts==0\.1\.7 resemble-perth==1\.0\.1/)
+  assert.match(docker, /transformers==5\.2\.0 gradio==6\.8\.0/)
   assert.match(docker, /install-source\.py --identity/)
   assert.match(installer, /'--no-deps', '--force-reinstall'/)
   assert.doesNotMatch(docker, /git\+|@master|git clone/)

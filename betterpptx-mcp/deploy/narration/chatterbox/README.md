@@ -63,8 +63,9 @@ The official image selects Python 3.11.14, CPU Torch/Torchaudio 2.6.0,
 record V3. `verify-bundle.py` rejects a V2 catalog, a mismatched selected T3
 filename, or disagreement about the runtime source commit.
 
-PyPI `chatterbox-tts==0.1.7` bootstraps the existing compatible dependency set;
-it is not the final inference source. `source-identity.json` pins upstream commit
+PyPI `chatterbox-tts==0.1.7` bootstraps the dependency set; Transformers 5.2.0
+and Gradio 6.8.0 are then pinned to match the selected source metadata.
+The PyPI package is not the final inference source. `source-identity.json` pins upstream commit
 `5de7a54aa4e5e2baadb0182dde554908b48b85c2` and archive SHA256
 `bb7363a76c0c0432a0305681fe2e533bbfb0f10fcf7b98d75a439d9a909f1576`.
 `install-source.py` streams that approximately 1.48 MB source ZIP into one bounded
