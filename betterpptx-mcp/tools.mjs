@@ -1535,6 +1535,18 @@ export const TOOLS = [
 		inputSchema: JSON.parse(JSON.stringify(MEDIA_AVATAR_PUBLIC_OPERATION_SCHEMAS['betterpptx.narration.voices'])),
 	},
 	{
+		name: 'betterpptx.narration.create_voice',
+		title: 'Create a private voice from your recording',
+		description: 'Create a private narration voice using your uploaded speech sample and explicit speaker permission and usage rights. Voice creation must be supported by the configured speech service. Returns a voiceId for narration and your private voice catalog.',
+		inputSchema: JSON.parse(JSON.stringify(MEDIA_AVATAR_PUBLIC_OPERATION_SCHEMAS['betterpptx.narration.create_voice'])),
+	},
+	{
+		name: 'betterpptx.narration.remove_voice',
+		title: 'Remove your private voice',
+		description: 'Remove a private voice you own from future narration selection. Other users cannot inspect or remove it.',
+		inputSchema: JSON.parse(JSON.stringify(MEDIA_AVATAR_PUBLIC_OPERATION_SCHEMAS['betterpptx.narration.remove_voice'])),
+	},
+	{
 		name: 'betterpptx.narration.get_voice_timing',
 		title: 'Get narration voice timing',
 		description: 'Synthesize the narration speech for a deck and return its measured timing, before quotation or final deck generation. Provide text or ordered segments; the service synthesizes each clip with an approved text-to-speech voice, measures it, records exact segment timing and authored gaps, and returns the timing plus opaque audio and preparation-manifest handles. The audio is embedded in the deck as native narration. Reuse the returned manifest in the deck spec so final generation never synthesizes a different clip after the quote. This is a mutating, potentially metered operation; supply a stable idempotencyKey. For long multi-clip preparations, a response deadline may return TOOL_TIMEOUT while synthesis continues: poll the returned operationId with betterpptx.operation.status or replay the identical request/key; never start a changed retry to recover the same preparation. Discovery never starts synthesis.',
@@ -4795,6 +4807,10 @@ const SPECIFIC_DATA = {
 		expectedReadback: { type: 'array', items: { type: 'string' } },
 		degradations: { type: 'array', items: { type: 'object', additionalProperties: true } },
 	},
+	'betterpptx.narration.create_voice': {
+		voiceId: { type: 'string' }, id: { type: 'string' }, name: { type: 'string' }, language: { type: 'string' }, locale: { type: 'string' }, languages: { type: 'array', items: { type: 'string' } }, gender: { type: 'string', enum: ['male', 'female'] }, genderSource: { const: 'user-declared' }, durationMs: { type: 'number', minimum: 3000, maximum: 30000 }, scope: { const: 'private' }, consentBasis: { const: 'user-attested' },
+	},
+	'betterpptx.narration.remove_voice': { removed: { type: 'boolean' }, voiceId: { type: 'string' } },
 	'betterpptx.narration.voices': {
 		catalogAvailable: { type: 'boolean' },
 		synthesisRuntimeAvailable: { type: 'boolean' },
@@ -5169,6 +5185,8 @@ const IDEMPOTENT_DECK_MUTATION_TOOLS = new Set([
 	'betterpptx.library.import_xml_group',
 ])
 const IDEMPOTENT_SESSION_MUTATION_TOOLS = new Set([
+	'betterpptx.narration.create_voice',
+	'betterpptx.narration.remove_voice',
 	'betterpptx.auth.activate_key',
 	'betterpptx.billing.redeem_promo',
 	'betterpptx.deck.new',

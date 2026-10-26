@@ -21,8 +21,8 @@ const rows = Object.entries(MEDIA_AVATAR_PUBLIC_OPERATION_ROW_IDS)
 const rowIds = new Set(rows.map(([, id]) => id))
 
 test('the active media/avatar rows close as exact public host commands while retired image generation stays unadvertised', () => {
-	assert.equal(MEDIA_AVATAR_PUBLIC_OPERATION_NAMES.length, 4)
-	assert.equal(rowIds.size, 5)
+	assert.equal(MEDIA_AVATAR_PUBLIC_OPERATION_NAMES.length, 6)
+	assert.equal(rowIds.size, 7)
 	assert.equal(MEDIA_AVATAR_PUBLIC_OPERATION_NAMES.includes('betterpptx.assets.generate_image'), false)
 	for (const name of MEDIA_AVATAR_PUBLIC_OPERATION_NAMES) {
 		const contract = MEDIA_AVATAR_PUBLIC_OPERATION_CONTRACTS[name]

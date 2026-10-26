@@ -77,6 +77,9 @@ jobs:
           npm run test:authoring-augmentation --prefix betterpptx-mcp
           node --test betterpptx-mcp/test/durable-operation-phase-idempotency.test.mjs
           node --test betterpptx-mcp/test/avatar-worker-budget.test.mjs betterpptx-mcp/test/avatar-worker-rotation.test.mjs betterpptx-mcp/test/identity-media-deployment-contract.test.mjs
+          node --test betterpptx-mcp/deploy/narration/chatterbox/deployment.test.mjs
+          node --test betterpptx-mcp/test/custom-voices.test.mjs betterpptx-mcp/test/custom-voice-public-contract.test.mjs betterpptx-mcp/test/custom-voice-public-dispatch.test.mjs betterpptx-mcp/test/chatterbox-provider.test.mjs betterpptx-mcp/test/chatterbox-custom-reference.test.mjs betterpptx-mcp/test/chatterbox-cloud-run-auth.test.mjs betterpptx-mcp/test/chatterbox-manifest.test.mjs
+          python3 -m unittest discover -s deploy/docker -p test_chatterbox_http_runtime.py
           node --test betterpptx-mcp/test/oauth-server.test.mjs betterpptx-mcp/test/gcs-browser-download-route.test.mjs
           node --test betterpptx-mcp/test/durable-mcp-authoring-worker.test.mjs
           node --test betterpptx-mcp/test/free-publication-existing-model-billing.test.mjs

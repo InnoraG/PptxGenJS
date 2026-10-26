@@ -38,6 +38,8 @@ export function isPublicBlackBoxMode() {
 }
 
 export const PUBLIC_PRODUCT_TOOLS = new Set([
+	'betterpptx.narration.create_voice',
+	'betterpptx.narration.remove_voice',
 	'price-listing',
 	'pricing-listing',
 	'payment-methods',
@@ -183,6 +185,8 @@ export const PUBLIC_BLACK_BOX_BLOCKED_TOOLS = new Set([
 ])
 
 export const PUBLIC_SPEC_FIRST_TOOLS = new Set([
+	'betterpptx.narration.create_voice',
+	'betterpptx.narration.remove_voice',
 	'price-listing',
 	'pricing-listing',
 	'payment-methods',
@@ -374,6 +378,7 @@ function sanitizeStringForPublic(value) {
 		.replace(/\bSketchfab\b/gi, 'public 3D catalog')
 		.replace(/\b(?:Openverse|Pexels|Pixabay)\b/gi, 'licensed visual catalog')
 		.replace(/\bFreesound\b/gi, 'licensed audio catalog')
+		.replace(/\bChatterbox(?:[- ](?:tts|http))?\b/gi, 'narration service')
 		.replace(/\b(?:ElevenLabs|Polly)\b/gi, 'managed narration service')
 		.replace(/\bBaker\b/g, 'the managed motion service')
 		.replace(/\bself-hosted\s+(?:single-image\s+)?PoC(?:\/flow-test)?\b/gi, 'non-production route')

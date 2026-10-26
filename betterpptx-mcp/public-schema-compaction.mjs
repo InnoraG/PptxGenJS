@@ -31,6 +31,7 @@ const TOOL_INPUT_DEPTH = Object.freeze({
 // transparent) is expanded N levels further with real descriptions, and its
 // ancestors stay visible. Everything else is fetched with schemaFor/schemaPath.
 const TOOL_EXPANDED_INPUT_PATHS = Object.freeze({
+	'betterpptx.narration.create_voice': Object.freeze({ consent: 1 }),
 	'betterpptx.deck.generate_from_spec': Object.freeze({
 		// Every native object kind (animated-table, media, model3d, ink, laser, ...).
 		'spec.slides.content.kind': 0,

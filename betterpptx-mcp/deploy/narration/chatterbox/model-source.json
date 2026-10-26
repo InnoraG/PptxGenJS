@@ -1,0 +1,28 @@
+{
+  "repository": "ResembleAI/chatterbox",
+  "revision": "5bb1f6ee58e50c3b8d408bc82a6d3740c2db6e18",
+  "variant": "multilingual",
+  "files": {
+    "ve.pt": {
+      "bytes": 5698626,
+      "sha256": "4b16d836bc598509860f6fa068165a8bb5e9ac84f05582dfcf278a5a372879f1"
+    },
+    "t3_mtl23ls_v2.safetensors": {
+      "bytes": 2143989752,
+      "sha256": "b1237586127ce98e7800a68e49938eb5092846862aabcb6e17b2fda7889a6c75"
+    },
+    "s3gen.pt": {
+      "bytes": 1057165844,
+      "sha256": "9b9ff07e60b20c136e2b1b3d7563a24604e8d2c4c267888d1ee929dd0151d2a3"
+    },
+    "grapheme_mtl_merged_expanded_v1.json": {
+      "bytes": 69989,
+      "sha256": "69632f47220a788a52ce2661d096453c5655e9bf25289d89a8d832c46ee07dbf"
+    },
+    "conds.pt": {
+      "bytes": 107374,
+      "sha256": "6552d70568833628ba019c6b03459e77fe71ca197d5c560cef9411bee9d87f4e"
+    }
+  },
+  "license": "MIT"
+}

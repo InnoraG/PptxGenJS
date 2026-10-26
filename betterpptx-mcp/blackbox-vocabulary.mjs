@@ -283,7 +283,7 @@ export async function validatePublicAvatarDiagnosticsFromZip(zip) {
 const TECH_STACK_PATTERNS = [
 	{ code: 'TTS_VOICE_MODEL', label: 'TTS voice model name', re: /\b(?:ljspeech|thorsten)\b/i },
 	{ code: 'TTS_VOICE_ID', label: 'TTS voice identifier', re: /\b[a-z]{2}_[A-Z]{2}-[a-z0-9]+-(?:x_low|low|medium|high)\b/ },
-	{ code: 'TTS_ENGINE_NAME', label: 'TTS engine name', re: /\bpiper[-\s]?tts\b/i },
+	{ code: 'TTS_ENGINE_NAME', label: 'TTS engine name', re: /\b(?:piper[-\s]?tts|chatterbox(?:[-\s](?:tts|http))?)\b/i },
 	{ code: 'AVATAR_MODEL_NAME', label: 'avatar model name', re: /\b(?:liveportrait|musetalk)\b/i },
 	{ code: 'IMAGING_ENGINE_NAME', label: 'imaging engine name', re: /\blibvips\b/i },
 	{ code: 'GPU_CLASS_NAME', label: 'GPU class name', re: /\b(?:a10g|l40s)\b/i },

@@ -38,6 +38,9 @@ import { createAssetGrantManager, AssetGrantError, requiresAssetGrant, assetGran
 import { loadGeneratedAsset } from './storage/gen-asset-store.mjs'
 import { createAssetFs } from './assets/asset-inventory.mjs'
 import { publicVoiceCatalog, probeSynthesisRuntime } from './narration/runtime-status.mjs'
+import { createCustomVoice, removeCustomVoice } from './narration/customVoices.mjs'
+import { effectiveVoiceProvider } from './narration/licenseGate.mjs'
+import { validateMediaAvatarPublicOperationArgs } from './media-avatar-public-operation-contract.mjs'
 import { narratedProfileRequested } from './narration/tts-text.mjs'
 import { findNonNativeCaptionOverlayField, materializeClosedCaptionTracks, nonNativeCaptionOverlayIssue, normalizeAuthoredCue } from './ir/narration-contract.mjs'
 import { hashText, parseDataUri } from './narration/audio.mjs'
@@ -35947,6 +35950,45 @@ async function handleNarrationVoices(args) {
 		})
 }
 
+function customVoiceFailure(code, message) {
+	const error = new Error(message)
+	error.code = code
+	return error
+}
+
+function assertCustomVoiceService() {
+	if (effectiveVoiceProvider() !== 'chatterbox-http') throw customVoiceFailure('NARRATION_CUSTOM_VOICE_UNSUPPORTED', 'Private voice creation is not supported by the configured speech service.')
+}
+
+async function handleNarrationCreateVoice(args = {}) {
+	const request = validateMediaAvatarPublicOperationArgs('betterpptx.narration.create_voice', args)
+	assertCustomVoiceService()
+	const sample = request.sample
+	const match = /^asset:\/\/locked\/(uploaded-(?:audio|media))\/([a-f0-9]{64})\.wav$/.exec(sample)
+	if (!match) throw customVoiceFailure('NARRATION_VOICE_SAMPLE_INVALID', 'Provide an owned uploaded WAV sample handle.')
+	// Authorize before looking up or reading any private sample bytes. Check the
+	// immutable upload's size before the existing resolver verifies its digest.
+	await authorizeAssetReferences(sample)
+	const target = lockedAssetTargetPath(match[1], match[2], 'wav')
+	let sampleBuffer
+	try {
+		const stat = await fs.stat(target)
+		if (!stat.isFile() || stat.size < 44 || stat.size > 8 * 1024 * 1024) throw customVoiceFailure('NARRATION_VOICE_SAMPLE_INVALID', 'The WAV sample must be at most 8 MiB.')
+		const resolved = resolveLockedAssetHandle(sample)
+		sampleBuffer = assertAssetBytes(sample, await fs.readFile(resolved))
+		if (sampleBuffer.length > 8 * 1024 * 1024) throw customVoiceFailure('NARRATION_VOICE_SAMPLE_INVALID', 'The WAV sample must be at most 8 MiB.')
+	} catch (error) {
+		if (error?.code === 'NARRATION_VOICE_SAMPLE_INVALID' || String(error?.code || '').startsWith('ASSET_')) throw error
+		throw customVoiceFailure('NARRATION_VOICE_SAMPLE_UNAVAILABLE', 'The authorized speech sample is unavailable or invalid.')
+	}
+	return createCustomVoice({ name: request.name, sampleBuffer, language: request.language, gender: request.gender, consent: request.consent })
+}
+
+async function handleNarrationRemoveVoice(args = {}) {
+	const request = validateMediaAvatarPublicOperationArgs('betterpptx.narration.remove_voice', args)
+	return removeCustomVoice({ voiceId: request.voiceId })
+}
+
 function publicNarrationSynthesisResult(result) {
 	const artifact = lockGeneratedAssetDescriptor(result.wavPath, 'narration-audio', {
 		extn: 'wav',
@@ -42325,6 +42367,8 @@ const HANDLERS = {
 	'betterpptx.deck.add_narration': handleDeckAddNarration,
 	'betterpptx.deck.add_avatar_narration': handleDeckAddAvatarNarration,
 	'betterpptx.narration.voices': handleNarrationVoices,
+	'betterpptx.narration.create_voice': handleNarrationCreateVoice,
+	'betterpptx.narration.remove_voice': handleNarrationRemoveVoice,
 	'betterpptx.narration.get_voice_timing': handleNarrationSynthesize,
 	'betterpptx.avatar.render_job': handleAvatarRenderJob,
 	'betterpptx.avatar.job_status': handleAvatarJobStatus,
@@ -42607,6 +42651,8 @@ const IDEMPOTENT_DECK_REPLAY_TOOLS = new Set([
 	'betterpptx.slide.add',
 ])
 const IDEMPOTENT_SESSION_MUTATION_TOOLS = new Set([
+	'betterpptx.narration.create_voice',
+	'betterpptx.narration.remove_voice',
 	'betterpptx.auth.activate_key',
 	'betterpptx.billing.redeem_promo',
 	'betterpptx.deck.new',

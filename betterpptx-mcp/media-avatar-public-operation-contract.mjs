@@ -18,6 +18,8 @@ export const MEDIA_AVATAR_PUBLIC_OPERATION_ROW_IDS = Object.freeze({
 	generateImage: 'cap_74a8c41ea999a8e1a8df',
 	validateAvatarNarration: 'cap_994489606a7f3c0579ef',
 	narrationVoices: 'cap_ee5633d7ddff8a40192c',
+	narrationCreateVoice: 'cap_4d735509f8e46bcf0d86',
+	narrationRemoveVoice: 'cap_04b19ae38356bdb32975',
 })
 
 export const MEDIA_AVATAR_PUBLIC_OPERATION_NAMES = Object.freeze([
@@ -25,6 +27,8 @@ export const MEDIA_AVATAR_PUBLIC_OPERATION_NAMES = Object.freeze([
 	'betterpptx.avatar.job_status',
 	'betterpptx.deck.validate_avatar_narration',
 	'betterpptx.narration.voices',
+	'betterpptx.narration.create_voice',
+	'betterpptx.narration.remove_voice',
 ])
 
 const NAME_TO_ROW_ID = Object.freeze({
@@ -33,6 +37,8 @@ const NAME_TO_ROW_ID = Object.freeze({
 	'betterpptx.assets.generate_image': MEDIA_AVATAR_PUBLIC_OPERATION_ROW_IDS.generateImage,
 	'betterpptx.deck.validate_avatar_narration': MEDIA_AVATAR_PUBLIC_OPERATION_ROW_IDS.validateAvatarNarration,
 	'betterpptx.narration.voices': MEDIA_AVATAR_PUBLIC_OPERATION_ROW_IDS.narrationVoices,
+	'betterpptx.narration.create_voice': MEDIA_AVATAR_PUBLIC_OPERATION_ROW_IDS.narrationCreateVoice,
+	'betterpptx.narration.remove_voice': MEDIA_AVATAR_PUBLIC_OPERATION_ROW_IDS.narrationRemoveVoice,
 })
 
 export const MEDIA_AVATAR_PUBLIC_OPERATION_ROW_ID_BY_NAME = NAME_TO_ROW_ID
@@ -69,6 +75,23 @@ const AVATAR_IMAGE_SCHEMA = Object.freeze({
 })
 
 export const MEDIA_AVATAR_PUBLIC_OPERATION_SCHEMAS = Object.freeze({
+	'betterpptx.narration.create_voice': Object.freeze({
+		type: 'object', additionalProperties: false,
+		required: ['name', 'sample', 'language', 'consent', 'idempotencyKey'],
+		properties: {
+			name: { type: 'string', minLength: 1, maxLength: 80, description: 'Display name for your private voice.' },
+			sample: { type: 'string', pattern: '^asset://locked/uploaded-(?:audio|media)/[a-f0-9]{64}\\.wav$', description: 'Your owned opaque WAV handle returned by assets.upload. Provide clean PCM16 speech lasting 3–30 seconds, up to 8 MiB.' },
+			language: { type: 'string', minLength: 2, maxLength: 32, pattern: '^[A-Za-z]{2,3}(?:[-_][A-Za-z0-9]{2,8})*$', description: 'Default language or locale for the voice. The response lists all supported output languages.' },
+			gender: { type: 'string', enum: ['female', 'male'], description: 'Optional self-described voice label; omit for no gender label.' },
+			consent: { type: 'object', additionalProperties: false, required: ['speakerPermission', 'usageRights'], properties: { speakerPermission: { type: 'boolean', const: true }, usageRights: { type: 'boolean', const: true } }, description: 'Affirm that the speaker permits voice cloning and you hold the required recording and usage rights.' },
+			idempotencyKey: { type: 'string', minLength: 1, maxLength: 160, pattern: '^[A-Za-z0-9._:-]+$' },
+		},
+	}),
+	'betterpptx.narration.remove_voice': Object.freeze({
+		type: 'object', additionalProperties: false, required: ['voiceId'],
+		properties: { voiceId: { type: 'string', minLength: 1, maxLength: 128 }, idempotencyKey: { type: 'string', minLength: 1, maxLength: 160, pattern: '^[A-Za-z0-9._:-]+$' } },
+	}),
+
 	'betterpptx.narration.voices': Object.freeze({
 		type: 'object',
 		additionalProperties: false,
@@ -151,6 +174,15 @@ export const MEDIA_AVATAR_PUBLIC_OPERATION_SCHEMAS = Object.freeze({
 })
 
 const OUTPUT_CONTRACTS = Object.freeze({
+	'betterpptx.narration.create_voice': Object.freeze({
+		allowedKeys: Object.freeze(['voiceId', 'id', 'name', 'language', 'locale', 'languages', 'gender', 'genderSource', 'durationMs', 'scope', 'consentBasis']),
+		forbiddenKeys: Object.freeze(['owner', 'ownerHash', 'sample', 'sampleBuffer', 'referenceAudio', 'path', 'filePath', 'provider', 'model', 'runtimePath']),
+	}),
+	'betterpptx.narration.remove_voice': Object.freeze({
+		allowedKeys: Object.freeze(['removed', 'voiceId']),
+		forbiddenKeys: Object.freeze(['owner', 'ownerHash', 'path', 'filePath', 'provider', 'referenceAudio']),
+	}),
+
 	'betterpptx.narration.voices': Object.freeze({
 		allowedKeys: Object.freeze(['catalogAvailable', 'synthesisRuntimeAvailable', 'mode', 'productionReady', 'listedVoiceCount', 'approvedVoiceCount', 'productionApprovedVoiceCount', 'lineageReviewRequiredCount', 'filter', 'readiness', 'genderCoverage', 'failure', 'note', 'voices', 'synthesisRuntimeReason']),
 		forbiddenKeys: Object.freeze(['source', 'modelPath', 'configPath', 'provider', 'runtimePath']),
@@ -220,6 +252,15 @@ export function validateMediaAvatarPublicOperationArgs(name, value = {}, path = 
 	if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error(`${path} must be an object.`)
 	const allowed = new Set(Object.keys(contract.publicSchema.properties || {}))
 	for (const key of Object.keys(value)) if (!allowed.has(key)) throw new Error(`${path}.${key} is not part of the public ${name} contract.`)
+	if (name === 'betterpptx.narration.create_voice') {
+		if (typeof value.name !== 'string' || !value.name.trim() || value.name.length > 80) throw new Error(`${path}.name must contain 1–80 characters.`)
+		if (typeof value.sample !== 'string' || !/^asset:\/\/locked\/uploaded-(?:audio|media)\/[a-f0-9]{64}\.wav$/.test(value.sample)) throw new Error(`${path}.sample requires your opaque uploaded WAV handle.`)
+		if (typeof value.language !== 'string' || value.language.length > 32 || !/^[A-Za-z]{2,3}(?:[-_][A-Za-z0-9]{2,8})*$/.test(value.language)) throw new Error(`${path}.language requires a supported language or locale.`)
+		if (value.gender !== undefined && !['male', 'female'].includes(value.gender)) throw new Error(`${path}.gender must be male or female when supplied.`)
+		if (!value.consent || Array.isArray(value.consent) || value.consent.speakerPermission !== true || value.consent.usageRights !== true || Object.keys(value.consent).some(key => !['speakerPermission', 'usageRights'].includes(key))) throw new Error(`${path}.consent requires explicit speakerPermission:true and usageRights:true.`)
+		if (typeof value.idempotencyKey !== 'string' || !/^[A-Za-z0-9._:-]{1,160}$/.test(value.idempotencyKey)) throw new Error(`${path}.idempotencyKey is required.`)
+	}
+	if (name === 'betterpptx.narration.remove_voice' && (typeof value.voiceId !== 'string' || !value.voiceId.trim() || value.voiceId.length > 128)) throw new Error(`${path}.voiceId is required.`)
 	if (name === 'betterpptx.assets.generate_image') {
 		if (typeof value.prompt !== 'string' || !value.prompt.trim()) throw new Error(`${path}.prompt must be a non-empty string.`)
 		if (value.steps !== undefined && (!Number.isInteger(value.steps) || value.steps < 1 || value.steps > 8)) throw new Error(`${path}.steps must be an integer between 1 and 8.`)

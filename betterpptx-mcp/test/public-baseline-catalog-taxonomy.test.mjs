@@ -91,3 +91,16 @@ test('catalog taxonomy locks representative collision cases', () => {
 		assert.equal(catalogById.get(opaqueLedgerId(ledgerRow.featureId))?.family, family, `${category} :: ${label}`)
 	}
 })
+
+test('explicit foundation operation ownership outranks voice keywords without reclassifying private voice commands', () => {
+	const rows = allCatalogRows().filter(row => row.sourceKind === 'public-tool')
+	const timing = rows.filter(row => row.label === 'betterpptx.narration.get_voice_timing')
+	assert.equal(timing.length, 1)
+	assert.equal(timing[0].family, 'foundation')
+	assert.equal(timing[0].selection.semanticKind, 'productOperation')
+	for (const name of ['betterpptx.narration.voices', 'betterpptx.narration.create_voice', 'betterpptx.narration.remove_voice']) {
+		const matching = rows.filter(row => row.label === name)
+		assert.equal(matching.length, 1, name)
+		assert.equal(matching[0].family, 'media-images-avatar', name)
+	}
+})

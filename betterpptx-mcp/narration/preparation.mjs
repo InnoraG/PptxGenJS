@@ -4,6 +4,7 @@ import * as crypto from 'node:crypto'
 import { synthesizeNarration } from './service.mjs'
 import { hashText, writeAudioArtifact } from './audio.mjs'
 import { parseWavDuration } from './wavDuration.mjs'
+import { effectiveVoiceProvider, loadVoiceManifest } from './licenseGate.mjs'
 
 export const NARRATION_PREPARATION_SCHEMA_VERSION = 'betterpptx.narration-preparation.v1'
 
@@ -28,7 +29,12 @@ function nonNegativeInteger(value, fallback = 0, field = 'timing') {
 }
 
 function canonicalPreparationInput(args = {}, segments = []) {
+	const provider = effectiveVoiceProvider(args.provider)
+	const manifest = loadVoiceManifest({ provider })
 	return {
+		provider,
+		runtimeVersion: process.env.BETTERPPTX_TTS_RUNTIME_VERSION || null,
+		voiceManifestIdentity: manifest.identity,
 		text: normalizeText(args.text ?? args.script),
 		segments: segments.map(segment => ({
 			id: segment.id,
@@ -224,8 +230,6 @@ export async function prepareNarrationAudio(args = {}, { synthesize = synthesize
 			timingEvidence: 'measured-audio-segment-boundary',
 		})),
 		voice: clips[0]?.result.voice || null,
-		// Every distinct voice licence used across segments (segments may switch voices),
-		// so attribution-required voices reach the deck's embedded licence manifest.
 		licenses: [...new Map(clips.map(clip => clip.result.license).filter(Boolean).map(license => [JSON.stringify(license), license])).values()],
 		provider: clips[0]?.result.provider || null,
 		warnings,

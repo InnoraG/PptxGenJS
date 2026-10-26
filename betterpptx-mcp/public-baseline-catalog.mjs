@@ -39,10 +39,12 @@ import { ADD_SLIDE_ENTRY_ROW_ID } from './add-slide-entry-contract.mjs'
 import { HYPERLINK_ENTRY_ROW_ID } from './hyperlink-entry-contract.mjs'
 import { MULTIPLE_SLIDE_MASTERS_ROW_ID } from './multiple-slide-masters-contract.mjs'
 import { listOptionCatalog } from './option-registry.mjs'
+import { FOUNDATION_PUBLIC_OPERATION_NAMES } from './public-operation-capability-contract.mjs'
 
 const CATALOG_SCHEMA = 'betterpptx.authoring.baseline-catalog.v1'
 const PUBLIC_COMPOSITION_TOOL = 'betterpptx.deck.generate_from_spec'
 const DISCOVERY_TOOLS = ['betterpptx.authoring.capabilities', 'betterpptx.options.catalog']
+const FOUNDATION_PUBLIC_OPERATIONS = new Set(FOUNDATION_PUBLIC_OPERATION_NAMES)
 const PUBLIC_KNOWN_FAMILIES = new Set([
 	...AUTHORING_CAPABILITY_REGISTRY.map(row => row.id),
 	'presenter-motion',
@@ -510,7 +512,8 @@ function buildEntries({ includePlanned = false, diagnostics = [], motionCatalogF
 	for (const tool of TOOLS) {
     if (!PUBLIC_SPEC_FIRST_TOOLS.has(tool.name)) continue
 		if (PUBLIC_LIFECYCLE_TOOLS.has(tool.name)) continue
-    const family = familyFor(tool.name)
+    // Explicit operation ownership outranks incidental words in a tool name.
+    const family = FOUNDATION_PUBLIC_OPERATIONS.has(tool.name) ? 'foundation' : familyFor(tool.name)
     entries.push(makeEntry({
       sourceId: `tool:${tool.name}`,
       source: 'mcp-tool-surface',

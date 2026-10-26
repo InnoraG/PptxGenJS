@@ -35,6 +35,7 @@ export async function synthesizeNarration(args = {}) {
 	let license = null
 	let warnings = []
 	voiceDecision = resolveVoice({
+		provider: provider.name,
 		voice: args.voice,
 		lang: args.lang,
 		gender: args.gender,
@@ -42,6 +43,7 @@ export async function synthesizeNarration(args = {}) {
 		allowUnreviewedVoices: args.allowUnreviewedVoices,
 	})
 	voice = voiceDecision.voice
+	const effectiveLanguage = args.lang || voice?.locale || voice?.language || null
 	license = voiceDecision.license
 	warnings = warnings.concat(voiceDecision.warnings)
 
@@ -59,6 +61,7 @@ export async function synthesizeNarration(args = {}) {
 	const result = await withSynthSlot(() => provider.synthesize({
 		text,
 		voice,
+		language: effectiveLanguage,
 		speaker: voiceDecision.speaker,
 		lengthScale: args.lengthScale,
 		noiseScale: args.noiseScale,
@@ -100,6 +103,11 @@ export async function synthesizeNarration(args = {}) {
 		audioPostProcessing: repaired.evidence,
 	})
 	const settingsDigest = hashText(JSON.stringify({
+		provider: provider.name,
+		language: effectiveLanguage,
+		modelDigest: voice?.modelDigest || null,
+		referenceDigest: voice?.referenceDigest || null,
+		runtimeVersion: process.env.BETTERPPTX_TTS_RUNTIME_VERSION || null,
 		voiceId: voice?.id || null,
 		gender: voiceDecision.gender || null,
 		speaker: voiceDecision.speaker ?? null,
@@ -135,7 +143,8 @@ export async function synthesizeNarration(args = {}) {
 			voiceId: voice?.id || null,
 			sampleRateHz: duration.sampleRate || parsed.sampleRate || 22050,
 			runtimeVersion: process.env.BETTERPPTX_TTS_RUNTIME_VERSION || null,
-			modelDigest: voice?.id ? `sha256:${hashText(voice.id)}` : null,
+			modelDigest: voice?.modelDigest || null,
+			referenceDigest: voice?.referenceDigest || null,
 			deterministicSettingsDigest: `sha256:${settingsDigest}`,
 			audioPostProcessing: repaired.evidence,
 		},

@@ -1,6 +1,8 @@
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { createHash } from 'node:crypto'
+import { isCustomVoiceId, resolveCustomVoice, listCustomVoices } from './customVoices.mjs'
 import {
 	enrichVoiceWithProfile,
 	genderCoverage,
@@ -18,8 +20,8 @@ function readJsonIfExists(filePath) {
 	try {
 		if (!filePath || !fs.existsSync(filePath)) return null
 		return JSON.parse(fs.readFileSync(filePath, 'utf8'))
-	} catch (err) {
-		throw new Error(`Failed to read voice manifest ${filePath}: ${err.message}`)
+	} catch {
+		throw new Error('The narration voice catalog could not be read.')
 	}
 }
 
@@ -27,20 +29,39 @@ export function narrationMode() {
 	return String(process.env.BETTERPPTX_NARRATION_MODE || 'development').toLowerCase()
 }
 
-export function loadVoiceManifest() {
-	const runtimePath = process.env.BETTERPPTX_RUNTIME_VOICES_MANIFEST || process.env.BETTERPPTX_VOICES_MANIFEST
-	const runtime = readJsonIfExists(runtimePath)
-	if (runtime) return {
-		source: runtimePath,
-		runtime: true,
-		voices: Array.isArray(runtime.voices) ? runtime.voices.map(voice => enrichVoiceWithProfile(voice, VOICE_PROFILES)) : [],
+export function effectiveVoiceProvider(provider) {
+	const name = String(provider || process.env.BETTERPPTX_TTS_PROVIDER || 'piper-http').toLowerCase()
+	return name === 'piper' ? 'piper-http' : name === 'chatterbox' ? 'chatterbox-http' : name
+}
+
+function manifestForProvider(data, source, runtime, provider) {
+	if (!data || !Array.isArray(data.voices)) throw new Error('The narration voice catalog is invalid.')
+	const declared = data?.provider ? effectiveVoiceProvider(data.provider) : null
+	if ((declared && declared !== provider) || (provider === 'chatterbox-http' && declared !== provider)
+		|| (data?.voices || []).some(voice => voice.provider && effectiveVoiceProvider(voice.provider) !== provider)) {
+		throw new Error('The narration voice catalog does not match the selected synthesis runtime.')
 	}
-	const broad = readJsonIfExists(DEFAULT_CANDIDATE_MANIFEST)
 	return {
-		source: DEFAULT_CANDIDATE_MANIFEST,
-		runtime: false,
-		voices: Array.isArray(broad?.voices) ? broad.voices.map(voice => enrichVoiceWithProfile(voice, VOICE_PROFILES)) : [],
+		source, runtime, provider,
+		identity: `sha256:${createHash('sha256').update(JSON.stringify(data)).digest('hex')}`,
+		voices: Array.isArray(data?.voices) ? data.voices.map(voice => enrichVoiceWithProfile({ ...voice, provider, modelDigest: voice.modelDigest || data.modelDigest || null, referenceDigest: voice.referenceDigest || null }, VOICE_PROFILES)) : [],
 	}
+}
+
+export function loadVoiceManifest({ provider: requestedProvider } = {}) {
+	const provider = effectiveVoiceProvider(requestedProvider)
+	const runtimePath = process.env.BETTERPPTX_RUNTIME_VOICES_MANIFEST || process.env.BETTERPPTX_VOICES_MANIFEST
+	if (provider === 'chatterbox-http') {
+		const dedicatedPath = process.env.BETTERPPTX_CHATTERBOX_VOICES_MANIFEST
+		const source = dedicatedPath || runtimePath
+		const data = readJsonIfExists(source)
+		if (!data) throw new Error('The selected narration runtime requires its own configured voice catalog.')
+		return manifestForProvider(data, source, true, provider)
+	}
+	const runtime = readJsonIfExists(runtimePath)
+	if (runtime) return manifestForProvider(runtime, runtimePath, true, provider)
+	const broad = readJsonIfExists(DEFAULT_CANDIDATE_MANIFEST)
+	return manifestForProvider(broad, DEFAULT_CANDIDATE_MANIFEST, false, provider)
 }
 
 function normalizeLanguage(value) {
@@ -49,7 +70,7 @@ function normalizeLanguage(value) {
 
 function voiceMatchesLanguage(voice, requested) {
 	if (!requested) return true
-	const candidates = [voice?.locale, voice?.language].map(normalizeLanguage).filter(Boolean)
+	const candidates = [voice?.locale, voice?.language, ...(Array.isArray(voice?.languages) ? voice.languages : [])].map(normalizeLanguage).filter(Boolean)
 	return candidates.some(candidate => candidate === requested || candidate.startsWith(`${requested}_`) || requested.startsWith(`${candidate}_`))
 }
 
@@ -67,8 +88,8 @@ function isAllowedInDevelopment(voice, allowUnreviewedVoices) {
 	return isCommerciallyUsable(voice) && voice?.commercialUse !== 'unknown' && voice?.commercialUse !== 'forbidden'
 }
 
-export function listVoices({ includeCandidates = false, allowUnreviewedVoices = false, gender, language, lang, query } = {}) {
-	const manifest = loadVoiceManifest()
+export function listVoices({ includeCandidates = false, allowUnreviewedVoices = false, gender, language, lang, query, provider } = {}) {
+	const manifest = loadVoiceManifest({ provider })
 	const mode = narrationMode()
 	const requestedGender = String(gender || '').trim() ? normalizeGender(gender) : null
 	const requestedLanguage = String(language || lang || '').trim() ? normalizeLanguage(language || lang) : null
@@ -76,11 +97,12 @@ export function listVoices({ includeCandidates = false, allowUnreviewedVoices = 
 	if (requestedGender && !['female', 'male'].includes(requestedGender)) {
 		throw new Error(`Unsupported narration gender ${gender}. Use female or male.`)
 	}
-	const voices = manifest.voices.filter(v => {
+	const privateVoices = manifest.provider === 'chatterbox-http' ? listCustomVoices() : []
+	const voices = [...manifest.voices, ...privateVoices].filter(v => {
 		if (requestedGender && !voiceMatchesGender(v, requestedGender)) return false
 		if (!voiceMatchesLanguage(v, requestedLanguage)) return false
 		if (requestedQuery && ![v.id, v.name, v.language, v.locale].some(value => String(value || '').toLowerCase().includes(requestedQuery))) return false
-		if (isApprovedForProduction(v)) return true
+		if (v.scope === 'private' || isApprovedForProduction(v)) return true
 		if (mode !== 'production' && (includeCandidates || allowUnreviewedVoices)) return isAllowedInDevelopment(v, true)
 		return false
 	})
@@ -93,8 +115,10 @@ export function listVoices({ includeCandidates = false, allowUnreviewedVoices = 
 		genderCoverage: genderCoverage(voices, ['female', 'male'], VOICE_PROFILES),
 		voices: voices.map(v => ({
 			id: v.id,
+			...(v.scope === 'private' ? { scope: 'private', consentBasis: 'user-attested' } : {}),
 			name: v.name,
 			language: v.language,
+			...(Array.isArray(v.languages) ? { languages: [...v.languages] } : {}),
 			locale: v.locale,
 			quality: v.quality,
 			numSpeakers: v.numSpeakers,
@@ -114,8 +138,16 @@ export function listVoices({ includeCandidates = false, allowUnreviewedVoices = 
 	}
 }
 
-export function resolveVoice({ voice, lang, gender, speaker, allowUnreviewedVoices = false } = {}) {
-	const manifest = loadVoiceManifest()
+export function resolveVoice({ voice, lang, gender, speaker, allowUnreviewedVoices = false, provider } = {}) {
+	if (isCustomVoiceId(voice)) {
+		if (effectiveVoiceProvider(provider) !== 'chatterbox-http') throw new Error('The selected synthesis runtime does not support private sample-based voices.')
+		const custom = resolveCustomVoice(voice)
+		if (lang && (typeof lang !== 'string' || !/^[a-z]{2}(?:[-_][a-z]{2})?$/i.test(lang) || !custom.languages.includes(normalizeLanguage(lang).split('_')[0]))) throw new Error('The private voice does not support the requested language.')
+		if (gender && gender !== custom.gender) throw new Error('The private voice does not match the requested gender.')
+		if (speaker != null) throw new Error('The private voice does not support a speaker index.')
+		return { voice: custom, gender: custom.gender, warnings: ['PRIVATE_VOICE_USER_ATTESTED'], license: { spdx: null, commercialUse: 'user-attested', attributionRequired: false, reviewStatus: 'user-authorized', consentBasis: 'user-attested' } }
+	}
+	const manifest = loadVoiceManifest({ provider })
 	const mode = narrationMode()
 	const requested = normalizeLanguage(voice || lang || '')
 	const requestedGender = String(gender || '').trim() ? normalizeGender(gender) : null
@@ -131,7 +163,6 @@ export function resolveVoice({ voice, lang, gender, speaker, allowUnreviewedVoic
 	if (voice) {
 		found = manifest.voices.find(v => v.id === voice)
 	} else if (lang) {
-		// A bare language ("en", "es") prefers its designated voice over whichever locale sorts first.
 		found = genderVoices.find(v => v.isDefaultForLocale && normalizeLanguage(v.locale) === requested)
 			|| genderVoices.find(v => v.isDefaultForLanguage && normalizeLanguage(v.language) === requested)
 			|| genderVoices.find(v => v.isDefaultForLocale && normalizeLanguage(v.language) === requested)
