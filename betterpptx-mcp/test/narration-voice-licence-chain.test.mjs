@@ -23,7 +23,9 @@ test('launch locales have a female and male voice whose whole licence chain is r
 	for (const voice of clean) {
 		assert.equal(voice.reviewStatus, 'approved')
 		assert.equal(voice.lineageReview, false, voice.id)
-		assert.equal(voice.licenseChain.training.base, null, voice.id)
+		const { base, baseLicense } = voice.licenseChain.training
+		assert.ok(base === null || /CC-BY-4\.0/.test(baseLicense || ''), `${voice.id} base ${base}`)
+		assert.doesNotMatch(`${base || ''} ${baseLicense || ''}`, NON_COMMERCIAL_BASE, voice.id)
 		assert.ok(voice.licenseChain.modelCard.url && voice.licenseChain.dataset.url && voice.licenseChain.dataset.license, voice.id)
 		assert.ok(voice.modelSha256 && voice.configSha256, voice.id)
 	}
@@ -32,7 +34,41 @@ test('launch locales have a female and male voice whose whole licence chain is r
 test('no production voice is non-commercial or unknown, and attribution voices carry their credit', () => {
 	for (const voice of production.voices) {
 		assert.ok(['allowed', 'attribution'].includes(voice.commercialUse), `${voice.id} is ${voice.commercialUse}`)
-		if (voice.commercialUse === 'attribution') assert.match(voice.attributionText || '', /CC BY 4\.0/, voice.id)
+		if (voice.commercialUse === 'attribution') assert.match(voice.attributionText || '', /CC BY(-SA)? \d\.0/, voice.id)
+	}
+})
+
+test('every production voice records a licence-chain verdict, and anything not resale-safe is flagged', () => {
+	for (const voice of production.voices) {
+		const verdict = voice.licenseChain?.verdict
+		assert.ok(verdict, `${voice.id} lacks a licence-chain verdict`)
+		if (!/^resale-safe/.test(verdict)) assert.match(verdict, /^(lineage-encumbered|lineage-unstated|dataset-unverified|synthetic-voice)$/, voice.id)
+		if (verdict === 'lineage-encumbered') assert.equal(voice.lineageReview, true, voice.id)
+	}
+})
+
+test('a bare language resolves to its designated voice, and locale defaults prefer clean voices', async () => {
+	const previous = process.env.BETTERPPTX_RUNTIME_VOICES_MANIFEST
+	process.env.BETTERPPTX_RUNTIME_VOICES_MANIFEST = path.join(voicesDir, 'runtime-manifest.production.json')
+	try {
+		const { resolveVoice } = await import('../narration/licenseGate.mjs')
+		assert.equal(resolveVoice({ lang: 'en' }).voice.id, 'en_US-ljspeech-high')
+		assert.equal(resolveVoice({ lang: 'en_GB' }).voice.id, 'en_GB-cori-high')
+		assert.equal(resolveVoice({ lang: 'es' }).voice.id, 'es_ES-carlfm-x_low')
+		assert.equal(resolveVoice({ lang: 'es', gender: 'female' }).gender, 'female')
+		assert.equal(resolveVoice({ lang: 'nl' }).voice.id, 'nl_NL-alex-medium')
+		const et = resolveVoice({ lang: 'et', gender: 'female' })
+		assert.equal(et.speaker, 3)
+	} finally {
+		if (previous === undefined) delete process.env.BETTERPPTX_RUNTIME_VOICES_MANIFEST
+		else process.env.BETTERPPTX_RUNTIME_VOICES_MANIFEST = previous
+	}
+	for (const locale of new Set(production.voices.map(voice => voice.locale))) {
+		const list = production.voices.filter(voice => voice.locale === locale)
+		const defaults = list.filter(voice => voice.isDefaultForLocale)
+		assert.equal(defaults.length, 1, locale)
+		const isClean = voice => /^resale-safe/.test(voice.licenseChain?.verdict || '')
+		if (list.some(isClean)) assert.ok(isClean(defaults[0]), `${locale} default should be clean`)
 	}
 })
 

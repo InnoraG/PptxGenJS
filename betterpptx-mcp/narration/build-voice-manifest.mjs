@@ -44,8 +44,10 @@ function parseCard(text) {
 	if (!text) return { rawLicense: '', datasetUrl: '', training: '', finetunedFrom: null }
 	const rawLicense = (text.match(/License:\s*(.+)/i) || [])[1]?.trim() || ''
 	const datasetUrl = (text.match(/Dataset[\s\S]*?URL:\s*(\S+)/i) || [])[1]?.trim() || ''
-	const training = (text.split(/##\s*Training/i)[1] || '').trim().split('\n')[0] || ''
-	const finetunedFrom = /finetuned from\s+(.+?)\.?$/i.exec(training)?.[1]?.trim() || null
+	const trainingSection = (text.split(/##\s*Training/i)[1] || '').trim()
+	const training = trainingSection.split('\n')[0] || ''
+	// The lineage line is not always first (e.g. "Trained by: …" then "Finetuned from …").
+	const finetunedFrom = /fine-?tuned from\s+(.+?)\.?\s*$/im.exec(trainingSection)?.[1]?.trim() || null
 	return { rawLicense, datasetUrl, training, finetunedFrom }
 }
 
@@ -66,7 +68,7 @@ function classify(raw) {
 	if (/gpl/.test(s)) return { license: raw, commercialUse: 'forbidden', reason: 'copyleft software license on model — treat as not-usable pending counsel' }
 	if (/cc0|public[\s-]?domain|unlicense/.test(s)) return { license: 'CC0-1.0', commercialUse: 'allowed' }
 	// CC-BY-SA as text ("cc-by-sa") or URL ("licenses/by-sa/").
-	if (/cc[\s-]?by[\s-]?sa|licenses\/by-sa/.test(s)) return { license: 'CC-BY-SA-4.0', commercialUse: 'attribution', reason: 'ShareAlike binds model adaptations, not program output' }
+	if (/cc[\s-]?by[\s-]?sa|licenses\/by-sa|attribution[\s-]?sharealike/.test(s)) return { license: 'CC-BY-SA-4.0', commercialUse: 'attribution', reason: 'ShareAlike binds model adaptations, not program output' }
 	// CC-BY as text ("cc by") or URL ("licenses/by/").
 	if (/cc[\s-]?by|licenses\/by(?:[\s/-]|$)/.test(s)) return { license: 'CC-BY-4.0', commercialUse: 'attribution' }
 	if (/\bmit\b/.test(s)) return { license: 'MIT', commercialUse: 'allowed' }
@@ -97,7 +99,13 @@ const built = (await mapLimit(entries, CONCURRENCY, async ([key, v]) => {
 	const cardPath = fileNames.find(f => f.endsWith('MODEL_CARD'))
 	const cardText = await fetchCard(key, cardPath)
 	const card = parseCard(cardText)
-	const cls = classify(card.rawLicense)
+	const machineCls = classify(card.rawLicense)
+	const priorReview = PRIOR_BY_ID.get(key)
+	// A human licence-chain review that resolved a "See URL" card (e.g. the M-AILABS
+	// licence read from the dataset page) outranks the machine verdict on the card text.
+	const cls = priorReview?.licenseChain?.licenseResolved && machineCls.commercialUse === 'unknown'
+		? { license: priorReview.license, commercialUse: priorReview.commercialUse }
+		: machineCls
 	// Fine-tuned weights inherit their base checkpoint's terms: lessac (Blizzard 2013,
 	// research-only) and Ryan (RyanSpeech, CC-BY-NC-SA) are both non-commercial bases.
 	const lineageReview = /lessac|blizzard|ryan/i.test(card.finetunedFrom || '')
@@ -129,7 +137,8 @@ const built = (await mapLimit(entries, CONCURRENCY, async ([key, v]) => {
 		commercialUse: cls.commercialUse,
 		datasetUrl: card.datasetUrl || null,
 		finetunedFrom: card.finetunedFrom,
-		lineageReview,
+		// A reviewed chain can establish lineage the card's free text hides (e.g. "Base model: …").
+		lineageReview: lineageReview || priorReview?.licenseChain?.verdict === 'lineage-encumbered',
 		reviewStatus,
 		verifiedFromModelCard: cardText != null,
 		reviewedBy: reviewStatus === 'approved' ? (prior?.reviewedBy || 'human-approved') : 'automated:build-voice-manifest.mjs',
@@ -138,8 +147,25 @@ const built = (await mapLimit(entries, CONCURRENCY, async ([key, v]) => {
 		// Human licence-chain review (model card + dataset + lineage) survives rebuilds.
 		...(prior?.licenseChain ? { licenseChain: prior.licenseChain } : {}),
 		...(prior?.attributionText ? { attributionText: prior.attributionText } : {}),
+		...(prior?.isDefaultForLanguage ? { isDefaultForLanguage: true } : {}),
 	}, VOICE_PROFILES)
 }))
+
+// Lineage is transitive: a fine-tune of a catalogue voice ("fa_IR Amir voice",
+// "Spanish davefx voice", the cross-language "LibriTTS-R base model") inherits that voice's flag.
+const namePattern = name => new RegExp(`\\b${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/[_-]/g, '[\\s_-]?')}\\b`, 'i')
+for (let changed = true; changed;) {
+	changed = false
+	for (const voice of built) {
+		if (voice.lineageReview || !voice.finetunedFrom) continue
+		const flagged = built.filter(candidate => candidate.lineageReview && namePattern(candidate.name).test(voice.finetunedFrom))
+		const parent = flagged.find(candidate => candidate.language === voice.language) || flagged[0]
+		if (!parent) continue
+		voice.lineageReview = true
+		if (voice.reviewStatus !== 'approved') voice.notes = [voice.notes, `finetuned from ${parent.id}, which carries a non-commercial weight lineage`].filter(Boolean).join('; ')
+		changed = true
+	}
+}
 
 // Pick a recommended default per locale: most permissive, then best quality,
 // then prefer a voice WITHOUT lessac lineage at the same tier.
@@ -148,7 +174,7 @@ for (const v of built) (byLocale[v.locale] ||= []).push(v)
 for (const [, list] of Object.entries(byLocale)) {
 	const usable = list.filter(v => v.commercialUse === 'allowed' || v.commercialUse === 'attribution')
 	if (!usable.length) continue
-	const preserved = usable.find(v => v.isDefaultForLocale)
+	const preserved = usable.find(v => v.isDefaultForLocale && v.reviewStatus === 'approved') || usable.find(v => v.isDefaultForLocale)
 	if (preserved) {
 		for (const candidate of list) candidate.isDefaultForLocale = candidate.id === preserved.id
 		continue

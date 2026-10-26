@@ -15,6 +15,7 @@ import os
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from collections import OrderedDict
 import threading
 import wave
 
@@ -27,6 +28,8 @@ PORT = int(os.environ.get("PIPER_PORT", "5000"))
 VOICE_DIR = Path(os.environ.get("PIPER_VOICES_DIR", "./voices")).resolve()
 MANIFEST_PATH = Path(os.environ.get("PIPER_VOICES_MANIFEST", str(VOICE_DIR / "runtime-manifest.json"))).resolve()
 MAX_TEXT_CHARS = int(os.environ.get("PIPER_MAX_TEXT_CHARS", "4000"))
+# Loaded voices stay resident; cap them so a large catalogue cannot exhaust instance memory.
+MAX_LOADED_VOICES = max(1, int(os.environ.get("PIPER_MAX_LOADED_VOICES", "6")))
 
 
 def load_voice_rows():
@@ -54,7 +57,7 @@ def load_voice_rows():
 
 
 VOICE_ROWS = load_voice_rows()
-VOICE_CACHE = {}
+VOICE_CACHE: "OrderedDict[str, PiperVoice]" = OrderedDict()
 VOICE_LOCK = threading.Lock()
 
 
@@ -83,6 +86,10 @@ def loaded_voice(row):
         if voice is None:
             voice = PiperVoice.load(row["modelPath"], config_path=row["configPath"])
             VOICE_CACHE[voice_id] = voice
+            while len(VOICE_CACHE) > MAX_LOADED_VOICES:
+                VOICE_CACHE.popitem(last=False)
+        else:
+            VOICE_CACHE.move_to_end(voice_id)
         return voice
 
 
