@@ -20,7 +20,7 @@ Object.assign(process.env, {
 })
 for (const name of ['BETTERPPTX_PUBLIC_BLACK_BOX', 'BETTERPPTX_CREDENTIAL_STORE', 'BETTERPPTX_REQUIRE_PROVIDER_METROLOGY', 'BETTERPPTX_AVATAR_QUOTA_STATE_STORE']) delete process.env[name]
 
-const { avatarWorkerStartIndex, renderMuseTalkHttp } = await import('../avatar/providers/musetalkHttp.mjs')
+const { avatarWorkerAccounts, avatarWorkerHealthUrl, avatarWorkerStartIndex, renderMuseTalkHttp } = await import('../avatar/providers/musetalkHttp.mjs')
 const { createAvatarWorkerBudgetStore } = await import('../storage/avatar-worker-budget-store.mjs')
 const { publicAvatarError } = await import('../avatar/errors.mjs')
 
@@ -28,8 +28,17 @@ const { publicAvatarError } = await import('../avatar/errors.mjs')
 const IDS = ['telcomgapp', 'betterpptx-fluxworkerai', 'betterxavatar2', 'betterxavatar1', 'betterpptx', 'betterpptx-flux']
 const behaviour = new Map()
 const hits = []
+const health = new Map()
+const healthHits = []
 const server = http.createServer((req, res) => {
 	const id = req.url.split('/')[1]
+	if (req.url.endsWith('/health')) {
+		healthHits.push(id)
+		const mode = health.get(id) || 'ok'
+		if (mode === 'http-404' || mode === 'http-503') { res.writeHead(mode === 'http-404' ? 404 : 503); return res.end() }
+		res.writeHead(200, { 'content-type': 'application/json' })
+		return res.end(JSON.stringify({ ok: true, service: 'betterpptx-avatar-worker', gpu: false, authConfigured: true, authorized: mode !== 'unauthorized' }))
+	}
 	hits.push(id)
 	req.resume().on('end', () => {
 		const mode = behaviour.get(id) || 'ok'
@@ -46,15 +55,17 @@ await new Promise(resolve => server.listen(0, '127.0.0.1', resolve))
 const base = `http://127.0.0.1:${server.address().port}`
 // "unreachable" points at a closed loopback port, so fetch fails at connect time.
 const closedPort = await new Promise(resolve => { const probe = http.createServer().listen(0, '127.0.0.1', () => { const { port } = probe.address(); probe.close(() => resolve(port)) }) })
-const pool = unreachable => IDS.map(id => ({ id, url: unreachable.has(id) ? `http://127.0.0.1:${closedPort}/${id}` : `${base}/${id}` }))
+const pool = (unreachable, healthDown = new Set()) => IDS.map(id => ({ id, token: 't', url: unreachable.has(id) ? `http://127.0.0.1:${closedPort}/${id}` : `${base}/${id}`, healthUrl: unreachable.has(id) || healthDown.has(id) ? `http://127.0.0.1:${closedPort}/${id}/health` : `${base}/${id}/health` }))
 const budget = createAvatarWorkerBudgetStore()
 const jobDir = await fs.mkdtemp(path.join(tmp, 'job-'))
 await fs.writeFile(path.join(jobDir, 'a.png'), Buffer.from('png'))
 await fs.writeFile(path.join(jobDir, 'a.wav'), Buffer.from('wav'))
 
-async function reset({ billed = {}, unreachable = new Set() } = {}) {
+async function reset({ billed = {}, unreachable = new Set(), healthDown = new Set() } = {}) {
 	behaviour.clear()
+	health.clear()
 	hits.length = 0
+	healthHits.length = 0
 	await fs.rm(process.env.BETTERPPTX_AVATAR_BUDGET_STATE_FILE, { force: true })
 	const now = new Date().toISOString()
 	for (const id of IDS) {
@@ -62,7 +73,7 @@ async function reset({ billed = {}, unreachable = new Set() } = {}) {
 		if (entry === 'stale') await budget.recordBilled(id, 1, new Date(Date.now() - 7 * 3600000).toISOString())
 		else if (entry !== 'missing') await budget.recordBilled(id, entry, now)
 	}
-	process.env.BETTERPPTX_AVATAR_WORKER_POOL = JSON.stringify(pool(unreachable))
+	process.env.BETTERPPTX_AVATAR_WORKER_POOL = JSON.stringify(pool(unreachable, healthDown))
 }
 const render = key => renderMuseTalkHttp({ avatarImagePath: path.join(jobDir, 'a.png'), audioPath: path.join(jobDir, 'a.wav'), jobDir, provider: 'musetalk', idempotencyKey: key })
 const startFor = key => IDS[crypto.createHash('sha256').update(key).digest().readUInt32BE(0) % IDS.length]
@@ -165,4 +176,62 @@ test('public black-box errors keep the code and retry hint but drop the private 
 		assert.deepEqual(publicErrorDetails({ code: 'SPEC_INVALID', details: { errors: [1] } }), { errors: [1] })
 	} finally { delete process.env.BETTERPPTX_PUBLIC_BLACK_BOX }
 	assert.equal(publicErrorDetails(error), error.details, 'local maintainers keep the full trace')
+})
+
+test('health URL comes from the bundle, else from the lipsync host, and never from a non-Modal host', () => {
+	assert.equal(avatarWorkerHealthUrl({ url: 'https://telcomgapp--betterpptx-avatar-commercial-lipsync.modal.run' }), 'https://telcomgapp--betterpptx-avatar-commercial-health.modal.run')
+	assert.equal(avatarWorkerHealthUrl({ url: 'https://innorag--betterpptx-avatar-commercial-lipsync.us-east.modal.run/' }), 'https://innorag--betterpptx-avatar-commercial-health.us-east.modal.run')
+	assert.equal(avatarWorkerHealthUrl({ url: 'https://x--betterpptx-avatar-commercial-lipsync.modal.run', healthUrl: 'https://x--betterpptx-avatar-commercial-health.us-east.modal.run' }), 'https://x--betterpptx-avatar-commercial-health.us-east.modal.run')
+	assert.equal(avatarWorkerHealthUrl({ url: 'https://avatar.example.run.app' }), '')
+	const previous = process.env.BETTERPPTX_COMMERCIAL_AVATAR_WORKER_POOL
+	process.env.BETTERPPTX_COMMERCIAL_AVATAR_WORKER_POOL = JSON.stringify({ providers: { 'avatar-worker-commercial': { accounts: [{ id: 'a', env: { BETTERPPTX_COMMERCIAL_AVATAR_WORKER_URL: 'https://a--betterpptx-avatar-commercial-lipsync.modal.run', BETTERPPTX_COMMERCIAL_AVATAR_WORKER_HEALTH_URL: 'https://a--betterpptx-avatar-commercial-health.us-east.modal.run/' } }] } } })
+	try { assert.equal(avatarWorkerAccounts('liveportrait-musetalk-commercial')[0].healthUrl, 'https://a--betterpptx-avatar-commercial-health.us-east.modal.run') }
+	finally { if (previous === undefined) delete process.env.BETTERPPTX_COMMERCIAL_AVATAR_WORKER_POOL; else process.env.BETTERPPTX_COMMERCIAL_AVATAR_WORKER_POOL = previous }
+})
+
+test('with the health pre-check on, a healthy account is checked once and then serves the render', async () => {
+	process.env.BETTERPPTX_AVATAR_WORKER_HEALTH_PRECHECK = '1'
+	try {
+		await reset()
+		assert.equal((await render(keyStartingAt('betterxavatar2'))).ok, true)
+		assert.deepEqual(healthHits, ['betterxavatar2'])
+		assert.deepEqual(hits, ['betterxavatar2'])
+	} finally { delete process.env.BETTERPPTX_AVATAR_WORKER_HEALTH_PRECHECK }
+})
+
+for (const mode of ['http-503', 'unauthorized', 'unreachable']) {
+	test(`a ${mode} health check skips the account without any render request or charge`, async () => {
+		process.env.BETTERPPTX_AVATAR_WORKER_HEALTH_PRECHECK = '1'
+		try {
+			const start = 'betterpptx'
+			const next = orderFrom(start)[1]
+			await reset({ healthDown: mode === 'unreachable' ? new Set([start]) : new Set() })
+			if (mode !== 'unreachable') health.set(start, mode)
+			const result = await render(keyStartingAt(start))
+			assert.equal(result.ok, true)
+			assert.deepEqual(hits, [next], 'no render request reached the unhealthy account')
+			assert.equal((await budget.get(start)).spentUsd, 1, 'the skipped account is not charged')
+		} finally { delete process.env.BETTERPPTX_AVATAR_WORKER_HEALTH_PRECHECK }
+	})
+}
+
+test('a worker without the health route (404) is still tried', async () => {
+	process.env.BETTERPPTX_AVATAR_WORKER_HEALTH_PRECHECK = '1'
+	try {
+		await reset()
+		health.set('telcomgapp', 'http-404')
+		assert.equal((await render(keyStartingAt('telcomgapp'))).ok, true)
+		assert.deepEqual(hits, ['telcomgapp'])
+	} finally { delete process.env.BETTERPPTX_AVATAR_WORKER_HEALTH_PRECHECK }
+})
+
+test('every account failing its health check reports the worker as unavailable, not capacity', async () => {
+	process.env.BETTERPPTX_AVATAR_WORKER_HEALTH_PRECHECK = '1'
+	try {
+		await reset()
+		for (const id of IDS) health.set(id, 'http-503')
+		await assert.rejects(render('all-unhealthy'), error => error.code === 'AVATAR_UNAVAILABLE' && error.details.retryable === true)
+		assert.deepEqual(hits, [])
+		assert.equal(healthHits.length, IDS.length)
+	} finally { delete process.env.BETTERPPTX_AVATAR_WORKER_HEALTH_PRECHECK }
 })
