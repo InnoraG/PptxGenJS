@@ -224,6 +224,9 @@ export async function prepareNarrationAudio(args = {}, { synthesize = synthesize
 			timingEvidence: 'measured-audio-segment-boundary',
 		})),
 		voice: clips[0]?.result.voice || null,
+		// Every distinct voice licence used across segments (segments may switch voices),
+		// so attribution-required voices reach the deck's embedded licence manifest.
+		licenses: [...new Map(clips.map(clip => clip.result.license).filter(Boolean).map(license => [JSON.stringify(license), license])).values()],
 		provider: clips[0]?.result.provider || null,
 		warnings,
 		timingEvidence: {

@@ -1717,6 +1717,28 @@ function publicNarrationWarnings(warnings) {
 	return warnings.map((warning, index) => publicNarrationFinding(warning, warnings.length || index + 1))
 }
 
+// Attribution-required narration voices (e.g. a CC-BY training corpus) are credited in the
+// deck's embedded licence manifest, never on a slide. Only public attribution facts travel:
+// no voice id, provider, model, or runtime names.
+function narrationVoiceLicenseRecords(licenses) {
+	const records = new Map()
+	for (const license of (Array.isArray(licenses) ? licenses : [licenses])) {
+		if (!license || typeof license !== 'object') continue
+		if (license.kind === 'narration-voice' && license.attribution) { records.set(license.attribution, license); continue }
+		if (!license.attributionRequired || !license.attribution) continue
+		records.set(license.attribution, {
+			kind: 'narration-voice',
+			type: 'narration',
+			license: license.spdx || null,
+			commercialUse: 'allowed',
+			attributionRequired: true,
+			attribution: license.attribution,
+			...(license.datasetUrl ? { sourceUrl: license.datasetUrl } : {}),
+		})
+	}
+	return [...records.values()]
+}
+
 function publicNarrationManifest(manifest) {
 	if (!manifest || typeof manifest !== 'object') return null
 	return {
@@ -22480,6 +22502,8 @@ function _buildEditionSidecar(entry) {
 		}
 	})
 	if (!entry.authoredStyleIntent && !entry.authoredSemanticContract && !entry.deliveryExperience && !slides.some(s => s.layoutIntent || s.narration || s.recordStudio || s.objects) && !entry.stockAssets?.length) return null
+	const narrationVoiceLicenses = narrationVoiceLicenseRecords((narrationManifest?.slides || []).flatMap(s => s.voiceLicenses || []))
+	const licensedAssets = [...(entry.stockAssets || []).map(_publicAssetLicenseRecord).filter(Boolean), ...narrationVoiceLicenses]
 	return {
 		schemaVersion: EDITION_SIDECAR_VERSION,
 		savedAt: new Date().toISOString(),
@@ -22490,10 +22514,12 @@ function _buildEditionSidecar(entry) {
 		// LICENSING MANIFEST (owner doctrine 2026-07-03): third-party assets embedded in
 		// this presentation are licensed for use WITHIN the generated presentation; the
 		// manifest travels invisibly inside the package as the permanent license record.
-		...(entry.stockAssets?.length ? {
+		...(licensedAssets.length ? {
 			embeddedAssetLicenses: {
-				notice: 'Third-party graphical/3D/media assets embedded in this presentation are governed by free commercial licenses (no attribution required) and are licensed for use exclusively within this generated presentation. Extraction or redistribution of raw assets is prohibited.',
-				assets: entry.stockAssets.map(_publicAssetLicenseRecord).filter(Boolean),
+				notice: narrationVoiceLicenses.length
+					? 'Third-party graphical/3D/media assets embedded in this presentation are governed by free commercial licenses and are licensed for use exclusively within this generated presentation. Attribution required by a narration voice licence is given in this manifest. Extraction or redistribution of raw assets is prohibited.'
+					: 'Third-party graphical/3D/media assets embedded in this presentation are governed by free commercial licenses (no attribution required) and are licensed for use exclusively within this generated presentation. Extraction or redistribution of raw assets is prohibited.',
+				assets: licensedAssets,
 			},
 		} : {}),
 		slides,
@@ -24348,7 +24374,8 @@ async function handleOpenExisting(args) {
 		// LICENSING MANIFEST round-trip: the embedded-asset license record survives
 		// re-upload so every future save keeps the permanent trail.
 		if (Array.isArray(sidecar.embeddedAssetLicenses?.assets) && sidecar.embeddedAssetLicenses.assets.length) {
-			entry.stockAssets = sidecar.embeddedAssetLicenses.assets
+			// Narration-voice credits are restored with their narration slides, not as stock.
+			entry.stockAssets = sidecar.embeddedAssetLicenses.assets.filter(asset => asset?.kind !== 'narration-voice')
 			editionContextRestored = true
 		}
 		const restoredNarration = []
@@ -35990,6 +36017,7 @@ function lockNarrationPreparation(prepared = {}) {
 			timingEvidence: segment.timingEvidence || 'measured-audio-segment-boundary',
 		})),
 		voice: publicNarrationVoice(prepared.voice),
+		...(narrationVoiceLicenseRecords(prepared.licenses).length ? { voiceLicenses: narrationVoiceLicenseRecords(prepared.licenses) } : {}),
 		settings: prepared.settings || {},
 		timingEvidence: prepared.timingEvidence,
 		warnings: publicNarrationWarnings(prepared.warnings),
@@ -36618,6 +36646,7 @@ async function addNarrationToSlide(args) {
 		...(resolved.voice?.speaker !== undefined ? { speaker: resolved.voice.speaker } : {}),
 		provider: resolved.provider || (args.audio ? 'external-audio' : args.provider || process.env.BETTERPPTX_TTS_PROVIDER || 'piper-http'),
 		license: resolved.license || null,
+		voiceLicenses: narrationVoiceLicenseRecords(prepared ? prepared.manifest.voiceLicenses : resolved.license),
 		requestedCues,
 		cues: cueTiming.applied,
 		captions: captionTiming.applied,
@@ -36893,6 +36922,7 @@ async function addSegmentedNarrationToSlide(args) {
 		...(clips[0]?.resolved?.voice?.speaker !== undefined ? { speaker: clips[0].resolved.voice.speaker } : {}),
 		provider: clips[0]?.resolved?.provider || args.provider || process.env.BETTERPPTX_TTS_PROVIDER || 'piper-http',
 		license: clips[0]?.resolved?.license || null,
+		voiceLicenses: narrationVoiceLicenseRecords(prepared ? prepared.manifest.voiceLicenses : clips.map(clip => clip.resolved?.license)),
 		requestedCues,
 		cues: cueApplied,
 		captions: captionTiming.applied,
@@ -37091,6 +37121,7 @@ function addResolvedNarrationAudioObject({ entry, pptx, slide, slideIndex, resol
 		voiceId: resolved.voice?.id || null,
 		provider: resolved.provider || (args.audio ? 'external-audio' : args.provider || process.env.BETTERPPTX_TTS_PROVIDER || 'piper-http'),
 		license: resolved.license || null,
+		voiceLicenses: narrationVoiceLicenseRecords(resolved.license),
 		cues: 0,
 		captions: 0,
 	})
@@ -44137,6 +44168,7 @@ function requestsRetiredGenericImageGeneration(value) {
 export { getDeck, getSlide, finalizeSlideShapeIds, applySmartTimingRemap, buildNativeTimingManifest, currentSlideTimingObjects, executeMonetizedMcpPaidItem, inferSlideLayoutIntent, _segmentsSignature, _applyRoleOverrides, _notesBodyTextFromXml, _retimeRawTransitionXml, _publicAssetLicenseRecord, toolTimeoutForName, LONG_RUNNING_TOOLS, collectCompositionIssues, PUBLIC_PREVIEW_BATCH_LIMIT, normalizedPreviewBatch, ensurePublicPreviewFreeze, currentPublicPreviewFreeze, publicPreviewVerification, invalidatePublicPreviewFreeze, currentVersionValidationVerification, authoritativePreviewInfrastructureStatus, setPowerPointPreviewExporterForTest, closedCaptionTracksForArgs as closedCaptionTracksForArgsForTest, _applyMediaOptionsPatch as applyMediaOptionsPatchForTest, _applyAtomicMediaPackagePatch as applyAtomicMediaPackagePatchForTest, _removeOwnedMediaCommands as removeOwnedMediaCommandsForTest, _markOwnedMediaCommands as markOwnedMediaCommandsForTest, _removeRawInteractiveMediaTiming as removeRawInteractiveMediaTimingForTest, _mediaRelationshipIds as mediaRelationshipIdsForTest, _removeSlideNarration as removeSlideNarrationForTest, exportedImageBlockFields as exportedImageBlockFieldsForTest, exportedMediaBlockFields as exportedMediaBlockFieldsForTest, publicSourceDescriptorForOptions as publicSourceDescriptorForOptionsForTest, publicNarrationSynthesisResult as publicNarrationSynthesisResultForTest, resolveNarrationAudioReference as resolveNarrationAudioReferenceForTest, normalizeNarrationProviderContractArgs as normalizeNarrationProviderContractArgsForTest, addNarrationToSlide as addNarrationToSlideForTest, removeAuthoredNarrationFromSlide as removeAuthoredNarrationFromSlideForTest, handleUpdateShape as handleUpdateShapeForTest, handleDeleteShapes as handleDeleteShapesForTest, handleAddImage as handleAddImageForTest, handleAddMedia as handleAddMediaForTest, handleUpdateMedia as handleUpdateMediaForTest }
 
 export { segmentCaptionTracksForArgs as segmentCaptionTracksForArgsForTest }
+export { _buildEditionSidecar as buildEditionSidecarForTest }
 export { withSpecIdentityMediaAllowance as withSpecIdentityMediaAllowanceForTest, reserveSpecIdentityMediaAllowance as reserveSpecIdentityMediaAllowanceForTest, commitSpecIdentityMediaAllowance as commitSpecIdentityMediaAllowanceForTest }
 
 export async function callBetterPptxTool(name, args = {}, context = {}) {

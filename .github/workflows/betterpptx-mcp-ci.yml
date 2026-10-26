@@ -113,6 +113,7 @@ jobs:
           node --test betterpptx-mcp/test/reusable-animated-hearts.test.mjs
           node --test betterpptx-mcp/test/full55-reusable-hand-catalogue.test.mjs
           node --test betterpptx-mcp/test/asset-inventory.test.mjs
+          node --test betterpptx-mcp/test/narration-voice-licence-chain.test.mjs betterpptx-mcp/test/voice-gender-coverage.test.mjs betterpptx-mcp/test/narration-preparation-reuse.test.mjs
 
       - name: Build the production container without publishing it
         shell: bash

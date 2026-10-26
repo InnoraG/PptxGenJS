@@ -417,7 +417,27 @@
       "genderConfidence": "curated",
       "availableGenders": [
         "male"
-      ]
+      ],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/bg/bg_BG/dimitar/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/OHF-Voice/voice-datasets",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "Piper U.S. English lessac voice",
+          "baseLicense": "Blizzard Challenge 2013 Lessac/Voice Factory Research Licence Agreement — \"Research Purposes\" only; expressly excludes commercial voice-synthesis products or services based upon the Materials",
+          "baseLicenseUrl": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+          "verdict": "lineage-encumbered"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "ca_ES-upc_ona-medium",
@@ -573,7 +593,27 @@
       "genderConfidence": "curated",
       "availableGenders": [
         "male"
-      ]
+      ],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/cs/cs_CZ/jirka/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/OHF-Voice/voice-datasets",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "Piper U.S. English lessac voice",
+          "baseLicense": "Blizzard Challenge 2013 Lessac/Voice Factory Research Licence Agreement — \"Research Purposes\" only; expressly excludes commercial voice-synthesis products or services based upon the Materials",
+          "baseLicenseUrl": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+          "verdict": "lineage-encumbered"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "cy_GB-bu_tts-medium",
@@ -715,7 +755,27 @@
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
-      "availableGenders": []
+      "availableGenders": [],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/da/da_DK/talesyntese/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-21/",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "Piper U.S. English lessac voice",
+          "baseLicense": "Blizzard Challenge 2013 Lessac/Voice Factory Research Licence Agreement — \"Research Purposes\" only; expressly excludes commercial voice-synthesis products or services based upon the Materials",
+          "baseLicenseUrl": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+          "verdict": "lineage-encumbered"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "de_DE-eva_k-x_low",
@@ -767,7 +827,7 @@
       "commercialUse": "unknown",
       "datasetUrl": "https://www.caito.de/2019/01/03/the-m-ailabs-speech-dataset/",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -796,7 +856,7 @@
       "commercialUse": "allowed",
       "datasetUrl": "https://github.com/rhasspy/dataset-voice-kerstin",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -816,7 +876,7 @@
       "localeName": "German, Germany",
       "quality": "medium",
       "numSpeakers": 236,
-      "isDefaultForLocale": false,
+      "isDefaultForLocale": true,
       "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/mls/medium/de_DE-mls-medium.onnx",
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/mls/medium/de_DE-mls-medium.onnx.json",
       "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/mls/medium/MODEL_CARD",
@@ -828,14 +888,41 @@
       "datasetUrl": "http://openslr.org/94/",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "reviewedBy": "w4-licence-chain-review-2026-10-25",
+      "notes": "W4 gender-pair launch voice; model card + dataset licence + training lineage verified 2026-10-25",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
-      "availableGenders": []
+      "availableGenders": [],
+      "attributionText": "German narration voice trained on Multilingual LibriSpeech (MLS), V. Pratap et al., 2020 (https://www.openslr.org/94/), licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/); source audio from LibriVox (public domain).",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/mls/medium/MODEL_CARD",
+          "statedLicense": "CC-BY 4.0"
+        },
+        "dataset": {
+          "name": "Multilingual LibriSpeech (MLS) — German",
+          "url": "https://www.openslr.org/94/",
+          "license": "CC-BY-4.0 (corpus); underlying LibriVox audio public domain"
+        },
+        "training": {
+          "lineage": "trained from scratch (multi-speaker, 236 MLS speakers)",
+          "base": null
+        },
+        "gender": {
+          "value": "mixed",
+          "source": "MLS metainfo.txt per-speaker GENDER column (facebook/multilingual_librispeech data/mls_german/metainfo.txt)"
+        },
+        "attribution": {
+          "required": true,
+          "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
+        },
+        "verdict": "resale-safe-with-manifest-attribution",
+        "verifiedAt": "2026-10-25"
+      },
+      "reviewedAt": "2026-10-25"
     },
     {
       "id": "de_DE-pavoque-low",
@@ -856,7 +943,7 @@
       "commercialUse": "forbidden",
       "datasetUrl": "https://github.com/marytts/pavoque-data",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -905,7 +992,7 @@
       "localeName": "German, Germany",
       "quality": "medium",
       "numSpeakers": 8,
-      "isDefaultForLocale": true,
+      "isDefaultForLocale": false,
       "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten_emotional/medium/de_DE-thorsten_emotional-medium.onnx",
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten_emotional/medium/de_DE-thorsten_emotional-medium.onnx.json",
       "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten_emotional/medium/MODEL_CARD",
@@ -956,7 +1043,27 @@
       "genderConfidence": "curated",
       "availableGenders": [
         "male"
-      ]
+      ],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/thorstenMueller/Thorsten-Voice",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (high quality)",
+          "base": "Piper U.S. English lessac voice",
+          "baseLicense": "Blizzard Challenge 2013 Lessac/Voice Factory Research Licence Agreement — \"Research Purposes\" only; expressly excludes commercial voice-synthesis products or services based upon the Materials",
+          "baseLicenseUrl": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+          "verdict": "lineage-encumbered"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "de_DE-thorsten-low",
@@ -977,7 +1084,7 @@
       "commercialUse": "allowed",
       "datasetUrl": "https://github.com/thorstenMueller/Thorsten-Voice",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -1039,7 +1146,7 @@
       "commercialUse": "allowed",
       "datasetUrl": "https://www.kaggle.com/datasets/bryanpark/greek-single-speaker-speech-dataset",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -1102,7 +1209,7 @@
       "commercialUse": "unknown",
       "datasetUrl": "https://github.com/MycroftAI/mimic3-voices/blob/master/voices/en_UK/apope_low",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -1369,7 +1476,7 @@
       "commercialUse": "attribution",
       "datasetUrl": "http://www.openslr.org/83/",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -1429,7 +1536,7 @@
       "commercialUse": "unknown",
       "datasetUrl": "https://github.com/MycroftAI/mimic3-voices",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -1547,7 +1654,7 @@
       "commercialUse": "unknown",
       "datasetUrl": "https://github.com/MycroftAI/mimic3-voices",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -1698,7 +1805,7 @@
       "commercialUse": "allowed",
       "datasetUrl": "https://github.com/rhasspy/dataset-voice-kathleen",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -1972,7 +2079,31 @@
       "genderConfidence": "verified",
       "availableGenders": [
         "female"
-      ]
+      ],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ljspeech/high/MODEL_CARD",
+          "statedLicense": "public domain"
+        },
+        "dataset": {
+          "name": "LJ Speech (LibriVox readings by Linda Johnson)",
+          "url": "https://keithito.com/LJ-Speech-Dataset/",
+          "license": "Public domain"
+        },
+        "training": {
+          "lineage": "trained from scratch (1000 epochs)",
+          "base": null
+        },
+        "gender": {
+          "value": "female",
+          "source": "model card: \"US English female voice. Single speaker.\""
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "resale-safe",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "en_US-ljspeech-medium",
@@ -2025,16 +2156,41 @@
       "datasetUrl": "https://librivox.org",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "reviewedBy": "w4-licence-chain-review-2026-10-25",
+      "notes": "W4 gender-pair launch voice; model card + dataset licence + training lineage verified 2026-10-25",
       "gender": "male",
       "genderSource": "model-card",
       "genderConfidence": "verified",
       "availableGenders": [
         "male"
-      ]
+      ],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/norman/medium/MODEL_CARD",
+          "statedLicense": "public domain"
+        },
+        "dataset": {
+          "name": "LibriVox recordings compiled by the model author (~15.5 h)",
+          "url": "https://librivox.org",
+          "license": "Public domain (LibriVox releases all recordings into the public domain)"
+        },
+        "training": {
+          "lineage": "trained from scratch (1200 epochs, medium)",
+          "base": null
+        },
+        "gender": {
+          "value": "male",
+          "source": "model card: \"US English male voice. Single Speaker.\""
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "resale-safe",
+        "verifiedAt": "2026-10-25"
+      },
+      "reviewedAt": "2026-10-25"
     },
     {
       "id": "en_US-reza_ibrahim-medium",
@@ -2289,7 +2445,7 @@
       "commercialUse": "attribution",
       "datasetUrl": "http://www.openslr.org/94/",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -2318,7 +2474,7 @@
       "commercialUse": "attribution",
       "datasetUrl": "http://www.openslr.org/94/",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -2437,7 +2593,23 @@
       "genderConfidence": "curated",
       "availableGenders": [
         "male"
-      ]
+      ],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/claude/high/MODEL_CARD",
+          "statedLicense": "apache-2.0"
+        },
+        "dataset": {
+          "url": "https://huggingface.co/spaces/HirCoir/Piper-TTS-Spanish",
+          "license": "unverified — the cited source is a Hugging Face Space whose only licence statement is the Space metadata tag apache-2.0; the recordings used for training are not identified"
+        },
+        "training": {
+          "lineage": "not stated (\"See URL above\")"
+        },
+        "verdict": "dataset-unverified",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "eu_ES-antton-medium",
@@ -2670,7 +2842,7 @@
       "commercialUse": "allowed",
       "datasetUrl": "https://www.kaggle.com/bryanpark/finnish-single-speaker-speech-dataset",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -2712,7 +2884,27 @@
       "genderConfidence": "curated",
       "availableGenders": [
         "male"
-      ]
+      ],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fi/fi_FI/harri/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://www.kaggle.com/bryanpark/finnish-single-speaker-speech-dataset",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "Piper U.S. English lessac voice",
+          "baseLicense": "Blizzard Challenge 2013 Lessac/Voice Factory Research Licence Agreement — \"Research Purposes\" only; expressly excludes commercial voice-synthesis products or services based upon the Materials",
+          "baseLicenseUrl": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+          "verdict": "lineage-encumbered"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "fr_FR-gilles-low",
@@ -2722,7 +2914,7 @@
       "localeName": "French, France",
       "quality": "low",
       "numSpeakers": 1,
-      "isDefaultForLocale": true,
+      "isDefaultForLocale": false,
       "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/gilles/low/fr_FR-gilles-low.onnx",
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/gilles/low/fr_FR-gilles-low.onnx.json",
       "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/gilles/low/MODEL_CARD",
@@ -2733,7 +2925,7 @@
       "commercialUse": "allowed",
       "datasetUrl": "https://www.kaggle.com/datasets/bryanpark/french-single-speaker-speech-dataset",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-human-approved-2026-05-30",
@@ -2744,7 +2936,27 @@
       "genderConfidence": "curated",
       "availableGenders": [
         "male"
-      ]
+      ],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/gilles/low/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://www.kaggle.com/datasets/bryanpark/french-single-speaker-speech-dataset",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English Ryan voice (low quality)",
+          "base": "Piper U.S. English Ryan voice",
+          "baseLicense": "CC-BY-NC-SA-4.0 (RyanSpeech dataset)",
+          "baseLicenseUrl": "https://www.kaggle.com/datasets/roholazandie/ryanspeech",
+          "verdict": "lineage-encumbered"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "fr_FR-mls_1840-low",
@@ -2765,7 +2977,7 @@
       "commercialUse": "attribution",
       "datasetUrl": "http://www.openslr.org/94/",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -2783,7 +2995,7 @@
       "localeName": "French, France",
       "quality": "medium",
       "numSpeakers": 125,
-      "isDefaultForLocale": false,
+      "isDefaultForLocale": true,
       "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/mls/medium/fr_FR-mls-medium.onnx",
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/mls/medium/fr_FR-mls-medium.onnx.json",
       "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/mls/medium/MODEL_CARD",
@@ -2795,14 +3007,41 @@
       "datasetUrl": "http://openslr.org/94/",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "reviewedBy": "w4-licence-chain-review-2026-10-25",
+      "notes": "W4 gender-pair launch voice; model card + dataset licence + training lineage verified 2026-10-25",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
-      "availableGenders": []
+      "availableGenders": [],
+      "attributionText": "French narration voice trained on Multilingual LibriSpeech (MLS), V. Pratap et al., 2020 (https://www.openslr.org/94/), licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/); source audio from LibriVox (public domain).",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/mls/medium/MODEL_CARD",
+          "statedLicense": "CC-BY 4.0"
+        },
+        "dataset": {
+          "name": "Multilingual LibriSpeech (MLS) — French",
+          "url": "https://www.openslr.org/94/",
+          "license": "CC-BY-4.0 (corpus); underlying LibriVox audio public domain"
+        },
+        "training": {
+          "lineage": "trained from scratch (multi-speaker, 125 MLS speakers)",
+          "base": null
+        },
+        "gender": {
+          "value": "mixed",
+          "source": "MLS metainfo.txt per-speaker GENDER column (facebook/multilingual_librispeech data/mls_french/metainfo.txt)"
+        },
+        "attribution": {
+          "required": true,
+          "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
+        },
+        "verdict": "resale-safe-with-manifest-attribution",
+        "verifiedAt": "2026-10-25"
+      },
+      "reviewedAt": "2026-10-25"
     },
     {
       "id": "fr_FR-siwis-low",
@@ -2823,7 +3062,7 @@
       "commercialUse": "attribution",
       "datasetUrl": "https://datashare.is.ed.ac.uk/handle/10283/2353",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -3064,7 +3303,27 @@
       "genderConfidence": "curated",
       "availableGenders": [
         "female"
-      ]
+      ],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/hu/hu_HU/anna/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/OHF-Voice/voice-datasets",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "Piper U.S. English lessac voice",
+          "baseLicense": "Blizzard Challenge 2013 Lessac/Voice Factory Research Licence Agreement — \"Research Purposes\" only; expressly excludes commercial voice-synthesis products or services based upon the Materials",
+          "baseLicenseUrl": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+          "verdict": "lineage-encumbered"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "hu_HU-berta-medium",
@@ -3709,7 +3968,27 @@
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
-      "availableGenders": []
+      "availableGenders": [],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ne/ne_NP/chitwan/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/OHF-Voice/voice-datasets",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "Piper U.S. English lessac voice",
+          "baseLicense": "Blizzard Challenge 2013 Lessac/Voice Factory Research Licence Agreement — \"Research Purposes\" only; expressly excludes commercial voice-synthesis products or services based upon the Materials",
+          "baseLicenseUrl": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+          "verdict": "lineage-encumbered"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "ne_NP-google-medium",
@@ -3940,7 +4219,7 @@
       "commercialUse": "attribution",
       "datasetUrl": "http://www.openslr.org/94/",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -3969,7 +4248,7 @@
       "commercialUse": "attribution",
       "datasetUrl": "http://www.openslr.org/94/",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -4188,7 +4467,27 @@
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
-      "availableGenders": []
+      "availableGenders": [],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/darkman/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/OHF-Voice/voice-datasets",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "Piper U.S. English lessac voice",
+          "baseLicense": "Blizzard Challenge 2013 Lessac/Voice Factory Research Licence Agreement — \"Research Purposes\" only; expressly excludes commercial voice-synthesis products or services based upon the Materials",
+          "baseLicenseUrl": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+          "verdict": "lineage-encumbered"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "pl_PL-gosia-medium",
@@ -4269,7 +4568,7 @@
       "commercialUse": "attribution",
       "datasetUrl": "http://www.openslr.org/94/",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -4309,7 +4608,27 @@
       "genderConfidence": "curated",
       "availableGenders": [
         "male"
-      ]
+      ],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/cadu/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/OHF-Voice/voice-datasets",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "Piper U.S. English lessac voice",
+          "baseLicense": "Blizzard Challenge 2013 Lessac/Voice Factory Research Licence Agreement — \"Research Purposes\" only; expressly excludes commercial voice-synthesis products or services based upon the Materials",
+          "baseLicenseUrl": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+          "verdict": "lineage-encumbered"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "pt_BR-edresson-low",
@@ -4330,7 +4649,7 @@
       "commercialUse": "attribution",
       "datasetUrl": "https://github.com/Edresson/TTS-Portuguese-Corpus",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -4465,7 +4784,27 @@
       "genderConfidence": "curated",
       "availableGenders": [
         "male"
-      ]
+      ],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ro/ro_RO/mihai/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/OHF-Voice/voice-datasets",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "Piper U.S. English lessac voice",
+          "baseLicense": "Blizzard Challenge 2013 Lessac/Voice Factory Research Licence Agreement — \"Research Purposes\" only; expressly excludes commercial voice-synthesis products or services based upon the Materials",
+          "baseLicenseUrl": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+          "verdict": "lineage-encumbered"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "ru_RU-denis-medium",
@@ -4497,7 +4836,27 @@
       "genderConfidence": "curated",
       "availableGenders": [
         "male"
-      ]
+      ],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/denis/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/OHF-Voice/voice-datasets",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "Piper U.S. English lessac voice",
+          "baseLicense": "Blizzard Challenge 2013 Lessac/Voice Factory Research Licence Agreement — \"Research Purposes\" only; expressly excludes commercial voice-synthesis products or services based upon the Materials",
+          "baseLicenseUrl": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+          "verdict": "lineage-encumbered"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "ru_RU-dmitri-medium",
@@ -4622,7 +4981,27 @@
       "genderConfidence": "curated",
       "availableGenders": [
         "female"
-      ]
+      ],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sk/sk_SK/lili/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/OHF-Voice/voice-datasets",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "Piper U.S. English lessac voice",
+          "baseLicense": "Blizzard Challenge 2013 Lessac/Voice Factory Research Licence Agreement — \"Research Purposes\" only; expressly excludes commercial voice-synthesis products or services based upon the Materials",
+          "baseLicenseUrl": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+          "verdict": "lineage-encumbered"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "sl_SI-artur-medium",
@@ -4685,7 +5064,27 @@
       "genderConfidence": "curated",
       "availableGenders": [
         "male"
-      ]
+      ],
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sq/sq_AL/edon/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://huggingface.co/edonseki/folsh.ai",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "Piper U.S. English lessac voice",
+          "baseLicense": "Blizzard Challenge 2013 Lessac/Voice Factory Research Licence Agreement — \"Research Purposes\" only; expressly excludes commercial voice-synthesis products or services based upon the Materials",
+          "baseLicenseUrl": "https://www.cstr.ed.ac.uk/projects/blizzard/2013/lessac_blizzard2013/license.html",
+          "verdict": "lineage-encumbered"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "verifiedAt": "2026-10-25"
+      }
     },
     {
       "id": "sr_RS-serbski_institut-medium",
@@ -5186,7 +5585,7 @@
       "commercialUse": "unknown",
       "datasetUrl": "https://github.com/TensorSpeech/TensorFlowASR/blob/main/README.md#vietnamese",
       "finetunedFrom": "U.S. English Ryan voice (low quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
@@ -5371,7 +5770,7 @@
       "availableGenders": []
     }
   ],
-  "updatedAt": "2026-06-06T00:00:00.000Z",
+  "updatedAt": "2026-10-25",
   "approvalPolicy": "Runtime production voices are selected as one best commercially allowed voice per language, using Piper quality tier first, then clean lineage, previous approval, default flag, and deterministic id tie-breaks. Attribution, forbidden, unknown-license, and runtime-failing voices remain excluded until an attribution/counsel or deterministic runtime path exists.",
   "voiceProfiles": "voices/voice-profiles.json"
 }

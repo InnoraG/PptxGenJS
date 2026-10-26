@@ -4975,7 +4975,7 @@ function buildAppliedDefaults(spec, plan, timingReadback = null) {
 			note: 'NARRATION-SYNCED BUILD (the visual adapts to the words automatically): on a slide with EXPLICIT narration and 2+ build objects, if you did not hand-place the beats, each object REVEALS as its sentence is spoken — the platform generates sentence-anchored entrance cues that resolve to the real audio at commit. Sentence splitting is Unicode-aware, so it works in every supported narration language. You keep control: place your own cues/timeline/animation (the author owns the build then), or opt out with syncBuild:false on the slide, narration, or spec.motion.',
 		},
 		multilingual: {
-			note: 'Narration is MULTILINGUAL: author scripts in any supported voice language (betterpptx.narration.voices). Set the language via the voice id locale (e.g. de_DE-thorsten-high) or narration.lang. The dry-run dwell estimate is language-aware; after resolve, measured locked narration audio governs timing and the synced build.',
+			note: 'Narration is MULTILINGUAL: author scripts in any supported voice language (betterpptx.narration.voices). Set the language via the voice id locale (e.g. de_DE-mls-medium) or narration.lang, and pick a female or male speaker with narration.gender. The dry-run dwell estimate is language-aware; after resolve, measured locked narration audio governs timing and the synced build.',
 		},
 		// WORLD = STARTING POINT, FULL PALETTE OPEN — the world sets tasteful DEFAULTS, never limits.
 		animationPalette: (() => {

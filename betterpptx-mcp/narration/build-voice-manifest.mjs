@@ -98,12 +98,17 @@ const built = (await mapLimit(entries, CONCURRENCY, async ([key, v]) => {
 	const cardText = await fetchCard(key, cardPath)
 	const card = parseCard(cardText)
 	const cls = classify(card.rawLicense)
-	const lineageReview = /lessac|blizzard/i.test(card.finetunedFrom || '')
+	// Fine-tuned weights inherit their base checkpoint's terms: lessac (Blizzard 2013,
+	// research-only) and Ryan (RyanSpeech, CC-BY-NC-SA) are both non-commercial bases.
+	const lineageReview = /lessac|blizzard|ryan/i.test(card.finetunedFrom || '')
 	const machineReviewStatus = cls.commercialUse === 'forbidden' ? 'rejected'
 		: cls.commercialUse === 'unknown' ? 'unreviewed' : 'candidate'
 	const prior = PRIOR_BY_ID.get(key)
 	const reviewStatus = prior?.reviewStatus === 'approved' && ['allowed', 'attribution'].includes(cls.commercialUse) ? 'approved' : machineReviewStatus
-	const notes = [cls.reason, lineageReview ? 'finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage' : '']
+	const lineageNote = /ryan/i.test(card.finetunedFrom || '')
+		? 'finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage'
+		: 'finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage'
+	const notes = [cls.reason, lineageReview ? lineageNote : '']
 		.filter(Boolean).join('; ')
 	return enrichVoiceWithProfile({
 		id: key,
@@ -130,6 +135,9 @@ const built = (await mapLimit(entries, CONCURRENCY, async ([key, v]) => {
 		reviewedBy: reviewStatus === 'approved' ? (prior?.reviewedBy || 'human-approved') : 'automated:build-voice-manifest.mjs',
 		...(reviewStatus === 'approved' && prior?.reviewedAt ? { reviewedAt: prior.reviewedAt } : {}),
 		notes: reviewStatus === 'approved' && prior?.notes ? prior.notes : notes,
+		// Human licence-chain review (model card + dataset + lineage) survives rebuilds.
+		...(prior?.licenseChain ? { licenseChain: prior.licenseChain } : {}),
+		...(prior?.attributionText ? { attributionText: prior.attributionText } : {}),
 	}, VOICE_PROFILES)
 }))
 

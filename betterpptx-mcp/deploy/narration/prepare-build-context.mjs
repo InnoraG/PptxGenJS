@@ -18,7 +18,7 @@ const pinned = JSON.parse(fs.readFileSync(path.join(narration, 'voices', 'runtim
 
 const result = spawnSync(process.execPath, [path.join(narration, 'download-approved-voices.mjs')], {
 	stdio: 'inherit',
-	env: { ...process.env, BETTERPPTX_VOICE_OUTPUT_DIR: voicesDir, BETTERPPTX_REQUIRED_VOICE_LANGS: 'approved', BETTERPPTX_ALLOW_ATTRIBUTION_VOICES: '0' },
+	env: { ...process.env, BETTERPPTX_VOICE_OUTPUT_DIR: voicesDir, BETTERPPTX_REQUIRED_VOICE_LANGS: 'approved', BETTERPPTX_ALLOW_ATTRIBUTION_VOICES: '1' },
 })
 if (result.status !== 0) throw new Error('Approved voice download failed.')
 
