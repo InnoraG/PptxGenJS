@@ -10,7 +10,7 @@
     "cy_GB-gwryw_gogledd": { "gender": "male", "genderSource": "model-name", "genderConfidence": "verified" },
     "de_DE-eva_k": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
     "de_DE-kerstin": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
-    "de_DE-ramona": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
+    "de_DE-ramona": { "gender": "female", "genderSource": "dataset-speaker-folder", "genderConfidence": "verified" },
     "de_DE-thorsten": { "gender": "male", "genderSource": "curated-model-name", "genderConfidence": "curated" },
     "el_GR-rapunzelina": { "gender": "female", "genderSource": "curated-model-name", "genderConfidence": "curated" },
     "en_GB-cori": { "gender": "female", "genderSource": "model-card", "genderConfidence": "verified" },
