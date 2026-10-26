@@ -8,16 +8,16 @@ The model lane is intentionally isolated from the resale-safe BetterPPTX worker:
   commercial quality lane;
 * applies the owner-selected RestoreFormer++ face-restoration stage only after
   MuseTalk completes;
-* promotion still requires two-profile rotation/idempotency/billing canaries and
-  serving-route verification before public traffic is moved.
+* feature qualification verifies six distinct authenticated billing workspaces,
+  the reviewed motion/mouth profile, and PowerPoint-compatible media canaries.
 
 Run from the repository root:
 
-    $env:MODAL_PROFILE='telcomgapp'
+    $env:MODAL_PROFILE='your-workspace'
     py -m modal run betterpptx-mcp/deploy/avatar-worker/modal_avatar_commercial_eval.py `
-      --image-path betterpptx-mcp/outputs/consented-head-talker-face-crop-long.png `
-      --audio-path betterpptx-mcp/outputs/narration/tts-en_US-ljspeech-high-mriud6ct-25c5632f.wav `
-      --output-path betterpptx-mcp/outputs/commercial-eval/upstream-bbox-0.mp4 `
+      --image-path portrait.jpg `
+      --audio-path speech.wav `
+      --output-path talking-head.mp4 `
       --bbox-shift 0
 """
 
@@ -38,9 +38,13 @@ except ImportError:  # pragma: no cover - exercised only on the deploy host
 
 APP_NAME = "betterpptx-avatar-commercial-production"
 ENDPOINT_LABEL = "betterpptx-avatar-commercial-lipsync"
+# CPU-only liveness route; its URL is the lipsync URL with "-lipsync" replaced by "-health".
+HEALTH_LABEL = "betterpptx-avatar-commercial-health"
+WORKER_BUILD = "commercial-health-20261026"
 AUTH_SECRET_NAME = "betterpptx-avatar-commercial-auth"
 GPU_PREFERENCE = ["A10G", "A100-40GB"]
-RESTORATION_MODEL_ROOT = "D:/PptxGenJS_Claude/betterpptx-mcp/outputs/commercial-eval/restoreformer-pp-models"
+MODEL_LOCK = os.path.join(os.path.dirname(__file__), "restoreformer-models.lock.json")
+MODEL_FETCHER = os.path.join(os.path.dirname(__file__), "fetch_pinned_weights.py")
 RESTORATION_COMMIT = "59d250f45d6b11a3e620d62e6e067ca1288f93a9"
 MUSE_REPO_COMMIT = "0a89dec45a0192b824e3cf4daf96c239440c5ed8"
 MUSE_MODEL_REVISION = "3ef28bc5cff08c90ad8178a25f1b570cd800170f"
@@ -117,7 +121,7 @@ rf_image = (
     .env({"DEBIAN_FRONTEND": "noninteractive", "TZ": "Etc/UTC", "PYTHONUNBUFFERED": "1"})
     .apt_install("git", "ffmpeg", "libgl1", "libglib2.0-0", "curl")
     .run_commands(
-        "pip install 'numpy<2' 'opencv-python-headless<4.12' basicsr facexlib scikit-image lmdb addict pyyaml scipy tqdm yapf imageio-ffmpeg",
+        "pip install 'numpy<2' 'opencv-python-headless<4.12' basicsr facexlib scikit-image lmdb addict pyyaml scipy tqdm yapf imageio-ffmpeg 'gdown==5.2.0'",
         "mkdir -p /opt/rfpp/experiments/pretrained_models/lpips /opt/rfpp/experiments/pretrained_models /opt/rfpp/facexlib-weights",
         "curl -fL https://github.com/xinntao/facexlib/releases/download/v0.1.0/detection_Resnet50_Final.pth -o /opt/rfpp/facexlib-weights/detection_Resnet50_Final.pth",
         "curl -fL https://github.com/xinntao/facexlib/releases/download/v0.2.2/parsing_parsenet.pth -o /opt/rfpp/facexlib-weights/parsing_parsenet.pth",
@@ -126,26 +130,9 @@ rf_image = (
         "git init /opt/rfpp && cd /opt/rfpp && git remote add origin https://github.com/wzhouxiff/RestoreFormerPlusPlus.git && git fetch --depth 1 origin 59d250f45d6b11a3e620d62e6e067ca1288f93a9 && git checkout --detach FETCH_HEAD",
     )
     .workdir("/opt/rfpp")
-    .add_local_file(
-        f"{RESTORATION_MODEL_ROOT}/RestoreFormerPlusPlus/last.ckpt",
-        "/opt/rfpp/experiments/pretrained_models/RestoreFormer++.ckpt",
-    )
-    .add_local_file(
-        f"{RESTORATION_MODEL_ROOT}/pretrained_models/arcface_resnet18.pth",
-        "/opt/rfpp/experiments/pretrained_models/arcface_resnet18.pth",
-    )
-    .add_local_file(
-        f"{RESTORATION_MODEL_ROOT}/pretrained_models/FFHQ_eye_mouth_landmarks_512.pth",
-        "/opt/rfpp/experiments/pretrained_models/FFHQ_eye_mouth_landmarks_512.pth",
-    )
-    .add_local_file(
-        f"{RESTORATION_MODEL_ROOT}/pretrained_models/inception_FFHQ_512.pth",
-        "/opt/rfpp/experiments/pretrained_models/inception_FFHQ_512.pth",
-    )
-    .add_local_file(
-        f"{RESTORATION_MODEL_ROOT}/pretrained_models/lpips/vgg.pth",
-        "/opt/rfpp/experiments/pretrained_models/lpips/vgg.pth",
-    )
+    .add_local_file(MODEL_LOCK, "/opt/restoreformer-models.lock.json", copy=True)
+    .add_local_file(MODEL_FETCHER, "/opt/fetch_pinned_weights.py", copy=True)
+    .run_commands("python /opt/fetch_pinned_weights.py")
 )
 
 commercial_auth = modal.Secret.from_name(AUTH_SECRET_NAME)
@@ -394,6 +381,42 @@ def restoreformer_pp(video_bytes: bytes) -> dict:
     }
 
 
+def _positive_stage_seconds(value):
+    import math
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value <= 0:
+        raise ValueError("Stage timing must be finite and positive")
+    return float(value)
+
+
+def _restoration_segment_usage(results, expected_count):
+    """Sum actual GPU-stage observations; reject incomplete restoration."""
+    if isinstance(expected_count, bool) or not isinstance(expected_count, int) or expected_count < 1 or len(results) != expected_count:
+        raise ValueError("Restoration segment coverage is incomplete")
+    seconds = []
+    for result in results:
+        if not isinstance(result, dict) or not isinstance(result.get("video"), bytes) or not result["video"]:
+            raise ValueError("Restoration segment output is missing")
+        seconds.append(_positive_stage_seconds(result.get("elapsedSec")))
+    return _positive_stage_seconds(sum(seconds))
+
+
+def _commercial_usage_headers(lp, mt, enhanced):
+    base = _positive_stage_seconds(lp.get("elapsedSec")) + _positive_stage_seconds(mt.get("elapsedSec"))
+    restoration = _positive_stage_seconds(enhanced.get("gpuSeconds"))
+    count = enhanced.get("segments")
+    completed = enhanced.get("segmentsCompleted")
+    if isinstance(count, bool) or not isinstance(count, int) or count < 1 or isinstance(completed, bool) or not isinstance(completed, int) or completed != count:
+        raise ValueError("Restoration segment coverage is incomplete")
+    return {
+        "X-Gpu-Seconds": str(round(base, 3)),
+        "X-Total-Gpu-Seconds": str(round(base + restoration, 3)),
+        "X-Gpu-Seconds-Scope": "full-pipeline",
+        "X-RestoreFormer-Seconds": str(round(restoration, 3)),
+        "X-RestoreFormer-Segments": str(count),
+        "X-RestoreFormer-Segments-Completed": str(completed),
+    }
+
+
 def restoreformer_pp_segmented(video_bytes: bytes, segment_seconds: int = 45) -> dict:
     """Restore long videos in parallel segments without changing frame quality.
 
@@ -425,6 +448,8 @@ def restoreformer_pp_segmented(video_bytes: bytes, segment_seconds: int = 45) ->
         raise RuntimeError("RestoreFormer++ could not segment the input video")
     calls = [restoreformer_pp.spawn(segment.read_bytes()) for segment in segment_paths]
     results = [call.get() for call in calls]
+    # Parallel coordinator wall time is not GPU usage: sum every actual stage.
+    gpu_seconds = _restoration_segment_usage(results, len(segment_paths))
     restored_paths = []
     for index, result in enumerate(results):
         restored_path = work / f"restored-{index:03d}.mp4"
@@ -440,22 +465,28 @@ def restoreformer_pp_segmented(video_bytes: bytes, segment_seconds: int = 45) ->
     payload = output.read_bytes()
     return {
         "video": payload,
-        "elapsedSec": round(time.time() - started, 2),
+        "coordinatorElapsedSec": round(time.time() - started, 2),
+        "gpuSeconds": gpu_seconds,
         "bytes": len(payload),
         "segments": len(segment_paths),
+        "segmentsCompleted": len(results),
         "segmentSeconds": int(segment_seconds),
         "restoration": "restoreformer++",
     }
 
 
-@app.function(image=lp_image, gpu=GPU_PREFERENCE, timeout=1200, scaledown_window=60, max_containers=1, secrets=[commercial_auth])
+# Coordination performs authentication, multipart I/O and remote GPU calls only.
+# Reserve GPUs on the three rendering stages, never while their caller waits.
+@app.function(image=lp_image, cpu=1, memory=1024, timeout=1200, scaledown_window=60, max_containers=1, secrets=[commercial_auth])
 @modal.fastapi_endpoint(method="POST", label=ENDPOINT_LABEL)
 async def lipsync(request: "Request"):
     """Authenticated production candidate endpoint for the upstream commercial lane.
 
     This endpoint deliberately exposes only the generic multipart worker contract.
-    It is promoted only after two owner-authenticated Modal profiles pass rotation,
-    idempotency, billing, and 180-second PowerPoint canaries.
+    Feature qualification requires six independently authenticated billing
+    workspaces and reviewed media canaries. Every restoration segment must
+    complete with valid measured usage; this coordinator performs no local GPU
+    inference.
     """
     import os
     import time
@@ -513,10 +544,13 @@ async def lipsync(request: "Request"):
         requested_duration_ms = int(str(form.get("durationMs") or "0"))
         if 0 < requested_duration_ms <= 45_000:
             enhanced = restoreformer_pp.remote(mt["video"])
+            enhanced["gpuSeconds"] = _restoration_segment_usage([enhanced], 1)
             enhanced["segments"] = 1
+            enhanced["segmentsCompleted"] = 1
             enhanced["segmentSeconds"] = 45
         else:
             enhanced = restoreformer_pp_segmented(mt["video"], segment_seconds=45)
+        usage_headers = _commercial_usage_headers(lp, mt, enhanced)
     except Exception as exc:
         raise HTTPException(status_code=502, detail="commercial avatar worker failed") from exc
     elapsed = round(time.time() - started, 3)
@@ -528,15 +562,36 @@ async def lipsync(request: "Request"):
         "X-Mouth-Profile": mouth_profile,
         "X-Mouth-Parsing-Mode": parsing_mode,
         "X-Gpu-Type": "A10G",
-        "X-Gpu-Seconds": str(round(float(lp.get("elapsedSec", 0)) + float(mt.get("elapsedSec", 0)), 3)),
         "X-Render-Seconds": str(round(float(form.get("durationMs") or 0) / 1000, 3)),
         "X-Provider-Execution-Ids": execution_id,
         "X-Idempotency-State": "completed",
         "Cache-Control": "no-store",
     }
-    headers["X-RestoreFormer-Seconds"] = str(round(float(enhanced.get("elapsedSec", 0)), 3))
-    headers["X-RestoreFormer-Segments"] = str(int(enhanced.get("segments", 1)))
+    headers.update(usage_headers)
     return Response(content=enhanced["video"], media_type="video/mp4", headers=headers)
+
+
+health_image = modal.Image.debian_slim(python_version="3.11").pip_install("fastapi[standard]==0.115.6")
+
+
+@app.function(image=health_image, cpu=0.125, memory=128, timeout=30, scaledown_window=10, max_containers=2, secrets=[commercial_auth])
+@modal.fastapi_endpoint(method="GET", label=HEALTH_LABEL)
+async def health(request: "Request"):
+    """CPU-only liveness and auth check; never starts a GPU stage.
+
+    Returns the worker build and whether the endpoint token is configured. With a bearer
+    token it also reports whether that token is the configured one (constant-time compare).
+    No secret, account id, or provider internal is returned.
+    """
+    import hmac
+    import os
+
+    expected = str(os.environ.get("BETTERPPTX_COMMERCIAL_AVATAR_ENDPOINT_TOKEN", "")).strip()
+    supplied = str(request.headers.get("authorization", ""))
+    body = {"ok": True, "service": "betterpptx-avatar-worker", "build": WORKER_BUILD, "gpu": False, "authConfigured": bool(expected)}
+    if supplied:
+        body["authorized"] = bool(expected) and hmac.compare_digest(supplied.encode(), f"Bearer {expected}".encode())
+    return body
 
 
 @app.local_entrypoint()

@@ -18,6 +18,12 @@ import { assertProductionTalkingHeadAttestation, resolveProductionTalkingHeadOpt
 const AVATAR_STORE_PROVIDER_ID = 'avatar-worker'
 const COMMERCIAL_AVATAR_STORE_PROVIDER_ID = 'avatar-worker-commercial'
 
+// A recorded health URL is carried only when present, so account records keep their shape.
+function optionalHealthUrl(value) {
+	const url = String(value || '').trim().replace(/\/+$/, '')
+	return url ? { healthUrl: url } : {}
+}
+
 // The pool is either a bare [{ id, url, route, token, weight }] array or a whole
 // credential-store document (the Secret Manager bundle) bound as one secret env value.
 function avatarWorkerEnvironmentPool(prefix, storeProviderId) {
@@ -30,7 +36,7 @@ function avatarWorkerEnvironmentPool(prefix, storeProviderId) {
 		if (!Array.isArray(accounts)) return []
 		parsed = accounts
 			.filter(account => account && account.enabled !== false && account.env && typeof account.env === 'object')
-			.map(account => ({ id: account.id, url: account.env[`${prefix}URL`], route: account.env[`${prefix}ROUTE`], token: account.env[`${prefix}TOKEN`], weight: account.env[`${prefix}WEIGHT`] }))
+			.map(account => ({ id: account.id, url: account.env[`${prefix}URL`], route: account.env[`${prefix}ROUTE`], token: account.env[`${prefix}TOKEN`], weight: account.env[`${prefix}WEIGHT`], healthUrl: account.env[`${prefix}HEALTH_URL`] }))
 	}
 	if (!Array.isArray(parsed)) return []
 	return parsed
@@ -40,6 +46,7 @@ function avatarWorkerEnvironmentPool(prefix, storeProviderId) {
 			route: String(account?.route || '').trim(),
 			token: String(account?.token || '').trim(),
 			weight: account?.weight,
+			...optionalHealthUrl(account?.healthUrl),
 		}))
 		.filter(account => account.id && account.url)
 }
@@ -57,6 +64,7 @@ export function avatarWorkerAccounts(provider = 'liveportrait-musetalk') {
 			// Selection metadata is non-secret and may be owner-managed in the credential UI.
 			// It is deliberately separate from provider credentials and never appears in public results.
 			weight: account.env?.[`${prefix}WEIGHT`],
+			...optionalHealthUrl(account.env?.[`${prefix}HEALTH_URL`]),
 		}))
 		.filter(account => account.id && account.url)
 	if (fromStore.length) return fromStore
@@ -68,8 +76,47 @@ export function avatarWorkerAccounts(provider = 'liveportrait-musetalk') {
 	if (fromEnvironmentPool.length) return fromEnvironmentPool
 	const url = String(process.env[`${prefix}URL`] || '').trim().replace(/\/+$/, '')
 	if (!url) return []
-	return [{ id: 'env', url, route: String(process.env[`${prefix}ROUTE`] || '').trim(), token: String(process.env[`${prefix}TOKEN`] || '').trim(), weight: process.env[`${prefix}WEIGHT`] }]
+	return [{ id: 'env', url, route: String(process.env[`${prefix}ROUTE`] || '').trim(), token: String(process.env[`${prefix}TOKEN`] || '').trim(), weight: process.env[`${prefix}WEIGHT`], ...optionalHealthUrl(process.env[`${prefix}HEALTH_URL`]) }]
 }
+// CPU-only liveness route of the worker app (never starts a GPU). The bundle records the
+// deployed URL; without it, the lipsync host with "-lipsync" replaced by "-health" is used.
+export function avatarWorkerHealthUrl(account = {}) {
+	if (account.healthUrl) return account.healthUrl
+	try {
+		const url = new URL(account.url)
+		if (!url.hostname.includes('-lipsync')) return ''
+		url.hostname = url.hostname.replace('-lipsync', '-health')
+		url.pathname = '/'
+		return url.toString().replace(/\/+$/, '')
+	} catch { return '' }
+}
+
+// Free pre-dispatch liveness check: an account whose /health is down, unreachable, or does not
+// accept our token is skipped before any render request reaches it. A worker without the
+// health route (404) is treated as unknown and still tried.
+export async function probeAvatarWorkerHealth(account, { timeoutMs = Math.max(1000, Number(process.env.BETTERPPTX_AVATAR_WORKER_HEALTH_TIMEOUT_MS || 20000)) } = {}) {
+	const url = avatarWorkerHealthUrl(account)
+	if (!url) return { ok: true, status: 'unknown' }
+	try {
+		recordResourceUsage({ externalCalls: 1 })
+		const headers = { Accept: 'application/json' }
+		if (account.token) headers.Authorization = `Bearer ${account.token}`
+		const response = await fetch(url, { headers, signal: AbortSignal.timeout(timeoutMs) })
+		if (response.status === 404) return { ok: true, status: 'unknown' }
+		if (!response.ok) return { ok: false, status: 'unhealthy', httpStatus: response.status }
+		const body = await response.json().catch(() => ({}))
+		if (body?.ok !== true) return { ok: false, status: 'unhealthy', httpStatus: response.status }
+		if (account.token && body.authorized === false) return { ok: false, status: 'unauthorized', httpStatus: response.status }
+		return { ok: true, status: 'healthy' }
+	} catch (error) {
+		return { ok: false, status: error?.name === 'TimeoutError' || error?.name === 'AbortError' ? 'timeout' : 'unreachable' }
+	}
+}
+
+function healthPrecheckEnabled() {
+	return String(process.env.BETTERPPTX_AVATAR_WORKER_HEALTH_PRECHECK || '').trim() === '1'
+}
+
 function accountEndpoint(account) {
 	const route = account.route || '/v1/avatar/lipsync'
 	return `${account.url}${route.startsWith('/') ? '' : '/'}${route}`
@@ -368,6 +415,18 @@ export async function renderMuseTalkHttp({ avatarImagePath, audioPath, durationM
 					continue
 				}
 				budgetReserved = true
+			}
+			if (healthPrecheckEnabled()) {
+				const liveness = await probeAvatarWorkerHealth(account)
+				if (!liveness.ok) {
+					// Nothing reached the render route, so release both ledgers instead of settling.
+					attemptTrace.push({ accountHash, phase: 'health', status: liveness.httpStatus || null, errorCode: liveness.status })
+					if (quotaStore && quotaReserved) { try { await quotaStore.release(account.id, quotaReservationId) } catch {} quotaSettled = true }
+					if (budgetStore && budgetReserved) { try { await budgetStore.release(account.id, quotaReservationId) } catch {} budgetSettled = true }
+					try { await stateStore.recordFailure(account.id, liveness.status === 'unauthorized' ? 'auth' : 'transient') } catch {}
+					lastErr = avatarError('AVATAR_UNAVAILABLE', 'Avatar worker failed its health check.', { retryable: true, workerCode: liveness.status })
+					continue
+				}
 			}
 			const body = new FormData()
 			body.append('image', new Blob([imageBuffer], { type: imageMime }), 'avatar.png')

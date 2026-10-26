@@ -31,3 +31,18 @@ test('Mission Control keeps talking heads disabled and receives no identity-medi
 	assert.match(workflow, /mission_control_env="[^"]*BETTERPPTX_AVATAR_PROVIDER=disabled"/)
 	assert.doesNotMatch(deployLine('CLOUD_RUN_MISSION_CONTROL'), /IDENTITY_MEDIA|MESHY|AVATAR_WORKER_POOL/)
 })
+
+test('production pre-checks each Modal account through its CPU-only health route', () => {
+	assert.match(workflow, /BETTERPPTX_AVATAR_WORKER_HEALTH_PRECHECK=1/)
+	const worker = fs.readFileSync(path.join(root, 'betterpptx-mcp/deploy/avatar-worker/modal_avatar_commercial_eval.py'), 'utf8')
+	const decorator = worker.split(/\r?\n/).find(line => line.startsWith('@app.function(image=health_image'))
+	assert.ok(decorator, 'health function is deployed with the slim image')
+	assert.doesNotMatch(decorator, /gpu=/, 'health never requests a GPU')
+	assert.ok(worker.includes('@modal.fastapi_endpoint(method="GET", label=HEALTH_LABEL)'))
+	assert.match(worker, /HEALTH_LABEL = "betterpptx-avatar-commercial-health"/)
+	const body = worker.slice(worker.indexOf('async def health('), worker.indexOf('@app.local_entrypoint()'))
+	assert.ok(body.includes('hmac.compare_digest'))
+	const returned = body.slice(body.indexOf('body = {'))
+	assert.doesNotMatch(returned, /: expected\b|"token"|AUTH_SECRET_NAME|APP_NAME/, 'the token and internals are never returned')
+	for (const file of ['fetch_pinned_weights.py', 'restoreformer-models.lock.json', 'liveportrait_eye_gaze_blend_patch.py']) assert.ok(fs.existsSync(path.join(root, 'betterpptx-mcp/deploy/avatar-worker', file)), file)
+})

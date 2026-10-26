@@ -1,0 +1,13 @@
+{
+  "schema": "betterpptx.restoreformer-public-models.v1",
+  "sourceRepositoryCommit": "59d250f45d6b11a3e620d62e6e067ca1288f93a9",
+  "sourceFolder": "https://drive.google.com/drive/folders/1-WPxGJu8CK6SjprJSD4Mvm2zQH9J7xCU",
+  "verifiedAt": "2026-10-15",
+  "weights": [
+    {"destination":"experiments/pretrained_models/RestoreFormer++.ckpt","googleDriveId":"1Tc1saE1vC60t5usjmtMd6FBpiC3zdCYm","sha256":"613fe52805f86bf8c2bffff08ae9f7a0b99f408be1bf221767af6183038be3a2","bytes":294028815},
+    {"destination":"experiments/pretrained_models/lpips/vgg.pth","googleDriveId":"15Otb6o79w6EgOmklKFoIhyqnEv6EowRt","sha256":"a78928a0af1e5f0fcb1f3b9e8f8c3a2a5a3de244d830ad5c1feddc79b8432868","bytes":7289},
+    {"destination":"experiments/pretrained_models/arcface_resnet18.pth","googleDriveId":"1eV5PHFeuIYJYKCTQiHxnSdLS0fJo4kNr","sha256":"69554b3184575bdda7ecf7f40caf2b0c5ecbd0617b676d2209d8bf0e7e3d8042","bytes":102585335},
+    {"destination":"experiments/pretrained_models/FFHQ_eye_mouth_landmarks_512.pth","googleDriveId":"1sXQcwrCLzjX3Ruf3qY01Cn_VvlCivB22","sha256":"80c0c1a71206d42b3d39c1d4c9b0ddd4066743f478e36e3de19ced0db4434c02","bytes":37260585},
+    {"destination":"experiments/pretrained_models/inception_FFHQ_512.pth","googleDriveId":"1ZpnjaOGq3pIamrTQybRac4Uiwq_J6mnx","sha256":"270ce9a1047139f4d0f2b2b4dae564c513f7c07850038619e1397ba97f214c52","bytes":48403951}
+  ]
+}

@@ -26,4 +26,11 @@ Private maintainer notes. Both features run wherever `generate_from_spec phase:"
   - Right after a fresh deploy, run it once by hand: `gcloud run jobs execute betterpptx-avatar-budget-sync --region=us-central1 --wait`.
 - Adding an account takes three steps: deploy the worker on the new Modal account, add it to both secrets, then run the sync job.
 - The owner decided on 2026-10-25 not to set Modal dashboard spend limits, so this gate is the cap.
-- Endpoint check without a GPU: every endpoint route is the GPU function, so even an unauthenticated request cold-starts an A10G. Verify deployments instead with a CPU-only Modal probe. It compares `modal.Function.from_name("betterpptx-avatar-commercial-production", "lipsync").get_web_url()` with the bundle URL, and the sha256 fingerprint of the account's `betterpptx-avatar-commercial-auth` token with the bundle token.
+- Liveness without spend: each worker app also deploys `health`, a CPU-only GET route (`betterpptx-avatar-commercial-health`, 0.125 CPU, never a GPU). It returns the worker build, `authConfigured`, and `authorized` when called with the bearer token.
+  - Each account's health URL is recorded in the bundle as `BETTERPPTX_COMMERCIAL_AVATAR_WORKER_HEALTH_URL`, because some workspaces add a `.us-east` region suffix that older lipsync URLs lack.
+  - Production (`BETTERPPTX_AVATAR_WORKER_HEALTH_PRECHECK=1`) calls it before every render request. An account that is down, unreachable, or rejects our token is skipped and released, with no render call and no charge.
+  - Checks: `py deploy/avatar-worker/verify_rotation_endpoints.py <bundle>` (add `--probe-lipsync-401` to also probe the render route), and `node verify-avatar-runtime.mjs --check-worker-health`.
+- Worker source: `deploy/avatar-worker/modal_avatar_commercial_eval.py` (with `fetch_pinned_weights.py`, `restoreformer-models.lock.json` and `liveportrait_eye_gaze_blend_patch.py`) is the deployed production source, tag `commercial-health-20261026`.
+  - The `lipsync` route is a 1-CPU coordinator; GPU stages start only after auth.
+  - Deploy one account at a time with `MODAL_PROFILE=<id> py -m modal deploy modal_avatar_commercial_eval.py --tag <tag>`.
+  - Keep LF line endings in the patch file, or the LivePortrait image rebuilds.

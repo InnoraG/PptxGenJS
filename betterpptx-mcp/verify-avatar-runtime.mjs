@@ -7,7 +7,7 @@ import { hashText } from './narration/audio.mjs'
 import { writeToneWav } from './narration/audio.mjs'
 import { findFfmpeg, findFfprobe, assertPowerPointSafeMp4 } from './avatar/ffmpeg.mjs'
 import { renderAvatarNarrationVideo } from './avatar/service.mjs'
-import { credentialAccounts } from './config/credential-store.mjs'
+import { avatarWorkerAccounts, avatarWorkerHealthUrl, probeAvatarWorkerHealth } from './avatar/providers/musetalkHttp.mjs'
 
 const args = new Set(process.argv.slice(2))
 
@@ -37,20 +37,18 @@ async function checkTts() {
 }
 
 async function checkWorkerHealth() {
-	const fromStore = credentialAccounts('avatar-worker')
-		.map(account => ({
-			id: String(account.id || ''),
-			url: String(account.env?.BETTERPPTX_AVATAR_WORKER_URL || '').trim().replace(/\/+$/, ''),
-			token: String(account.env?.BETTERPPTX_AVATAR_WORKER_TOKEN || '').trim(),
-		}))
-		.filter(account => account.id && account.url)
-	const accounts = fromStore.length ? fromStore : (() => {
-		const url = String(process.env.BETTERPPTX_AVATAR_WORKER_URL || '').trim().replace(/\/+$/, '')
-		return url ? [{ id: 'env', url, token: String(process.env.BETTERPPTX_AVATAR_WORKER_TOKEN || '').trim() }] : []
-	})()
+	// Same accounts and liveness route the provider uses. Modal workers answer on their
+	// CPU-only /health function (never a GPU); self-hosted workers keep /healthz or /health.
+	const provider = String(process.env.BETTERPPTX_AVATAR_PROVIDER || '').trim().toLowerCase()
+	const accounts = avatarWorkerAccounts(provider === 'liveportrait-musetalk-commercial' ? provider : 'liveportrait-musetalk')
 	if (!accounts.length) return null
 	const results = []
 	for (const account of accounts) {
+		if (avatarWorkerHealthUrl(account)) {
+			const probe = await probeAvatarWorkerHealth(account, { timeoutMs: 30000 })
+			results.push({ id: account.id, ok: probe.ok && probe.status === 'healthy', route: 'health-function', status: probe.status, ...(probe.httpStatus ? { httpStatus: probe.httpStatus } : {}) })
+			continue
+		}
 		let route = '/healthz'
 		let response
 		try {
