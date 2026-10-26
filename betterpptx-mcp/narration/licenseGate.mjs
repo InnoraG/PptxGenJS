@@ -131,7 +131,9 @@ export function resolveVoice({ voice, lang, gender, speaker, allowUnreviewedVoic
 	if (voice) {
 		found = manifest.voices.find(v => v.id === voice)
 	} else if (lang) {
+		// A bare language ("en", "es") prefers its designated voice over whichever locale sorts first.
 		found = genderVoices.find(v => v.isDefaultForLocale && normalizeLanguage(v.locale) === requested)
+			|| genderVoices.find(v => v.isDefaultForLanguage && normalizeLanguage(v.language) === requested)
 			|| genderVoices.find(v => v.isDefaultForLocale && normalizeLanguage(v.language) === requested)
 			|| genderVoices.find(v => normalizeLanguage(v.locale) === requested)
 			|| genderVoices.find(v => normalizeLanguage(v.language) === requested)

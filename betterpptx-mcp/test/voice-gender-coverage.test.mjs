@@ -19,8 +19,8 @@ test('voice profiles distinguish a mixed Piper model from its selected speaker g
 test('inventory coverage reports the pair matrix instead of silently treating unknown voices as gendered', () => {
 	const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
 	const coverage = genderCoverage((manifest.voices || []).map(voice => enrichVoiceWithProfile(voice, profiles)), ['female', 'male'], profiles)
-	assert.equal(coverage.localeCount, 49)
-	assert.equal(coverage.localesWithPair.length, 19)
+	assert.equal(coverage.localeCount, 58)
+	assert.equal(coverage.localesWithPair.length, 23)
 	assert.equal(coverage.pairComplete, false)
 	assert.ok(coverage.localesMissingPair.some(row => row.locale === 'zh_CN' && row.missingGenders.includes('female') && row.missingGenders.includes('male')))
 })

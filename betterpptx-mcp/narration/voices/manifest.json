@@ -1,18 +1,18 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-04",
+  "generatedAt": "2026-10-26",
   "source": "https://huggingface.co/rhasspy/piper-voices (voices.json + per-voice MODEL_CARD)",
   "policy": "zero-cost voices whose license permits embedding the synthesized audio in a sold, closed-SaaS .pptx. CC0/MIT/permissive=allowed; CC-BY/CC-BY-SA=attribution; NC/research/GPL/unknown=not usable. See plan §4.5.",
   "disclaimer": "Machine-classified from the live MODEL_CARD. NOT legal advice and NOT human-approved. Flip chosen candidates to reviewStatus:\"approved\" after review. sha256 of each .onnx is computed when the model is downloaded into the image.",
   "stats": {
-    "voices": 161,
-    "locales": 49,
-    "localesWithUsableVoice": 35,
+    "voices": 178,
+    "locales": 58,
+    "localesWithUsableVoice": 41,
     "byCommercialUse": {
-      "unknown": 42,
-      "allowed": 67,
-      "attribution": 34,
-      "forbidden": 18
+      "unknown": 41,
+      "allowed": 72,
+      "attribution": 42,
+      "forbidden": 23
     },
     "mandatory": {
       "fr": true,
@@ -20,18 +20,21 @@
     },
     "localesWithoutUsableVoice": [
       "ar_JO",
-      "es_AR",
       "eu_ES",
+      "he_IL",
       "hi_IN",
+      "hy_AM",
       "id_ID",
       "is_IS",
-      "it_IT",
+      "ja_JP",
       "ka_GE",
+      "ko_KR",
       "ku_TR",
       "lb_LU",
       "ml_IN",
       "sr_RS",
       "sw_CD",
+      "th_TH",
       "tr_TR"
     ],
     "genderPairCoverage": {
@@ -46,6 +49,7 @@
         "en_GB",
         "en_US",
         "es_ES",
+        "et_EE",
         "eu_ES",
         "fr_FR",
         "hi_IN",
@@ -55,10 +59,13 @@
         "kk_KZ",
         "ku_TR",
         "ml_IN",
+        "nl_BE",
+        "no_NO",
         "pl_PL",
         "ru_RU",
         "te_IN",
-        "uk_UA"
+        "uk_UA",
+        "ur_PK"
       ],
       "localesMissingPair": [
         {
@@ -80,6 +87,14 @@
           ]
         },
         {
+          "locale": "bn_BD",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        },
+        {
           "locale": "cs_CZ",
           "availableGenders": [
             "male"
@@ -90,10 +105,11 @@
         },
         {
           "locale": "da_DK",
-          "availableGenders": [],
-          "missingGenders": [
-            "female",
+          "availableGenders": [
             "male"
+          ],
+          "missingGenders": [
+            "female"
           ]
         },
         {
@@ -142,7 +158,31 @@
           ]
         },
         {
+          "locale": "he_IL",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        },
+        {
+          "locale": "hy_AM",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        },
+        {
           "locale": "id_ID",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        },
+        {
+          "locale": "ja_JP",
           "availableGenders": [],
           "missingGenders": [
             "female",
@@ -159,11 +199,27 @@
           ]
         },
         {
+          "locale": "ko_KR",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
+            "male"
+          ]
+        },
+        {
           "locale": "lb_LU",
           "availableGenders": [
             "female"
           ],
           "missingGenders": [
+            "male"
+          ]
+        },
+        {
+          "locale": "lt_LT",
+          "availableGenders": [],
+          "missingGenders": [
+            "female",
             "male"
           ]
         },
@@ -177,20 +233,21 @@
           ]
         },
         {
-          "locale": "ne_NP",
-          "availableGenders": [],
-          "missingGenders": [
-            "female",
-            "male"
-          ]
-        },
-        {
-          "locale": "nl_BE",
+          "locale": "mr_IN",
           "availableGenders": [
             "female"
           ],
           "missingGenders": [
             "male"
+          ]
+        },
+        {
+          "locale": "ne_NP",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
           ]
         },
         {
@@ -200,14 +257,6 @@
           ],
           "missingGenders": [
             "female"
-          ]
-        },
-        {
-          "locale": "no_NO",
-          "availableGenders": [],
-          "missingGenders": [
-            "female",
-            "male"
           ]
         },
         {
@@ -221,11 +270,10 @@
         },
         {
           "locale": "pt_PT",
-          "availableGenders": [
-            "male"
-          ],
+          "availableGenders": [],
           "missingGenders": [
-            "female"
+            "female",
+            "male"
           ]
         },
         {
@@ -274,6 +322,15 @@
         },
         {
           "locale": "sv_SE",
+          "availableGenders": [
+            "male"
+          ],
+          "missingGenders": [
+            "female"
+          ]
+        },
+        {
+          "locale": "sw_CD",
           "availableGenders": [],
           "missingGenders": [
             "female",
@@ -281,7 +338,7 @@
           ]
         },
         {
-          "locale": "sw_CD",
+          "locale": "th_TH",
           "availableGenders": [],
           "missingGenders": [
             "female",
@@ -297,19 +354,11 @@
           ]
         },
         {
-          "locale": "ur_PK",
+          "locale": "vi_VN",
           "availableGenders": [
-            "male"
+            "female"
           ],
           "missingGenders": [
-            "female"
-          ]
-        },
-        {
-          "locale": "vi_VN",
-          "availableGenders": [],
-          "missingGenders": [
-            "female",
             "male"
           ]
         },
@@ -412,12 +461,6 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
-      "availableGenders": [
-        "male"
-      ],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/bg/bg_BG/dimitar/medium/MODEL_CARD",
@@ -435,9 +478,44 @@
           "verdict": "lineage-encumbered"
         },
         "verdict": "lineage-encumbered",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
         "verifiedAt": "2026-10-25"
-      }
+      },
+      "gender": "male",
+      "genderSource": "dataset-sample-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "male"
+      ]
+    },
+    {
+      "id": "bn_BD-google-medium",
+      "name": "google",
+      "language": "bn",
+      "locale": "bn_BD",
+      "localeName": "Bengali, Bangladesh",
+      "quality": "medium",
+      "numSpeakers": 16,
+      "isDefaultForLocale": true,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/bn/bn_BD/google/medium/bn_BD-google-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/bn/bn_BD/google/medium/bn_BD-google-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/bn/bn_BD/google/medium/MODEL_CARD",
+      "modelMd5": "2a365b2d91bb9cb7ed62c57d9ee0ec48",
+      "configMd5": "2286795a555ad100657de86646a74f12",
+      "rawLicense": "Attribution-ShareAlike 4.0 International",
+      "license": "CC-BY-SA-4.0",
+      "commercialUse": "attribution",
+      "datasetUrl": "http://www.openslr.org/37/",
+      "finetunedFrom": "LibriTTS-R voice (medium quality)",
+      "lineageReview": true,
+      "reviewStatus": "candidate",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "automated:build-voice-manifest.mjs",
+      "notes": "ShareAlike binds model adaptations, not program output; finetuned from en_US-libritts_r-medium, which carries a non-commercial weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "ca_ES-upc_ona-medium",
@@ -464,8 +542,8 @@
       "reviewedBy": "automated:build-voice-manifest.mjs",
       "notes": "ShareAlike binds model adaptations, not program output; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
       "gender": "female",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
       "availableGenders": [
         "female"
       ]
@@ -490,13 +568,39 @@
       "datasetUrl": "https://collectivat.cat/asr#upc-festcat-tts-corpora",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "ShareAlike binds model adaptations, not program output",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; resale-safe-with-manifest-attribution",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ca/ca_ES/upc_ona/x_low/MODEL_CARD",
+          "statedLicense": "CC BY-SA 3.0 ES"
+        },
+        "dataset": {
+          "url": "https://collectivat.cat/asr#upc-festcat-tts-corpora",
+          "license": "CC-BY-SA-4.0"
+        },
+        "training": {
+          "lineage": "trained from scratch (model card)",
+          "base": null
+        },
+        "gender": {
+          "value": "female",
+          "source": "measured-acoustic: synthesized median F0 185 Hz (FestCat speaker \"Ona\")"
+        },
+        "attribution": {
+          "required": true,
+          "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
+        },
+        "verdict": "resale-safe-with-manifest-attribution",
+        "verifiedAt": "2026-10-26"
+      },
+      "attributionText": "Catalan narration voice trained on the UPC FestCat TTS corpora (https://collectivat.cat/asr#upc-festcat-tts-corpora), licensed CC BY-SA 3.0 ES.",
       "gender": "female",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
       "availableGenders": [
         "female"
       ]
@@ -521,13 +625,39 @@
       "datasetUrl": "https://collectivat.cat/asr#upc-festcat-tts-corpora",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "ShareAlike binds model adaptations, not program output",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; resale-safe-with-manifest-attribution",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ca/ca_ES/upc_pau/x_low/MODEL_CARD",
+          "statedLicense": "CC BY-SA 3.0 ES"
+        },
+        "dataset": {
+          "url": "https://collectivat.cat/asr#upc-festcat-tts-corpora",
+          "license": "CC-BY-SA-4.0"
+        },
+        "training": {
+          "lineage": "trained from scratch (model card)",
+          "base": null
+        },
+        "gender": {
+          "value": "male",
+          "source": "measured-acoustic: synthesized median F0 89 Hz (FestCat speaker \"Pau\")"
+        },
+        "attribution": {
+          "required": true,
+          "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
+        },
+        "verdict": "resale-safe-with-manifest-attribution",
+        "verifiedAt": "2026-10-26"
+      },
+      "attributionText": "Catalan narration voice trained on the UPC FestCat TTS corpora (https://collectivat.cat/asr#upc-festcat-tts-corpora), licensed CC BY-SA 3.0 ES.",
       "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
       "availableGenders": [
         "male"
       ]
@@ -588,12 +718,6 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
-      "availableGenders": [
-        "male"
-      ],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/cs/cs_CZ/jirka/medium/MODEL_CARD",
@@ -611,9 +735,44 @@
           "verdict": "lineage-encumbered"
         },
         "verdict": "lineage-encumbered",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
         "verifiedAt": "2026-10-25"
-      }
+      },
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
+    },
+    {
+      "id": "cs_CZ-kasandra-medium",
+      "name": "kasandra",
+      "language": "cs",
+      "locale": "cs_CZ",
+      "localeName": "Czech, Czech Republic",
+      "quality": "medium",
+      "numSpeakers": 1,
+      "isDefaultForLocale": false,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/cs/cs_CZ/kasandra/medium/cs_CZ-kasandra-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/cs/cs_CZ/kasandra/medium/cs_CZ-kasandra-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/cs/cs_CZ/kasandra/medium/MODEL_CARD",
+      "modelMd5": "4b74926a8e7a25e86e1bdb01a25bae66",
+      "configMd5": "b7c458cdaccfc2709555961b6328087c",
+      "rawLicense": "Creative Commons Attribution 4.0 International (CC BY 4.0)",
+      "license": "CC-BY-4.0",
+      "commercialUse": "attribution",
+      "datasetUrl": "https://huggingface.co/ondrazarici/Cassandra-Kasandra-piper-cz",
+      "finetunedFrom": null,
+      "lineageReview": false,
+      "reviewStatus": "candidate",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "automated:build-voice-manifest.mjs",
+      "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "cy_GB-bu_tts-medium",
@@ -635,10 +794,37 @@
       "datasetUrl": "https://huggingface.co/datasets/techiaith/bu-tts-cy-en",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; lineage-encumbered",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/cy/cy_GB/bu_tts/medium/MODEL_CARD",
+          "statedLicense": "CC-BY"
+        },
+        "dataset": {
+          "url": "https://huggingface.co/datasets/techiaith/bu-tts-cy-en",
+          "license": "CC-BY-4.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "lessac (Blizzard 2013 research-only base)"
+        },
+        "gender": {
+          "value": "mixed",
+          "source": "speaker-id-map benyw (female) / gwryw (male)"
+        },
+        "attribution": {
+          "required": true,
+          "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
+      "attributionText": "Welsh narration voices trained on the Bangor University TTS corpus, licensed CC BY 4.0.",
       "gender": "mixed",
       "genderSource": "speaker-id-map",
       "genderConfidence": "verified",
@@ -752,10 +938,6 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "gender": "unknown",
-      "genderSource": "unresolved",
-      "genderConfidence": "unresolved",
-      "availableGenders": [],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/da/da_DK/talesyntese/medium/MODEL_CARD",
@@ -773,9 +955,19 @@
           "verdict": "lineage-encumbered"
         },
         "verdict": "lineage-encumbered",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
-        "verifiedAt": "2026-10-25"
-      }
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-25",
+        "gender": {
+          "value": "male",
+          "source": "measured-acoustic: synthesized median F0 117 Hz"
+        }
+      },
+      "gender": "male",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "de_DE-eva_k-x_low",
@@ -831,7 +1023,7 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL",
+      "notes": "license not machine-clear; read dataset URL; finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -860,7 +1052,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "female",
       "genderSource": "curated-model-name",
       "genderConfidence": "curated",
@@ -891,12 +1083,8 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "w4-licence-chain-review-2026-10-25",
+      "reviewedAt": "2026-10-25",
       "notes": "W4 gender-pair launch voice; model card + dataset licence + training lineage verified 2026-10-25",
-      "gender": "unknown",
-      "genderSource": "unresolved",
-      "genderConfidence": "unresolved",
-      "availableGenders": [],
-      "attributionText": "German narration voice trained on Multilingual LibriSpeech (MLS), V. Pratap et al., 2020 (https://www.openslr.org/94/), licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/); source audio from LibriVox (public domain).",
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/mls/medium/MODEL_CARD",
@@ -923,7 +1111,31 @@
         "verifiedAt": "2026-10-25",
         "speakerSelection": "Speakers selected 2026-10-26 by measured intelligibility (faster-whisper WER over 4 clips) and natural pace among dataset-gender-verified MLS speakers with >=600 training minutes; the most-trained speakers were slower and less intelligible."
       },
-      "reviewedAt": "2026-10-25"
+      "attributionText": "German narration voice trained on Multilingual LibriSpeech (MLS), V. Pratap et al., 2020 (https://www.openslr.org/94/), licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/); source audio from LibriVox (public domain).",
+      "isDefaultForLanguage": true,
+      "gender": "mixed",
+      "genderSource": "dataset-speaker-metadata",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female",
+        "male"
+      ],
+      "speakerProfiles": [
+        {
+          "speaker": 5,
+          "name": "mls-6507",
+          "gender": "female",
+          "genderSource": "dataset-speaker-metadata",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 6,
+          "name": "mls-5055",
+          "gender": "male",
+          "genderSource": "dataset-speaker-metadata",
+          "genderConfidence": "verified"
+        }
+      ]
     },
     {
       "id": "de_DE-pavoque-low",
@@ -948,7 +1160,7 @@
       "reviewStatus": "rejected",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "non-commercial",
+      "notes": "non-commercial; finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -977,14 +1189,8 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "w4-licence-chain-review-2026-10-25",
-      "notes": "W4 gender-pair launch voice; M-AILABS licence verified on the archived original page 2026-10-26",
-      "gender": "female",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
-      "availableGenders": [
-        "female"
-      ],
       "reviewedAt": "2026-10-26",
+      "notes": "W4 gender-pair launch voice; M-AILABS licence verified on the archived original page 2026-10-26",
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/ramona/low/MODEL_CARD",
@@ -1008,8 +1214,15 @@
           "note": "BSD notice binds redistribution of the source data, not synthesized output; no on-slide credit"
         },
         "verdict": "resale-safe",
-        "verifiedAt": "2026-10-26"
-      }
+        "verifiedAt": "2026-10-26",
+        "licenseResolved": true
+      },
+      "gender": "female",
+      "genderSource": "dataset-speaker-folder",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "de_DE-thorsten_emotional-medium",
@@ -1030,11 +1243,11 @@
       "commercialUse": "allowed",
       "datasetUrl": "https://github.com/thorstenMueller/Thorsten-Voice",
       "finetunedFrom": "German thorsten voice (medium quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from de_DE-thorsten-high, which carries a non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -1065,12 +1278,6 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
-      "availableGenders": [
-        "male"
-      ],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/thorsten/high/MODEL_CARD",
@@ -1088,9 +1295,15 @@
           "verdict": "lineage-encumbered"
         },
         "verdict": "lineage-encumbered",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
         "verifiedAt": "2026-10-25"
-      }
+      },
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "de_DE-thorsten-low",
@@ -1115,7 +1328,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "male",
       "genderSource": "curated-model-name",
       "genderConfidence": "curated",
@@ -1155,6 +1368,35 @@
       ]
     },
     {
+      "id": "el_GR-joy-medium",
+      "name": "joy",
+      "language": "el",
+      "locale": "el_GR",
+      "localeName": "Greek, Greece",
+      "quality": "medium",
+      "numSpeakers": 1,
+      "isDefaultForLocale": false,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/el/el_GR/joy/medium/el_GR-joy-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/el/el_GR/joy/medium/el_GR-joy-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/el/el_GR/joy/medium/MODEL_CARD",
+      "modelMd5": "080895960699531c30e70415a75a604d",
+      "configMd5": "775c0b4ac4c12de0dd11df701ab25466",
+      "rawLicense": "CC BY-NC 4.0",
+      "license": "CC-BY-NC-4.0",
+      "commercialUse": "forbidden",
+      "datasetUrl": null,
+      "finetunedFrom": null,
+      "lineageReview": false,
+      "reviewStatus": "rejected",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "automated:build-voice-manifest.mjs",
+      "notes": "non-commercial",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
+    },
+    {
       "id": "el_GR-rapunzelina-low",
       "name": "rapunzelina",
       "language": "el",
@@ -1177,7 +1419,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "female",
       "genderSource": "curated-model-name",
       "genderConfidence": "curated",
@@ -1210,6 +1452,25 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/el/el_GR/rapunzelina/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://www.kaggle.com/datasets/bryanpark/greek-single-speaker-speech-dataset",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "trained from scratch (model card)",
+          "base": null
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "resale-safe",
+        "verifiedAt": "2026-10-26"
+      },
       "gender": "female",
       "genderSource": "curated-model-name",
       "genderConfidence": "curated",
@@ -1240,7 +1501,7 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL",
+      "notes": "license not machine-clear; read dataset URL; finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -1353,10 +1614,34 @@
       "datasetUrl": "https://librivox.org",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; resale-safe",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/cori/high/MODEL_CARD",
+          "statedLicense": "public domain"
+        },
+        "dataset": {
+          "url": "https://librivox.org",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "trained from scratch (model card)",
+          "base": null
+        },
+        "gender": {
+          "value": "female",
+          "source": "model card: \"UK English female voice\""
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "resale-safe",
+        "verifiedAt": "2026-10-26"
+      },
       "gender": "female",
       "genderSource": "model-card",
       "genderConfidence": "verified",
@@ -1444,10 +1729,37 @@
       "datasetUrl": "http://www.openslr.org/83/",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "ShareAlike binds model adaptations, not program output; finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; lineage-encumbered",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_GB/northern_english_male/medium/MODEL_CARD",
+          "statedLicense": "CC-BY-SA 4.0 International"
+        },
+        "dataset": {
+          "url": "http://www.openslr.org/83/",
+          "license": "CC-BY-SA-4.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "lessac (Blizzard 2013 research-only base)"
+        },
+        "gender": {
+          "value": "male",
+          "source": "model card title / dataset (OpenSLR 83 northern English male)"
+        },
+        "attribution": {
+          "required": true,
+          "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
+      "attributionText": "English (northern UK) narration voice trained on the Google crowdsourced UK and Ireland English dialect corpus (OpenSLR 83, http://www.openslr.org/83/), licensed CC BY-SA 4.0.",
       "gender": "male",
       "genderSource": "model-card-title",
       "genderConfidence": "verified",
@@ -1507,7 +1819,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "ShareAlike binds model adaptations, not program output",
+      "notes": "ShareAlike binds model adaptations, not program output; finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "female",
       "genderSource": "model-card-title",
       "genderConfidence": "verified",
@@ -1567,7 +1879,7 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL",
+      "notes": "license not machine-clear; read dataset URL; finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -1685,7 +1997,7 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL",
+      "notes": "license not machine-clear; read dataset URL; finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -1800,7 +2112,7 @@
       "license": "CC0-1.0",
       "commercialUse": "allowed",
       "datasetUrl": "https://librivox.org",
-      "finetunedFrom": null,
+      "finetunedFrom": "Kristin (above) on medium quality settings for an additional 600 epochs. I put together the dataset, which ended up with about 12.5 hours of recordings. All recordings came from LibriVox.org",
       "lineageReview": false,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
@@ -1836,7 +2148,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -2025,23 +2337,23 @@
       "locale": "en_US",
       "localeName": "English, United States",
       "quality": "medium",
-      "numSpeakers": 904,
+      "numSpeakers": 2306,
       "isDefaultForLocale": false,
       "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/libritts_r/medium/en_US-libritts_r-medium.onnx",
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/libritts_r/medium/en_US-libritts_r-medium.onnx.json",
       "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/libritts_r/medium/MODEL_CARD",
-      "modelMd5": "bb2c2776cffbfd736c7c497f620c0ca6",
-      "configMd5": "c740db18a0dab11b13ce0292ea1196c6",
+      "modelMd5": "76debe50c70542b522558a2cde811383",
+      "configMd5": "98f2955fa41d7068f072e15f55aae396",
       "rawLicense": "CC BY 4.0",
       "license": "CC-BY-4.0",
       "commercialUse": "attribution",
       "datasetUrl": "http://www.openslr.org/141/",
-      "finetunedFrom": null,
-      "lineageReview": false,
+      "finetunedFrom": "English lessac medium on train-clean-360",
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -2101,12 +2413,6 @@
       "reviewedBy": "codex-human-approved-2026-05-30",
       "reviewedAt": "2026-05-30",
       "notes": "; approved as default CC0 no-lineage v1 narration voice; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "gender": "female",
-      "genderSource": "model-card",
-      "genderConfidence": "verified",
-      "availableGenders": [
-        "female"
-      ],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/ljspeech/high/MODEL_CARD",
@@ -2130,7 +2436,14 @@
         },
         "verdict": "resale-safe",
         "verifiedAt": "2026-10-25"
-      }
+      },
+      "isDefaultForLanguage": true,
+      "gender": "female",
+      "genderSource": "model-card",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "en_US-ljspeech-medium",
@@ -2164,6 +2477,35 @@
       ]
     },
     {
+      "id": "en_US-mike-medium",
+      "name": "mike",
+      "language": "en",
+      "locale": "en_US",
+      "localeName": "English, United States",
+      "quality": "medium",
+      "numSpeakers": 1,
+      "isDefaultForLocale": false,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/mike/medium/en_US-mike-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/mike/medium/en_US-mike-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/mike/medium/MODEL_CARD",
+      "modelMd5": "032952405bbd4eeae409385cde31b8c5",
+      "configMd5": "b4426eda10444b2bef8b447baeba84b2",
+      "rawLicense": "CC0",
+      "license": "CC0-1.0",
+      "commercialUse": "allowed",
+      "datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
+      "finetunedFrom": "U.S. English lessac voice (medium quality)",
+      "lineageReview": true,
+      "reviewStatus": "candidate",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "automated:build-voice-manifest.mjs",
+      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
+    },
+    {
       "id": "en_US-norman-medium",
       "name": "norman",
       "language": "en",
@@ -2186,13 +2528,8 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "w4-licence-chain-review-2026-10-25",
+      "reviewedAt": "2026-10-25",
       "notes": "W4 gender-pair launch voice; model card + dataset licence + training lineage verified 2026-10-25",
-      "gender": "male",
-      "genderSource": "model-card",
-      "genderConfidence": "verified",
-      "availableGenders": [
-        "male"
-      ],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/norman/medium/MODEL_CARD",
@@ -2217,7 +2554,12 @@
         "verdict": "resale-safe",
         "verifiedAt": "2026-10-25"
       },
-      "reviewedAt": "2026-10-25"
+      "gender": "male",
+      "genderSource": "model-card",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "en_US-reza_ibrahim-medium",
@@ -2372,25 +2714,52 @@
       "localeName": "Spanish, Argentina",
       "quality": "high",
       "numSpeakers": 1,
-      "isDefaultForLocale": false,
+      "isDefaultForLocale": true,
       "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_AR/daniela/high/es_AR-daniela-high.onnx",
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_AR/daniela/high/es_AR-daniela-high.onnx.json",
       "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_AR/daniela/high/MODEL_CARD",
       "modelMd5": "e373fb657c93877dbc438badeadff4cb",
       "configMd5": "b68d699a1779d98ee94c0cd9a08ba95b",
       "rawLicense": "Attribution-ShareAlike 4.0 International",
-      "license": "Attribution-ShareAlike 4.0 International",
-      "commercialUse": "unknown",
+      "license": "CC-BY-SA-4.0",
+      "commercialUse": "attribution",
       "datasetUrl": "https://www.openslr.org/61/",
-      "finetunedFrom": null,
-      "lineageReview": false,
-      "reviewStatus": "unreviewed",
+      "finetunedFrom": "U.S. English lessac voice (high quality)",
+      "lineageReview": true,
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; lineage-encumbered",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_AR/daniela/high/MODEL_CARD",
+          "statedLicense": "Attribution-ShareAlike 4.0 International"
+        },
+        "dataset": {
+          "url": "https://www.openslr.org/61/",
+          "license": "CC-BY-SA-4.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (high quality)",
+          "base": "lessac (Blizzard 2013 research-only base)"
+        },
+        "gender": {
+          "value": "female",
+          "source": "measured-acoustic: synthesized median F0 188 Hz (OpenSLR 61 splits female/male; single-speaker model)"
+        },
+        "attribution": {
+          "required": true,
+          "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
+      "attributionText": "Argentine Spanish narration voice trained on the Google crowdsourced es-AR corpus (OpenSLR 61, https://www.openslr.org/61/), licensed CC BY-SA 4.0.",
       "gender": "female",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
       "availableGenders": [
         "female"
       ]
@@ -2415,14 +2784,41 @@
       "datasetUrl": "https://github.com/carlfm01/my-speech-datasets",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
-      "gender": "unknown",
-      "genderSource": "unresolved",
-      "genderConfidence": "unresolved",
-      "availableGenders": []
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; resale-safe",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/carlfm/x_low/MODEL_CARD",
+          "statedLicense": "Public domain"
+        },
+        "dataset": {
+          "url": "https://github.com/carlfm01/my-speech-datasets",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "trained from scratch (model card)",
+          "base": null
+        },
+        "gender": {
+          "value": "male",
+          "source": "measured-acoustic: synthesized median F0 121 Hz; neither card nor dataset states gender"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "resale-safe",
+        "verifiedAt": "2026-10-26"
+      },
+      "isDefaultForLanguage": true,
+      "gender": "male",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "es_ES-davefx-medium",
@@ -2476,7 +2872,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -2505,7 +2901,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -2531,10 +2927,37 @@
       "datasetUrl": "https://datashare.ed.ac.uk/handle/10283/574",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; lineage-encumbered",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_ES/sharvard/medium/MODEL_CARD",
+          "statedLicense": "http://creativecommons.org/licenses/by/3.0/"
+        },
+        "dataset": {
+          "url": "https://datashare.ed.ac.uk/handle/10283/574",
+          "license": "CC-BY-4.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "lessac (Blizzard 2013 research-only base)"
+        },
+        "gender": {
+          "value": "mixed",
+          "source": "speaker-id-map M/F"
+        },
+        "attribution": {
+          "required": true,
+          "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
+      "attributionText": "Spanish narration voices trained on the Sharvard corpus (University of Edinburgh DataShare, https://datashare.ed.ac.uk/handle/10283/574), licensed CC BY 4.0.",
       "gender": "mixed",
       "genderSource": "speaker-id-map",
       "genderConfidence": "verified",
@@ -2578,11 +3001,42 @@
       "commercialUse": "allowed",
       "datasetUrl": "https://huggingface.co/datasets/rmcpantoja/Ald_Mexican_Spanish_speech_dataset",
       "finetunedFrom": "Spanish davefx voice (medium quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from es_ES-davefx-medium, which carries a non-commercial weight lineage",
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
+    },
+    {
+      "id": "es_MX-ald-x_low",
+      "name": "ald",
+      "language": "es",
+      "locale": "es_MX",
+      "localeName": "Spanish, Mexico",
+      "quality": "x_low",
+      "numSpeakers": 1,
+      "isDefaultForLocale": false,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/ald/x_low/es_MX-ald-x_low.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/ald/x_low/es_MX-ald-x_low.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/ald/x_low/MODEL_CARD",
+      "modelMd5": "b463f8c0972f28f89494961137cd2dc1",
+      "configMd5": "0e53a2c435987374e7ad3cee27e6f4f2",
+      "rawLicense": null,
+      "license": "MISSING",
+      "commercialUse": "unknown",
+      "datasetUrl": null,
+      "finetunedFrom": null,
+      "lineageReview": false,
+      "reviewStatus": "unreviewed",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "automated:build-voice-manifest.mjs",
+      "notes": "no License line in MODEL_CARD",
       "gender": "male",
       "genderSource": "curated-model-name",
       "genderConfidence": "curated",
@@ -2615,12 +3069,6 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
-      "availableGenders": [
-        "male"
-      ],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/es/es_MX/claude/high/MODEL_CARD",
@@ -2634,9 +3082,91 @@
           "lineage": "not stated (\"See URL above\")"
         },
         "verdict": "dataset-unverified",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice.",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
         "verifiedAt": "2026-10-25"
-      }
+      },
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
+    },
+    {
+      "id": "et_EE-news-medium",
+      "name": "news",
+      "language": "et",
+      "locale": "et_EE",
+      "localeName": "Estonian, Estonia",
+      "quality": "medium",
+      "numSpeakers": 4,
+      "isDefaultForLocale": true,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/et/et_EE/news/medium/et_EE-news-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/et/et_EE/news/medium/et_EE-news-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/et/et_EE/news/medium/MODEL_CARD",
+      "modelMd5": "6fba6ec8d985e84435ce680ee9d3b0bc",
+      "configMd5": "28fea16b0e4d26a445906e83d6de7ac6",
+      "rawLicense": "CC-BY (META-SHARE \"Available - Unrestricted Use\")",
+      "license": "CC-BY-4.0",
+      "commercialUse": "attribution",
+      "datasetUrl": "https://metashare.ut.ee/repository/browse/speech-corpus-of-estonian-news-sentences/37b7c5d6a0d411eebb4773db10791bcfb0c0cf788d2d4030bfaf2f2e6e55dd8d/",
+      "finetunedFrom": "LibriTTS-R base model",
+      "lineageReview": true,
+      "reviewStatus": "approved",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; lineage-encumbered (LibriTTS-R base is lessac-derived)",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/et/et_EE/news/medium/MODEL_CARD",
+          "statedLicense": "CC-BY (META-SHARE \"Available - Unrestricted Use\")"
+        },
+        "dataset": {
+          "url": "https://metashare.ut.ee/repository/browse/speech-corpus-of-estonian-news-sentences/37b7c5d6a0d411eebb4773db10791bcfb0c0cf788d2d4030bfaf2f2e6e55dd8d/",
+          "license": "CC-BY-4.0"
+        },
+        "training": {
+          "lineage": "finetuned from LibriTTS-R base model",
+          "base": "Piper LibriTTS-R base model (en_US-libritts_r-medium, itself fine-tuned from lessac)",
+          "baseLicense": "LibriTTS-R CC-BY-4.0 data; lessac (Blizzard 2013 research-only) starting weights"
+        },
+        "gender": {
+          "value": "mixed",
+          "source": "measured-acoustic per speaker (Albert 101 Hz, Kalev 87 Hz, Mari 225 Hz, Vesta 185 Hz); corpus paper names but does not gender them"
+        },
+        "attribution": {
+          "required": true,
+          "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
+      "attributionText": "Estonian narration voices trained on the Speech Corpus of Estonian News Sentences (University of Tartu), licensed CC BY 4.0, from a base model trained on LibriTTS-R (CC BY 4.0).",
+      "gender": "mixed",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "female",
+        "male"
+      ],
+      "speakerProfiles": [
+        {
+          "speaker": 1,
+          "name": "Kalev",
+          "gender": "male",
+          "genderSource": "measured-acoustic",
+          "genderConfidence": "measured"
+        },
+        {
+          "speaker": 3,
+          "name": "Vesta",
+          "gender": "female",
+          "genderSource": "measured-acoustic",
+          "genderConfidence": "measured"
+        }
+      ]
     },
     {
       "id": "eu_ES-antton-medium",
@@ -2657,11 +3187,11 @@
       "commercialUse": "unknown",
       "datasetUrl": "https://huggingface.co/datasets/itzune/antton-dataset",
       "finetunedFrom": "U.S English amy voice (medium quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL",
+      "notes": "license not machine-clear; read dataset URL; finetuned from en_US-amy-low, which carries a non-commercial weight lineage",
       "gender": "male",
       "genderSource": "curated-model-name",
       "genderConfidence": "curated",
@@ -2688,11 +3218,11 @@
       "commercialUse": "unknown",
       "datasetUrl": "https://huggingface.co/datasets/itzune/maider-dataset",
       "finetunedFrom": "U.S English amy voice (medium quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL",
+      "notes": "license not machine-clear; read dataset URL; finetuned from en_US-amy-low, which carries a non-commercial weight lineage",
       "gender": "female",
       "genderSource": "curated-model-name",
       "genderConfidence": "curated",
@@ -2748,11 +3278,11 @@
       "commercialUse": "allowed",
       "datasetUrl": "https://tts.datacula.com/",
       "finetunedFrom": "fa_IR Ganji voice (medium quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from fa_IR-ganji-medium, which carries a non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -2777,12 +3307,32 @@
       "commercialUse": "allowed",
       "datasetUrl": "https://tts.datacula.com/",
       "finetunedFrom": "fa_IR Amir voice (medium quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fa/fa_IR/ganji/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://tts.datacula.com/",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from fa_IR-amir-medium",
+          "base": "fa_IR-amir-medium (itself fine-tuned from lessac)"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
       "gender": "male",
       "genderSource": "curated-model-name",
       "genderConfidence": "curated",
@@ -2858,7 +3408,7 @@
       "localeName": "Finnish, Finland",
       "quality": "low",
       "numSpeakers": 1,
-      "isDefaultForLocale": true,
+      "isDefaultForLocale": false,
       "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fi/fi_FI/harri/low/fi_FI-harri-low.onnx",
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fi/fi_FI/harri/low/fi_FI-harri-low.onnx.json",
       "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fi/fi_FI/harri/low/MODEL_CARD",
@@ -2873,7 +3423,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "male",
       "genderSource": "curated-model-name",
       "genderConfidence": "curated",
@@ -2889,7 +3439,7 @@
       "localeName": "Finnish, Finland",
       "quality": "medium",
       "numSpeakers": 1,
-      "isDefaultForLocale": false,
+      "isDefaultForLocale": true,
       "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fi/fi_FI/harri/medium/fi_FI-harri-medium.onnx",
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fi/fi_FI/harri/medium/fi_FI-harri-medium.onnx.json",
       "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fi/fi_FI/harri/medium/MODEL_CARD",
@@ -2906,12 +3456,6 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
-      "availableGenders": [
-        "male"
-      ],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fi/fi_FI/harri/medium/MODEL_CARD",
@@ -2929,9 +3473,15 @@
           "verdict": "lineage-encumbered"
         },
         "verdict": "lineage-encumbered",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
         "verifiedAt": "2026-10-25"
-      }
+      },
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "fr_FR-gilles-low",
@@ -2958,12 +3508,6 @@
       "reviewedBy": "codex-human-approved-2026-05-30",
       "reviewedAt": "2026-05-30",
       "notes": "; approved as default CC0 no-lineage v1 narration voice; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
-      "availableGenders": [
-        "male"
-      ],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/gilles/low/MODEL_CARD",
@@ -2981,9 +3525,15 @@
           "verdict": "lineage-encumbered"
         },
         "verdict": "lineage-encumbered",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
         "verifiedAt": "2026-10-25"
-      }
+      },
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "fr_FR-mls_1840-low",
@@ -3008,7 +3558,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -3037,12 +3587,8 @@
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "w4-licence-chain-review-2026-10-25",
+      "reviewedAt": "2026-10-25",
       "notes": "W4 gender-pair launch voice; model card + dataset licence + training lineage verified 2026-10-25",
-      "gender": "unknown",
-      "genderSource": "unresolved",
-      "genderConfidence": "unresolved",
-      "availableGenders": [],
-      "attributionText": "French narration voice trained on Multilingual LibriSpeech (MLS), V. Pratap et al., 2020 (https://www.openslr.org/94/), licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/); source audio from LibriVox (public domain).",
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/fr/fr_FR/mls/medium/MODEL_CARD",
@@ -3069,7 +3615,31 @@
         "verifiedAt": "2026-10-25",
         "speakerSelection": "Speakers selected 2026-10-26 by measured intelligibility (faster-whisper WER over 4 clips) and natural pace among dataset-gender-verified MLS speakers with >=600 training minutes; the most-trained speakers were slower and less intelligible."
       },
-      "reviewedAt": "2026-10-25"
+      "attributionText": "French narration voice trained on Multilingual LibriSpeech (MLS), V. Pratap et al., 2020 (https://www.openslr.org/94/), licensed CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/); source audio from LibriVox (public domain).",
+      "isDefaultForLanguage": true,
+      "gender": "mixed",
+      "genderSource": "dataset-speaker-metadata",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female",
+        "male"
+      ],
+      "speakerProfiles": [
+        {
+          "speaker": 8,
+          "name": "mls-3060",
+          "gender": "male",
+          "genderSource": "dataset-speaker-metadata",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 88,
+          "name": "mls-12899",
+          "gender": "female",
+          "genderSource": "dataset-speaker-metadata",
+          "genderConfidence": "verified"
+        }
+      ]
     },
     {
       "id": "fr_FR-siwis-low",
@@ -3094,7 +3664,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -3207,6 +3777,35 @@
           "genderConfidence": "curated"
         }
       ]
+    },
+    {
+      "id": "he_IL-saspeech-medium",
+      "name": "saspeech",
+      "language": "he",
+      "locale": "he_IL",
+      "localeName": "Hebrew, Israel",
+      "quality": "medium",
+      "numSpeakers": 1,
+      "isDefaultForLocale": false,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/he/he_IL/saspeech/medium/he_IL-saspeech-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/he/he_IL/saspeech/medium/he_IL-saspeech-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/he/he_IL/saspeech/medium/MODEL_CARD",
+      "modelMd5": "ffa7fbbbbeab5fa8fb7eb00bf9a0e2a5",
+      "configMd5": "7da2dd72146707adf21b3caaf4adeb46",
+      "rawLicense": "See dataset URL",
+      "license": "See dataset URL",
+      "commercialUse": "unknown",
+      "datasetUrl": "https://www.openslr.org/134",
+      "finetunedFrom": "LibriTTS-R base model",
+      "lineageReview": true,
+      "reviewStatus": "unreviewed",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "automated:build-voice-manifest.mjs",
+      "notes": "license not machine-clear; read dataset URL; finetuned from en_US-libritts_r-medium, which carries a non-commercial weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "hi_IN-pratham-medium",
@@ -3326,12 +3925,6 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "gender": "female",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
-      "availableGenders": [
-        "female"
-      ],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/hu/hu_HU/anna/medium/MODEL_CARD",
@@ -3349,9 +3942,15 @@
           "verdict": "lineage-encumbered"
         },
         "verdict": "lineage-encumbered",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
         "verifiedAt": "2026-10-25"
-      }
+      },
+      "gender": "female",
+      "genderSource": "dataset-sample-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "hu_HU-berta-medium",
@@ -3404,16 +4003,70 @@
       "datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; lineage-encumbered",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/hu/hu_HU/imre/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/OHF-Voice/voice-datasets",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "lessac (Blizzard 2013 research-only base)"
+        },
+        "gender": {
+          "value": "male",
+          "source": "dataset-sample-acoustic: OHF dataset sample median F0 110 Hz"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
       "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
+      "genderSource": "dataset-sample-acoustic",
+      "genderConfidence": "measured",
       "availableGenders": [
         "male"
       ]
+    },
+    {
+      "id": "hy_AM-gor-medium",
+      "name": "gor",
+      "language": "hy",
+      "locale": "hy_AM",
+      "localeName": "Armenian, Armenia",
+      "quality": "medium",
+      "numSpeakers": 1,
+      "isDefaultForLocale": false,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/hy/hy_AM/gor/medium/hy_AM-gor-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/hy/hy_AM/gor/medium/hy_AM-gor-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/hy/hy_AM/gor/medium/MODEL_CARD",
+      "modelMd5": "fd726714c656f1cad828bcf102059aa1",
+      "configMd5": "fb816fe191dc49a8349b023dd87090f9",
+      "rawLicense": "GPL 2.0",
+      "license": "GPL 2.0",
+      "commercialUse": "forbidden",
+      "datasetUrl": "https://huggingface.co/davit312/piper-TTS-Armenian",
+      "finetunedFrom": "en_US-bryce-medium model",
+      "lineageReview": false,
+      "reviewStatus": "rejected",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "automated:build-voice-manifest.mjs",
+      "notes": "copyleft software license on model — treat as not-usable pending counsel",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "id_ID-news_tts-medium",
@@ -3607,28 +4260,171 @@
       "localeName": "Italian, Italy",
       "quality": "x_low",
       "numSpeakers": 1,
-      "isDefaultForLocale": false,
+      "isDefaultForLocale": true,
       "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/riccardo/x_low/it_IT-riccardo-x_low.onnx",
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/riccardo/x_low/it_IT-riccardo-x_low.onnx.json",
       "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/riccardo/x_low/MODEL_CARD",
       "modelMd5": "2c564b67f6bfaf3ad02d28ab528929b8",
       "configMd5": "ed24cd550b79acbdc337e519849e9636",
       "rawLicense": "See URL",
-      "license": "See URL",
-      "commercialUse": "unknown",
+      "license": "BSD-style (M-AILABS)",
+      "commercialUse": "allowed",
       "datasetUrl": "https://www.caito.de/2019/01/03/the-m-ailabs-speech-dataset/",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "unreviewed",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; resale-safe",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/riccardo/x_low/MODEL_CARD",
+          "statedLicense": "See URL"
+        },
+        "dataset": {
+          "url": "https://www.caito.de/2019/01/03/the-m-ailabs-speech-dataset/",
+          "license": "BSD-style (M-AILABS)"
+        },
+        "training": {
+          "lineage": "trained from scratch (model card)",
+          "base": null
+        },
+        "gender": {
+          "value": "male",
+          "source": "M-AILABS dataset folder it_IT/by_book/male/riccardo_fasol"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "resale-safe",
+        "licenseResolved": true,
+        "verifiedAt": "2026-10-26"
+      },
       "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
+      "genderSource": "dataset-speaker-folder",
+      "genderConfidence": "verified",
       "availableGenders": [
         "male"
       ]
+    },
+    {
+      "id": "it_IT-serena-high",
+      "name": "serena",
+      "language": "it",
+      "locale": "it_IT",
+      "localeName": "Italian, Italy",
+      "quality": "high",
+      "numSpeakers": 1,
+      "isDefaultForLocale": false,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/serena/high/it_IT-serena-high.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/serena/high/it_IT-serena-high.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/serena/high/MODEL_CARD",
+      "modelMd5": "0b4d9553883e439fd7bda5475e820bfe",
+      "configMd5": "15ba3705d51c879d7290cb5bf9826d96",
+      "rawLicense": "CC-BY-4.0",
+      "license": "CC-BY-4.0",
+      "commercialUse": "attribution",
+      "datasetUrl": "https://huggingface.co/datasets/committa/serena-synthetic-it-27h",
+      "finetunedFrom": null,
+      "lineageReview": false,
+      "reviewStatus": "approved",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; synthetic-voice",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/serena/high/MODEL_CARD",
+          "statedLicense": "CC-BY-4.0"
+        },
+        "dataset": {
+          "url": "https://huggingface.co/datasets/committa/serena-synthetic-it-27h",
+          "license": "CC-BY-4.0"
+        },
+        "training": {
+          "lineage": "trained from scratch on a synthetic dataset generated by Qwen3-TTS-1.7B-Base (Apache-2.0) cloning a fixed synthetic reference voice",
+          "base": null
+        },
+        "gender": {
+          "value": "female",
+          "source": "measured-acoustic: synthesized median F0 220 Hz"
+        },
+        "attribution": {
+          "required": true,
+          "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
+        },
+        "verdict": "synthetic-voice",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
+      "attributionText": "Italian narration voice trained on serena-synthetic-it-27h (https://huggingface.co/datasets/committa/serena-synthetic-it-27h), licensed CC BY 4.0.",
+      "gender": "female",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "female"
+      ]
+    },
+    {
+      "id": "it_IT-serena-medium",
+      "name": "serena",
+      "language": "it",
+      "locale": "it_IT",
+      "localeName": "Italian, Italy",
+      "quality": "medium",
+      "numSpeakers": 1,
+      "isDefaultForLocale": false,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/serena/medium/it_IT-serena-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/serena/medium/it_IT-serena-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/it/it_IT/serena/medium/MODEL_CARD",
+      "modelMd5": "f8c82f1139dfa382686bd7564a633400",
+      "configMd5": "a0b3d407bc039d501219857e5aa0e34e",
+      "rawLicense": "CC-BY-4.0",
+      "license": "CC-BY-4.0",
+      "commercialUse": "attribution",
+      "datasetUrl": "https://huggingface.co/datasets/committa/serena-synthetic-it-27h",
+      "finetunedFrom": null,
+      "lineageReview": false,
+      "reviewStatus": "candidate",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "automated:build-voice-manifest.mjs",
+      "notes": "",
+      "gender": "female",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "female"
+      ]
+    },
+    {
+      "id": "ja_JP-hi_fi_captain-medium",
+      "name": "hi_fi_captain",
+      "language": "ja",
+      "locale": "ja_JP",
+      "localeName": "Japanese, Japan",
+      "quality": "medium",
+      "numSpeakers": 2,
+      "isDefaultForLocale": false,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ja/ja_JP/hi_fi_captain/medium/ja_JP-hi_fi_captain-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ja/ja_JP/hi_fi_captain/medium/ja_JP-hi_fi_captain-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ja/ja_JP/hi_fi_captain/medium/MODEL_CARD",
+      "modelMd5": "f9daab8970d06d7e9fc895a879854542",
+      "configMd5": "828a68fa5fc7677f98ea336fa1d66512",
+      "rawLicense": "https://creativecommons.org/licenses/by-nc-sa/4.0/deed.en",
+      "license": "CC-BY-NC-SA-4.0",
+      "commercialUse": "forbidden",
+      "datasetUrl": "https://ast-astrec.nict.go.jp/en/release/hi-fi-captain/",
+      "finetunedFrom": "LibriTTS-R base model",
+      "lineageReview": true,
+      "reviewStatus": "rejected",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "automated:build-voice-manifest.mjs",
+      "notes": "non-commercial; finetuned from en_US-libritts_r-medium, which carries a non-commercial weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "ka_GE-natia-medium",
@@ -3710,10 +4506,36 @@
       "datasetUrl": "https://github.com/IS2AI/Kazakh_TTS",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; resale-safe-with-manifest-attribution",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/kk/kk_KZ/issai/high/MODEL_CARD",
+          "statedLicense": "CC-BY-4.0"
+        },
+        "dataset": {
+          "url": "https://github.com/IS2AI/Kazakh_TTS",
+          "license": "CC-BY-4.0"
+        },
+        "training": {
+          "lineage": "trained from scratch (model card)",
+          "base": null
+        },
+        "gender": {
+          "value": "mixed",
+          "source": "speaker-id-map ISSAI M*/F* speaker codes"
+        },
+        "attribution": {
+          "required": true,
+          "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
+        },
+        "verdict": "resale-safe-with-manifest-attribution",
+        "verifiedAt": "2026-10-26"
+      },
+      "attributionText": "Kazakh narration voices trained on ISSAI KazakhTTS (Institute of Smart Systems and AI, Nazarbayev University), licensed CC BY 4.0.",
       "gender": "mixed",
       "genderSource": "speaker-id-map",
       "genderConfidence": "verified",
@@ -3790,6 +4612,35 @@
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
       "notes": "",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
+    },
+    {
+      "id": "ko_KR-kss-medium",
+      "name": "kss",
+      "language": "ko",
+      "locale": "ko_KR",
+      "localeName": "Korean, South Korea",
+      "quality": "medium",
+      "numSpeakers": 1,
+      "isDefaultForLocale": false,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ko/ko_KR/kss/medium/ko_KR-kss-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ko/ko_KR/kss/medium/ko_KR-kss-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ko/ko_KR/kss/medium/MODEL_CARD",
+      "modelMd5": "bebbd298dffe5ee7b88f2ce41bb4e3a9",
+      "configMd5": "427c0b8d93211ba2ffea1f565819058a",
+      "rawLicense": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+      "license": "CC-BY-NC-SA-4.0",
+      "commercialUse": "forbidden",
+      "datasetUrl": "https://www.kaggle.com/datasets/bryanpark/korean-single-speaker-speech-dataset",
+      "finetunedFrom": "LibriTTS-R base model",
+      "lineageReview": true,
+      "reviewStatus": "rejected",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "automated:build-voice-manifest.mjs",
+      "notes": "non-commercial; finetuned from en_US-libritts_r-medium, which carries a non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -3875,6 +4726,64 @@
       ]
     },
     {
+      "id": "lt_LT-ingute-medium",
+      "name": "ingute",
+      "language": "lt",
+      "locale": "lt_LT",
+      "localeName": "Lithuanian, Lithuania",
+      "quality": "medium",
+      "numSpeakers": 1,
+      "isDefaultForLocale": false,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/lt/lt_LT/ingute/medium/lt_LT-ingute-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/lt/lt_LT/ingute/medium/lt_LT-ingute-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/lt/lt_LT/ingute/medium/MODEL_CARD",
+      "modelMd5": "e79127cc0dea69a9b5bc66bb75a14a79",
+      "configMd5": "9ef9a87035bdc5197d7b30c7896fab93",
+      "rawLicense": "NewGenLTU Open RAIL-D License 1.0",
+      "license": "NewGenLTU Open RAIL-D License 1.0",
+      "commercialUse": "unknown",
+      "datasetUrl": null,
+      "finetunedFrom": "`lt_LT-reginute1-medium` (CC-BY-4.0, trained on the LIEPA",
+      "lineageReview": true,
+      "reviewStatus": "unreviewed",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "automated:build-voice-manifest.mjs",
+      "notes": "license not machine-clear; read dataset URL; finetuned from lt_LT-reginute1-medium, which carries a non-commercial weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
+    },
+    {
+      "id": "lt_LT-reginute1-medium",
+      "name": "reginute1",
+      "language": "lt",
+      "locale": "lt_LT",
+      "localeName": "Lithuanian, Lithuania",
+      "quality": "medium",
+      "numSpeakers": 1,
+      "isDefaultForLocale": true,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/lt/lt_LT/reginute1/medium/lt_LT-reginute1-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/lt/lt_LT/reginute1/medium/lt_LT-reginute1-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/lt/lt_LT/reginute1/medium/MODEL_CARD",
+      "modelMd5": "315dabbe13d83276cb5f921119d87dac",
+      "configMd5": "d242d34547f8dedd83162481df2a0f31",
+      "rawLicense": "CC-BY-4.0",
+      "license": "CC-BY-4.0",
+      "commercialUse": "attribution",
+      "datasetUrl": "https://huggingface.co/datasets/meldynamics/liepa-tts",
+      "finetunedFrom": "the Piper catalogue checkpoint `ru_RU-irina-medium`",
+      "lineageReview": true,
+      "reviewStatus": "candidate",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "automated:build-voice-manifest.mjs",
+      "notes": "finetuned from ru_RU-irina-medium, which carries a non-commercial weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
+    },
+    {
       "id": "lv_LV-aivars-medium",
       "name": "aivars",
       "language": "lv",
@@ -3899,6 +4808,25 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/lv/lv_LV/aivars/medium/MODEL_CARD",
+          "statedLicense": "CC0 1.0 Universal"
+        },
+        "dataset": {
+          "url": "https://huggingface.co/RaivisDejus/Piper-lv_LV-Aivars-medium",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "not stated (card links the trainer page)"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "lineage-unstated",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
       "gender": "male",
       "genderSource": "curated-model-name",
       "genderConfidence": "curated",
@@ -3969,6 +4897,74 @@
       ]
     },
     {
+      "id": "mr_IN-google-medium",
+      "name": "google",
+      "language": "mr",
+      "locale": "mr_IN",
+      "localeName": "Marathi, India",
+      "quality": "medium",
+      "numSpeakers": 9,
+      "isDefaultForLocale": true,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/mr/mr_IN/google/medium/mr_IN-google-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/mr/mr_IN/google/medium/mr_IN-google-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/mr/mr_IN/google/medium/MODEL_CARD",
+      "modelMd5": "331957abd31bff58aaa10934cd3ac58f",
+      "configMd5": "6cba88c1e90cdc81a061d9f6d6d48943",
+      "rawLicense": "Attribution-ShareAlike 4.0 International",
+      "license": "CC-BY-SA-4.0",
+      "commercialUse": "attribution",
+      "datasetUrl": "https://openslr.org/64/",
+      "finetunedFrom": "LibriTTS-R base model",
+      "lineageReview": true,
+      "reviewStatus": "approved",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; lineage-encumbered (LibriTTS-R base is lessac-derived)",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/mr/mr_IN/google/medium/MODEL_CARD",
+          "statedLicense": "Attribution-ShareAlike 4.0 International"
+        },
+        "dataset": {
+          "url": "https://openslr.org/64/",
+          "license": "CC-BY-SA-4.0"
+        },
+        "training": {
+          "lineage": "finetuned from LibriTTS-R base model",
+          "base": "Piper LibriTTS-R base model (en_US-libritts_r-medium, itself fine-tuned from lessac)",
+          "baseLicense": "LibriTTS-R CC-BY-4.0 data; lessac (Blizzard 2013 research-only) starting weights"
+        },
+        "gender": {
+          "value": "female",
+          "source": "dataset is female-only (OpenSLR 64 ships mr_in_female.zip)"
+        },
+        "attribution": {
+          "required": true,
+          "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
+      "attributionText": "Marathi narration voice trained on the Google crowdsourced Marathi corpus (OpenSLR 64, https://openslr.org/64/), licensed CC BY-SA 4.0, from a base model trained on LibriTTS-R (CC BY 4.0).",
+      "gender": "female",
+      "genderSource": "dataset-female-only",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female"
+      ],
+      "speakerProfiles": [
+        {
+          "speaker": 3,
+          "name": "mrt_02624",
+          "gender": "female",
+          "genderSource": "dataset-female-only",
+          "genderConfidence": "verified"
+        }
+      ]
+    },
+    {
       "id": "ne_NP-chitwan-medium",
       "name": "chitwan",
       "language": "ne",
@@ -3993,10 +4989,6 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "gender": "unknown",
-      "genderSource": "unresolved",
-      "genderConfidence": "unresolved",
-      "availableGenders": [],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ne/ne_NP/chitwan/medium/MODEL_CARD",
@@ -4014,9 +5006,19 @@
           "verdict": "lineage-encumbered"
         },
         "verdict": "lineage-encumbered",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
-        "verifiedAt": "2026-10-25"
-      }
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-25",
+        "gender": {
+          "value": "male",
+          "source": "dataset-sample-acoustic: OHF dataset sample median F0 137 Hz"
+        }
+      },
+      "gender": "male",
+      "genderSource": "dataset-sample-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "ne_NP-google-medium",
@@ -4101,8 +5103,8 @@
       "reviewedBy": "automated:build-voice-manifest.mjs",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
       "gender": "female",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
+      "genderSource": "dataset-readme",
+      "genderConfidence": "verified",
       "availableGenders": [
         "female"
       ]
@@ -4127,13 +5129,37 @@
       "datasetUrl": "https://github.com/rhasspy/dataset-voice-nathalie",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; resale-safe",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_BE/nathalie/x_low/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/rhasspy/dataset-voice-nathalie",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "trained from scratch (model card)",
+          "base": null
+        },
+        "gender": {
+          "value": "female",
+          "source": "dataset README: \"Gender: female\""
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "resale-safe",
+        "verifiedAt": "2026-10-26"
+      },
       "gender": "female",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
+      "genderSource": "dataset-readme",
+      "genderConfidence": "verified",
       "availableGenders": [
         "female"
       ]
@@ -4163,10 +5189,35 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "gender": "unknown",
-      "genderSource": "unresolved",
-      "genderConfidence": "unresolved",
-      "availableGenders": []
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_BE/rdh/medium/MODEL_CARD",
+          "statedLicense": "CC0 1.0 Universal"
+        },
+        "dataset": {
+          "url": "https://github.com/r-dh/dutch-vl-tts",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "trained from scratch (model card)",
+          "base": null
+        },
+        "gender": {
+          "value": "male",
+          "source": "measured-acoustic: synthesized median F0 108 Hz"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "resale-safe",
+        "verifiedAt": "2026-10-26"
+      },
+      "gender": "male",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "nl_BE-rdh-x_low",
@@ -4192,10 +5243,12 @@
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
       "notes": "",
-      "gender": "unknown",
-      "genderSource": "unresolved",
-      "genderConfidence": "unresolved",
-      "availableGenders": []
+      "gender": "male",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "nl_NL-alex-medium",
@@ -4217,13 +5270,38 @@
       "datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
       "finetunedFrom": "Dutch rdh voice (medium quality)",
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; resale-safe",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/nl/nl_NL/alex/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/OHF-Voice/voice-datasets",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "fine-tuned from nl_BE-rdh-medium (CC0, trained from scratch)",
+          "base": null
+        },
+        "gender": {
+          "value": "male",
+          "source": "dataset-sample-acoustic: OHF dataset sample median F0 129 Hz"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "resale-safe",
+        "verifiedAt": "2026-10-26"
+      },
+      "isDefaultForLanguage": true,
       "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
+      "genderSource": "dataset-sample-acoustic",
+      "genderConfidence": "measured",
       "availableGenders": [
         "male"
       ]
@@ -4251,7 +5329,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -4280,7 +5358,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -4385,26 +5463,69 @@
       "localeName": "Norwegian, Norway",
       "quality": "medium",
       "numSpeakers": 10,
-      "isDefaultForLocale": false,
+      "isDefaultForLocale": true,
       "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/nvcc/medium/no_NO-nvcc-medium.onnx",
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/nvcc/medium/no_NO-nvcc-medium.onnx.json",
       "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/nvcc/medium/MODEL_CARD",
-      "modelMd5": "56324c58437c9946fcaaf345a85bac62",
-      "configMd5": "d831a4a7431ab0d290b74e5e30a266c6",
-      "rawLicense": null,
-      "license": "MISSING",
-      "commercialUse": "unknown",
-      "datasetUrl": null,
+      "modelMd5": "67e04e52b2f195e6db3ae103b58d1710",
+      "configMd5": "eb78dda3e46b97cb184dc6e9b91f64ea",
+      "rawLicense": "CC0",
+      "license": "CC0-1.0",
+      "commercialUse": "allowed",
+      "datasetUrl": "https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-75/",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "unreviewed",
-      "verifiedFromModelCard": false,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "no License line in MODEL_CARD",
-      "gender": "unknown",
-      "genderSource": "unresolved",
-      "genderConfidence": "unresolved",
-      "availableGenders": []
+      "reviewStatus": "approved",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; resale-safe",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/nvcc/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-75/",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "trained from scratch (model card)",
+          "base": null
+        },
+        "gender": {
+          "value": "mixed",
+          "source": "speaker codes K*/M* (kvinne/mann) consistent with measured F0 (K 168–228 Hz, M 97–131 Hz)"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "resale-safe",
+        "verifiedAt": "2026-10-26"
+      },
+      "gender": "mixed",
+      "genderSource": "speaker-code",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female",
+        "male"
+      ],
+      "speakerProfiles": [
+        {
+          "speaker": 0,
+          "name": "KNN",
+          "gender": "female",
+          "genderSource": "speaker-code",
+          "genderConfidence": "verified"
+        },
+        {
+          "speaker": 5,
+          "name": "MSV",
+          "gender": "male",
+          "genderSource": "speaker-code",
+          "genderConfidence": "verified"
+        }
+      ]
     },
     {
       "id": "no_NO-talesyntese-medium",
@@ -4414,7 +5535,7 @@
       "localeName": "Norwegian, Norway",
       "quality": "medium",
       "numSpeakers": 1,
-      "isDefaultForLocale": true,
+      "isDefaultForLocale": false,
       "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/talesyntese/medium/no_NO-talesyntese-medium.onnx",
       "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/talesyntese/medium/no_NO-talesyntese-medium.onnx.json",
       "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/talesyntese/medium/MODEL_CARD",
@@ -4424,13 +5545,33 @@
       "license": "CC0-1.0",
       "commercialUse": "allowed",
       "datasetUrl": "https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-15/",
-      "finetunedFrom": null,
-      "lineageReview": false,
+      "finetunedFrom": "U.S. English lessac voice (medium quality)",
+      "lineageReview": true,
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/no/no_NO/talesyntese/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-15/",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "fine-tuned from U.S. English lessac voice (medium quality)",
+          "base": "lessac (Blizzard 2013 research-only base)"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -4492,10 +5633,6 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "gender": "unknown",
-      "genderSource": "unresolved",
-      "genderConfidence": "unresolved",
-      "availableGenders": [],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/darkman/medium/MODEL_CARD",
@@ -4513,9 +5650,19 @@
           "verdict": "lineage-encumbered"
         },
         "verdict": "lineage-encumbered",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
-        "verifiedAt": "2026-10-25"
-      }
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-25",
+        "gender": {
+          "value": "male",
+          "source": "dataset-sample-acoustic: OHF dataset sample median F0 114 Hz"
+        }
+      },
+      "gender": "male",
+      "genderSource": "dataset-sample-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "pl_PL-gosia-medium",
@@ -4537,13 +5684,38 @@
       "datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; lineage-encumbered",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pl/pl_PL/gosia/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/OHF-Voice/voice-datasets",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "lessac (Blizzard 2013 research-only base)"
+        },
+        "gender": {
+          "value": "female",
+          "source": "dataset-sample-acoustic: OHF dataset sample median F0 218 Hz"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
       "gender": "female",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
+      "genderSource": "dataset-sample-acoustic",
+      "genderConfidence": "measured",
       "availableGenders": [
         "female"
       ]
@@ -4600,7 +5772,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -4631,12 +5803,6 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
-      "availableGenders": [
-        "male"
-      ],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_BR/cadu/medium/MODEL_CARD",
@@ -4654,9 +5820,16 @@
           "verdict": "lineage-encumbered"
         },
         "verdict": "lineage-encumbered",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
         "verifiedAt": "2026-10-25"
-      }
+      },
+      "isDefaultForLanguage": true,
+      "gender": "male",
+      "genderSource": "dataset-sample-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "pt_BR-edresson-low",
@@ -4681,7 +5854,7 @@
       "reviewStatus": "candidate",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "notes": "finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "male",
       "genderSource": "curated-model-name",
       "genderConfidence": "curated",
@@ -4771,16 +5944,39 @@
       "datasetUrl": "https://github.com/OHF-Voice/voice-datasets",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
-      "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
-      "availableGenders": [
-        "male"
-      ]
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; lineage-encumbered",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/pt/pt_PT/tugão/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://github.com/OHF-Voice/voice-datasets",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "lessac (Blizzard 2013 research-only base)"
+        },
+        "gender": {
+          "value": "unknown",
+          "source": "ambiguous: dataset sample median F0 162 Hz, synthesized 183 Hz; dataset gives no gender"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
+      "gender": "unknown",
+      "genderSource": "ambiguous-acoustic",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
     },
     {
       "id": "ro_RO-mihai-medium",
@@ -4807,12 +6003,6 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
-      "availableGenders": [
-        "male"
-      ],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ro/ro_RO/mihai/medium/MODEL_CARD",
@@ -4830,9 +6020,15 @@
           "verdict": "lineage-encumbered"
         },
         "verdict": "lineage-encumbered",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
         "verifiedAt": "2026-10-25"
-      }
+      },
+      "gender": "male",
+      "genderSource": "dataset-sample-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "ru_RU-denis-medium",
@@ -4859,12 +6055,6 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
-      "availableGenders": [
-        "male"
-      ],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ru/ru_RU/denis/medium/MODEL_CARD",
@@ -4882,9 +6072,15 @@
           "verdict": "lineage-encumbered"
         },
         "verdict": "lineage-encumbered",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
         "verifiedAt": "2026-10-25"
-      }
+      },
+      "gender": "male",
+      "genderSource": "dataset-sample-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "ru_RU-dmitri-medium",
@@ -5004,12 +6200,6 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "gender": "female",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
-      "availableGenders": [
-        "female"
-      ],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sk/sk_SK/lili/medium/MODEL_CARD",
@@ -5027,9 +6217,15 @@
           "verdict": "lineage-encumbered"
         },
         "verdict": "lineage-encumbered",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
         "verifiedAt": "2026-10-25"
-      }
+      },
+      "gender": "female",
+      "genderSource": "dataset-sample-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "sl_SI-artur-medium",
@@ -5051,13 +6247,40 @@
       "datasetUrl": "https://huggingface.co/datasets/ppisljar/artur_studio_tts/",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; lineage-unstated",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sl/sl_SI/artur/medium/MODEL_CARD",
+          "statedLicense": "https://creativecommons.org/licenses/by/4.0/"
+        },
+        "dataset": {
+          "url": "https://huggingface.co/datasets/ppisljar/artur_studio_tts/",
+          "license": "CC-BY-4.0"
+        },
+        "training": {
+          "lineage": "not stated (\"Trained by @ppisljar\")",
+          "base": null
+        },
+        "gender": {
+          "value": "male",
+          "source": "measured-acoustic: synthesized median F0 91 Hz"
+        },
+        "attribution": {
+          "required": true,
+          "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
+        },
+        "verdict": "lineage-unstated",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
+      "attributionText": "Slovenian narration voice trained on the ARTUR studio TTS data (https://huggingface.co/datasets/ppisljar/artur_studio_tts), licensed CC BY 4.0.",
       "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
       "availableGenders": [
         "male"
       ]
@@ -5087,12 +6310,6 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage; approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded; lineageReview flag retained for counsel/runtime audit",
-      "gender": "male",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
-      "availableGenders": [
-        "male"
-      ],
       "licenseChain": {
         "modelCard": {
           "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sq/sq_AL/edon/medium/MODEL_CARD",
@@ -5110,9 +6327,15 @@
           "verdict": "lineage-encumbered"
         },
         "verdict": "lineage-encumbered",
-        "note": "Legacy approval kept pending owner decision; not counted as a resale-safe gender-pair voice. Fine-tuned weights start from a checkpoint whose training data is not licensed for commercial voice synthesis.",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
         "verifiedAt": "2026-10-25"
-      }
+      },
+      "gender": "male",
+      "genderSource": "curated-model-name",
+      "genderConfidence": "curated",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "sr_RS-serbski_institut-medium",
@@ -5191,11 +6414,11 @@
       "commercialUse": "unknown",
       "datasetUrl": null,
       "finetunedFrom": "Norweigan talesyntese voice (medium quality)",
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "no License line in MODEL_CARD",
+      "notes": "no License line in MODEL_CARD; finetuned from da_DK-talesyntese-medium, which carries a non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -5226,10 +6449,35 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
-      "gender": "unknown",
-      "genderSource": "unresolved",
-      "genderConfidence": "unresolved",
-      "availableGenders": []
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/sv/sv_SE/nst/medium/MODEL_CARD",
+          "statedLicense": "CC0"
+        },
+        "dataset": {
+          "url": "https://www.nb.no/sprakbanken/en/resource-catalogue/oai-nb-no-sbr-17/",
+          "license": "CC0-1.0"
+        },
+        "training": {
+          "lineage": "trained from scratch by KBLab, National Library of Sweden (model card)",
+          "base": null
+        },
+        "gender": {
+          "value": "male",
+          "source": "measured-acoustic: synthesized median F0 82 Hz"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "resale-safe",
+        "verifiedAt": "2026-10-26"
+      },
+      "gender": "male",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "male"
+      ]
     },
     {
       "id": "sw_CD-lanfrica-medium",
@@ -5354,6 +6602,35 @@
       ]
     },
     {
+      "id": "th_TH-tsync2-medium",
+      "name": "tsync2",
+      "language": "th",
+      "locale": "th_TH",
+      "localeName": "Thai, Thailand",
+      "quality": "medium",
+      "numSpeakers": 1,
+      "isDefaultForLocale": false,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/th/th_TH/tsync2/medium/th_TH-tsync2-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/th/th_TH/tsync2/medium/th_TH-tsync2-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/th/th_TH/tsync2/medium/MODEL_CARD",
+      "modelMd5": "f3f58fc2cfc4f6c591629cb25b47923d",
+      "configMd5": "01ddb288347a85c36f55c328ad9fa299",
+      "rawLicense": "CC BY-NC-SA 3.0 (**non-commercial**)",
+      "license": "CC-BY-NC-SA-4.0",
+      "commercialUse": "forbidden",
+      "datasetUrl": "https://huggingface.co/datasets/dubbing-ai/vaja-thai",
+      "finetunedFrom": "the LibriTTS-R base model (MRD and SDP)",
+      "lineageReview": true,
+      "reviewStatus": "rejected",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "automated:build-voice-manifest.mjs",
+      "notes": "non-commercial; finetuned from en_US-libritts_r-medium, which carries a non-commercial weight lineage",
+      "gender": "unknown",
+      "genderSource": "unresolved",
+      "genderConfidence": "unresolved",
+      "availableGenders": []
+    },
+    {
       "id": "tr_TR-dfki-medium",
       "name": "dfki",
       "language": "tr",
@@ -5438,6 +6715,25 @@
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/uk/uk_UA/mykyta/high/MODEL_CARD",
+          "statedLicense": "Apache 2.0"
+        },
+        "dataset": {
+          "url": "https://github.com/egorsmkv/ukrainian-tts-datasets",
+          "license": "Apache-2.0"
+        },
+        "training": {
+          "lineage": "not stated (card links the trainer page)"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "lineage-unstated",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
       "gender": "male",
       "genderSource": "curated-model-name",
       "genderConfidence": "curated",
@@ -5496,13 +6792,38 @@
       "datasetUrl": "https://github.com/egorsmkv/ukrainian-tts-datasets",
       "finetunedFrom": null,
       "lineageReview": false,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "",
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; lineage-unstated",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/uk/uk_UA/tetiana/high/MODEL_CARD",
+          "statedLicense": "Apache 2.0"
+        },
+        "dataset": {
+          "url": "https://github.com/egorsmkv/ukrainian-tts-datasets",
+          "license": "Apache-2.0"
+        },
+        "training": {
+          "lineage": "not stated (card links the trainer page)",
+          "base": null
+        },
+        "gender": {
+          "value": "female",
+          "source": "measured-acoustic: synthesized median F0 210 Hz"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "lineage-unstated",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
       "gender": "female",
-      "genderSource": "curated-model-name",
-      "genderConfidence": "curated",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
       "availableGenders": [
         "female"
       ]
@@ -5563,6 +6884,62 @@
       ]
     },
     {
+      "id": "ur_PK-aegis_female-medium",
+      "name": "aegis_female",
+      "language": "ur",
+      "locale": "ur_PK",
+      "localeName": "Urdu, Pakistan",
+      "quality": "medium",
+      "numSpeakers": 1,
+      "isDefaultForLocale": false,
+      "modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ur/ur_PK/aegis_female/medium/ur_PK-aegis_female-medium.onnx",
+      "configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ur/ur_PK/aegis_female/medium/ur_PK-aegis_female-medium.onnx.json",
+      "modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ur/ur_PK/aegis_female/medium/MODEL_CARD",
+      "modelMd5": "81f9f9772025785f548e1aa0de3361b7",
+      "configMd5": "6ee1b0405998a314c51c6744b714becd",
+      "rawLicense": "mit",
+      "license": "MIT",
+      "commercialUse": "allowed",
+      "datasetUrl": null,
+      "finetunedFrom": null,
+      "lineageReview": false,
+      "reviewStatus": "approved",
+      "verifiedFromModelCard": true,
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; dataset-unverified",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ur/ur_PK/aegis_female/medium/MODEL_CARD",
+          "statedLicense": "mit"
+        },
+        "dataset": {
+          "url": null,
+          "license": "MIT"
+        },
+        "training": {
+          "lineage": "not stated; card names no dataset",
+          "base": null
+        },
+        "gender": {
+          "value": "female",
+          "source": "model card: \"Voice: Female\""
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "dataset-unverified",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
+      "gender": "female",
+      "genderSource": "model-card",
+      "genderConfidence": "verified",
+      "availableGenders": [
+        "female"
+      ]
+    },
+    {
       "id": "ur_PK-fasih-medium",
       "name": "fasih",
       "language": "ur",
@@ -5581,12 +6958,32 @@
       "commercialUse": "allowed",
       "datasetUrl": null,
       "finetunedFrom": null,
-      "lineageReview": false,
+      "lineageReview": true,
       "reviewStatus": "approved",
       "verifiedFromModelCard": true,
       "reviewedBy": "codex-owner-directed-2026-06-06",
       "reviewedAt": "2026-06-06",
       "notes": "approved for broad multilingual runtime best-per-language bundle 2026-06-06; selection rule: commercialUse allowed, highest Piper quality, clean lineage/previous approval/default tie-breaks; attribution/unknown/forbidden excluded",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/ur/ur_PK/fasih/medium/MODEL_CARD",
+          "statedLicense": "mit"
+        },
+        "dataset": {
+          "url": "https://huggingface.co/datasets/mahwizzzz/UAT",
+          "license": "MIT (model card)"
+        },
+        "training": {
+          "lineage": "fine-tuned from the hi_IN-rohan-medium checkpoint (card \"Base model\")",
+          "base": "hi_IN-rohan-medium (fine-tuned from lessac; IITM IndicTTS data under an unverified licence)"
+        },
+        "attribution": {
+          "required": false
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
       "gender": "male",
       "genderSource": "model-card",
       "genderConfidence": "verified",
@@ -5617,7 +7014,7 @@
       "reviewStatus": "unreviewed",
       "verifiedFromModelCard": true,
       "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "license not machine-clear; read dataset URL",
+      "notes": "license not machine-clear; read dataset URL; finetuned from Ryan (CC-BY-NC-SA base) — non-commercial weight lineage",
       "gender": "unknown",
       "genderSource": "unresolved",
       "genderConfidence": "unresolved",
@@ -5643,14 +7040,43 @@
       "datasetUrl": "https://ieee-dataport.org/documents/vais-1000-vietnamese-speech-synthesis-corpus",
       "finetunedFrom": "U.S. English lessac voice (medium quality)",
       "lineageReview": true,
-      "reviewStatus": "candidate",
+      "reviewStatus": "approved",
       "verifiedFromModelCard": true,
-      "reviewedBy": "automated:build-voice-manifest.mjs",
-      "notes": "finetuned from lessac (restricted Blizzard base) — counsel review of weight lineage",
-      "gender": "unknown",
-      "genderSource": "unresolved",
-      "genderConfidence": "unresolved",
-      "availableGenders": []
+      "reviewedBy": "w4-coverage-pass-2026-10-26",
+      "reviewedAt": "2026-10-26",
+      "notes": "W4 coverage pass 2026-10-26; lineage-encumbered",
+      "licenseChain": {
+        "modelCard": {
+          "url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/vi/vi_VN/vais1000/medium/MODEL_CARD",
+          "statedLicense": "https://creativecommons.org/licenses/by/4.0/"
+        },
+        "dataset": {
+          "url": "https://ieee-dataport.org/documents/vais-1000-vietnamese-speech-synthesis-corpus",
+          "license": "CC-BY-4.0"
+        },
+        "training": {
+          "lineage": "finetuned from U.S. English lessac voice (medium quality)",
+          "base": "lessac (Blizzard 2013 research-only base)"
+        },
+        "gender": {
+          "value": "female",
+          "source": "measured-acoustic: synthesized median F0 257 Hz"
+        },
+        "attribution": {
+          "required": true,
+          "home": "deck edition sidecar embeddedAssetLicenses (narration-voice record); no on-slide credit"
+        },
+        "verdict": "lineage-encumbered",
+        "note": "Owner decision 2026-10-26: keep flagged — voices whose own model card licence permits commercial use are accepted to maximise female/male coverage; weight lineage or dataset gaps are flagged, never hidden.",
+        "verifiedAt": "2026-10-26"
+      },
+      "attributionText": "Vietnamese narration voice trained on the VAIS-1000 corpus (IEEE DataPort), licensed CC BY 4.0.",
+      "gender": "female",
+      "genderSource": "measured-acoustic",
+      "genderConfidence": "measured",
+      "availableGenders": [
+        "female"
+      ]
     },
     {
       "id": "vi_VN-vivos-x_low",
@@ -5798,7 +7224,7 @@
       "availableGenders": []
     }
   ],
-  "updatedAt": "2026-10-25",
+  "updatedAt": "2026-10-26",
   "approvalPolicy": "Runtime production voices are selected as one best commercially allowed voice per language, using Piper quality tier first, then clean lineage, previous approval, default flag, and deterministic id tie-breaks. Attribution, forbidden, unknown-license, and runtime-failing voices remain excluded until an attribution/counsel or deterministic runtime path exists.",
   "voiceProfiles": "voices/voice-profiles.json"
 }
