@@ -101,6 +101,11 @@
 							"name": "mls-6507",
 							"genderSource": "dataset-speaker-metadata",
 							"genderConfidence": "verified"
+						},
+						{
+							"voiceId": "de_DE-ramona-low",
+							"genderSource": "curated-model-name",
+							"genderConfidence": "curated"
 						}
 					],
 					"male": [
@@ -1068,6 +1073,67 @@
 					"genderConfidence": "verified"
 				}
 			]
+		},
+		{
+			"id": "de_DE-ramona-low",
+			"name": "ramona",
+			"language": "de",
+			"locale": "de_DE",
+			"localeName": "German, Germany",
+			"quality": "low",
+			"numSpeakers": 1,
+			"isDefaultForLocale": false,
+			"modelUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/ramona/low/de_DE-ramona-low.onnx",
+			"configUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/ramona/low/de_DE-ramona-low.onnx.json",
+			"modelCardUrl": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/ramona/low/MODEL_CARD",
+			"modelMd5": "b4aaf3673170a0d96519cdc992c23fda",
+			"configMd5": "d61011961f01f349331b1a1b1b0ca58a",
+			"rawLicense": "See URL",
+			"license": "BSD-style (M-AILABS)",
+			"commercialUse": "allowed",
+			"datasetUrl": "https://www.caito.de/2019/01/03/the-m-ailabs-speech-dataset/",
+			"finetunedFrom": null,
+			"lineageReview": false,
+			"reviewStatus": "approved",
+			"verifiedFromModelCard": true,
+			"reviewedBy": "w4-licence-chain-review-2026-10-25",
+			"notes": "W4 gender-pair launch voice; M-AILABS licence verified on the archived original page 2026-10-26",
+			"gender": "female",
+			"genderSource": "curated-model-name",
+			"genderConfidence": "curated",
+			"availableGenders": [
+				"female"
+			],
+			"reviewedAt": "2026-10-26",
+			"licenseChain": {
+				"modelCard": {
+					"url": "https://huggingface.co/rhasspy/piper-voices/resolve/main/de/de_DE/ramona/low/MODEL_CARD",
+					"statedLicense": "See URL (M-AILABS)"
+				},
+				"dataset": {
+					"name": "M-AILABS Speech Dataset — de_DE (LibriVox readings)",
+					"url": "https://www.caito.de/2019/01/03/the-m-ailabs-speech-dataset/",
+					"license": "M-AILABS BSD-style licence: \"Redistribution and use in any form, including any commercial use, with or without modification are permitted\" provided source-data redistributions retain the copyright notice and the holder name is not used for endorsement; underlying LibriVox audio public domain. Verified on the archived original page (web.archive.org, 2023 capture)."
+				},
+				"training": {
+					"lineage": "trained from scratch",
+					"base": null
+				},
+				"gender": {
+					"value": "female",
+					"source": "M-AILABS dataset folder de_DE/by_book/female/ramona_deininger (dataset splits voices into female/male/mixed folders)"
+				},
+				"attribution": {
+					"required": false,
+					"note": "BSD notice binds redistribution of the source data, not synthesized output; no on-slide credit"
+				},
+				"verdict": "resale-safe",
+				"verifiedAt": "2026-10-26"
+			},
+			"modelPath": "/voices/de_DE-ramona-low.onnx",
+			"configPath": "/voices/de_DE-ramona-low.onnx.json",
+			"modelSha256": "a1068592532aad8c49bf3d1a01b8749c11d7dba726689ee28ad64e7b627ae4c5",
+			"configSha256": "64906ab7a050ac685fa3dcea044baa798f67ed77be164f9c668a69298c6487d2"
 		},
 		{
 			"id": "de_DE-thorsten-high",
