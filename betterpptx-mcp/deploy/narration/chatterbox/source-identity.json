@@ -1,0 +1,9 @@
+{
+  "repository": "https://github.com/resemble-ai/chatterbox",
+  "commit": "5de7a54aa4e5e2baadb0182dde554908b48b85c2",
+  "archiveUrl": "https://codeload.github.com/resemble-ai/chatterbox/zip/5de7a54aa4e5e2baadb0182dde554908b48b85c2",
+  "archiveBytes": 1478295,
+  "archiveSha256": "bb7363a76c0c0432a0305681fe2e533bbfb0f10fcf7b98d75a439d9a909f1576",
+  "mtlSourceArchivePath": "chatterbox-5de7a54aa4e5e2baadb0182dde554908b48b85c2/src/chatterbox/mtl_tts.py",
+  "mtlSourceSha256": "936759044e54cffe8c68b91b32e01da0bc032a1e084f769f0403080d86ad153c"
+}

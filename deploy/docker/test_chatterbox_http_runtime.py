@@ -60,6 +60,89 @@ class RuntimeTests(unittest.TestCase):
     def setUp(self):
         self.voices = {'voice': {'id': 'voice'}, 'reference': {'id': 'reference', 'referenceAudio': 'approved.wav'}}
 
+    def test_selected_multilingual_version_controls_required_files_and_identity(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for filename in runtime.model_files('multilingual', 'v3'):
+                (root / filename).write_bytes(b'version fixture')
+            v3 = runtime.model_digest(root, 'multilingual', 'v3')
+            with self.assertRaises(runtime.RequestError): runtime.model_digest(root, 'multilingual')
+            (root / runtime.MULTILINGUAL_WEIGHT_FILES['v2']).write_bytes(b'version fixture')
+            v2 = runtime.model_digest(root, 'multilingual')
+            legacy_identity = hashlib.sha256()
+            for filename in runtime.MULTILINGUAL_FILES:
+                legacy_identity.update((filename + '\0' + runtime.file_digest(root / filename) + '\n').encode())
+            self.assertEqual(v2, 'sha256:' + legacy_identity.hexdigest())
+            self.assertNotEqual(v2, v3, 'Even equal weight bytes with different selected filenames have distinct identities.')
+            (root / runtime.MULTILINGUAL_WEIGHT_FILES['v2']).write_bytes(b'changed unused v2')
+            self.assertEqual(runtime.model_digest(root, 'multilingual', 'v3'), v3)
+            (root / runtime.MULTILINGUAL_WEIGHT_FILES['v3']).write_bytes(b'changed selected v3')
+            self.assertNotEqual(runtime.model_digest(root, 'multilingual', 'v3'), v3)
+        for version in ('v1', 'V3', '', None, 't3_mtl23ls_v3.safetensors'):
+            with self.assertRaises(runtime.RequestError): runtime.model_files('multilingual', version)
+        with self.assertRaises(runtime.RequestError): runtime.model_files('english', 'v3')
+
+    def test_multilingual_loader_selects_v3_explicitly_and_never_retries_v2(self):
+        class SelectorModel:
+            calls = []
+            @classmethod
+            def from_local(cls, directory, device, t3_model=None):
+                cls.calls.append((directory, device, t3_model))
+                return 'selected-model'
+        self.assertEqual(runtime.load_local_model(SelectorModel, Path('local-model'), variant='multilingual', multilingual_version='v3'), 'selected-model')
+        self.assertEqual(SelectorModel.calls, [(Path('local-model'), 'cpu', 'v3')])
+        runtime.load_local_model(SelectorModel, Path('local-model'), variant='multilingual')
+        self.assertEqual(SelectorModel.calls[-1][2], 'v2')
+        class LegacyModel:
+            calls = 0
+            @classmethod
+            def from_local(cls, directory, device):
+                cls.calls += 1
+                return 'legacy-model'
+        with self.assertRaises(runtime.RequestError): runtime.load_local_model(LegacyModel, Path('local-model'), variant='multilingual', multilingual_version='v3')
+        self.assertEqual(LegacyModel.calls, 0)
+        self.assertEqual(runtime.load_local_model(LegacyModel, Path('local-model'), variant='multilingual'), 'legacy-model')
+        class WildcardModel:
+            calls = 0
+            @classmethod
+            def from_local(cls, directory, device, **kwargs):
+                cls.calls += 1
+        with self.assertRaises(runtime.RequestError): runtime.load_local_model(WildcardModel, Path('local-model'), variant='multilingual', multilingual_version='v3')
+        self.assertEqual(WildcardModel.calls, 0, 'A wildcard argument must not be assumed to honor explicit model selection.')
+        class FailedSelector:
+            calls = []
+            @classmethod
+            def from_local(cls, directory, device, t3_model=None):
+                cls.calls.append(t3_model)
+                raise TypeError('selected runtime load failed')
+        with self.assertRaises(TypeError): runtime.load_local_model(FailedSelector, Path('local-model'), variant='multilingual', multilingual_version='v3')
+        self.assertEqual(FailedSelector.calls, ['v3'])
+
+    def test_v3_catalog_requires_explicit_version_and_matching_selected_digest(self):
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            for filename in set(runtime.model_files('multilingual', 'v2') + runtime.model_files('multilingual', 'v3')):
+                (root / filename).write_bytes(b'identity fixture')
+            manifest = root / 'voices.json'
+            voice = {'id': 'voice', 'reviewStatus': 'approved', 'commercialUse': 'allowed', 'language': 'en'}
+            data = {'provider': 'chatterbox-http', 'modelVariant': 'multilingual', 'multilingualVersion': 'v3', 'modelDigest': runtime.model_digest(root, 'multilingual', 'v3'), 'voices': [voice]}
+            manifest.write_text(json.dumps(data))
+            self.assertIn('voice', runtime.load_voices(manifest, root, variant='multilingual', multilingual_version='v3'))
+            with self.assertRaises(runtime.RequestError): runtime.load_voices(manifest, root, variant='multilingual')
+            for changed in [
+                {**data, 'multilingualVersion': 'v2'},
+                {key: value for key, value in data.items() if key != 'multilingualVersion'},
+                {key: value for key, value in data.items() if key != 'modelDigest'},
+                {**data, 'modelDigest': runtime.model_digest(root, 'multilingual', 'v2')},
+                {**data, 'voices': [{**voice, 'multilingualVersion': 'v2'}]},
+            ]:
+                manifest.write_text(json.dumps(changed))
+                with self.assertRaises(runtime.RequestError): runtime.load_voices(manifest, root, variant='multilingual', multilingual_version='v3')
+            legacy = {**data, 'modelDigest': runtime.model_digest(root, 'multilingual', 'v2')}
+            del legacy['multilingualVersion']
+            manifest.write_text(json.dumps(legacy))
+            self.assertIn('voice', runtime.load_voices(manifest, root, variant='multilingual'))
+
     def test_validation_rejects_unknown_fields_voices_and_languages(self):
         self.assertEqual(runtime.validate_request({'text': 'Hello', 'voice': 'voice', 'language': 'en-US'}, self.voices)[0], 'Hello')
         for request in [

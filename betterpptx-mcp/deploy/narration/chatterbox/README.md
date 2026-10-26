@@ -9,7 +9,7 @@ on the next approved release restores the existing routing and catalog.
 
 `model-source.json` pins official `ResembleAI/chatterbox` multilingual revision
 `5bb1f6ee58e50c3b8d408bc82a6d3740c2db6e18`, MIT, with exact file sizes and SHA256s.
-It identifies approximately 3.21 GB of model files. No weights are committed,
+It selects multilingual V3 explicitly and identifies approximately 3.21 GB of model files. No weights are committed,
 copied into build contexts, downloaded at startup, or bundled in the image.
 
 Provision a dedicated, owner-controlled bucket before selecting this engine:
@@ -18,7 +18,7 @@ Provision a dedicated, owner-controlled bucket before selecting this engine:
 models/conds.pt
 models/grapheme_mtl_merged_expanded_v1.json
 models/s3gen.pt
-models/t3_mtl23ls_v2.safetensors
+models/t3_mtl23ls_v3.safetensors
 models/ve.pt
 references/female-ljspeech.wav
 references/male-thorsten.wav
@@ -57,23 +57,48 @@ embedded in `runtime-manifest.json`. This fixture catalog does not establish
 native accent quality: local ASR matched English and French, while Arabic and
 Swahili need listening review.
 
-The Dockerfile selects Python 3.11.14, CPU Torch/Torchaudio 2.6.0 and
-chatterbox-tts 0.1.7, consistent with that package's Python-version dependency
-markers. The actual local image build and `pip check` passed. This is not the
-same environment as the Windows CPU inference proof. An actual container with
-networking disabled, 2 CPU and 8 GiB became ready in 104.485 seconds. It returned
-eight public catalog entries without reference paths, registered a private
-reference voice without listing it publicly, and synthesized one real English
-clip in 78.317 seconds: 2,000 ms of non-silent mono PCM16 at 24 kHz. Peak cgroup
-memory was 6,931,578,880 bytes (about 6.46 GiB). The final tested image identity is
-`sha256:fff97f1c6bbe21eb9a31aecea35db3242850110f3d7d87ae81d99883e245b2b2`.
-`container-smoke.py` reproduces the single-clip protocol inside an owned container.
+The official image selects Python 3.11.14, CPU Torch/Torchaudio 2.6.0,
+`CHATTERBOX_MODEL_VARIANT=multilingual`, and
+`CHATTERBOX_MULTILINGUAL_VERSION=v3`. Both model identity files explicitly
+record V3. `verify-bundle.py` rejects a V2 catalog, a mismatched selected T3
+filename, or disagreement about the runtime source commit.
 
-This proves local offline startup and real reference-conditioned synthesis;
-it does not establish native quality, speaker similarity, Cloud Run cold-start
-performance or shared private-profile persistence. CPU generation is slow. The configured starting profile
-is 2 CPU, 8 GiB, concurrency 1, min 0, max 2, and 900-second requests; it is a
-candidate capacity setting, not a throughput guarantee.
+PyPI `chatterbox-tts==0.1.7` bootstraps the existing compatible dependency set;
+it is not the final inference source. `source-identity.json` pins upstream commit
+`5de7a54aa4e5e2baadb0182dde554908b48b85c2` and archive SHA256
+`bb7363a76c0c0432a0305681fe2e533bbfb0f10fcf7b98d75a439d9a909f1576`.
+`install-source.py` streams that approximately 1.48 MB source ZIP into one bounded
+temporary file, verifies its exact size, archive digest and multilingual module
+digest, then installs it with `--no-deps --force-reinstall`. It verifies the
+installed module bytes and explicit `t3_model` selector before the build can
+continue. No source checkout or model history is copied. `resemble-perth==1.0.1`
+is pinned independently; the source metadata's moving Perth master dependency
+is never resolved by the source installation step.
+
+The selected V3 checkpoint is `t3_mtl23ls_v3.safetensors`, SHA256
+`5abca8321ede76f8e61f1cc0d19aea6c946b28871017ce8726f8a69203f05953`.
+The catalog aggregate identity is
+`sha256:4afe36eeb538555c62c8b768f312a89580a1ef8f764dc7ef87487f8289e25875`.
+The worker explicitly calls `from_local(..., t3_model='v3')`; missing selector
+support or V3 loading failure stops startup and never retries V2. Historical
+V2 container measurements do not qualify this V3 recipe. Current real inference
+and application-delivery acceptance must be recorded separately against the
+actual image/source/model identities; focused deployment tests do not build or
+certify an image.
+
+The starting capacity profile remains 2 CPU, 8 GiB, concurrency 1, min 0, max 2,
+and 900-second requests. It is a candidate configuration, not a throughput or
+cold-start guarantee. The MCP voice catalog retains the same licensed reference
+fixtures and language/gender descriptors. Native Arabic/Swahili fluency and
+speaker similarity still require listening review.
+
+Offline contract checks (no weights or speech execution):
+
+```powershell
+node --test betterpptx-mcp/deploy/narration/chatterbox/deployment.test.mjs
+python -m unittest discover -s betterpptx-mcp/deploy/narration/chatterbox -p test_v3_deployment.py
+python -m unittest discover -s deploy/docker -p test_chatterbox_http_runtime.py
+```
 
 ## Explicit release inputs and IAM
 

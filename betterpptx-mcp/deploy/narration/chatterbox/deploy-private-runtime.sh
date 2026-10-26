@@ -26,7 +26,7 @@ check_bucket "$SPEECH_MODEL_BUCKET" "$GCP_NARRATION_SERVICE_ACCOUNT" '["roles/st
 if [[ -n "${PRIVATE_VOICE_BUCKET:-}" ]]; then
   check_bucket "$PRIVATE_VOICE_BUCKET" "$GCP_RUNTIME_SERVICE_ACCOUNT" '["roles/storage.objectUser","roles/storage.objectAdmin"]' true
 fi
-inputs_digest="$(cat "$here/model-source.json" "$here/runtime-manifest.json" "$here/Dockerfile" "$here/verify-bundle.py" "$here/provision-tokenizers.py" deploy/docker/chatterbox_http_runtime.py | sha256sum | cut -c1-20)"
+inputs_digest="$(cat "$here/model-source.json" "$here/runtime-manifest.json" "$here/source-identity.json" "$here/install-source.py" "$here/Dockerfile" "$here/verify-bundle.py" "$here/provision-tokenizers.py" deploy/docker/chatterbox_http_runtime.py | sha256sum | cut -c1-20)"
 image="${GCP_REGION}-docker.pkg.dev/${GCP_PROJECT_ID}/${GCP_ARTIFACT_REPOSITORY}/betterpptx-narration-chatterbox:inputs-${inputs_digest}"
 if ! gcloud artifacts docker images describe "$image" --format='value(image_summary.digest)' >/dev/null 2>&1; then
   context="$RUNNER_TEMP/chatterbox-context-${GITHUB_RUN_ID:-local}"

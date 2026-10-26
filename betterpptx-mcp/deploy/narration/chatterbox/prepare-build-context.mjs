@@ -24,7 +24,7 @@ export async function prepareBuildContext(output, { modelCache } = {}) {
   const identity = JSON.parse(await fs.readFile(path.join(here, 'model-source.json'), 'utf8'))
   if (modelCache) await verifyPinnedFiles(modelCache, identity)
   await fs.mkdir(root, { recursive: true })
-  const files = ['Dockerfile', 'verify-bundle.py', 'model-source.json', 'runtime-manifest.json', 'provision-tokenizers.py']
+  const files = ['Dockerfile', 'verify-bundle.py', 'model-source.json', 'runtime-manifest.json', 'source-identity.json', 'install-source.py', 'provision-tokenizers.py']
   for (const name of files) await fs.copyFile(path.join(here, name), path.join(root, name))
   await fs.copyFile(path.join(repository, 'deploy/docker/chatterbox_http_runtime.py'), path.join(root, 'runtime.py'))
   let bytes = 0

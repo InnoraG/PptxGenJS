@@ -4,6 +4,7 @@ import base64
 import copy
 import hashlib
 import io
+import inspect
 import json
 import math
 import os
@@ -22,6 +23,7 @@ MAX_REGISTRATION_BODY = 12 * 1024 * 1024
 MAX_CUSTOM_VOICES = 32
 WEIGHT_FILES = ('conds.pt', 's3gen.safetensors', 't3_cfg.safetensors', 've.safetensors')
 MULTILINGUAL_FILES = ('conds.pt', 'grapheme_mtl_merged_expanded_v1.json', 's3gen.pt', 't3_mtl23ls_v2.safetensors', 've.pt')
+MULTILINGUAL_WEIGHT_FILES = {'v2': 't3_mtl23ls_v2.safetensors', 'v3': 't3_mtl23ls_v3.safetensors'}
 MULTILINGUAL_LANGUAGES = frozenset('ar da de el en es fi fr he hi it ja ko ms nl no pl pt ru sv sw tr zh'.split())
 
 
@@ -37,11 +39,27 @@ def file_digest(path):
     return 'sha256:' + hasher.hexdigest()
 
 
-def model_digest(root, variant='english'):
+def validate_model_selection(variant='english', multilingual_version='v2'):
     if variant not in ('english', 'multilingual'):
         raise RequestError('Unsupported speech model variant.')
+    if multilingual_version not in MULTILINGUAL_WEIGHT_FILES:
+        raise RequestError('Unsupported speech model version.')
+    if variant != 'multilingual' and multilingual_version != 'v2':
+        raise RequestError('Speech model version does not match the selected variant.')
+
+
+def model_files(variant='english', multilingual_version='v2'):
+    validate_model_selection(variant, multilingual_version)
+    if variant == 'english':
+        return WEIGHT_FILES
+    return tuple(MULTILINGUAL_WEIGHT_FILES[multilingual_version] if name == MULTILINGUAL_WEIGHT_FILES['v2'] else name for name in MULTILINGUAL_FILES)
+
+
+def model_digest(root, variant='english', multilingual_version='v2'):
     hasher = hashlib.sha256()
-    for name in MULTILINGUAL_FILES if variant == 'multilingual' else WEIGHT_FILES:
+    # The selected weight filename participates in identity. Keep legacy v2
+    # digests stable while making v3 identities unambiguously version-specific.
+    for name in model_files(variant, multilingual_version):
         path = Path(root) / name
         if not path.is_file():
             raise RequestError('Required local model weights are unavailable.')
@@ -63,7 +81,8 @@ def supported_for_variant(variant):
     raise RequestError('Unsupported speech model variant.')
 
 
-def load_voices(manifest_path, model_dir, reference_root=None, variant='english'):
+def load_voices(manifest_path, model_dir, reference_root=None, variant='english', multilingual_version='v2'):
+    validate_model_selection(variant, multilingual_version)
     manifest_path = Path(manifest_path).resolve(strict=True)
     root = Path(reference_root or manifest_path.parent).resolve(strict=True)
     data = json.loads(manifest_path.read_text(encoding='utf-8-sig'))
@@ -72,7 +91,11 @@ def load_voices(manifest_path, model_dir, reference_root=None, variant='english'
     supported = supported_for_variant(variant)
     if data.get('modelVariant', variant) != variant:
         raise RequestError('Voice catalog does not match the speech model.')
-    actual_model_digest = model_digest(model_dir, variant)
+    if variant == 'multilingual' and data.get('multilingualVersion', 'v2') != multilingual_version:
+        raise RequestError('Voice catalog does not match the speech model version.')
+    if variant == 'multilingual' and multilingual_version == 'v3' and not re.fullmatch(r'sha256:[a-f0-9]{64}', str(data.get('modelDigest', ''))):
+        raise RequestError('Voice catalog requires the selected model identity.')
+    actual_model_digest = model_digest(model_dir, variant, multilingual_version)
     if data.get('modelDigest') and data['modelDigest'] != actual_model_digest:
         raise RequestError('Model identity does not match the voice catalog.')
     voices = {}
@@ -87,6 +110,8 @@ def load_voices(manifest_path, model_dir, reference_root=None, variant='english'
             raise RequestError('Voice runtime mismatch.')
         if voice.get('modelDigest') and voice['modelDigest'] != actual_model_digest:
             raise RequestError('Model identity does not match the voice catalog.')
+        if variant == 'multilingual' and voice.get('multilingualVersion', multilingual_version) != multilingual_version:
+            raise RequestError('Voice does not match the speech model version.')
         languages = voice.get('languages', [voice.get('language', voice.get('locale', 'en'))])
         if not isinstance(languages, list) or not languages:
             raise RequestError('Invalid voice languages.')
@@ -108,6 +133,24 @@ def load_voices(manifest_path, model_dir, reference_root=None, variant='english'
     if not voices:
         raise RequestError('Voice catalog is empty.')
     return voices
+
+
+def load_local_model(model_class, model_dir, device='cpu', variant='english', multilingual_version='v2'):
+    validate_model_selection(variant, multilingual_version)
+    if variant != 'multilingual':
+        return model_class.from_local(model_dir, device=device)
+    try:
+        parameter = inspect.signature(model_class.from_local).parameters.get('t3_model')
+        selector_supported = parameter is not None and parameter.kind in (inspect.Parameter.POSITIONAL_OR_KEYWORD, inspect.Parameter.KEYWORD_ONLY)
+    except (TypeError, ValueError):
+        selector_supported = False
+    if not selector_supported:
+        if multilingual_version == 'v3':
+            raise RequestError('The configured speech runtime cannot load the selected model version.')
+        # Older supported runtimes have a fixed v2 loader. Never take this
+        # compatibility route for a v3 selection or retry a failed v3 load.
+        return model_class.from_local(model_dir, device=device)
+    return model_class.from_local(model_dir, device=device, t3_model=multilingual_version)
 
 
 def validate_request(data, voices, variant='english', supported_languages=None):
@@ -355,7 +398,8 @@ def main():
     try:
         model_dir = Path(os.environ['CHATTERBOX_MODEL_DIR']).resolve(strict=True)
         variant = os.environ.get('CHATTERBOX_MODEL_VARIANT', 'english').lower()
-        voices = load_voices(os.environ['CHATTERBOX_VOICES_MANIFEST'], model_dir, os.environ.get('CHATTERBOX_REFERENCE_ROOT'), variant)
+        multilingual_version = os.environ.get('CHATTERBOX_MULTILINGUAL_VERSION', 'v2')
+        voices = load_voices(os.environ['CHATTERBOX_VOICES_MANIFEST'], model_dir, os.environ.get('CHATTERBOX_REFERENCE_ROOT'), variant, multilingual_version)
         cpu_threads = min(os.cpu_count() or 1, max(1, int(os.environ.get('CHATTERBOX_CPU_THREADS', '4'))))
         os.environ['OMP_NUM_THREADS'] = str(cpu_threads)
         os.environ['MKL_NUM_THREADS'] = str(cpu_threads)
@@ -366,7 +410,7 @@ def main():
             from chatterbox.mtl_tts import ChatterboxMultilingualTTS as Model
         else:
             from chatterbox.tts import ChatterboxTTS as Model
-        model = Model.from_local(model_dir, device=os.environ.get('CHATTERBOX_DEVICE', 'cpu'))
+        model = load_local_model(Model, model_dir, device=os.environ.get('CHATTERBOX_DEVICE', 'cpu'), variant=variant, multilingual_version=multilingual_version)
         worker = SpeechWorker(model, voices, torch, seed=int(os.environ.get('CHATTERBOX_SEED', '7')), variant=variant, custom_reference_root=os.environ.get('CHATTERBOX_CUSTOM_REFERENCE_ROOT'))
         server = ThreadingHTTPServer((args.host, args.port), make_handler(worker))
         print('Local speech service ready.', flush=True)

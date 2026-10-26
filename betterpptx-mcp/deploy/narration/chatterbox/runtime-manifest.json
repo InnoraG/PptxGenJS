@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "provider": "chatterbox-http",
   "modelVariant": "multilingual",
-  "modelDigest": "sha256:df4dde23165e698c7828d5d2fdb5130d57c3d63129db6b1ff9dd94148d446008",
+  "modelDigest": "sha256:4afe36eeb538555c62c8b768f312a89580a1ef8f764dc7ef87487f8289e25875",
   "modelCardUrl": "https://huggingface.co/ResembleAI/chatterbox",
   "voices": [
     {
@@ -205,5 +205,9 @@
       "recordingLicenseUrl": "https://thorsten-voice.de/en/about/recordings/",
       "modelCardUrl": "https://huggingface.co/ResembleAI/chatterbox"
     }
-  ]
+  ],
+  "modelVersion": "v3",
+  "multilingualVersion": "v3",
+  "runtimeSourceCommit": "5de7a54aa4e5e2baadb0182dde554908b48b85c2",
+  "expectedUpstreamMtlSourceSha256": "936759044e54cffe8c68b91b32e01da0bc032a1e084f769f0403080d86ad153c"
 }

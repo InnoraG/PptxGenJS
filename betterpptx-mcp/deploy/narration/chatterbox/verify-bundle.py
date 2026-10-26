@@ -18,6 +18,14 @@ def sha(path):
 def verify(model_root, reference_root, identity, catalog, full_hash=True):
     if identity['repository'] != 'ResembleAI/chatterbox' or identity['variant'] != 'multilingual':
         raise ValueError('Unsupported pinned speech bundle')
+    version = identity.get('multilingualVersion', 'v2')
+    if version not in ('v2', 'v3') or catalog.get('multilingualVersion', 'v2') != version:
+        raise ValueError('Catalog differs from the selected speech version')
+    expected_files = {'conds.pt', 'grapheme_mtl_merged_expanded_v1.json', 's3gen.pt', f't3_mtl23ls_{version}.safetensors', 've.pt'}
+    if set(identity['files']) != expected_files:
+        raise ValueError('Pinned model files differ from the selected speech version')
+    if identity.get('runtimeSourceCommit') != catalog.get('runtimeSourceCommit'):
+        raise ValueError('Catalog differs from the pinned runtime source')
     aggregate = hashlib.sha256()
     for name in sorted(identity['files']):
         expected = identity['files'][name]
