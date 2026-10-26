@@ -181,6 +181,7 @@ export function resolveVoice({ voice, lang, gender, speaker, allowUnreviewedVoic
 			commercialUse: found.commercialUse,
 			attributionRequired: found.commercialUse === 'attribution',
 			source: found.modelCardUrl || found.datasetUrl,
+			...(found.commercialUse === 'attribution' ? { attribution: found.attributionText || null, datasetUrl: found.datasetUrl || null } : {}),
 			reviewStatus: found.reviewStatus,
 			lineageReview: Boolean(found.lineageReview),
 		},

@@ -94,6 +94,15 @@
         "6": { "name": "benyw-gogledd-1", "gender": "female", "genderSource": "speaker-id-map", "genderConfidence": "verified" }
       }
     },
+    "de_DE-mls-medium": {
+      "gender": "mixed",
+      "genderSource": "dataset-speaker-metadata",
+      "genderConfidence": "verified",
+      "speakerProfiles": {
+        "0": { "name": "mls-2422", "gender": "male", "genderSource": "dataset-speaker-metadata", "genderConfidence": "verified" },
+        "2": { "name": "mls-2037", "gender": "female", "genderSource": "dataset-speaker-metadata", "genderConfidence": "verified" }
+      }
+    },
     "es_ES-sharvard-medium": {
       "gender": "mixed",
       "genderSource": "speaker-id-map",
@@ -101,6 +110,15 @@
       "speakerProfiles": {
         "0": { "name": "M", "gender": "male", "genderSource": "speaker-id-map", "genderConfidence": "verified" },
         "1": { "name": "F", "gender": "female", "genderSource": "speaker-id-map", "genderConfidence": "verified" }
+      }
+    },
+    "fr_FR-mls-medium": {
+      "gender": "mixed",
+      "genderSource": "dataset-speaker-metadata",
+      "genderConfidence": "verified",
+      "speakerProfiles": {
+        "0": { "name": "mls-1840", "gender": "male", "genderSource": "dataset-speaker-metadata", "genderConfidence": "verified" },
+        "1": { "name": "mls-3698", "gender": "female", "genderSource": "dataset-speaker-metadata", "genderConfidence": "verified" }
       }
     },
     "fr_FR-upmc-medium": {
