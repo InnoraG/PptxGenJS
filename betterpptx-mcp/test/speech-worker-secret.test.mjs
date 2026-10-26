@@ -12,7 +12,7 @@ test('speech spending credentials have private owner update and redacted status 
 	assert.ok(def.actions.reveal && def.actions.update && def.actions.test)
 	assert.match(def.description, /Rotate.*Modal.*update.*redeploy/)
 	assert.deepEqual(def.dependentServices, ['betterpptx-narration-modal', 'betterpptx-avatar-budget-sync'])
-	assert.match(def.description, /rebind.*billing-sync.*new Secret Manager version/)
+	assert.match(def.description, /execute the billing-sync job.*current Secret Manager version at startup/)
 	for (const value of ['{}', '{"token_id":"private-only"}', '{"token_id":"ak-synthetic123","token_secret":"as-synthetic123","extra":true}']) await assert.rejects(updateMissionControlSecret(id, { value, confirm: `UPDATE ${id}` }), { code: 'MC_SECRET_VALUE_INVALID' })
 	const value = JSON.stringify({ token_id: 'ak-synthetic123', token_secret: 'as-synthetic123' })
 	const updated = await updateMissionControlSecret(id, { value, confirm: `UPDATE ${id}` })

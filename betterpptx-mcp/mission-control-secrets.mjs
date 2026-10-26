@@ -21,7 +21,7 @@ export const MISSION_CONTROL_SECRET_DEFINITIONS = Object.freeze([
 		id: 'speech_worker_credentials',
 		displayName: 'Speech GPU Account Credentials',
 		kind: 'modal-credentials',
-		description: 'Dedicated speech account credential pair. Rotate the pair at Modal, update it here, then redeploy the private speech bridge and rebind the billing-sync job to the new Secret Manager version. Run the sync and verify fresh billing before new speech. This account is separate from avatar worker rotation.',
+		description: 'Dedicated speech account credential pair. Rotate the pair at Modal, update it here, then redeploy the private speech bridge and execute the billing-sync job. Both resolve the current Secret Manager version at startup. Verify fresh billing and speech before retiring the old pair. This account is separate from avatar worker rotation.',
 		secretName: 'betterpptx-speech-worker-credentials',
 		envName: 'BETTERPPTX_SPEECH_WORKER_CREDENTIALS',
 		alternateEnvNames: [],

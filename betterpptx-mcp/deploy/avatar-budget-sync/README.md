@@ -10,13 +10,15 @@ not the public gateway identity. Provision that identity with Firestore budget
 read/write access and Secret Manager accessor on the two named inputs only:
 
 - `BETTERPPTX_MODAL_BILLING_TOKENS=betterpptx-modal-billing-tokens:latest`
-- `BETTERPPTX_SPEECH_WORKER_CREDENTIALS=betterpptx-speech-worker-credentials:1`
+- `BETTERPPTX_SPEECH_WORKER_CREDENTIALS=betterpptx-speech-worker-credentials:latest`
 
 Set `BETTERPPTX_GCP_PROJECT`,
 `BETTERPPTX_FIRESTORE_AVATAR_WORKER_BUDGET_COLLECTION=betterpptx_avatar_worker_budget`,
 and `BETTERPPTX_SPEECH_WORKER_ACCOUNT_ID=fluxworkerai1`. The speech pair is owned
 through Mission Control's existing Speech GPU Account Credentials controls.
-Rotation requires a deliberate new secret-version binding and redeployment.
+After updating the pair in Mission Control, redeploy the bridge and execute this
+job. Both resolve the current secret version at startup. Verify fresh billing and
+speech before retiring the old pair; later releases must not restore an old pin.
 Never grant the public gateway access to this pair or log token values.
 
 The bridge separately enforces owner policy before every GPU wake: monthly cap

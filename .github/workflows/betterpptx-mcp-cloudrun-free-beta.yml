@@ -519,7 +519,7 @@ jobs:
             --tasks=1 --parallelism=1 --max-retries=1 --task-timeout=900s \
             --memory=1Gi --cpu=1 \
             --set-env-vars="BETTERPPTX_GCP_PROJECT=$GCP_PROJECT_ID,BETTERPPTX_FIRESTORE_AVATAR_WORKER_BUDGET_COLLECTION=betterpptx_avatar_worker_budget,BETTERPPTX_SPEECH_WORKER_ACCOUNT_ID=fluxworkerai1" \
-            --set-secrets="BETTERPPTX_MODAL_BILLING_TOKENS=${MODAL_BILLING_TOKENS_SECRET_NAME}:latest,BETTERPPTX_SPEECH_WORKER_CREDENTIALS=betterpptx-speech-worker-credentials:1" \
+            --set-secrets="BETTERPPTX_MODAL_BILLING_TOKENS=${MODAL_BILLING_TOKENS_SECRET_NAME}:latest,BETTERPPTX_SPEECH_WORKER_CREDENTIALS=betterpptx-speech-worker-credentials:latest" \
             --quiet
           gcloud run jobs add-iam-policy-binding "$CLOUD_RUN_AVATAR_BUDGET_SYNC" \
             --project="$GCP_PROJECT_ID" --region="$GCP_REGION" \
