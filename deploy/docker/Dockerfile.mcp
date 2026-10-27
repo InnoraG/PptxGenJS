@@ -61,6 +61,13 @@ RUN if find /app/betterpptx-mcp -type f \( -name '*.zip' -o -name '*.pptx' -o -n
     && test ! -e /app/betterpptx-mcp/evaluation \
     && test ! -e /app/betterpptx-mcp/chatgpt-plugin \
     && node -e "const {createRequire}=require('node:module');const r=createRequire('/app/betterpptx-mcp/server.mjs');r.resolve('jose');r.resolve('tesseract.js')"
+# Validate actual packaged catalogs offline. A successful image build must not
+# leave the public narration catalog empty because an upload filter lost files.
+RUN BETTERPPTX_TTS_PROVIDER=chatterbox-http \
+    BETTERPPTX_TTS_LEGACY_FALLBACK=1 \
+    BETTERPPTX_NARRATION_MODE=production \
+    BETTERPPTX_CHATTERBOX_VOICES_MANIFEST=/app/betterpptx-mcp/deploy/narration/chatterbox/runtime-manifest.json \
+    node --input-type=module -e "import assert from 'node:assert/strict'; import {loadVoiceManifest,listVoices} from './betterpptx-mcp/narration/licenseGate.mjs'; const manifest=loadVoiceManifest(); assert(manifest.voices.some(v=>!v.privateFallbackRoute)); assert(manifest.voices.some(v=>v.privateFallbackRoute)); const catalog=listVoices(); assert(catalog.count>0 && catalog.productionApprovedCount>0); console.log('Packaged production narration catalogs verified offline.')"
 RUN useradd -u 10001 -m appuser \
     && mkdir -p /out /app/.betterpptx-runtime \
     && chown -R appuser:appuser /out /app/.betterpptx-runtime

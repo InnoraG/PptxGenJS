@@ -83,6 +83,15 @@ deploy/docker/*
 !betterpptx-mcp/deploy/model3d-worker/
 !betterpptx-mcp/deploy/model3d-worker/**
 
+# These runtime catalogs are read by the narration license gate and fallback
+# identity verifier. Keep them after deploy/* so manual Cloud Build uploads
+# retain the same approved catalogs as builds from the full Git checkout.
+!betterpptx-mcp/deploy/narration/
+!betterpptx-mcp/deploy/narration/chatterbox/
+!betterpptx-mcp/deploy/narration/chatterbox/runtime-manifest.json
+!betterpptx-mcp/deploy/narration/modal/
+!betterpptx-mcp/deploy/narration/modal/fallback-map.json
+
 **/*.pptx
 **/*.pptm
 **/*.ppsx
