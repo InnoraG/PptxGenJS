@@ -2421,7 +2421,22 @@ function lockedAudioInput(lockedAudio) {
 function audioInputHasSource(audio) {
 	if (typeof audio === 'string') return audio.trim().length > 0
 	if (!audio || typeof audio !== 'object' || Array.isArray(audio)) return false
-	return Boolean(audio.path || audio.handle || audio.url || audio.data || audio.filePath || audio.buffer)
+	return Boolean(audio.ref || audio.path || audio.handle || audio.url || audio.data || audio.filePath || audio.buffer)
+}
+
+function authoredNarrationAudioInput(object = {}) {
+	const ref = object.audioRef
+	const source = object.audio
+	if (ref && audioInputHasSource(source)) {
+		const existing = typeof source === 'string' ? source : source.ref || source.path || source.handle || source.url || source.data || source.filePath || source.buffer
+		if (existing !== ref) {
+			const error = new Error('Narration has conflicting audio sources. Keep one owned audio reference.')
+			error.code = 'NARRATION_AUDIO_SOURCE_AMBIGUOUS'
+			throw error
+		}
+	}
+	if (source && typeof source === 'object' && !Array.isArray(source)) return { ...(ref ? { ref } : {}), ...source }
+	return source ?? (ref ? { ref } : undefined)
 }
 
 function narrationArgsForObject(object, spec = {}, cueContext = {}) {
@@ -2430,21 +2445,20 @@ function narrationArgsForObject(object, spec = {}, cueContext = {}) {
 	// boundary and lower its portable audio reference into the same internal
 	// carrier used by locked narration assets. Legacy narration objects remain
 	// supported when they do not declare the closed-contract `mode` selector.
-	const providerNarration = object?.mode !== undefined ? object : null
 	// M19 voice temperament: the world sets HOW it speaks (pace + pause) when narrated;
 	// the author's explicit values always win. Voice identity stays the author's choice.
 	const _voice = artVoiceForSpec(spec)
 	const _emph = artEmphasisForSpec(spec)
 	const timing = object.timing || object.timeline || object.narrationTiming || {}
 	const lockedAudioAsInput = lockedAudioInput(object.lockedAudio)
-	const providerAudio = providerNarration?.audioRef ? { path: providerNarration.audioRef } : undefined
-	const authoredAudio = object.audio && typeof object.audio === 'object' && !Array.isArray(object.audio)
+	const sourceAudio = authoredNarrationAudioInput(object)
+	const authoredAudio = sourceAudio && typeof sourceAudio === 'object' && !Array.isArray(sourceAudio)
 		? {
-			...object.audio,
-			...(object.durationMs !== undefined && object.audio.durationMs === undefined ? { durationMs: object.durationMs } : {}),
-			...(timing.durationMs !== undefined && object.audio.durationMs === undefined ? { durationMs: timing.durationMs } : {}),
+			...sourceAudio,
+			...(object.durationMs !== undefined && sourceAudio.durationMs === undefined ? { durationMs: object.durationMs } : {}),
+			...(timing.durationMs !== undefined && sourceAudio.durationMs === undefined ? { durationMs: timing.durationMs } : {}),
 		}
-		: (object.audio ?? providerAudio)
+		: sourceAudio
 	const audio = audioInputHasSource(authoredAudio) ? authoredAudio : (lockedAudioAsInput ?? authoredAudio)
 	const pctDurationMs = durationForPctTiming(object, timing, audio)
 	const rawCues = object.cues ?? timing.cues ?? object.timing?.cues
@@ -2463,10 +2477,12 @@ function narrationArgsForObject(object, spec = {}, cueContext = {}) {
 	const segments = rawSegments ? rawSegments.map((seg, segmentIndex) => {
 		if (typeof seg === 'string') return { script: seg }
 		if (!seg || typeof seg !== 'object') return null
-		const segmentAudio = audioInputHasSource(seg.audio) ? seg.audio : (lockedAudioInput(seg.lockedAudio) ?? seg.audio)
+		const rawAudio = authoredNarrationAudioInput(seg)
+		const segmentAudio = audioInputHasSource(rawAudio) ? rawAudio : (lockedAudioInput(seg.lockedAudio) ?? rawAudio)
 		const segDur = durationForPctTiming(seg, {}, segmentAudio)
 		const segmentScript = seg.script ?? seg.text ?? ''
 		return Object.fromEntries(Object.entries({
+			id: seg.id,
 			script: segmentScript,
 			synthesisText: seg.synthesisText || normalizeNarrationForTts(segmentScript),
 			audio: segmentAudio,

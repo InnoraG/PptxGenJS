@@ -122,13 +122,23 @@ export function estimateHeavyCost(name, args = {}, result = {}, rateCard = curre
 		return applyMinimumCharge(h.openUploadedBase + bytesToMb(argByteEstimate(args, result)) * h.openUploadedPerMb, rateCard)
 	}
 	if (tool === 'betterpptx.narration.get_voice_timing' || tool === 'betterpptx.deck.add_narration' || tool === 'betterpptx.slide.add_narration') {
+		if (tool === 'betterpptx.narration.get_voice_timing' && Array.isArray(args.segments) && args.segments.length) {
+			const synthesized = args.segments.filter(segment => !/^asset:\/\/locked\/[^/]+\/[a-f0-9]{64}\.wav$/.test(String(segment?.audioRef || '')))
+			if (!synthesized.length) return 0
+			const chars = synthesized.reduce((sum, segment) => sum + textLength(segment?.text ?? segment?.script), 0)
+			return applyMinimumCharge(h.narrationBase + (chars / 1000) * h.narrationPer1000Chars, rateCard)
+		}
+		// Attaching an existing clip is not a speech synthesis operation.
+		if (tool === 'betterpptx.slide.add_narration') {
+			const source = audio => typeof audio === 'string' ? Boolean(audio) : Boolean(audio && (audio.ref || audio.path || audio.handle || audio.data || audio.url))
+			const segments = Array.isArray(args.segments) ? args.segments : []
+			if (segments.length ? segments.every(segment => source(segment?.audio)) : source(args.audio)) return 0
+		}
 		// A final spec carrying a validated preparation manifest reuses the exact
 		// measured audio. It must not be quoted or reserved as a second synthesis.
 		if (tool === 'betterpptx.slide.add_narration' && args.preparedNarration) return 0
 		if (tool === 'betterpptx.deck.add_narration' && Array.isArray(args.slides) && args.slides.length && args.slides.every(slide => slide?.preparedNarration)) return 0
-		// The synthesis endpoint always prepares audio; it does not implement a
-		// caller-controlled "reuse" exemption. Segmented scripts consume speech
-		// compute too, even when the top-level text field is empty.
+		// Scripts without an owned audio source still consume speech compute.
 		const chars = Math.max(textLength(args.text), textLength(args.script), textLength(args.slides), textLength(args.items), textLength(args.segments), textLength(args.narration))
 		return applyMinimumCharge(h.narrationBase + (chars / 1000) * h.narrationPer1000Chars, rateCard)
 	}

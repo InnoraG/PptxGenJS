@@ -46,6 +46,20 @@ import { premiumQuoteBindingPublicSchema } from './billing/premium-quote-contrac
 import { PUBLIC_CANDIDATE_TOOLS } from './motion-candidate-contract.mjs'
 import { MOTION_PREPARATION_TOOLS } from './motion-preparation-contract.mjs'
 
+const NARRATION_OWNED_AUDIO_REF_SCHEMA = { type: 'string', pattern: '^asset://locked/[^/]+/[a-f0-9]{64}\\.wav$', description: 'Owned uploaded PCM WAV handle. This clip is measured and reused without speech synthesis; all clips in one preparation must have matching PCM sample rate, channels and bit depth.' }
+const NARRATION_SPEC_TOOL_SCHEMA = {
+	type: 'object', additionalProperties: true,
+	description: 'Native narration. Use mode:attach plus audioRef for a caller-owned clip, or preparedNarration for a measured ordered preparation. Captions are native WebVTT tracks, not visible text overlays.',
+	properties: {
+		...NARRATION_PROVIDER_SCHEMA.oneOf[1].properties,
+		script: { type: 'string' },
+		audio: { type: ['string', 'object'], properties: { ref: { type: 'string', description: 'Owned opaque audio handle; no local path.' }, closedCaptionTracks: NARRATION_PROVIDER_SCHEMA.oneOf[1].properties.closedCaptionTracks }, additionalProperties: true },
+		preparedNarration: { type: 'object', properties: { preparationId: { type: 'string' }, manifestHandle: { type: 'string' }, manifestDigest: { type: 'string' }, segmentIds: { type: 'array', items: { type: 'string' } }, slideId: { type: 'string' } }, additionalProperties: true },
+		segments: { type: 'array', items: { type: 'object', properties: { id: { type: 'string' }, text: { type: 'string' }, script: { type: 'string' }, audioRef: { type: 'string' }, audio: { type: ['string', 'object'], properties: { ref: { type: 'string' } }, additionalProperties: true }, gapBeforeMs: { type: 'integer', minimum: 0 }, gapAfterMs: { type: 'integer', minimum: 0 }, closedCaptionTracks: NARRATION_PROVIDER_SCHEMA.oneOf[1].properties.closedCaptionTracks }, additionalProperties: true } },
+		paddingMs: { type: 'integer', minimum: 0 }, expectedDurationMs: { type: 'integer', minimum: 1 }, preserveInNotes: { type: 'boolean' },
+	},
+}
+
 // The node contract is recursive at runtime. For JSON-Schema consumers that
 // embed an item schema (where a fragment-local $ref would resolve against the
 // parent document), expose a bounded typed child shape without an unresolved
@@ -835,6 +849,7 @@ export const TOOLS = [
 							items: {
 								type: 'object',
 								properties: {
+									narration: NARRATION_SPEC_TOOL_SCHEMA,
 									pixelViewport: { type: 'object', description: 'Optional source-image width and height in pixels for this slide. Overrides visualReference.viewport for slide content and this slide presenter.pixelFrame, but not for an inherited deck presenter frame.', required: ['width', 'height'], additionalProperties: false, properties: { width: { type: 'number', exclusiveMinimum: 0 }, height: { type: 'number', exclusiveMinimum: 0 } } },
 									presenter: { type: 'object', additionalProperties: false, description: 'Per-slide deck-presenter overrides. pixelFrame requires the explicit visualReference pixel route. Omitted fields inherit the deck presenter. staticPose controls stopped/edit posture only; select playback separately through presenterMotion.', properties: { pixelFrame: PRESENTER_PIXEL_FRAME_TOOL_SCHEMA, staticPose: STATIC_POSE_PUBLIC_SCHEMA } },
 									presenterPerformance: { oneOf: [PRESENTER_PERFORMANCE_SCHEMA, { type: 'null' }], description: 'A continuous same-slide performance for any supported presenter: ordered motion IDs, pose blending, 3D transform keyframes, exact AI-authored slide-inch travel centers, entry/exit and named target interactions. All times are milliseconds relative to startMs.' },
@@ -1549,7 +1564,7 @@ export const TOOLS = [
 	{
 		name: 'betterpptx.narration.get_voice_timing',
 		title: 'Get narration voice timing',
-		description: 'Synthesize the narration speech for a deck and return its measured timing, before quotation or final deck generation. Provide text or ordered segments; the service synthesizes each clip with an approved text-to-speech voice, measures it, records exact segment timing and authored gaps, and returns the timing plus opaque audio and preparation-manifest handles. The audio is embedded in the deck as native narration. Reuse the returned manifest in the deck spec so final generation never synthesizes a different clip after the quote. This is a mutating, potentially metered operation; supply a stable idempotencyKey. For long multi-clip preparations, a response deadline may return TOOL_TIMEOUT while synthesis continues: poll the returned operationId with betterpptx.operation.status or replay the identical request/key; never start a changed retry to recover the same preparation. Discovery never starts synthesis.',
+		description: 'Prepare narration and return its measured timing before quotation or final deck generation. Supply text for approved speech synthesis, or ordered segments with audioRef handles for caller-owned PCM WAV clips. Owned clips are authorized, measured and reused without speech synthesis or a voice catalog requirement. All clips in one preparation must have matching PCM sample rate, channels and bit depth; no implicit conversion occurs. Exact segment timing and authored gaps are returned with opaque audio and preparation-manifest handles. Reuse the manifest in the deck spec so final generation never synthesizes another clip after the quote. This is a mutating, potentially metered operation; supply a stable idempotencyKey. For long preparations, poll the returned operationId with betterpptx.operation.status or replay the identical request/key; never start a changed retry to recover the same preparation. Discovery never starts synthesis.',
 		inputSchema: {
 			type: 'object',
 			description: 'Provide text or segments. A segment requires text or script; gap values are non-negative integer milliseconds. Use a caller-generated idempotencyKey for retries.',
@@ -1558,13 +1573,15 @@ export const TOOLS = [
 				script: { type: 'string', description: 'Compatibility alias for text.' },
 				segments: {
 					type: 'array',
-					description: 'Ordered narration clips. Each clip is synthesized and measured independently, then assembled with the authored gaps.',
+					description: 'Ordered narration clips. A clip with audioRef reuses that owned WAV without synthesis; otherwise its text is synthesized. Every clip is measured and assembled with the authored gaps.',
+					maxItems: 32,
 					items: {
 						type: 'object',
 						properties: {
 							id: { type: 'string', description: 'Stable segment identifier.' },
 							slideId: { type: 'string', description: 'Optional semantic slide identifier.' },
 							text: { type: 'string' },
+							audioRef: NARRATION_OWNED_AUDIO_REF_SCHEMA,
 							script: { type: 'string', description: 'Compatibility alias for text.' },
 							synthesisText: { type: 'string', description: 'Optional normalized speech text while text remains the authored notes/script.' },
 							gapBeforeMs: { type: 'integer', minimum: 0, description: 'Measured-timeline silence before this segment. If both this and the preceding segment gapAfterMs are supplied, both authored gaps are retained.' },

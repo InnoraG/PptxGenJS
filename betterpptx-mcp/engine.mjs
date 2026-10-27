@@ -5341,9 +5341,15 @@ function publicNarrationRecipe(detail = 'summary') {
 			timebase: 'Each WebVTT cue timestamp is relative to its own clip start; the slide timeline adds that clip start offset.',
 			requirement: 'deliveryExperience.requireCaptions:true makes missing clip tracks a preflight error. Native tracks are not always-visible subtitle boxes.',
 		},
+		callerOwnedAudio: {
+			preparation: { type: 'template', tool: 'betterpptx.narration.get_voice_timing', missingInputs: ['owned uploaded WAV handles', 'exact authored transcripts', 'stable caller retry key'], request: { segments: [{ id: 'clip-a', slideId: 'slide-a', text: 'Exact transcript of the owned recording.', audioRef: 'asset://locked/uploaded-audio/<sha256>.wav', gapAfterMs: 250 }], idempotencyKey: 'stable-caller-preparation-key' } },
+			rule: 'Upload each authorized PCM WAV with assets.upload kind:audio. Copy its opaque handle into segments[].audioRef. Every owned clip is authorized and measured before any requested synthesis; owned clips do not require a voice catalog and incur no speech synthesis charge. All clips in one preparation must match sample rate, channel count and PCM bit depth; convert explicitly before upload if needed. Reuse the returned manifest in preparedNarration and author native WebVTT per clip.',
+			singleClip: { mode: 'attach', audioRef: 'asset://locked/uploaded-audio/<sha256>.wav', text: 'Exact transcript.', language: 'en', timing: { paddingMs: 500 }, autoplay: { enabled: true }, closedCaptionTracks: [{ language: 'en', label: 'English', vtt: 'WEBVTT\n\n1\n00:00:00.000 --> 00:00:01.000\nExact transcript.\n' }] },
+			captionTiming: 'Replace the example cue end with the measured clip duration. Tracks are clip-relative; narration.closedCaptionTracks is valid for a single clip. For several clips use narration.segments[].closedCaptionTracks.',
+		},
 		sequence: [
 			{ tool: 'betterpptx.narration.voices', when: 'Check the current language/gender catalog and readiness facts before selecting a voice.' },
-			{ type: 'template', tool: 'betterpptx.narration.get_voice_timing', missingInputs: ['text or ordered segments', 'eligible approved voice or explicit caller audio route', 'idempotencyKey for retries'], when: 'Prepare the exact script through the configured synthesis runtime before the final quote. The response measures each returned WAV segment and returns preparationId, manifestHandle, segment timing, and an assembled audio reference; discovery never starts synthesis.' },
+			{ type: 'template', tool: 'betterpptx.narration.get_voice_timing', missingInputs: ['text or ordered segments', 'eligible approved voice or owned segments[].audioRef handles', 'idempotencyKey for retries'], when: 'Prepare the exact ordered script before the final quote. Owned audioRef clips are measured and reused without synthesis; other clips use the configured speech service. The response returns preparationId, manifestHandle, measured segment timing and an assembled audio reference; discovery never starts synthesis.' },
 			{ type: 'executable-estimate-call', tool: 'betterpptx.billing.estimate', request: { toolName: 'betterpptx.deck.generate_from_spec', toolArgs: { plan: 'premium', spec: 'complete authored spec with preparedNarration reference' } }, when: 'Quote the final deck using the complete authored spec plus the prepared narration manifest. The result includes quoteBinding; it is a read-only final-cost calculation and must not synthesize or charge.' },
 			{ type: 'template', tool: 'betterpptx.deck.generate_from_spec', missingInputs: ['content/story/design choices', 'preparedNarration.manifestHandle and preparationId copied from the preparation response', 'quoteBinding copied unchanged from billing.estimate when required by deployment', 'cues and one timing authority', 'autoplay intent'], when: 'Compile the authored semantic spec with the exact prepared narration reference and quote binding. Final generation reuses the measured audio; it does not perform a second TTS call after the quote.' },
 			{ tool: 'betterpptx.deck.validate_narration', when: 'Verify audio packaging, measured duration, cue alignment, slide advance, autoplay, and conflicts before save.' },
@@ -36060,6 +36066,8 @@ function lockNarrationPreparation(prepared = {}) {
 			startMs: segment.startMs,
 			endMs: segment.endMs,
 			timingEvidence: segment.timingEvidence || 'measured-audio-segment-boundary',
+			...(segment.sourceType ? { sourceType: segment.sourceType } : {}),
+			...(segment.sourceAudioSha256 ? { sourceAudioSha256: segment.sourceAudioSha256 } : {}),
 		})),
 		voice: publicNarrationVoice(prepared.voice),
 		...(narrationVoiceLicenseRecords(prepared.licenses).length ? { voiceLicenses: narrationVoiceLicenseRecords(prepared.licenses) } : {}),
@@ -36379,6 +36387,8 @@ async function publicNarrationPreparationResult(prepared = {}) {
 		warnings: manifest.warnings,
 		billing: {
 			stage: 'preparation',
+			callerAudioSegmentCount: (prepared.segments || []).filter(segment => segment.sourceType === 'caller-audio').length,
+			synthesizedSegmentCount: (prepared.segments || []).filter(segment => segment.sourceType !== 'caller-audio').length,
 			quoteBeforeFinalGeneration: true,
 			finalGenerationReusesPreparedAudio: true,
 			duplicateSynthesisOnReuse: false,
@@ -36391,7 +36401,31 @@ async function publicNarrationPreparationResult(prepared = {}) {
 }
 
 async function handleNarrationSynthesize(args) {
-	const prepared = await prepareNarrationAudio(args)
+	const audioRefs = (Array.isArray(args.segments) ? args.segments : []).map(segment => segment?.audioRef).filter(Boolean)
+	// Authorize the entire ordered request before reading any owned bytes or
+	// synthesizing a different segment. Foreign handles stay owner-blind.
+	await authorizeAssetReferences(audioRefs)
+	if (audioRefs.length) await prefetchLockedAssetsFromShared(audioRefs, { required: true })
+	let totalBytes = 0
+	const ownedAudio = new Map()
+	for (const handle of new Set(audioRefs)) {
+		if (typeof handle !== 'string' || !/^asset:\/\/locked\/[^/]+\/[a-f0-9]{64}\.wav$/.test(handle)) {
+			const error = new Error('Provide an owned uploaded WAV audio handle.')
+			error.code = 'NARRATION_PREPARATION_AUDIO_REFERENCE_INVALID'
+			throw error
+		}
+		const filePath = resolveLockedAssetHandle(handle)
+		const stat = await fs.stat(filePath)
+		if (!stat.isFile() || stat.size < 44 || stat.size > 64 * 1024 * 1024 || totalBytes + stat.size > 64 * 1024 * 1024) {
+			const error = new Error('The owned WAV audio inputs exceed the preparation size limit.')
+			error.code = 'NARRATION_PREPARATION_AUDIO_INVALID'
+			throw error
+		}
+		const buffer = assertAssetBytes(handle, await fs.readFile(filePath))
+		totalBytes += buffer.length
+		ownedAudio.set(handle, { filePath, buffer })
+	}
+	const prepared = await prepareNarrationAudio(args, { loadAudio: async handle => ownedAudio.get(handle) })
 	const result = await publicNarrationPreparationResult(prepared)
 	return isPublicBlackBoxMode() ? result : { ...prepared, ...result }
 }
@@ -36412,7 +36446,7 @@ function resolveNarrationAudioReference(audio) {
 function narrationAudioInputHasSource(audio) {
 	if (typeof audio === 'string') return audio.trim().length > 0
 	if (!audio || typeof audio !== 'object' || Array.isArray(audio)) return false
-	return Boolean(audio.path || audio.handle || audio.url || audio.data || audio.filePath || audio.buffer)
+	return Boolean(audio.ref || audio.path || audio.handle || audio.url || audio.data || audio.filePath || audio.buffer)
 }
 
 function normalizeNarrationProviderContractArgs(args = {}) {
@@ -36427,6 +36461,7 @@ function normalizeNarrationProviderContractArgs(args = {}) {
 	out.lang = narration.language ?? out.lang
 	out.gender = narration.gender ?? out.gender
 	out.cues = narration.cues ?? out.cues
+	out.closedCaptionTracks = narration.closedCaptionTracks ?? out.closedCaptionTracks
 	out.timing = narration.timing ?? out.timing
 	if (narration.audioRef) out.audio = { ref: narration.audioRef }
 	if (narration.autoplay) {

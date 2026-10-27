@@ -29,17 +29,19 @@ function nonNegativeInteger(value, fallback = 0, field = 'timing') {
 }
 
 function canonicalPreparationInput(args = {}, segments = []) {
-	const provider = effectiveVoiceProvider(args.provider)
-	const manifest = loadVoiceManifest({ provider })
+	const needsSynthesis = segments.some(segment => !segment.audioRef)
+	const provider = needsSynthesis ? effectiveVoiceProvider(args.provider) : null
+	const manifest = needsSynthesis ? loadVoiceManifest({ provider }) : null
 	return {
 		provider,
-		runtimeVersion: process.env.BETTERPPTX_TTS_RUNTIME_VERSION || null,
-		voiceManifestIdentity: manifest.identity,
+		runtimeVersion: needsSynthesis ? process.env.BETTERPPTX_TTS_RUNTIME_VERSION || null : null,
+		voiceManifestIdentity: manifest?.identity || null,
 		text: normalizeText(args.text ?? args.script),
 		segments: segments.map(segment => ({
 			id: segment.id,
 			slideId: segment.slideId || null,
 			text: segment.text,
+			...(segment.audioRef ? { audioRef: segment.audioRef, sourceAudioSha256: segment.sourceAudioSha256 } : {}),
 			synthesisText: segment.synthesisText || null,
 			gapBeforeMs: segment.gapBeforeMs,
 			gapAfterMs: segment.gapAfterMs,
@@ -119,6 +121,7 @@ function normalizeSegments(args = {}) {
 	const supplied = Array.isArray(args.segments) && args.segments.length
 		? args.segments
 		: [{ id: args.segmentId || 'segment-1', slideId: args.slideId, text: args.text ?? args.script, synthesisText: args.synthesisText }]
+	if (supplied.length > 32) throw preparationError('NARRATION_PREPARATION_SEGMENT_INVALID', 'A preparation supports at most 32 ordered clips.')
 	const seen = new Set()
 	return supplied.map((raw, index) => {
 		if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
@@ -130,10 +133,14 @@ function normalizeSegments(args = {}) {
 		seen.add(id)
 		const text = normalizeText(raw.text ?? raw.script)
 		if (!text) throw preparationError('NARRATION_TEXT_REQUIRED', `segments[${index}] requires text or script.`)
+		if (raw.audioRef !== undefined && (typeof raw.audioRef !== 'string' || !/^asset:\/\/locked\/[^/]+\/[a-f0-9]{64}\.wav$/.test(raw.audioRef))) {
+			throw preparationError('NARRATION_PREPARATION_AUDIO_REFERENCE_INVALID', `segments[${index}].audioRef must be an owned uploaded WAV asset handle.`)
+		}
 		return {
 			id,
 			slideId: raw.slideId == null ? null : normalizeText(raw.slideId),
 			text,
+			audioRef: raw.audioRef,
 			synthesisText: normalizeText(raw.synthesisText) || undefined,
 			gapBeforeMs: nonNegativeInteger(raw.gapBeforeMs ?? raw.pauseBeforeMs, index === 0 ? 0 : nonNegativeInteger(args.segmentGapMs, 0, 'segmentGapMs'), `segments[${index}].gapBeforeMs`),
 			gapAfterMs: nonNegativeInteger(raw.gapAfterMs ?? raw.pauseAfterMs ?? raw.pauseMs, 0, `segments[${index}].gapAfterMs`),
@@ -154,8 +161,28 @@ function normalizeSegments(args = {}) {
  * This module deliberately returns local paths only to the engine; public
  * callers receive opaque locked handles after the engine packages the result.
  */
-export async function prepareNarrationAudio(args = {}, { synthesize = synthesizeNarration } = {}) {
+export async function prepareNarrationAudio(args = {}, { synthesize = synthesizeNarration, loadAudio } = {}) {
 	const segments = normalizeSegments(args)
+	const provided = new Map()
+	let providedFormat = null
+	let providedBytes = 0
+	// Validate every caller-owned clip before the first synthesis request. The
+	// engine authorizes the complete handle set before invoking this reader.
+	for (const segment of segments.filter(segment => segment.audioRef)) {
+		if (typeof loadAudio !== 'function') throw preparationError('NARRATION_PREPARATION_AUDIO_UNAVAILABLE', 'Owned audio requires an authorized asset reader.')
+		const source = await loadAudio(segment.audioRef)
+		const buffer = source?.buffer
+		if (!Buffer.isBuffer(buffer) || buffer.length < 44 || buffer.length > 64 * 1024 * 1024 || !source.filePath) throw preparationError('NARRATION_PREPARATION_AUDIO_INVALID', 'Owned audio must be a bounded PCM WAV asset.')
+		providedBytes += buffer.length
+		if (providedBytes > 64 * 1024 * 1024) throw preparationError('NARRATION_PREPARATION_AUDIO_INVALID', 'The owned WAV clips exceed the 64 MiB preparation limit.')
+		const parsed = readPcmWav(buffer)
+		const measured = parseWavDuration(buffer)
+		if (!measured || measured.durationMs <= 0) throw preparationError('NARRATION_PREPARATION_AUDIO_INVALID', 'Owned audio must have a positive measured duration.')
+		if (providedFormat && !samePcmFormat(providedFormat, parsed.fmt)) throw preparationError('NARRATION_PREPARATION_FORMAT_MISMATCH', 'All narration clips must use the same PCM sample rate, channel count, and bit depth. Convert them explicitly before uploading.')
+		providedFormat = parsed.fmt
+		segment.sourceAudioSha256 = crypto.createHash('sha256').update(buffer).digest('hex')
+		provided.set(segment.id, { buffer, parsed, measured, result: { wavPath: source.filePath, voice: null, provider: null, warnings: [] } })
+	}
 	const request = canonicalPreparationInput(args, segments)
 	const requestDigest = crypto.createHash('sha256').update(JSON.stringify(request)).digest('hex')
 	const scriptDigest = hashText(segments.map(segment => segment.text).join('\n'))
@@ -165,7 +192,8 @@ export async function prepareNarrationAudio(args = {}, { synthesize = synthesize
 	const warnings = []
 
 	for (const segment of segments) {
-		const result = await synthesize({
+		const owned = provided.get(segment.id)
+		const result = owned?.result || await synthesize({
 			text: segment.text,
 			synthesisText: segment.synthesisText,
 			voice: segment.voice ?? args.voice,
@@ -179,12 +207,12 @@ export async function prepareNarrationAudio(args = {}, { synthesize = synthesize
 			allowUnreviewedVoices: args.allowUnreviewedVoices,
 		})
 		if (!result?.wavPath) throw preparationError('NARRATION_PREPARATION_AUDIO_MISSING', `Synthesis returned no audio for segment "${segment.id}".`, { segmentId: segment.id })
-		const buffer = await fs.readFile(result.wavPath)
-		const parsed = readPcmWav(buffer)
-		const measured = parseWavDuration(buffer)
+		const buffer = owned?.buffer || await fs.readFile(result.wavPath)
+		const parsed = owned?.parsed || readPcmWav(buffer)
+		const measured = owned?.measured || parseWavDuration(buffer)
 		if (!measured || measured.durationMs <= 0) throw preparationError('NARRATION_PREPARATION_AUDIO_INVALID', `Measured audio for segment "${segment.id}" has no positive duration.`, { segmentId: segment.id })
 		if (!format) format = parsed.fmt
-		if (format.sampleRate !== parsed.fmt.sampleRate || format.channels !== parsed.fmt.channels || format.bitsPerSample !== parsed.fmt.bitsPerSample || format.blockAlign !== parsed.fmt.blockAlign) {
+		if (!samePcmFormat(format, parsed.fmt)) {
 			throw preparationError('NARRATION_PREPARATION_FORMAT_MISMATCH', 'All narration segments must use the same PCM sample rate, channel count, and bit depth.', { segmentId: segment.id })
 		}
 		const gapBeforeMs = segment.gapBeforeMs
@@ -226,6 +254,8 @@ export async function prepareNarrationAudio(args = {}, { synthesize = synthesize
 			endMs: clip.endMs,
 			voice: clip.result.voice,
 			provider: clip.result.provider,
+			sourceType: clip.segment.audioRef ? 'caller-audio' : 'synthesized',
+			...(clip.segment.audioRef ? { sourceAudioSha256: clip.segment.sourceAudioSha256 } : {}),
 			textHash: clip.result.textHash || hashText(clip.segment.text),
 			timingEvidence: 'measured-audio-segment-boundary',
 		})),
@@ -235,7 +265,7 @@ export async function prepareNarrationAudio(args = {}, { synthesize = synthesize
 		warnings,
 		timingEvidence: {
 			kind: 'measured-audio',
-			source: 'provider-output-wav',
+			source: provided.size === segments.length ? 'caller-owned-wav' : provided.size ? 'mixed-caller-and-synthesized-wav' : 'provider-output-wav',
 			precision: 'segment-boundary',
 			wordAlignment: false,
 		},
@@ -248,4 +278,8 @@ export async function prepareNarrationAudio(args = {}, { synthesize = synthesize
 			noiseWScale: args.noiseWScale ?? null,
 		},
 	}
+}
+
+function samePcmFormat(a, b) {
+	return a.sampleRate === b.sampleRate && a.channels === b.channels && a.bitsPerSample === b.bitsPerSample && a.blockAlign === b.blockAlign
 }

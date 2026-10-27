@@ -449,6 +449,7 @@ export const NARRATION_PROVIDER_SCHEMA = Object.freeze({
 			mode: { type: 'string', enum: [...NARRATION_AUTHORING_MODES] },
 			text: { type: 'string', minLength: 1, maxLength: 100000 },
 			audioRef: { type: 'string', pattern: '^(?:(?:asset|generated|download|opaque|audio)://\\S+|https://\\S+|data:audio/[^;]+;base64,.*)$' },
+			closedCaptionTracks: MEDIA_FORMAT_SCHEMA_PROPERTIES.closedCaptionTracks,
 				voiceId: { type: 'string', minLength: 1, maxLength: 255 },
 				language: { type: 'string', pattern: '^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$', maxLength: 35 },
 				gender: { type: 'string', enum: ['female', 'male'] },
@@ -637,7 +638,7 @@ function validateNarrationCue(value, path) {
 export function validateNarrationProvider(value, path = 'narration') {
 	if (value === undefined || value === null) return value
 	exactContractObject(value, path)
-	rejectUnknownKeys(value, ['mode', 'text', 'audioRef', 'voiceId', 'language', 'gender', 'cues', 'timing', 'autoplay'], path)
+	rejectUnknownKeys(value, ['mode', 'text', 'audioRef', 'voiceId', 'language', 'gender', 'cues', 'timing', 'autoplay', 'closedCaptionTracks'], path)
 	if (!NARRATION_AUTHORING_MODES.includes(value.mode)) throw new Error(`${path}.mode must be synthesize, attach, or retrieve.`)
 	if (value.text !== undefined && (typeof value.text !== 'string' || !value.text.trim() || value.text.length > 100000)) throw new Error(`${path}.text must be a non-empty string of at most 100000 characters.`)
 	if (value.mode === 'synthesize' && !value.text) throw new Error(`${path}.text is required for synthesize mode.`)
@@ -662,7 +663,10 @@ export function validateNarrationProvider(value, path = 'narration') {
 		for (const key of ['enabled', 'loop']) if (value.autoplay[key] !== undefined && typeof value.autoplay[key] !== 'boolean') throw new Error(`${path}.autoplay.${key} must be boolean.`)
 		if (value.autoplay.mode !== undefined && !['present', 'browse', 'kiosk'].includes(value.autoplay.mode)) throw new Error(`${path}.autoplay.mode must be present, browse, or kiosk.`)
 	}
-	return { ...value }
+	return {
+		...value,
+		...(value.closedCaptionTracks !== undefined ? { closedCaptionTracks: validatePublicMediaFormatOptions({ closedCaptionTracks: value.closedCaptionTracks }, path).closedCaptionTracks } : {}),
+	}
 }
 
 export function validateLegacyAggregateDescriptor(value, path = 'legacyAggregate') {
