@@ -2079,7 +2079,7 @@ function collectLockedAssetHandles(value, out = new Set()) {
 // shared store at persist time so another instance can fetch them on rehydrate.
 // The sync compile seam (LOCKED_ASSET_ROOT) is untouched; this is additive and
 // gated on a shared locked-asset store being configured.
-async function mirrorLockedAssetsToShared(spec) {
+async function mirrorLockedAssetsToShared(spec, { required = false } = {}) {
 	if (!_lockedAssetStore || _lockedAssetStore.disabled || !spec) return { mirrored: 0 }
 	let mirrored = 0
 	for (const handle of collectLockedAssetHandles(spec)) {
@@ -2087,12 +2087,15 @@ async function mirrorLockedAssetsToShared(spec) {
 			if (typeof _lockedAssetStore.hasLockedAsset === 'function' && await _lockedAssetStore.hasLockedAsset(handle)) continue
 			let localPath = null
 			try { localPath = resolveLockedAssetHandle(handle) } catch { localPath = null }
-			if (!localPath) continue
+			if (!localPath) {
+				if (required) throw new Error('A required locked asset is unavailable.')
+				continue
+			}
 			await _lockedAssetStore.putLockedAsset(handle, fsNode.readFileSync(localPath))
 			mirrored++
 		} catch (err) {
 			logEvent('deck_state.locked_asset_mirror_failed', { handle, code: err?.code || 'LOCKED_ASSET_MIRROR_FAILED', message: String(err?.message || err) })
-			if (process.env.BETTERPPTX_REQUIRE_DURABLE_DECK_STATE === '1') throw err
+			if (required || process.env.BETTERPPTX_REQUIRE_DURABLE_DECK_STATE === '1') throw err
 		}
 	}
 	return { mirrored }
@@ -2101,7 +2104,7 @@ async function mirrorLockedAssetsToShared(spec) {
 // §29.6: before recompiling a rehydrated deck, fetch its referenced locked assets
 // from the shared store into the per-instance LOCKED_ASSET_ROOT cache so the sync
 // resolver finds them.
-async function prefetchLockedAssetsFromShared(spec) {
+async function prefetchLockedAssetsFromShared(spec, { required = false } = {}) {
 	await authorizeAssetReferences(spec)
 	if (!_lockedAssetStore || _lockedAssetStore.disabled || !spec) return { fetched: 0 }
 	let fetched = 0
@@ -2117,7 +2120,7 @@ async function prefetchLockedAssetsFromShared(spec) {
 			fetched++
 		} catch (err) {
 			logEvent('deck_state.locked_asset_prefetch_failed', { handle, code: err?.code || 'LOCKED_ASSET_PREFETCH_FAILED', message: String(err?.message || err) })
-			if (enforceAssetOwnership()) throw err
+			if (required || enforceAssetOwnership()) throw err
 			if (process.env.BETTERPPTX_REQUIRE_DURABLE_DECK_STATE === '1') throw err
 		}
 	}
@@ -36170,6 +36173,7 @@ async function resolvePreparedNarration(value = {}) {
 		}
 		throw error
 	}
+	await prefetchPreparedNarrationAssets({ manifestHandle: reference.manifestHandle })
 	let manifestPath
 	try { manifestPath = resolveLockedAssetHandle(reference.manifestHandle) } catch {
 		const error = new Error('The narration preparation handle is missing or expired. Prepare the narration again and use the returned handle.')
@@ -36198,6 +36202,7 @@ async function resolvePreparedNarration(value = {}) {
 		error.details = { status: 'preparation_id_mismatch' }
 		throw error
 	}
+	await prefetchPreparedNarrationAssets({ audio: manifest.audio?.ref, segments: (Array.isArray(manifest.segments) ? manifest.segments : []).map(segment => segment.audio?.ref) })
 	const audioRef = manifest.audio?.ref
 	let audioPath
 	try { audioPath = resolveLockedAssetHandle(audioRef) } catch {
@@ -36325,9 +36330,29 @@ async function preparedNarrationTimingBySlideForSpec(spec = {}) {
 	return Object.keys(map).length ? map : null
 }
 
-function publicNarrationPreparationResult(prepared = {}) {
+async function prefetchPreparedNarrationAssets(references) {
+	try { await prefetchLockedAssetsFromShared(references, { required: true }) } catch (cause) {
+		if (['ASSET_NOT_FOUND', 'RESOURCE_IDENTITY_REQUIRED', 'RESOURCE_NOT_FOUND'].includes(cause?.code)) throw cause
+		const invalid = /DIGEST|INTEGRITY/.test(String(cause?.code || ''))
+		const error = new Error(invalid ? 'The prepared narration failed its integrity check.' : 'The prepared narration assets are missing or expired.')
+		error.code = invalid ? 'NARRATION_PREPARATION_INVALID' : 'NARRATION_PREPARATION_EXPIRED'
+		throw error
+	}
+}
+
+async function publicNarrationPreparationResult(prepared = {}) {
 	const locked = lockNarrationPreparation(prepared)
 	const manifest = locked.manifest
+	try {
+		// Publish the binding only after all of its immutable dependencies and the
+		// manifest are available to other gateway/worker instances.
+		await mirrorLockedAssetsToShared({ audio: locked.assembledAudio.handle, segments: locked.segmentLocks.map(item => item.lockedAudio.handle), manifestHandle: locked.manifestHandle }, { required: true })
+	} catch {
+		const error = new Error('The narration preparation could not be retained. Retry after the voice service storage is available.')
+		error.code = 'NARRATION_PREPARATION_STORAGE_UNAVAILABLE'
+		error.retryable = true
+		throw error
+	}
 	return {
 		ok: true,
 		state: 'succeeded',
@@ -36367,7 +36392,8 @@ function publicNarrationPreparationResult(prepared = {}) {
 
 async function handleNarrationSynthesize(args) {
 	const prepared = await prepareNarrationAudio(args)
-	return isPublicBlackBoxMode() ? publicNarrationPreparationResult(prepared) : { ...prepared, ...publicNarrationPreparationResult(prepared) }
+	const result = await publicNarrationPreparationResult(prepared)
+	return isPublicBlackBoxMode() ? result : { ...prepared, ...result }
 }
 
 function resolveNarrationAudioReference(audio) {
